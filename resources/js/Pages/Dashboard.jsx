@@ -165,14 +165,15 @@ export default function Dashboard({ auth }) {
                     
                     {/* Admin/Manager level components */}
                     {hasAnyPermission(['attendance.view', 'employees.view']) && (
-                        <AnimatePresence mode="wait">
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
                             <motion.div
                                 key="timesheet-section"
                                 variants={staggerItemVariants}
                                 custom={2}
-                                initial="hidden"
-                                animate="visible"
-                                exit="hidden"
                             >
                                 <TimeSheetTable 
                                     selectedDate={selectedDate} 
@@ -184,16 +185,13 @@ export default function Dashboard({ auth }) {
                                 key="user-locations-section"
                                 variants={staggerItemVariants}
                                 custom={3}
-                                initial="hidden"
-                                animate="visible"
-                                exit="hidden"
                             >
                                 <UserLocationsCard 
                                     selectedDate={selectedDate} 
                                     updateMap={updateMap} 
                                 />
                             </motion.div>
-                        </AnimatePresence>
+                        </motion.div>
                     )}
                     
                     {/* Updates and holidays - available to all authenticated users */}
@@ -208,6 +206,7 @@ export default function Dashboard({ auth }) {
                             <UpdatesCards />
                         </motion.div>
                     )}
+                    
                 
                 </Box>
             </motion.div>

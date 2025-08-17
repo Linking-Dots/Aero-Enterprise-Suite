@@ -11,7 +11,7 @@ import { getPages } from '@/Props/pages.jsx';
 import { getSettingsPages } from '@/Props/settings.jsx';
 import { HeroUIProvider } from "@heroui/react";
 import { applyThemeToRoot } from "@/utils/themeUtils.js";
-import {ScrollShadow} from "@heroui/scroll-shadow";
+import {ScrollShadow} from "@heroui/react";
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Direct imports - eager loading with smooth animations
