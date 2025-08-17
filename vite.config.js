@@ -8,7 +8,14 @@ import path from 'path';
 // Vite configuration
 export default defineConfig({
     optimizeDeps: {
-    exclude: ['styled-components']
+        exclude: ['styled-components'],
+        include: [
+            '@heroui/react',
+            '@heroui/theme',
+            '@mui/material',
+            '@mui/icons-material',
+            'framer-motion'
+        ]
     },
     plugins: [
         laravel({
@@ -62,9 +69,35 @@ export default defineConfig({
     },
     build: {
         rollupOptions: {
+            external: [],
             output: {
-                manualChunks: undefined,
+                manualChunks: {
+                    vendor: ['react', 'react-dom'],
+                    heroui: ['@heroui/react', '@heroui/theme'],
+                    mui: ['@mui/material', '@mui/icons-material', '@mui/system'],
+                    motion: ['framer-motion'],
+                    charts: ['react-chartjs-2', 'recharts'],
+                },
+                chunkFileNames: 'assets/[name]-[hash].js',
+                entryFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: 'assets/[name]-[hash].[ext]'
             }
-        }
+        },
+        target: 'esnext',
+        sourcemap: false,
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true
+            }
+        },
+        chunkSizeWarningLimit: 1000,
+        assetsInlineLimit: 4096
+    },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'resources/js'),
+        },
     }
 });
