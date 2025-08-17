@@ -15,7 +15,11 @@ export default defineConfig({
             'react',
             'react-dom'
         ],
-        force: true
+        force: true,
+        // Ensure React is processed first
+        esbuildOptions: {
+            target: 'esnext'
+        }
     },
     plugins: [
         laravel({
@@ -40,32 +44,29 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: {
-                    // Core React chunk
-                    'react-vendor': ['react', 'react-dom'],
+                    // Core React and Animation bundle - keep together to avoid dependency issues
+                    'react-core': ['react', 'react-dom', 'framer-motion'],
                     
                     // UI Libraries chunk
-                    'ui-vendor': [
+                    'ui-libraries': [
                         '@heroui/react', 
                         '@heroui/theme',
                         '@headlessui/react'
                     ],
                     
                     // Material UI chunk
-                    'mui-vendor': [
+                    'mui-libraries': [
                         '@mui/material', 
                         '@mui/system',
                         '@emotion/react',
                         '@emotion/styled'
                     ],
                     
-                    // Animation libraries
-                    'animation-vendor': ['framer-motion'],
-                    
                     // Chart libraries
-                    'chart-vendor': ['react-chartjs-2', 'recharts'],
+                    'chart-libraries': ['react-chartjs-2', 'recharts'],
                     
-                    // Utility libraries
-                    'utils-vendor': [
+                    // Utility libraries (no React dependency)
+                    'utilities': [
                         'lodash', 
                         'axios', 
                         'date-fns',
@@ -73,7 +74,7 @@ export default defineConfig({
                     ],
                     
                     // Form libraries
-                    'form-vendor': [
+                    'form-libraries': [
                         'react-hook-form',
                         '@hookform/resolvers',
                         'zod'
