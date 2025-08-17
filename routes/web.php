@@ -555,7 +555,7 @@ Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(funct
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/designations/list', function () {
         return response()->json(\App\Models\HRM\Designation::select('id', 'title as name')->get());
-    })->name('designations.list');
+    })->name('api.designations.list');
 
     Route::get('/api/departments/list', function () {
         return response()->json(\App\Models\HRM\Department::select('id', 'name')->get());
