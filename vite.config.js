@@ -1,11 +1,9 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
-import { createHtmlPlugin } from 'vite-plugin-html';
-import { ViteMinifyPlugin } from 'vite-plugin-minify';
 import path from 'path';
 
-// Vite configuration
+// Vite configuration optimized for large projects
 export default defineConfig({
     optimizeDeps: {
         exclude: ['styled-components'],
@@ -13,9 +11,11 @@ export default defineConfig({
             '@heroui/react',
             '@heroui/theme',
             '@mui/material',
-            '@mui/icons-material',
-            'framer-motion'
-        ]
+            'framer-motion',
+            'react',
+            'react-dom'
+        ],
+        force: true
     },
     plugins: [
         laravel({
@@ -28,76 +28,85 @@ export default defineConfig({
                 plugins: ['@emotion/babel-plugin'],
             },
         }),
-        createHtmlPlugin({
-            minify: true, // Minify HTML output
-        }),
-        ViteMinifyPlugin(), // Additional minification
     ],
     server: {
         host: '127.0.0.1',
         port: 5173,
         hmr: {
             overlay: false
-        },
-        proxy: {
-            '/api': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                secure: false,
-            },
-            '/login': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                secure: false,
-            },
-            '/register': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                secure: false,
-            },
-            '/check-user-type': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                secure: false,
-            },
-            '/check-domain': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                secure: false,
-            }
         }
     },
     build: {
         rollupOptions: {
-            external: [],
             output: {
                 manualChunks: {
-                    vendor: ['react', 'react-dom'],
-                    heroui: ['@heroui/react', '@heroui/theme'],
-                    mui: ['@mui/material', '@mui/icons-material', '@mui/system'],
-                    motion: ['framer-motion'],
-                    charts: ['react-chartjs-2', 'recharts'],
+                    // Core React chunk
+                    'react-vendor': ['react', 'react-dom'],
+                    
+                    // UI Libraries chunk
+                    'ui-vendor': [
+                        '@heroui/react', 
+                        '@heroui/theme',
+                        '@headlessui/react'
+                    ],
+                    
+                    // Material UI chunk
+                    'mui-vendor': [
+                        '@mui/material', 
+                        '@mui/system',
+                        '@emotion/react',
+                        '@emotion/styled'
+                    ],
+                    
+                    // Animation libraries
+                    'animation-vendor': ['framer-motion'],
+                    
+                    // Chart libraries
+                    'chart-vendor': ['react-chartjs-2', 'recharts'],
+                    
+                    // Utility libraries
+                    'utils-vendor': [
+                        'lodash', 
+                        'axios', 
+                        'date-fns',
+                        'dayjs'
+                    ],
+                    
+                    // Form libraries
+                    'form-vendor': [
+                        'react-hook-form',
+                        '@hookform/resolvers',
+                        'zod'
+                    ]
                 },
-                chunkFileNames: 'assets/[name]-[hash].js',
-                entryFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: 'assets/[name]-[hash].[ext]'
-            }
+                chunkFileNames: 'assets/js/[name]-[hash].js',
+                entryFileNames: 'assets/js/[name]-[hash].js',
+                assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+            },
+            // Increase max chunk size to reduce number of files
+            maxParallelFileOps: 2
         },
         target: 'esnext',
         sourcemap: false,
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true,
-                drop_debugger: true
-            }
-        },
-        chunkSizeWarningLimit: 1000,
-        assetsInlineLimit: 4096
+        minify: 'esbuild',
+        chunkSizeWarningLimit: 2000,
+        assetsInlineLimit: 8192,
+        // Reduce concurrent file operations
+        commonjsOptions: {
+            include: [/node_modules/],
+            transformMixedEsModules: true
+        }
     },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'resources/js'),
         },
+    },
+    esbuild: {
+        // Optimize esbuild for better memory usage
+        target: 'esnext',
+        logOverride: {
+            'this-is-undefined-in-esm': 'silent'
+        }
     }
 });
