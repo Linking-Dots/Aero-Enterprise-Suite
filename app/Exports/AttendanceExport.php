@@ -27,7 +27,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
     public function collection()
     {
-        $users = User::join('designations', 'users.designation', '=', 'designations.id')
+        $users = User::join('designations', 'users.designation_id', '=', 'designations.id')
             ->select('users.*', 'designations.title as designation_title')
             ->get();
 
@@ -124,9 +124,9 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     'Remarks'          => $remarks,
                 ]);
             } elseif ($leave) {
-                $duration = $leave->from_date->eq($leave->to_date)
+                $duration = $leave->from_date === $leave->to_date
                     ? $this->date
-                    : $leave->from_date->format('Y-m-d') . " to " . $leave->to_date->format('Y-m-d');
+                    : $leave->from_date . " to " . $leave->to_date;
                 $leave_type = LeaveSetting::find($leave->leave_type)->type ?? 'Unknown';
 
                 $remarks = "On {$leave_type} Leave ({$duration}) - Status: {$leave->status}";
