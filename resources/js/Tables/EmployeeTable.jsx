@@ -46,6 +46,9 @@ import {
   XCircleIcon,
   HashtagIcon
 } from "@heroicons/react/24/outline";
+import DeleteEmployeeModal from '@/Components/DeleteEmployeeModal';
+import ProfilePictureModal from '@/Components/ProfilePictureModal';
+import ProfileAvatar from '@/Components/ProfileAvatar';
 
 const EmployeeTable = ({ 
   allUsers, 
@@ -68,6 +71,17 @@ const EmployeeTable = ({
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [attendanceConfig, setAttendanceConfig] = useState({});
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Profile picture modal state
+  const [profilePictureModal, setProfilePictureModal] = useState({
+    isOpen: false,
+    employee: null
+  });
 
   const handleDepartmentChange = async (userId, departmentId) => {
     const promise = new Promise(async (resolve, reject) => {
@@ -278,26 +292,49 @@ const EmployeeTable = ({
     });
   };
 
-  // Delete employee
-  const handleDelete = async (userId) => {
-    const confirmed = confirm('Are you sure you want to delete this employee?');
-    if (!confirmed) return;
+  // Delete employee - Enhanced with confirmation modal
+  const handleDeleteClick = (user) => {
+    setEmployeeToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!employeeToDelete) return;
+    
+    setDeleteLoading(true);
 
     const promise = new Promise(async (resolve, reject) => {
       try {
-        const response = await axios.delete(route('user.delete', { id: userId }));
+        const response = await axios.delete(route('user.delete', { id: employeeToDelete.id }));
         
         if (response.status === 200) {
           // Update optimistically
           if (deleteEmployeeOptimized) {
-            deleteEmployeeOptimized(userId);
+            deleteEmployeeOptimized(employeeToDelete.id);
           }
+          
+          // Close modal and reset state
+          setDeleteModalOpen(false);
+          setEmployeeToDelete(null);
           
           resolve('Employee deleted successfully');
         }
       } catch (error) {
         console.error('Error deleting employee:', error);
-        reject('Failed to delete employee');
+        
+        // Handle specific error responses
+        let errorMessage = 'Failed to delete employee';
+        if (error.response?.status === 403) {
+          errorMessage = 'You do not have permission to delete this employee';
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Employee not found or already deleted';
+        } else if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        }
+        
+        reject(errorMessage);
+      } finally {
+        setDeleteLoading(false);
       }
     });
 
@@ -323,7 +360,7 @@ const EmployeeTable = ({
         render({ data }) {
           return <div>{data}</div>;
         },
-        icon: '🟢',
+        icon: '✅',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
           background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
@@ -335,7 +372,7 @@ const EmployeeTable = ({
         render({ data }) {
           return <div>{data}</div>;
         },
-        icon: '🔴',
+        icon: '❌',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
           background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
@@ -346,22 +383,51 @@ const EmployeeTable = ({
     });
   };
 
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setEmployeeToDelete(null);
+  };
+
+  // Profile picture modal handlers
+  const handleProfilePictureClick = (employee) => {
+    setProfilePictureModal({
+      isOpen: true,
+      employee: employee
+    });
+  };
+
+  const handleProfilePictureClose = () => {
+    setProfilePictureModal({
+      isOpen: false,
+      employee: null
+    });
+  };
+
+  const handleImageUpdate = (employeeId, newImageUrl) => {
+    // Update the employee's profile image in the local state
+    if (updateEmployeeOptimized) {
+      updateEmployeeOptimized(employeeId, {
+        profile_image: newImageUrl
+      });
+    }
+  };
+
   const columns = useMemo(() => {
     const baseColumns = [
-      { name: "#", uid: "sl" },
-      { name: "EMPLOYEE", uid: "employee" },
-      { name: "DEPARTMENT", uid: "department" },
-      { name: "DESIGNATION", uid: "designation" },
-      { name: "ACTIONS", uid: "actions" }
+      { name: "#", uid: "sl", width: 60 },
+      { name: "EMPLOYEE", uid: "employee", width: "auto", minWidth: 200 },
+      { name: "DEPARTMENT", uid: "department", width: 180 },
+      { name: "DESIGNATION", uid: "designation", width: 180 },
+      { name: "ACTIONS", uid: "actions", width: 80 }
     ];
 
     // Add or remove columns based on screen size
     if (!isMobile) {
-      baseColumns.splice(2, 0, { name: "CONTACT", uid: "contact" });
+      baseColumns.splice(2, 0, { name: "CONTACT", uid: "contact", width: 220 });
     }
     
     if (!isMobile && !isTablet) {
-      baseColumns.splice(baseColumns.length - 1, 0, { name: "ATTENDANCE TYPE", uid: "attendance_type" });
+      baseColumns.splice(baseColumns.length - 1, 0, { name: "ATTENDANCE TYPE", uid: "attendance_type", width: 180 });
     }
     
     return baseColumns;
@@ -393,34 +459,37 @@ const EmployeeTable = ({
 
       case "employee":
         return (
-          <div>
-            <User
-              avatarProps={{ 
-                radius: "lg", 
-                src: user?.profile_image,
-                size: isMobile ? "sm" : "md",
-                fallback: <UserIcon className="w-4 h-4" />
-              }}
-              name={user?.name}
-              description={isMobile ? null : `ID: ${user?.employee_id || 'N/A'}`}
-              classNames={{
-                name: "font-semibold text-foreground text-left",
-                description: "text-default-500 text-left text-xs",
-                wrapper: "justify-start"
-              }}
-            />
+          <div className="min-w-max">
+            <div className="flex items-center gap-3">
+              <ProfileAvatar
+                src={user?.profile_image_url || user?.profile_image}
+                name={user?.name}
+                size={isMobile ? "sm" : "md"}
+                onClick={() => handleProfilePictureClick(user)}
+              />
+              <div className="flex flex-col">
+                <p className="font-semibold text-foreground text-left whitespace-nowrap">
+                  {user?.name}
+                </p>
+                {!isMobile && (
+                  <p className="text-default-500 text-left text-xs whitespace-nowrap">
+                    ID: {user?.employee_id || 'N/A'}
+                  </p>
+                )}
+              </div>
+            </div>
             {isMobile && (
-              <div className="flex flex-col gap-1 text-xs text-default-500 ml-10">
-                <div className="flex items-center gap-1">
+              <div className="flex flex-col gap-1 text-xs text-default-500 ml-10 mt-2">
+                <div className="flex items-center gap-1 whitespace-nowrap">
                   <HashtagIcon className="w-3 h-3" />
                   {user?.employee_id || 'N/A'}
                 </div>
                 <div className="flex items-center gap-1">
                   <EnvelopeIcon className="w-3 h-3" />
-                  {user?.email}
+                  <span className="truncate max-w-[150px]">{user?.email}</span>
                 </div>
                 {user?.phone && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <PhoneIcon className="w-3 h-3" />
                     {user?.phone}
                   </div>
@@ -574,7 +643,7 @@ const EmployeeTable = ({
                   className="text-danger"
                   color="danger"
                   startContent={<TrashIcon className="w-4 h-4" />}
-                  onPress={() => handleDelete(user.id)}
+                  onPress={() => handleDeleteClick(user)}
                 >
                   Delete
                 </DropdownItem>
@@ -634,9 +703,9 @@ const EmployeeTable = ({
           removeWrapper
           classNames={{
             base: "bg-transparent min-w-[800px]", // Set minimum width to prevent squishing on small screens
-            th: "bg-white/5 backdrop-blur-md text-default-500 border-b border-white/10 font-medium text-xs sticky top-0 z-10",
-            td: "border-b border-white/5 py-3",
-            table: "border-collapse",
+            th: "bg-white/5 backdrop-blur-md text-default-500 border-b border-white/10 font-medium text-xs sticky top-0 z-10 whitespace-nowrap",
+            td: "border-b border-white/5 py-3 whitespace-nowrap",
+            table: "border-collapse table-auto",
             thead: "bg-white/5",
             tr: "hover:bg-white/5"
           }}
@@ -648,7 +717,9 @@ const EmployeeTable = ({
               <TableColumn 
                 key={column.uid} 
                 align={column.uid === "actions" ? "center" : column.uid === "sl" ? "center" : "start"}
-                width={column.uid === "sl" ? 60 : undefined}
+                width={column.width}
+                minWidth={column.minWidth}
+                className={column.uid === "employee" ? "whitespace-nowrap" : ""}
               >
                 {column.name}
               </TableColumn>
@@ -684,6 +755,23 @@ const EmployeeTable = ({
       </div>
       {/* Pagination is moved outside the scrollable area to make it sticky */}
       {renderPagination()}
+      
+      {/* Delete Employee Confirmation Modal */}
+      <DeleteEmployeeModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        employee={employeeToDelete}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+      />
+      
+      {/* Profile Picture Update Modal */}
+      <ProfilePictureModal
+        isOpen={profilePictureModal.isOpen}
+        onClose={handleProfilePictureClose}
+        employee={profilePictureModal.employee}
+        onImageUpdate={handleImageUpdate}
+      />
     </div>
   );
 };

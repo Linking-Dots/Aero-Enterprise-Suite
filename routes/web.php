@@ -9,6 +9,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FMSController;
 use App\Http\Controllers\HolidayController;
@@ -238,6 +239,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/user/{id}/update-role', [UserController::class, 'updateUserRole'])->name('user.updateRole');
         Route::put('/user/toggle-status/{id}', [UserController::class, 'toggleStatus'])->name('user.toggleStatus');
         Route::post('/user/{id}/update-attendance-type', [UserController::class, 'updateUserAttendanceType'])->name('user.updateAttendanceType');
+    });
+
+    // Employee deletion route
+    Route::middleware(['permission:employees.delete'])->group(function () {
+        Route::delete('/user/{id}', [EmployeeController::class, 'destroy'])->name('user.delete');
     });
 
     // Company settings routes
@@ -590,6 +596,40 @@ Route::get('/service-worker.js', function () {
     }
     abort(404);
 })->name('service-worker');
+
+// Temporary test route for debugging employee deletion authorization
+Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () {
+    $currentUser = \Illuminate\Support\Facades\Auth::user();
+    $employee = \App\Models\User::where('id', '!=', $currentUser->id)->first();
+    
+    if (!$employee) {
+        return response()->json(['error' => 'No other employee found for testing']);
+    }
+    
+    $controller = new \App\Http\Controllers\EmployeeController();
+    $reflection = new ReflectionClass($controller);
+    $method = $reflection->getMethod('canDeleteEmployee');
+    $method->setAccessible(true);
+    $canDelete = $method->invoke($controller, $currentUser, $employee);
+    
+    return response()->json([
+        'current_user' => [
+            'id' => $currentUser->id,
+            'name' => $currentUser->name,
+            'roles' => $currentUser->roles->pluck('name'),
+            'has_users_delete_permission' => $currentUser->can('users.delete'),
+            'has_super_admin_role' => $currentUser->hasRole('Super Administrator'),
+            'has_hr_manager_role' => $currentUser->hasRole('HR Manager'),
+            'has_administrator_role' => $currentUser->hasRole('Administrator'),
+        ],
+        'target_employee' => [
+            'id' => $employee->id,
+            'name' => $employee->name,
+        ],
+        'can_delete' => $canDelete,
+        'authorization_result' => $canDelete ? 'AUTHORIZED' : 'UNAUTHORIZED'
+    ]);
+});
 
 // Include all module routes
 require __DIR__ . '/modules.php';

@@ -86,6 +86,25 @@ class ProfileController extends Controller
         $user = $this->crudService->findUser($request->id);
 
         try {
+            // Determine rule set based on request content
+            if ($request->hasFile('profile_image') || $request->has('remove_profile_image')) {
+                $request->merge(['ruleSet' => 'profile_picture']);
+            }
+            
+            // Handle profile image removal first
+            if ($request->has('remove_profile_image')) {
+                $imageMessages = $this->mediaService->handleProfileImageRemoval($user);
+                
+                // Get fresh user data
+                $freshUser = $user->fresh();
+                
+                return response()->json([
+                    'messages' => $imageMessages,
+                    'user' => $freshUser,
+                    'profile_image_url' => $freshUser->profile_image_url // Explicitly include accessor
+                ]);
+            }
+            
             // Validate the request
             $validated = $this->validationService->validateUserUpdate($request);
 
@@ -93,19 +112,27 @@ class ProfileController extends Controller
             $messages = $this->updateService->updateUserProfile($user, $validated);
 
             // Handle profile image upload
-            $imageMessages = $this->mediaService->handleProfileImageUpload($user, $request);
-            $messages = array_merge($messages, $imageMessages);
+            if ($request->hasFile('profile_image')) {
+                $imageMessages = $this->mediaService->handleProfileImageUpload($user, $request);
+                $messages = array_merge($messages, $imageMessages);
+            }
 
             // Save the user
             $this->crudService->saveUser($user);
+            
+            // Get fresh user data with profile image URL
+            $freshUser = $user->fresh();
 
             return response()->json([
                 'messages' => $messages,
-                'user' => $user
+                'user' => $freshUser,
+                'profile_image_url' => $freshUser->profile_image_url // Explicitly include accessor
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

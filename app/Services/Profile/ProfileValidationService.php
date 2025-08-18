@@ -122,6 +122,12 @@ class ProfileValidationService
                     'total_esi_rate' => 'nullable|numeric',
                 ];
 
+            case 'profile_picture':
+                return $baseRules + [
+                    'profile_image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+                    'remove_profile_image' => 'nullable|boolean',
+                ];
+
             default:
                 return $baseRules;
         }
@@ -227,7 +233,10 @@ class ProfileValidationService
      */
     public function validateUserUpdate(Request $request): array
     {
-        $rules = $this->getUpdateRulesBySet($request->ruleSet, $request->id);
+        // Default to 'profile' rule set if no ruleSet is specified
+        $ruleSet = $request->ruleSet ?? 'profile';
+        
+        $rules = $this->getUpdateRulesBySet($ruleSet, $request->id);
         $messages = $this->getValidationMessages();
         
         return $request->validate($rules, $messages);

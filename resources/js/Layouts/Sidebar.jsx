@@ -666,7 +666,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                   {app?.name || 'Company Name'}
                 </Typography>
                 <Typography variant="caption" className="text-default-400 text-xs font-medium">
-                  Enterprise Suite
+                  Aero Enterprise Suite
                 </Typography>
               </div>
             </motion.div>
@@ -686,35 +686,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             </motion.div>
           </div>
           
-          {/* User Info - Fixed size */}
-          {auth.user && (
-            <motion.div 
-              className={`p-2 rounded-lg backdrop-blur-sm transition-all duration-300 ${GRADIENT_PRESETS.accentCard}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="flex items-center gap-2">
-                <Avatar
-                  size="sm"
-                  src={auth.user.profile_image}
-                  fallback={auth.user.first_name?.charAt(0)}
-                  className="w-6 h-6 flex-shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <Typography variant="caption" className="font-medium text-foreground truncate block">
-                    {auth.user.first_name} {auth.user.last_name}
-                  </Typography>
-                  {auth.user.roles && auth.user.roles.length > 0 && (
-                    <Typography variant="caption" className="text-default-400 text-xs truncate block">
-                      {auth.user.roles[0].name}
-                    </Typography>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
+         
         </div>
       </motion.div>
 

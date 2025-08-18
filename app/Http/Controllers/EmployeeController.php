@@ -7,9 +7,11 @@ use App\Models\HRM\Department;
 use App\Models\HRM\Designation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -110,48 +112,59 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $employee = User::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($id)],
-            'phone' => ['nullable', 'string', Rule::unique('users')->ignore($id)],
-            'employee_id' => ['nullable', 'string', Rule::unique('users')->ignore($id)],
-            'department_id' => 'nullable|exists:departments,id',
-            'designation_id' => 'nullable|exists:designations,id',
-            'attendance_type_id' => 'nullable|exists:attendance_types,id',
-            'date_of_joining' => 'nullable|date',
-            'birthday' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
-            'address' => 'nullable|string',
-            'salary_amount' => 'nullable|numeric|min:0',
-            'active' => 'boolean',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        DB::beginTransaction();
         try {
-            $employee->update($request->only([
-                'name', 'email', 'phone', 'employee_id', 'department_id', 
-                'designation_id', 'attendance_type_id', 'date_of_joining', 
-                'birthday', 'gender', 'address', 'salary_amount', 'active'
-            ]));
+            $employee = User::findOrFail($id);
+            
+            // Enhanced authorization check
+            $currentUser = Auth::user();
+            if (!$this->canModifyEmployee($currentUser, $employee)) {
+                return response()->json(['error' => 'Unauthorized to modify this employee'], 403);
+            }
 
-            DB::commit();
+            // Enhanced validation
+            $validated = $request->validate([
+                'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|unique:users,email,' . $id,
+                'department_id' => 'sometimes|nullable|exists:departments,id',
+                'designation_id' => 'sometimes|nullable|exists:designations,id',
+                'attendance_type_id' => 'sometimes|nullable|exists:attendance_types,id',
+                'active' => 'sometimes|boolean',
+                'phone' => 'sometimes|nullable|string|max:20',
+                'hire_date' => 'sometimes|nullable|date',
+                'salary' => 'sometimes|nullable|numeric|min:0'
+            ]);
+
+            // Track what was changed for audit
+            $changes = [];
+            foreach ($validated as $key => $value) {
+                if ($employee->$key != $value) {
+                    $changes[$key] = [
+                        'old' => $employee->$key,
+                        'new' => $value
+                    ];
+                }
+            }
+
+            $employee->update($validated);
+
+            // Log the update for audit trail
+            Log::info('Employee updated', [
+                'employee_id' => $id,
+                'employee_name' => $employee->name,
+                'changes' => $changes,
+                'updated_by' => Auth::id(),
+                'timestamp' => now()
+            ]);
 
             return response()->json([
                 'message' => 'Employee updated successfully',
-                'employee' => $employee->fresh(['department', 'designation', 'attendanceType'])
+                'employee' => $employee->fresh()
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Error updating employee', [
                 'error' => $e->getMessage(),
                 'employee_id' => $id,
-                'request' => $request->all()
+                'updated_by' => Auth::id()
             ]);
             return response()->json(['error' => 'Failed to update employee'], 500);
         }
@@ -165,19 +178,171 @@ class EmployeeController extends Controller
         try {
             $employee = User::findOrFail($id);
             
+            // Enhanced authorization check
+            $currentUser = Auth::user();
+            if (!$this->canDeleteEmployee($currentUser, $employee)) {
+                return response()->json(['error' => 'Unauthorized to delete this employee'], 403);
+            }
+            
+            // Check for dependencies before deletion
+            $dependencies = $this->checkEmployeeDependencies($employee);
+            if (!empty($dependencies)) {
+                return response()->json([
+                    'error' => 'Cannot delete employee with active dependencies',
+                    'dependencies' => $dependencies
+                ], 422);
+            }
+
             // Perform soft delete
             $employee->active = false;
             $employee->save();
             $employee->delete();
 
+            // Log the deletion for audit trail
+            Log::info('Employee deleted', [
+                'employee_id' => $id,
+                'employee_name' => $employee->name,
+                'deleted_by' => Auth::id(),
+                'timestamp' => now()
+            ]);
+
             return response()->json(['message' => 'Employee deleted successfully']);
         } catch (\Exception $e) {
             Log::error('Error deleting employee', [
                 'error' => $e->getMessage(),
-                'employee_id' => $id
+                'employee_id' => $id,
+                'deleted_by' => Auth::id()
             ]);
             return response()->json(['error' => 'Failed to delete employee'], 500);
         }
+    }
+
+    /**
+     * Check if current user can modify the employee
+     */
+    private function canModifyEmployee($currentUser, $employee)
+    {
+        // Super admins can modify anyone
+        if ($currentUser->hasRole('Super Administrator')) {
+            return true;
+        }
+        
+        // Administrators can modify employees
+        if ($currentUser->hasRole('Administrator')) {
+            return true;
+        }
+        
+        // HR managers can modify employees in their organization
+        if ($currentUser->hasRole('HR Manager')) {
+            return true;
+        }
+        
+        // Department managers can modify employees in their department
+        if ($currentUser->hasRole('Department Manager') && 
+            $currentUser->department_id === $employee->department_id) {
+            return true;
+        }
+        
+        // Check if user has the specific permission (fallback)
+        if ($currentUser->can('users.update')) {
+            return true;
+        }
+        
+        // Users can only modify their own profile (limited fields)
+        if ($currentUser->id === $employee->id) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if current user can delete the employee
+     */
+    private function canDeleteEmployee($currentUser, $employee)
+    {
+        // Super admins can delete anyone (except themselves)
+        if ($currentUser->hasRole('Super Administrator') && $currentUser->id !== $employee->id) {
+            return true;
+        }
+        
+        // HR managers can delete employees (except themselves)
+        if ($currentUser->hasRole('HR Manager') && $currentUser->id !== $employee->id) {
+            return true;
+        }
+        
+        // Administrators can delete employees (except themselves)
+        if ($currentUser->hasRole('Administrator') && $currentUser->id !== $employee->id) {
+            return true;
+        }
+        
+        // Check if user has the specific permission (fallback)
+        if ($currentUser->can('users.delete') && $currentUser->id !== $employee->id) {
+            return true;
+        }
+        
+        // Users cannot delete themselves or others
+        return false;
+    }
+
+    /**
+     * Check for employee dependencies before deletion
+     */
+    private function checkEmployeeDependencies($employee)
+    {
+        $dependencies = [];
+        
+        // Check for active projects (if the table exists)
+        try {
+            if (Schema::hasTable('project_members')) {
+                $activeProjects = DB::table('project_members')
+                    ->join('projects', 'project_members.project_id', '=', 'projects.id')
+                    ->where('project_members.user_id', $employee->id)
+                    ->where('projects.status', 'active')
+                    ->count();
+                    
+                if ($activeProjects > 0) {
+                    $dependencies['active_projects'] = $activeProjects;
+                }
+            }
+        } catch (\Exception $e) {
+            // Table doesn't exist, skip this check
+        }
+        
+        // Check for pending leaves
+        try {
+            if (Schema::hasTable('leaves')) {
+                $pendingLeaves = DB::table('leaves')
+                    ->where('user_id', $employee->id)
+                    ->where('status', 'pending')
+                    ->count();
+                    
+                if ($pendingLeaves > 0) {
+                    $dependencies['pending_leaves'] = $pendingLeaves;
+                }
+            }
+        } catch (\Exception $e) {
+            // Table doesn't exist, skip this check
+        }
+        
+        // Check for active trainings
+        try {
+            if (Schema::hasTable('training_enrollments')) {
+                $activeTrainings = DB::table('training_enrollments')
+                    ->join('trainings', 'training_enrollments.training_id', '=', 'trainings.id')
+                    ->where('training_enrollments.user_id', $employee->id)
+                    ->where('trainings.status', 'active')
+                    ->count();
+                    
+                if ($activeTrainings > 0) {
+                    $dependencies['active_trainings'] = $activeTrainings;
+                }
+            }
+        } catch (\Exception $e) {
+            // Table doesn't exist, skip this check
+        }
+        
+        return $dependencies;
     }
 
     /**
@@ -289,7 +454,7 @@ class EmployeeController extends Controller
                     'email' => $employee->email,
                     'phone' => $employee->phone,
                     'employee_id' => $employee->employee_id,
-                    'profile_image' => $employee->profile_image,
+                    'profile_image' => $employee->profile_image_url,
                     'active' => $employee->active,
                     'department_id' => $employee->department_id,
                     'department_name' => $departmentName,
