@@ -98,11 +98,11 @@ const ProfilePictureModal = ({
 
         const formData = new FormData();
         formData.append('profile_image', selectedFile);
-        formData.append('id', employee.id); // Add user ID
+        formData.append('user_id', employee.id); // Add user ID
 
         try {
             const response = await axios.post(
-                route('profile.update'), 
+                route('profile.image.upload'), 
                 formData,
                 {
                     headers: {
@@ -117,17 +117,19 @@ const ProfilePictureModal = ({
                 }
             );
 
-            if (response.status === 200) {
-                toast.success('Profile picture updated successfully!');
+            if (response.data.success) {
+                toast.success(response.data.message || 'Profile picture updated successfully!');
                 
                 // Callback to update the parent component with the new profile image URL
                 if (onImageUpdate) {
-                    // Use the explicit profile_image_url from response or fallback to user accessor
-                    const newImageUrl = response.data.profile_image_url || response.data.user?.profile_image_url || null;
+                    // Use the explicit profile_image_url from response
+                    const newImageUrl = response.data.profile_image_url;
                     onImageUpdate(employee.id, newImageUrl);
                 }
                 
                 handleClose();
+            } else {
+                throw new Error(response.data.message || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
@@ -139,6 +141,8 @@ const ProfilePictureModal = ({
                 errorMessage = error.response.data.message || 'Validation failed';
             } else if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
             }
             
             setError(errorMessage);
@@ -157,35 +161,36 @@ const ProfilePictureModal = ({
         setError('');
 
         const formData = new FormData();
-        formData.append('remove_profile_image', '1');
-        formData.append('id', employee.id);
+        formData.append('user_id', employee.id);
 
         try {
-            const response = await axios.post(
-                route('profile.update'), 
-                formData,
+            const response = await axios.delete(
+                route('profile.image.remove'), 
                 {
+                    data: formData,
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 }
             );
 
-            if (response.status === 200) {
-                toast.success('Profile picture removed successfully!');
+            if (response.data.success) {
+                toast.success(response.data.message || 'Profile picture removed successfully!');
                 
                 // Callback to update the parent component
                 if (onImageUpdate) {
                     // Use the explicit profile_image_url from response (should be null after removal)
-                    const newImageUrl = response.data.profile_image_url || response.data.user?.profile_image_url || null;
+                    const newImageUrl = response.data.profile_image_url;
                     onImageUpdate(employee.id, newImageUrl);
                 }
                 
                 handleClose();
+            } else {
+                throw new Error(response.data.message || 'Remove failed');
             }
         } catch (error) {
             console.error('Remove error:', error);
-            const errorMessage = error.response?.data?.message || 'Failed to remove profile picture';
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to remove profile picture';
             setError(errorMessage);
             toast.error(errorMessage);
         } finally {

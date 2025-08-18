@@ -6,7 +6,6 @@ use App\Models\HRM\Department;
 use App\Models\HRM\Designation;
 use App\Models\User;
 use App\Services\Profile\ProfileCrudService;
-use App\Services\Profile\ProfileMediaService;
 use App\Services\Profile\ProfileUpdateService;
 use App\Services\Profile\ProfileValidationService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -25,18 +24,15 @@ class ProfileController extends Controller
     protected ProfileValidationService $validationService;
     protected ProfileCrudService $crudService;
     protected ProfileUpdateService $updateService;
-    protected ProfileMediaService $mediaService;
 
     public function __construct(
         ProfileValidationService $validationService,
         ProfileCrudService $crudService,
-        ProfileUpdateService $updateService,
-        ProfileMediaService $mediaService
+        ProfileUpdateService $updateService
     ) {
         $this->validationService = $validationService;
         $this->crudService = $crudService;
         $this->updateService = $updateService;
-        $this->mediaService = $mediaService;
     }
     /**
      * Display the user's profile form.
@@ -80,42 +76,18 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
+     * Note: Profile image upload/removal is now handled by ProfileImageController
      */
     public function update(Request $request)
     {
         $user = $this->crudService->findUser($request->id);
 
         try {
-            // Determine rule set based on request content
-            if ($request->hasFile('profile_image') || $request->has('remove_profile_image')) {
-                $request->merge(['ruleSet' => 'profile_picture']);
-            }
-            
-            // Handle profile image removal first
-            if ($request->has('remove_profile_image')) {
-                $imageMessages = $this->mediaService->handleProfileImageRemoval($user);
-                
-                // Get fresh user data
-                $freshUser = $user->fresh();
-                
-                return response()->json([
-                    'messages' => $imageMessages,
-                    'user' => $freshUser,
-                    'profile_image_url' => $freshUser->profile_image_url // Explicitly include accessor
-                ]);
-            }
-            
-            // Validate the request
+            // Validate the request (excluding profile image handling)
             $validated = $this->validationService->validateUserUpdate($request);
 
             // Update user profile
             $messages = $this->updateService->updateUserProfile($user, $validated);
-
-            // Handle profile image upload
-            if ($request->hasFile('profile_image')) {
-                $imageMessages = $this->mediaService->handleProfileImageUpload($user, $request);
-                $messages = array_merge($messages, $imageMessages);
-            }
 
             // Save the user
             $this->crudService->saveUser($user);

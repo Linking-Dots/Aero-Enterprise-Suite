@@ -225,42 +225,9 @@ class User extends Authenticatable implements HasMedia
     public function getProfileImageUrlAttribute(): ?string
     {
         try {
-            // First, check if user has media in the profile_images collection
+            // Only use MediaLibrary - check if user has media in the profile_images collection
             $url = $this->getFirstMediaUrl('profile_images');
-            if (!empty($url)) {
-                return $url;
-            }
-
-            // Fallback: check if user has media in old 'profile_image' collection
-            $url = $this->getFirstMediaUrl('profile_image');
-            if (!empty($url)) {
-                return $url;
-            }
-
-            // Handle legacy data - convert any external URLs to local storage URLs
-            if (!empty($this->attributes['profile_image'])) {
-                $profileImage = $this->attributes['profile_image'];
-                
-                // Check if it's an external storage URL
-                if (str_contains($profileImage, '/storage/')) {
-                    // Extract just the file path after /storage/
-                    $pathParts = explode('/storage/', $profileImage);
-                    if (count($pathParts) > 1) {
-                        $filePath = end($pathParts);
-                        return asset('storage/' . $filePath);
-                    }
-                }
-                
-                // If it's already a local URL starting with http, return as is
-                if (str_starts_with($profileImage, 'http')) {
-                    return $profileImage;
-                }
-                
-                // If it's a relative path, make it absolute
-                return asset('storage/' . $profileImage);
-            }
-
-            return null;
+            return !empty($url) ? $url : null;
         } catch (\Exception $e) {
             // Log the error and return null
             Log::warning('Failed to get profile image URL for user ' . $this->id . ': ' . $e->getMessage());

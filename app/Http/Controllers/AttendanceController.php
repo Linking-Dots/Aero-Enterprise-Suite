@@ -162,7 +162,6 @@ class AttendanceController extends Controller
             'user_id'      => $user->id,
             'employee_id'  => $user->employee_id,
             'name'         => $user->name,
-            'profile_image' => $user->profile_image,
             'profile_image_url' => $user->profile_image_url,
         ];
 
@@ -444,7 +443,6 @@ class AttendanceController extends Controller
                 return [
                     'user_id' => $user->id ?? null,
                     'name' => $user->name ?? 'Unknown',
-                    'profile_image' => $user->profile_image ?? null,
                     'profile_image_url' => $user->profile_image_url ?? null,
                     'designation' => optional($user->designation)->title ?? 'N/A',
                     'punchin_location' => $attendance->punchin_location_array ?? null,

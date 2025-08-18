@@ -178,7 +178,6 @@ class UserController extends Controller
                     'name'           => $user->name,
                     'email'          => $user->email,
                     'phone'          => $user->phone,
-                    'profile_image'  => $user->profile_image,
                     'profile_image_url' => $user->profile_image_url,
                     'active'         => $user->active,
                     'department_id' => $user->department_id,
@@ -396,7 +395,6 @@ class UserController extends Controller
                     'email' => $employee->email,
                     'phone' => $employee->phone,
                     'employee_id' => $employee->employee_id,
-                    'profile_image' => $employee->profile_image,
                     'profile_image_url' => $employee->profile_image_url,
                     'active' => $employee->active,
                     // Include both ID and full name for department

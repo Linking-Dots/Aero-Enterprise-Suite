@@ -21,6 +21,7 @@ use App\Http\Controllers\LMSController;
 use App\Http\Controllers\PicnicController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileImageController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Settings\AttendanceSettingController;
@@ -128,6 +129,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/profile/{user}', [ProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+        
+        // Profile Image Routes - dedicated endpoints for profile image management
+        Route::post('/profile/image/upload', [ProfileImageController::class, 'upload'])->name('profile.image.upload');
+        Route::delete('/profile/image/remove', [ProfileImageController::class, 'remove'])->name('profile.image.remove');
         
         // New API endpoints for enhanced profile functionality (consistent with other modules)
         Route::get('/profile/{user}/stats', [ProfileController::class, 'stats'])->name('profile.stats');

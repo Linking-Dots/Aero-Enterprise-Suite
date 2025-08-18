@@ -407,7 +407,6 @@ const EmployeeTable = ({
     // Update the employee's profile image in the local state
     if (updateEmployeeOptimized) {
       updateEmployeeOptimized(employeeId, {
-        profile_image: newImageUrl,
         profile_image_url: newImageUrl
       });
     }
