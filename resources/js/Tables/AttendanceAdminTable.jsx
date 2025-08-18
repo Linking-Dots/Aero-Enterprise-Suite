@@ -107,7 +107,7 @@ const AttendanceAdminTable = ({
                             avatarProps={{
                                 radius: "lg",
                                 size: "md",
-                                src: data.profile_image,
+                                src: data.profile_image_url || data.profile_image,
                                 fallback: <UserIcon className="w-6 h-6"/>
                             }}
                             name={
@@ -368,7 +368,7 @@ const AttendanceAdminTable = ({
                                                                 avatarProps={{
                                                                     radius: "lg",
                                                                     size: isLargeScreen ? "md" : "sm",
-                                                                    src: data.profile_image,
+                                                                    src: data.profile_image_url || data.profile_image,
                                                                     fallback: <UserIcon className="w-6 h-6"/>
                                                                 }}
                                                                 name={data.name || 'Unknown User'}

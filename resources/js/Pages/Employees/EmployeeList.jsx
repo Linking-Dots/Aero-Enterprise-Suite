@@ -48,6 +48,7 @@ import GlassCard from "@/Components/GlassCard.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
 import EmployeeTable from "@/Tables/EmployeeTable.jsx";
+import ProfileAvatar from "@/Components/ProfileAvatar.jsx";
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -322,21 +323,16 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
           {/* Card Header with Employee Info */}
           <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10">
             <div className="flex-shrink-0">
-              <User
-                avatarProps={{ 
-                  radius: "lg", 
-                  src: user?.profile_image,
-                  size: "md",
-                  fallback: <UserIcon className="w-4 h-4" />
-                }}
+              <ProfileAvatar
+                src={user?.profile_image_url || user?.profile_image}
                 name={user?.name}
-                description={`ID: ${user?.employee_id || 'N/A'}`}
-                classNames={{
-                  name: "font-semibold text-foreground text-left text-sm",
-                  description: "text-default-500 text-left text-xs",
-                  wrapper: "justify-start"
-                }}
+                size="md"
+                fallback={<UserIcon className="w-4 h-4" />}
               />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-semibold text-foreground text-left text-sm">{user?.name}</span>
+              <span className="text-default-500 text-left text-xs">ID: {user?.employee_id || 'N/A'}</span>
             </div>
             <div className="flex-1 min-w-0 flex justify-end">
               <Button

@@ -454,7 +454,8 @@ class EmployeeController extends Controller
                     'email' => $employee->email,
                     'phone' => $employee->phone,
                     'employee_id' => $employee->employee_id,
-                    'profile_image' => $employee->profile_image_url,
+                    'profile_image' => $employee->profile_image_url, // Use the accessor for consistent URL generation
+                    'profile_image_url' => $employee->profile_image_url, // Add explicit profile_image_url field
                     'active' => $employee->active,
                     'department_id' => $employee->department_id,
                     'department_name' => $departmentName,

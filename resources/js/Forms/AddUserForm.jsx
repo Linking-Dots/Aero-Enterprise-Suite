@@ -275,7 +275,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
                             >
                                 <Avatar
                                     alt={changedUserData.name || initialUserData.name}
-                                    src={selectedImage || user?.profile_image}
+                                    src={selectedImage || user?.profile_image_url || user?.profile_image}
                                     sx={{width: 100, height: 100}}
                                 />
                                 {hover && (

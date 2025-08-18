@@ -36,7 +36,9 @@ import {
     Card,
     CardBody,
     Divider,
-    ScrollShadow
+    ScrollShadow,
+    Link,
+    Avatar 
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -59,6 +61,8 @@ import {
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import GlassCard from "@/Components/GlassCard";
+import { PhoneOff } from "lucide-react";
+
 
 
 
@@ -302,23 +306,35 @@ const LeaveEmployeeTable = React.forwardRef(({
                         <Box className="flex items-center gap-3 flex-1">
                             {isAdminView && (
                                 <User
-                                    avatarProps={{
-                                        radius: "lg",
-                                        size: "sm",
-                                        src: user?.profile_image,
-                                        fallback: <UserIcon className="w-4 h-4" />
-                                    }}
-                                    name={
-                                        <Typography variant="body2" fontWeight="medium">
-                                            {user?.name}
-                                        </Typography>
-                                    }
-                                    description={
-                                        <Typography variant="caption" color="textSecondary">
-                                            {user?.phone}
-                                        </Typography>
-                                    }
-                                />
+                        avatarProps={{
+                        radius: "lg",
+                        size: "sm",
+                        src: user?.profile_image_url || user?.profile_image,
+                        showFallback: true, // Ensure fallback is always available
+                        name: user?.name || "Unnamed User",
+                        isBordered: true,
+                        }}
+                        description={
+                        user?.phone ? (
+                            <Link
+                            href={`tel:${user?.phone}`}
+                            size="sm"
+                            className="text-xs text-blue-500 hover:underline"
+                            >
+                            {user?.phone}
+                            </Link>
+                        ) : (
+                            <span className="flex items-center gap-1 text-xs text-gray-400 italic">
+                            <PhoneOff className="w-3 h-3" /> No Phone
+                            </span>
+                        )
+                        }
+                        name={
+                        <span className="text-sm font-medium">
+                            {user?.name || "Unnamed User"}
+                        </span>
+                        }
+                    />
                             )}
                         </Box>
                         <Box className="flex items-center gap-2">
@@ -435,24 +451,36 @@ const LeaveEmployeeTable = React.forwardRef(({
             case "employee":
                 return (
                     <TableCell className="whitespace-nowrap">
-                        <User
-                            avatarProps={{
-                                radius: "lg",
-                                size: "sm",
-                                src: user?.profile_image,
-                                fallback: <UserIcon className="w-4 h-4" />
-                            }}
-                            description={
-                                <Typography variant="caption" className="text-xs">
-                                    {user?.phone}
-                                </Typography>
-                            }
-                            name={
-                                <Typography variant="body2" className="text-sm font-medium">
-                                    {user?.name}
-                                </Typography>
-                            }
-                        />
+                    <User
+                        avatarProps={{
+                        radius: "lg",
+                        size: "sm",
+                        src: user?.profile_image_url || user?.profile_image,
+                        showFallback: true, // Ensure fallback is always available
+                        name: user?.name || "Unnamed User",
+                        isBordered: true,
+                        }}
+                        description={
+                        user?.phone ? (
+                            <Link
+                            href={`tel:${user?.phone}`}
+                            size="sm"
+                            className="text-xs text-blue-500 hover:underline"
+                            >
+                            {user?.phone}
+                            </Link>
+                        ) : (
+                            <span className="flex items-center gap-1 text-xs text-gray-400 italic">
+                            <PhoneOff className="w-3 h-3" /> No Phone
+                            </span>
+                        )
+                        }
+                        name={
+                        <span className="text-sm font-medium">
+                            {user?.name || "Unnamed User"}
+                        </span>
+                        }
+                    />
                     </TableCell>
                 );
 

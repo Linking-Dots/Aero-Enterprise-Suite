@@ -331,6 +331,355 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
         );
     }
 
+    // Render functions for different tabs
+    const renderOverviewTab = () => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Personal Information */}
+            <ProfileSection
+                title="Personal Information"
+                icon={<IdentificationIcon />}
+                onEdit={() => openModal('personal')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('personal')}
+                isCompleted={isSectionCompleted('personal')}
+            >
+                <div className="space-y-1">
+                    <InfoRow 
+                        label="Passport No." 
+                        value={user.passport_no} 
+                        icon={<IdentificationIcon />}
+                    />
+                    <InfoRow 
+                        label="Passport Expiry" 
+                        value={user.passport_exp_date} 
+                        type="date"
+                        icon={<CalendarIcon />}
+                    />
+                    <InfoRow 
+                        label="NID No." 
+                        value={user.nid} 
+                        icon={<IdentificationIcon />}
+                    />
+                    <InfoRow 
+                        label="Nationality" 
+                        value={user.nationality} 
+                        icon={<GlobeAltIcon />}
+                    />
+                    <InfoRow 
+                        label="Religion" 
+                        value={user.religion} 
+                        icon={<UserIcon />}
+                    />
+                    <InfoRow 
+                        label="Marital Status" 
+                        value={user.marital_status} 
+                        type="chip"
+                        icon={<HeartIcon />}
+                    />
+                    <InfoRow 
+                        label="Spouse Employment" 
+                        value={user.employment_of_spouse} 
+                        icon={<BriefcaseIcon />}
+                    />
+                    <InfoRow 
+                        label="Children" 
+                        value={user.number_of_children} 
+                        icon={<UsersIcon />}
+                        showDivider={false}
+                    />
+                </div>
+            </ProfileSection>
+
+            {/* Emergency Contact */}
+            <ProfileSection
+                title="Emergency Contacts"
+                icon={<PhoneIcon />}
+                onEdit={() => openModal('emergency')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('emergency')}
+                isCompleted={isSectionCompleted('emergency')}
+            >
+                <div className="space-y-4">
+                    {user.emergency_contact_primary_name && (
+                        <div>
+                            <h5 className="text-sm font-semibold text-foreground mb-2">Primary Contact</h5>
+                            <div className="space-y-1 pl-4 border-l-2 border-primary-500">
+                                <InfoRow 
+                                    label="Name" 
+                                    value={user.emergency_contact_primary_name} 
+                                    icon={<UserIcon />}
+                                />
+                                <InfoRow 
+                                    label="Relationship" 
+                                    value={user.emergency_contact_primary_relationship} 
+                                    icon={<HeartIcon />}
+                                />
+                                <InfoRow 
+                                    label="Phone" 
+                                    value={user.emergency_contact_primary_phone} 
+                                    type="phone"
+                                    icon={<PhoneIcon />}
+                                    showDivider={false}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {user.emergency_contact_secondary_name && (
+                        <div>
+                            <h5 className="text-sm font-semibold text-foreground mb-2">Secondary Contact</h5>
+                            <div className="space-y-1 pl-4 border-l-2 border-secondary-500">
+                                <InfoRow 
+                                    label="Name" 
+                                    value={user.emergency_contact_secondary_name} 
+                                    icon={<UserIcon />}
+                                />
+                                <InfoRow 
+                                    label="Relationship" 
+                                    value={user.emergency_contact_secondary_relationship} 
+                                    icon={<HeartIcon />}
+                                />
+                                <InfoRow 
+                                    label="Phone" 
+                                    value={user.emergency_contact_secondary_phone} 
+                                    type="phone"
+                                    icon={<PhoneIcon />}
+                                    showDivider={false}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </ProfileSection>
+
+            {/* Bank Information */}
+            <ProfileSection
+                title="Banking Information"
+                icon={<BanknotesIcon />}
+                onEdit={() => openModal('bank')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('bank')}
+                isCompleted={isSectionCompleted('bank')}
+            >
+                <div className="space-y-1">
+                    <InfoRow 
+                        label="Bank Name" 
+                        value={user.bank_name} 
+                        icon={<BuildingOfficeIcon />}
+                    />
+                    <InfoRow 
+                        label="Account Number" 
+                        value={user.bank_account_no} 
+                        icon={<IdentificationIcon />}
+                    />
+                    <InfoRow 
+                        label="IFSC Code" 
+                        value={user.ifsc_code} 
+                        icon={<IdentificationIcon />}
+                    />
+                    <InfoRow 
+                        label="PAN Number" 
+                        value={user.pan_no} 
+                        icon={<IdentificationIcon />}
+                        showDivider={false}
+                    />
+                </div>
+            </ProfileSection>
+
+            {/* Family Information */}
+            <ProfileSection
+                title="Family Information"
+                icon={<UsersIcon />}
+                onEdit={() => openModal('family')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('family')}
+                isCompleted={isSectionCompleted('family')}
+            >
+                <div className="space-y-1">
+                    <InfoRow 
+                        label="Member Name" 
+                        value={user.family_member_name} 
+                        icon={<UserIcon />}
+                    />
+                    <InfoRow 
+                        label="Relationship" 
+                        value={user.family_member_relationship} 
+                        icon={<HeartIcon />}
+                    />
+                    <InfoRow 
+                        label="Date of Birth" 
+                        value={user.family_member_dob} 
+                        type="date"
+                        icon={<CalendarIcon />}
+                    />
+                    <InfoRow 
+                        label="Phone" 
+                        value={user.family_member_phone} 
+                        type="phone"
+                        icon={<PhoneIcon />}
+                        showDivider={false}
+                    />
+                </div>
+            </ProfileSection>
+
+            {/* Education */}
+            <ProfileSection
+                title="Education History"
+                icon={<AcademicCapIcon />}
+                onEdit={() => openModal('education')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('education')}
+                isCompleted={isSectionCompleted('education')}
+                className="lg:col-span-2"
+            >
+                {user.educations && user.educations.length > 0 ? (
+                    <div className="space-y-4">
+                        {user.educations.map((education, index) => (
+                            <motion.div
+                                key={education.id || index}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="p-4 bg-white/5 rounded-lg border border-white/10"
+                            >
+                                <h5 className="font-semibold text-foreground mb-2">{education.institution}</h5>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-default-500">Degree:</span>
+                                        <p className="font-medium">{education.degree || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">Start Date:</span>
+                                        <p className="font-medium">
+                                            {education.starting_date ? new Date(education.starting_date).getFullYear() : 'N/A'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">End Date:</span>
+                                        <p className="font-medium">
+                                            {education.complete_date ? new Date(education.complete_date).getFullYear() : 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : null}
+            </ProfileSection>
+
+            {/* Experience */}
+            <ProfileSection
+                title="Work Experience"
+                icon={<BriefcaseIcon />}
+                onEdit={() => openModal('experience')}
+                canEdit={canEditProfile}
+                isEmpty={isSectionEmpty('experience')}
+                isCompleted={isSectionCompleted('experience')}
+                className="lg:col-span-2"
+            >
+                {user.experiences && user.experiences.length > 0 ? (
+                    <div className="space-y-4">
+                        {user.experiences.map((experience, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="p-4 bg-white/5 rounded-lg border border-white/10"
+                            >
+                                <h5 className="font-semibold text-foreground mb-1">
+                                    {experience.job_position}
+                                </h5>
+                                <p className="text-primary-400 font-medium mb-2">{experience.company_name}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-default-500">Duration:</span>
+                                        <p className="font-medium">
+                                            {experience.period_from
+                                                ? new Date(experience.period_from).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+                                                : 'N/A'}{' '}
+                                            - {experience.period_to
+                                                ? new Date(experience.period_to).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+                                                : 'Present'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">Location:</span>
+                                        <p className="font-medium">{experience.location || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                {experience.description && (
+                                    <div className="mt-2">
+                                        <span className="text-default-500 text-sm">Description:</span>
+                                        <p className="text-sm mt-1">{experience.description}</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : null}
+            </ProfileSection>
+        </div>
+    );
+
+    const renderProjectsTab = () => (
+        <div className="text-center py-12">
+            <div className="p-8 bg-white/5 rounded-lg border border-white/10 max-w-md mx-auto">
+                <BriefcaseIcon className="w-16 h-16 text-default-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Projects Coming Soon</h3>
+                <p className="text-default-500 text-sm">
+                    Project management integration will be available in a future update.
+                </p>
+            </div>
+        </div>
+    );
+
+    const renderSalaryTab = () => (
+        <div className="text-center py-12">
+            <div className="p-8 bg-white/5 rounded-lg border border-white/10 max-w-md mx-auto">
+                <CurrencyDollarIcon className="w-16 h-16 text-default-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Salary Information</h3>
+                <p className="text-default-500 text-sm mb-4">
+                    Access detailed salary and compensation information.
+                </p>
+                {canEditProfile && (
+                    <Button
+                        color="primary"
+                        variant="bordered"
+                        onPress={() => openModal('salary')}
+                        startContent={<CurrencyDollarIcon className="w-4 h-4" />}
+                    >
+                        View Salary Details
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderAssetsTab = () => (
+        <div className="text-center py-12">
+            <div className="p-8 bg-white/5 rounded-lg border border-white/10 max-w-md mx-auto">
+                <ShieldCheckIcon className="w-16 h-16 text-default-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Assets Coming Soon</h3>
+                <p className="text-default-500 text-sm">
+                    Asset management and tracking will be available in a future update.
+                </p>
+            </div>
+        </div>
+    );
+
+    const renderDocumentsTab = () => (
+        <div className="text-center py-12">
+            <div className="p-8 bg-white/5 rounded-lg border border-white/10 max-w-md mx-auto">
+                <DocumentArrowDownIcon className="w-16 h-16 text-default-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Documents Coming Soon</h3>
+                <p className="text-default-500 text-sm">
+                    Document management and storage will be available in a future update.
+                </p>
+            </div>
+        </div>
+    );
+
     return (
         <App>
             <Head title={user.name} />

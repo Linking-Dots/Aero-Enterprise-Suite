@@ -24,7 +24,8 @@ import {    Table,
     Card as HeroCard,
     Divider,
     Button,
-    Button as HeroButton
+    Button as HeroButton,
+    Link
 } from "@heroui/react";
 import Grow from '@mui/material/Grow';
 import GlassCard from "@/Components/GlassCard.jsx";
@@ -72,6 +73,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
     const [lastUpdate, setLastUpdate] = useState(null);
     const [isPolling, setIsPolling] = useState(true);
     const [lastChecked, setLastChecked] = useState(new Date());
+    const [downloading, setDownloading] = useState('');
     const prevUpdateRef = useRef(null);
     const prevFilterData = useRef({
         currentMonth: dayjs().format('YYYY-MM'),
@@ -348,13 +350,12 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
     
     // Column definitions with improved descriptive labels
     const columns = [
-        ...(!(canViewAllAttendance) && url !== '/attendance' ? [
-            { name: "Date", uid: "date", icon: CalendarDaysIcon, ariaLabel: "Attendance date" }
-        ] : []),
-        ...(url == '/attendance-employee' ? [
+        // Date column - only shown in employee view (when user can't view all attendance or on employee-specific page)
+        ...(!canViewAllAttendance || url === '/attendance-employee' ? [
             { name: "Date", uid: "date", icon: CalendarDaysIcon, ariaLabel: "Attendance date" }
         ] : []),
         
+        // Employee column - only shown in admin/manager view (when user can view all attendance and not on employee page)
         ...(canViewAllAttendance && (url !== '/attendance-employee') ? [
             { name: "Employee", uid: "employee", icon: UserIcon, ariaLabel: "Employee name and information" }
         ] : []),
@@ -387,18 +388,40 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 const avatarSize = isLargeScreen ? 'md' : isMediumScreen ? 'md' : 'sm';
                 return (
                     <TableCell className="whitespace-nowrap">
+                        
                         <User
-                            avatarProps={{
-                                radius: "lg",
-                                size: avatarSize,
-                                src: attendance.user?.profile_image,
-                                fallback: <UserIcon className="w-6 h-6" />
-                            }}
-                            description={attendance.user?.phone}
-                            name={attendance.user?.name}
-                        />
+                        avatarProps={{
+                        radius: "lg",
+                        size: "sm",
+                        src: attendance.user?.profile_image_url || attendance.user?.profile_image,
+                        showFallback: true, // Ensure fallback is always available
+                        name: attendance.user?.name || "Unnamed User",
+                        isBordered: true,
+                        }}
+                        description={
+                        attendance.user?.phone ? (
+                            <Link
+                            href={`tel:${attendance.user?.phone}`}
+                            size="sm"
+                            className="text-xs text-blue-500 hover:underline"
+                            >
+                            {attendance.user?.phone}
+                            </Link>
+                        ) : (
+                            <span className="flex items-center gap-1 text-xs text-gray-400 italic">
+                            <PhoneOff className="w-3 h-3" /> No Phone
+                            </span>
+                        )
+                        }
+                        name={
+                        <span className="text-sm font-medium">
+                            {attendance.user?.name || "Unnamed User"}
+                        </span>
+                        }
+                    />
                     </TableCell>
-                );            case "clockin_time":
+                );            
+                case "clockin_time":
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
                         <Box className="flex items-center gap-2">
@@ -536,6 +559,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
         }
     };    // Excel download function
     const exportExcel = useCallback(async () => { 
+        setDownloading('excel');
         try { 
             const response = await axios.get(route('attendance.exportExcel'), { params: { date: selectedDate }, responseType: 'blob', });
 
@@ -550,15 +574,19 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
             document.body.appendChild(link);
             link.click();
             link.remove();
+            window.URL.revokeObjectURL(url);
+            setDownloading('');
         } catch (error) {
             console.error('Error downloading Excel:', error);
             alert('Failed to download attendance excel.');
+            setDownloading('');
         }
 
     }, [selectedDate]);
 
     // PDF download function
     const downloadPDF = useCallback(async () => {
+        setDownloading('pdf');
         try { 
             const response = await axios.get(route('attendance.exportPdf'), { params:{date:selectedDate}, responseType:'blob' });
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -570,9 +598,12 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
             document.body.appendChild(link); 
             link.click(); 
             link.remove();
+            window.URL.revokeObjectURL(url);
+            setDownloading('');
         } catch (error) {
             console.error('Error downloading PDF:', error);
             alert('Failed to download attendance pdf.');
+            setDownloading('');
         }
         
     },[selectedDate]);    
@@ -870,7 +901,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                     }
                                                                     className="bg-gradient-to-r from-[rgba(var(--theme-success-rgb),0.1)] to-[rgba(var(--theme-success-rgb),0.2)] hover:from-[rgba(var(--theme-success-rgb),0.2)] hover:to-[rgba(var(--theme-success-rgb),0.3)] border border-[rgba(var(--theme-success-rgb),0.2)] backdrop-blur-sm"
                                                                     onPress={exportExcel}
-                                                                    isDisabled={!isLoaded || attendances.length === 0}
+                                                                    isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
+                                                                    isLoading={downloading === 'excel'}
                                                                     style={{
                                                                         fontFamily: 'var(--font-current)',
                                                                         transition: 'all var(--transition)'
@@ -890,7 +922,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                     }
                                                                     className="bg-gradient-to-r from-[rgba(var(--theme-danger-rgb),0.1)] to-[rgba(var(--theme-danger-rgb),0.2)] hover:from-[rgba(var(--theme-danger-rgb),0.2)] hover:to-[rgba(var(--theme-danger-rgb),0.3)] border border-[rgba(var(--theme-danger-rgb),0.2)] backdrop-blur-sm"
                                                                     onPress={downloadPDF}
-                                                                    isDisabled={!isLoaded || attendances.length === 0}
+                                                                    isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
+                                                                    isLoading={downloading === 'pdf'}
                                                                     style={{
                                                                         fontFamily: 'var(--font-current)',
                                                                         transition: 'all var(--transition)'
@@ -1023,8 +1056,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                 >
                                                     <Skeleton className="rounded-lg" isLoaded={isLoaded}>
                                                         <Table
-                                                            selectionMode="multiple"
-                                                            selectionBehavior="toggle"
+                                                         
                                                             isCompact
                                                             removeWrapper
                                                             aria-label="Employee attendance timesheet table"

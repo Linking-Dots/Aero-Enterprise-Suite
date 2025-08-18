@@ -174,6 +174,7 @@ const LeaveSummary = ({ title, summaryData }) => {
 
     // Render employee cell content
     const renderEmployeeCell = useCallback((employee, columnKey) => {
+      
         const cellValue = employee[columnKey];
 
         switch (columnKey) {

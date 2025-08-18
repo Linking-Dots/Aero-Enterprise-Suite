@@ -59,6 +59,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { usePage } from '@inertiajs/react';
 import GlassCard from './GlassCard';
+import ProfileAvatar from './ProfileAvatar';
 
 const PunchStatusCard = () => {
     const theme = useTheme();
@@ -538,20 +539,15 @@ const PunchStatusCard = () => {
                                     />
                                 }
                             >
-                                <Avatar 
+                                <ProfileAvatar
+                                    src={user?.profile_image_url || user?.profile_image}
+                                    name={user?.name}
                                     sx={{ 
                                         width: 48, 
                                         height: 48,
-                                        background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                                         fontSize: '1.2rem'
                                     }}
-                                >
-                                    {user?.profile_image ? (
-                                        <img src={user.profile_image} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        user?.name?.charAt(0).toUpperCase()
-                                    )}
-                                </Avatar>
+                                />
                             </Badge>
 
                             <Box sx={{ ml: 2, textAlign: 'left' }}>

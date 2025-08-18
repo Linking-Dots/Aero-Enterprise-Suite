@@ -248,6 +248,7 @@ const UsersTable = ({
 
   // Render cell content based on column type
   const renderCell = (user, columnKey, rowIndex) => {
+ 
     const cellValue = user[columnKey];
     
     switch (columnKey) {
@@ -270,19 +271,23 @@ const UsersTable = ({
       case "user":
         
         return (
+    
           <User
-            avatarProps={{ 
-              radius: "lg", 
-              src: user?.profile_image,
-              size: "sm",
-              fallback: <UserIcon className="w-4 h-4" />
-            }}
-            name={user?.name || ""}
-            classNames={{
-              name: "font-semibold text-foreground",
-              description: "text-default-500",
-            }}
-          />
+      className="w-fit max-w-full" // 👈 Force User to only take as much width as needed
+      avatarProps={{
+        radius: "lg",
+        size: "sm",
+        src: user?.profile_image_url || user?.profile_image,
+        showFallback: true,
+        name: user?.name || "Unnamed User",
+        isBordered: true,
+      }}
+      name={
+        <span className="text-sm font-medium whitespace-nowrap">
+          {user?.name || "Unnamed User"}
+        </span>
+      }
+    />
         );
         
       case "email":

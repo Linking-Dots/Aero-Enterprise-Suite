@@ -278,7 +278,7 @@ const EmployeeFormModal = ({
                         mb: 3 
                     }}>
                         <Avatar 
-                            src={employee.profile_image}
+                            src={employee.profile_image_url || employee.profile_image}
                             sx={{ 
                                 width: 80, 
                                 height: 80,

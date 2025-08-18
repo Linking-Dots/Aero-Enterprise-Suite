@@ -278,8 +278,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 font-size: 14px;
                 backdrop-filter: blur(10px);
             ">
-                ${user.profile_image ? 
-                    `<img src="${user.profile_image}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover;" />` :
+                ${user.profile_image_url || user.profile_image ? 
+                    `<img src="${user.profile_image_url || user.profile_image}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='${user.name?.charAt(0)?.toUpperCase() || '?'}';" />` :
                     user.name?.charAt(0)?.toUpperCase() || '?'
                 }
             </div>
@@ -322,8 +322,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         font-weight: bold;
                         margin-right: 12px;
                     ">
-                        ${user.profile_image ? 
-                            `<img src="${user.profile_image}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" />` :
+                        ${user.profile_image_url || user.profile_image ? 
+                            `<img src="${user.profile_image_url || user.profile_image}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='${user.name?.charAt(0)?.toUpperCase() || '?'}';" />` :
                             user.name?.charAt(0)?.toUpperCase() || '?'
                         }
                     </div>

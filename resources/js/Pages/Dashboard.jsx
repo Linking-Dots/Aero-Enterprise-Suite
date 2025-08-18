@@ -20,6 +20,8 @@ import {
 
 export default function Dashboard({ auth }) {
 
+    console.log(auth)
+
     const [updateMap, setUpdateMap] = useState(false);
     const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Intl.DateTimeFormat('en-CA', {

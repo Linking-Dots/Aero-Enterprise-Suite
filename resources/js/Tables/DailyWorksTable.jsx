@@ -226,12 +226,12 @@ const DailyWorksTable = ({
     };
 
     const getUserInfo = (userId) => {
-        if (!userId) return { name: 'Unassigned', profile_image: null };
+        if (!userId) return { name: 'Unassigned', profile_image_url: null, profile_image: null };
         
         const user = availableInCharges?.find((u) => String(u.id) === String(userId)) || 
                     availableJuniors?.find((u) => String(u.id) === String(userId)) ||
                     users?.find((u) => String(u.id) === String(userId));
-        return user || { name: 'Unassigned', profile_image: null };
+        return user || { name: 'Unassigned', profile_image_url: null, profile_image: null };
     };
 
     const getJurisdictionInfo = (jurisdictionId) => {
@@ -1062,7 +1062,7 @@ const DailyWorksTable = ({
                                     return items.map((item) => (
                                         <div key={item.key} className="flex items-center gap-2">
                                             <img
-                                                src={inchargeUser.profile_image || '/default-avatar.png'}
+                                                src={inchargeUser.profile_image_url || inchargeUser.profile_image || '/default-avatar.png'}
                                                 alt={inchargeUser.name}
                                                 className="w-6 h-6 rounded-full object-cover"
                                                 onError={(e) => {
@@ -1082,7 +1082,7 @@ const DailyWorksTable = ({
                                             description={`Employee ID: ${incharge.employee_id || 'N/A'}`}
                                             avatarProps={{
                                                 size: "sm",
-                                                src: incharge.profile_image,
+                                                src: incharge.profile_image_url || incharge.profile_image,
                                             }}
                                         />
                                     </SelectItem>
@@ -1097,7 +1097,7 @@ const DailyWorksTable = ({
                                         description="In-charge"
                                         avatarProps={{
                                             size: "sm",
-                                            src: inchargeUser.profile_image,
+                                            src: inchargeUser.profile_image_url || inchargeUser.profile_image,
                                         }}
                                         classNames={{
                                             name: "text-xs font-medium",
@@ -1125,7 +1125,7 @@ const DailyWorksTable = ({
                                     description="Assigned"
                                     avatarProps={{
                                         size: "sm",
-                                        src: assignedUser.profile_image,
+                                        src: assignedUser.profile_image_url || assignedUser.profile_image,
                                     }}
                                     classNames={{
                                         name: "text-xs font-medium",

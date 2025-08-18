@@ -163,6 +163,7 @@ class AttendanceController extends Controller
             'employee_id'  => $user->employee_id,
             'name'         => $user->name,
             'profile_image' => $user->profile_image,
+            'profile_image_url' => $user->profile_image_url,
         ];
 
         for ($day = 1; $day <= $daysInMonth; $day++) {
@@ -444,6 +445,7 @@ class AttendanceController extends Controller
                     'user_id' => $user->id ?? null,
                     'name' => $user->name ?? 'Unknown',
                     'profile_image' => $user->profile_image ?? null,
+                    'profile_image_url' => $user->profile_image_url ?? null,
                     'designation' => optional($user->designation)->title ?? 'N/A',
                     'punchin_location' => $attendance->punchin_location_array ?? null,
                     'punchout_location' => $attendance->punchout_location_array ?? null,

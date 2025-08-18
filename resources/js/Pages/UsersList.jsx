@@ -303,7 +303,7 @@ const UsersList = ({ title, roles }) => {
           <User
             avatarProps={{ 
               radius: "lg", 
-              src: user?.profile_image,
+              src: user?.profile_image_url || user?.profile_image,
               size: "md",
               fallback: <UserIcon className="w-5 h-5" />
             }}

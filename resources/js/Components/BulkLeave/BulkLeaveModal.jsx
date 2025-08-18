@@ -491,8 +491,9 @@ const BulkLeaveModal = ({
                                                     <MenuItem key={user.id} value={user.id}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                             <Avatar
-                                                                src={user.profile_image}
-                                                                alt={user.name || 'Not assigned'}
+                                                                showFallback
+                                                                src={user.profile_image_url || user.profile_image}
+                                                                name={user.name || 'Not assigned'}
                                                                 sx={{
                                                                     width: 24,
                                                                     height: 24,

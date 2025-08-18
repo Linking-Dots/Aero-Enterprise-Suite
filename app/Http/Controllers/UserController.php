@@ -179,6 +179,7 @@ class UserController extends Controller
                     'email'          => $user->email,
                     'phone'          => $user->phone,
                     'profile_image'  => $user->profile_image,
+                    'profile_image_url' => $user->profile_image_url,
                     'active'         => $user->active,
                     'department_id' => $user->department_id,
                     'department' => $user->department ? $user->department->name : null,
@@ -396,6 +397,7 @@ class UserController extends Controller
                     'phone' => $employee->phone,
                     'employee_id' => $employee->employee_id,
                     'profile_image' => $employee->profile_image,
+                    'profile_image_url' => $employee->profile_image_url,
                     'active' => $employee->active,
                     // Include both ID and full name for department
                     'department' => $employee->department,

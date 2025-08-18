@@ -346,7 +346,7 @@ const LeaveForm = ({
                                             <MenuItem key={user.id} value={user.id}>
                                                 <Box sx={{display: 'flex'}}>
                                                     <Avatar
-                                                        src={user.profile_image}
+                                                        src={user.profile_image_url || user.profile_image}
                                                         alt={user.name || 'Not assigned'}
                                                         sx={{
                                                             borderRadius: '50%',

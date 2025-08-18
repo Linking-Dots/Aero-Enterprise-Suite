@@ -179,10 +179,12 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                                 <Box className="flex items-start justify-between">
                                     <Box className="flex items-center gap-2 flex-1">
                                         <Avatar 
-                                            src={user.profile_image} 
-                                            alt={user.name}
+                                            src={user.profile_image_url || user.profile_image} 
+                                            name={user.name}
+                                            isBordered
                                             size="sm"
-                                            fallback={<UserIcon className="w-4 h-4" />}
+                                            
+                                            showFallback
                                         />
                                         <Box className="flex-1 min-w-0">                                            <Typography 
                                                 variant="body2" 

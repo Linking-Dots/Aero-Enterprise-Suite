@@ -156,7 +156,7 @@ const LettersTable = ({ allData, setData, users, loading, handleClickOpen, openM
                                         key={user.id}
                                         name={user.name}
                                         avatarProps={{
-                                            src: user.profile_photo_url,
+                                            src: user.profile_image_url || user.profile_image || user.profile_photo_url,
                                             size: "sm"
                                         }}
                                     />
@@ -169,7 +169,7 @@ const LettersTable = ({ allData, setData, users, loading, handleClickOpen, openM
                                 <User
                                     name={user.name}
                                     avatarProps={{
-                                        src: user.profile_photo_url,
+                                        src: user.profile_image_url || user.profile_image || user.profile_photo_url,
                                         size: "sm"
                                     }}
                                 />

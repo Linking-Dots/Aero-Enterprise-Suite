@@ -32,7 +32,7 @@ const GlassCard = forwardRef(({
             border: theme.palette.mode === 'dark'
               ? '1px solid rgba(255, 255, 255, 0.1)'
               : '1px solid rgba(255, 255, 255, 0.6)',
-            borderRadius: 2,
+            borderRadius: 1,
             transition: 'all 0.3s ease-in-out',
             overflow: 'hidden',
             isolation: 'isolate',

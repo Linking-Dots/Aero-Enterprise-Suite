@@ -51,7 +51,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
     const [hover, setHover] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(user?.profile_image || null);
+    const [selectedImage, setSelectedImage] = useState(user?.profile_image_url || user?.profile_image || null);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [allReportTo, setAllReportTo] = useState(allUsers);
 
@@ -59,8 +59,8 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
 
     // Initialize selected image if user has profile image
     useEffect(() => {
-        if (user?.profile_image) {
-            setSelectedImage(user.profile_image);
+        if (user?.profile_image_url || user?.profile_image) {
+            setSelectedImage(user.profile_image_url || user.profile_image);
         }
     }, [user]);
 

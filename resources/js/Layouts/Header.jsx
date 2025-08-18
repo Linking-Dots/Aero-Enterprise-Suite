@@ -19,6 +19,7 @@ import {
 
 } from "@heroui/react";
 import GlassDropdown from '@/Components/GlassDropdown';
+import ProfileAvatar from '@/Components/ProfileAvatar';
 import {
   Bars3Icon,
   ChevronDownIcon,
@@ -734,23 +735,15 @@ const Header = React.memo(({
         <div className="relative">
           <Avatar
             size={avatarSize}
-            src={auth.user.profile_image}
-            fallback={
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                {auth.user.first_name?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-            }
+            src={auth.user.profile_image_url || auth.user.profile_image}
+            name={auth.user.name}
             className={`
               ring-2 ring-white/20 transition-all duration-300 ease-out
               ${isHovered ? 'ring-white/40 scale-105' : ''}
               ${isPressed ? 'scale-95' : ''}
               group-hover:shadow-lg group-hover:shadow-blue-500/20
             `}
-            classNames={{
-              base: "shrink-0",
-              img: "object-cover",
-              fallback: "bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold"
-            }}
+            radius='sm'
           />
           
           {/* Online indicator */}
@@ -832,14 +825,10 @@ const Header = React.memo(({
             
             {/* Avatar with fallback */}
             <div className="relative">
-              <Avatar
+              <ProfileAvatar
                 size="md"
-                src={auth.user.profile_image}
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-500 to-purple-600 text-white font-bold text-sm">
-                    {auth.user.name}
-                  </div>
-                }
+                src={auth.user.profile_image_url || auth.user.profile_image}
+                name={auth.user.name}
                 className="ring-2 ring-pink-400/40 shadow-md"
               />
 
