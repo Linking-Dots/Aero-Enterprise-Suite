@@ -21,7 +21,9 @@ import Breadcrumb from "@/Components/Breadcrumb.jsx";
 import BottomNav from "@/Layouts/BottomNav.jsx";
 import SessionExpiredModal from '@/Components/SessionExpiredModal.jsx';
 import ThemeSettingDrawer from "@/Components/ThemeSettingDrawer.jsx";
+import UpdateNotification from '@/Components/UpdateNotification.jsx';
 import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
+import { useVersionManager } from '@/hooks/useVersionManager.js';
 
 import axios from 'axios';
 
@@ -33,7 +35,17 @@ function App({ children }) {
     // ===== STATE MANAGEMENT =====
     const [sessionExpired, setSessionExpired] = useState(false);
     const [scrolled, setScrolled] = useState(false); // Track scroll position for shadow effect
+    const [isUpdating, setIsUpdating] = useState(false);
     let { auth, app, url, csrfToken } = usePage().props;
+    
+    // Initialize version manager
+    const {
+        currentVersion,
+        isUpdateAvailable,
+        isChecking,
+        forceUpdate,
+        dismissUpdate
+    } = useVersionManager();
     
     // Memoize auth to prevent unnecessary re-renders
     const memoizedAuth = useMemo(() => ({
@@ -138,6 +150,17 @@ function App({ children }) {
             return newValue;
         });
     }, []);
+
+    // Handle app update
+    const handleUpdate = useCallback(async () => {
+        setIsUpdating(true);
+        try {
+            await forceUpdate();
+        } catch (error) {
+            console.error('Update failed:', error);
+            setIsUpdating(false);
+        }
+    }, [forceUpdate]);
 
   
     // ===== INITIALIZATION EFFECTS =====
@@ -349,6 +372,15 @@ function App({ children }) {
     return (
         <ThemeProvider theme={theme}>
             <HeroUIProvider>
+                {/* Version Update Notification */}
+                <UpdateNotification
+                    isVisible={isUpdateAvailable}
+                    onUpdate={handleUpdate}
+                    onDismiss={dismissUpdate}
+                    isUpdating={isUpdating}
+                    version={currentVersion}
+                />
+                
                 {/* Global modals and overlays */}
                 {sessionExpired && (
                     <SessionExpiredModal setSessionExpired={setSessionExpired}/>

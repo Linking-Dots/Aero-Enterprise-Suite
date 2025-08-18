@@ -6,10 +6,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\SystemMonitoringController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\VersionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+// Version check endpoints (no auth required for PWA functionality)
+Route::get('/version', [VersionController::class, 'current'])->name('api.version.current');
+Route::post('/version/check', [VersionController::class, 'check'])->name('api.version.check');
 
 // Error logging endpoint
 Route::post('/log-error', function (Request $request) {

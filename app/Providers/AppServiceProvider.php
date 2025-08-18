@@ -11,6 +11,7 @@ use App\Repositories\Contracts\CompanySettingRepositoryInterface;
 use App\Repositories\Eloquent\CompanySettingRepository;
 use App\Repositories\Contracts\AttendanceSettingRepositoryInterface;
 use App\Repositories\Eloquent\AttendanceSettingRepository;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Share application version with all Inertia responses
+        Inertia::share([
+            'app' => [
+                'version' => config('app.version'),
+                'name' => config('app.name'),
+            ],
+        ]);
 
         Validator::extend('custom_location', function ($attribute, $value, $parameters, $validator) {
             // Regex for validating chainage format with optional text afterwards
