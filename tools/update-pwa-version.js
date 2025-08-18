@@ -1,5 +1,10 @@
-const fs = import('fs');
-const path = import('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module equivalents for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Get version from package.json or environment variable
 const getVersion = () => {
@@ -63,8 +68,12 @@ const updateManifest = () => {
     }
 };
 
-// Main execution
-if (require.main === module) {
+// Main execution - ES module equivalent of require.main === module
+// Convert Windows path to file URL format for comparison
+const scriptPath = path.resolve(process.argv[1]);
+const scriptUrl = `file:///${scriptPath.replace(/\\/g, '/')}`;
+
+if (import.meta.url === scriptUrl) {
     console.log('🔄 Updating PWA assets with version information...');
     
     const swUpdated = updateServiceWorkerVersion();
@@ -79,7 +88,8 @@ if (require.main === module) {
     }
 }
 
-module.exports = {
+// ES module exports
+export {
     updateServiceWorkerVersion,
     updateManifest,
     getVersion

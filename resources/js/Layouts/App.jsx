@@ -25,6 +25,9 @@ import UpdateNotification from '@/Components/UpdateNotification.jsx';
 import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
 import { useVersionManager } from '@/hooks/useVersionManager.js';
 
+// Import service worker manager to trigger registration
+import '@/utils/serviceWorkerManager.js';
+
 import axios from 'axios';
 
 /**
@@ -36,7 +39,7 @@ function App({ children }) {
     const [sessionExpired, setSessionExpired] = useState(false);
     const [scrolled, setScrolled] = useState(false); // Track scroll position for shadow effect
     const [isUpdating, setIsUpdating] = useState(false);
-    let { auth, app, url, csrfToken } = usePage().props;
+    let { auth, app, url } = usePage().props;
     
     // Initialize version manager
     const {
@@ -262,13 +265,7 @@ function App({ children }) {
         };
     }, [memoizedAuth?.user?.id]);
         
-    // CSRF token setup (persistent)
-    useEffect(() => {
-        if (csrfToken) {
-            document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', csrfToken);
-            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
-        }
-    }, [csrfToken]);
+
 
     // Inertia loading state with throttling (optimized for SPA navigation)
     useEffect(() => {

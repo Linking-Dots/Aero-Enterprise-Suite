@@ -579,6 +579,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::post('/update-fcm-token', [UserController::class, 'updateFcmToken'])->name('updateFcmToken');
 
+// Service worker route for development
+Route::get('/service-worker.js', function () {
+    $filePath = public_path('service-worker.js');
+    if (file_exists($filePath)) {
+        return response()->file($filePath, [
+            'Content-Type' => 'application/javascript',
+            'Service-Worker-Allowed' => '/'
+        ]);
+    }
+    abort(404);
+})->name('service-worker');
+
 // Include all module routes
 require __DIR__ . '/modules.php';
 require __DIR__ . '/compliance.php';

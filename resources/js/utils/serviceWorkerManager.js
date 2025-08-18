@@ -240,8 +240,10 @@ class ServiceWorkerManager {
 // Create singleton instance
 const serviceWorkerManager = new ServiceWorkerManager();
 
-// Auto-register when module loads (if not in development)
-if (process.env.NODE_ENV === 'production') {
+// Auto-register when module loads (in both development and production)
+const shouldRegister = 'serviceWorker' in navigator;
+
+if (shouldRegister) {
     // Register after page load to avoid blocking
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
