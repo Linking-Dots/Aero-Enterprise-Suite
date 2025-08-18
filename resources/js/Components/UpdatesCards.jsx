@@ -154,8 +154,8 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                                                             user && (
                                                                 <Avatar
                                                                     key={idx}
-                                                                    src={user.profile_image}
-                                                                    alt={`${user.name} - on leave`}
+                                                                    src={user.profile_image_url}
+                                                                    name={`${user.name} - on leave`}
                                                                     onClick={(e) => handleClick(e, leave)}
                                                                     className="cursor-pointer hover:scale-110 transition-transform"
                                                                     fallback={<UserIcon className="w-4 h-4" />}
