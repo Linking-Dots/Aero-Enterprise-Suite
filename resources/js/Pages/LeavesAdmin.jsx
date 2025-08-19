@@ -624,18 +624,40 @@ const LeavesAdmin = ({ title, allUsers }) => {
                 break;
             }
 
-            case 'bulk_add':
-            case 'single_add': {
+            case 'bulk_add': {
                 const addedCount = responseData.added_count || 1;
                 const newTotal = totalRows + addedCount;
                 
-                // For bulk additions or if we're on the last page, refresh data
-                if (operation === 'bulk_add' || (leaves.length < itemsPerPage)) {
-                    setTotalRows(newTotal);
-                    updatePaginationMetadata(newTotal);
-                    fetchLeavesData(currentPage, itemsPerPage);
+                // For bulk additions, always refresh data to ensure proper filtering
+                setTotalRows(newTotal);
+                updatePaginationMetadata(newTotal);
+                fetchLeavesData(currentPage, itemsPerPage);
+                break;
+            }
+            
+            case 'single_add': {
+                const addedCount = responseData.added_count || 1;
+                const newTotal = totalRows + addedCount;
+                const newLeave = responseData.leave;
+                
+                // Check if the new leave matches current filters
+                const matchesCurrentFilters = newLeave && leaveMatchesFilters(newLeave);
+                
+                if (matchesCurrentFilters) {
+                    // If leave matches filters and we're on the last page with room, add it directly
+                    if (leaves.length < itemsPerPage) {
+                        const updatedLeaves = sortLeavesByFromDate([...leaves, newLeave]);
+                        setLeaves(updatedLeaves);
+                        setTotalRows(newTotal);
+                        updatePaginationMetadata(newTotal);
+                    } else {
+                        // If page is full, refresh to maintain proper pagination
+                        setTotalRows(newTotal);
+                        updatePaginationMetadata(newTotal);
+                        fetchLeavesData(currentPage, itemsPerPage);
+                    }
                 } else {
-                    // For single additions on full pages, just update total count
+                    // If leave doesn't match filters, just update total count without adding to view
                     setTotalRows(newTotal);
                     updatePaginationMetadata(newTotal);
                 }
@@ -663,7 +685,9 @@ const LeavesAdmin = ({ title, allUsers }) => {
         fetchLeavesStats, 
         updatePaginationMetadata, 
         fetchLeavesData, 
-        fetchAdditionalItemsIfNeeded
+        fetchAdditionalItemsIfNeeded,
+        leaveMatchesFilters,
+        sortLeavesByFromDate
     ]);
 
     // Optimistic UI for add/edit
@@ -780,6 +804,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                     setLeavesData={setLeavesData}
                     currentLeave={null}
                     allUsers={allUsers}
+                    departments={departments}
                     setTotalRows={setTotalRows}
                     setLastPage={setLastPage}
                     setLeaves={setLeaves}
@@ -799,6 +824,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                     setLeavesData={setLeavesData}
                     currentLeave={currentLeave}
                     allUsers={allUsers}
+                    departments={departments}
                     setTotalRows={setTotalRows}
                     setLastPage={setLastPage}
                     setLeaves={setLeaves}
@@ -833,6 +859,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                         addBulkLeavesOptimized(responseData);
                     }}
                     allUsers={allUsers}
+                    departments={departments}
                     leavesData={leavesData}
                     isAdmin={true}
                 />
@@ -1005,7 +1032,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                 )}
                                 {/* Table Section */}
                                 <div className="min-h-96">
-                                    <Typography variant="h6" className="mb-4 flex items-center gap-2">
+                                    <Typography variant="subtitle1" component="div" className="mb-4 flex items-center gap-2 font-semibold">
                                         <ChartBarIcon className="w-5 h-5" />
                                         Leave Requests Management
                                     </Typography>
@@ -1051,7 +1078,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                         <Card className="bg-white/10 backdrop-blur-md border-white/20">
                                             <CardBody className="text-center py-12">
                                                 <ExclamationTriangleIcon className="w-16 h-16 text-warning-500 mx-auto mb-4" />
-                                                <Typography variant="h6" className="mb-2">
+                                                <Typography variant="subtitle1" component="div" className="mb-2 font-semibold">
                                                     No Data Found
                                                 </Typography>
                                                 <Typography color="textSecondary">
@@ -1063,7 +1090,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                         <Card className="bg-white/10 backdrop-blur-md border-white/20">
                                             <CardBody className="text-center py-12">
                                                 <CalendarIcon className="w-16 h-16 text-default-400 mx-auto mb-4" />
-                                                <Typography variant="h6" className="mb-2">
+                                                <Typography variant="subtitle1" component="div" className="mb-2 font-semibold">
                                                     No Leave Records Found
                                                 </Typography>
                                                 <Typography color="textSecondary">

@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from "react";
 import {
-    Box,
     Typography,
-    IconButton,
     Stack,
     useMediaQuery,
     Tooltip as MuiTooltip,
@@ -302,8 +300,8 @@ const LeaveEmployeeTable = React.forwardRef(({
         return (
             <GlassCard className="mb-2" shadow="sm">
                 <CardContent className="p-3">
-                    <Box className="flex items-start justify-between mb-3">
-                        <Box className="flex items-center gap-3 flex-1">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1">
                             {isAdminView && (
                                 <User
                         avatarProps={{
@@ -336,15 +334,20 @@ const LeaveEmployeeTable = React.forwardRef(({
                         }
                     />
                             )}
-                        </Box>
-                        <Box className="flex items-center gap-2">
+                        </div>
+                        <div className="flex items-center gap-2">
                             {getStatusChip(leave.status)}
                             {(canEditLeaves || canDeleteLeaves) && ( // Check specific permissions for dropdown
                                 <Dropdown>
                                     <DropdownTrigger>
-                                        <IconButton size="small">
+                                        <Button
+                                            isIconOnly
+                                            size="sm"
+                                            variant="light"
+                                            className="min-w-8 h-8"
+                                        >
                                             <EllipsisVerticalIcon className="w-4 h-4" />
-                                        </IconButton>
+                                        </Button>
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Leave actions">
                                         {canEditLeaves && (
@@ -374,20 +377,20 @@ const LeaveEmployeeTable = React.forwardRef(({
                                     </DropdownMenu>
                                 </Dropdown>
                             )}
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
 
                     <Divider className="my-3" />
 
                     <Stack spacing={2}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <DocumentTextIcon className="w-4 h-4 text-primary" />
                             <Typography variant="body2" fontWeight="medium">
                                 {leave.leave_type}
                             </Typography>
-                        </Box>
+                        </div>
 
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <CalendarDaysIcon className="w-4 h-4 text-default-500" />
                             <Typography variant="body2" color="textSecondary">
                                 {formatDate(leave.from_date)} - {formatDate(leave.to_date)}
@@ -395,22 +398,22 @@ const LeaveEmployeeTable = React.forwardRef(({
                             <Chip size="sm" variant="bordered" color="default">
                                 {duration}
                             </Chip>
-                        </Box>
+                        </div>
 
                         {leave.reason && (
-                            <Box className="flex items-start gap-2">
+                            <div className="flex items-start gap-2">
                                 <ClockIconOutline className="w-4 h-4 text-default-500 mt-0.5" />
                                 <Typography variant="body2" color="textSecondary" className="flex-1">
                                     {leave.reason}
                                 </Typography>
-                            </Box>
+                            </div>
                         )}
                     </Stack>
 
                     {isAdminView && canApproveLeaves && (
                         <>
                             <Divider className="my-3" />
-                            <Box className="flex gap-2">
+                            <div className="flex gap-2">
                                 {['Approved', 'Declined'].map((status) => (
                                     <Button
                                         key={status}
@@ -435,7 +438,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                                         {status}
                                     </Button>
                                 ))}
-                            </Box>
+                            </div>
                         </>
                     )}
                 </CardContent>
@@ -487,12 +490,12 @@ const LeaveEmployeeTable = React.forwardRef(({
             case "leave_type":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             {getLeaveTypeIcon(leave.leave_type)}
                             <Typography variant="body2" className="text-sm font-medium capitalize">
                                 {leave.leave_type}
                             </Typography>
-                        </Box>
+                        </div>
                     </TableCell>
                 );
             case "from_date":
@@ -501,9 +504,9 @@ const LeaveEmployeeTable = React.forwardRef(({
  
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <CalendarDaysIcon className="w-3 h-3 text-default-500" />
-                            <Box>
+                            <div>
                                 <Typography variant="body2" className="text-sm">
                                     {formatDate(leave[columnKey])}
                                 </Typography>
@@ -512,15 +515,15 @@ const LeaveEmployeeTable = React.forwardRef(({
                                         {getLeaveDuration(leave.from_date, leave.to_date)}
                                     </Typography>
                                 )}
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );
 
             case "status":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {getStatusChip(leave.status)}
                             {isAdminView && canApproveLeaves && (
                                 <Dropdown>
@@ -530,6 +533,8 @@ const LeaveEmployeeTable = React.forwardRef(({
                                             size="sm" 
                                             variant="light"
                                             isDisabled={updatingLeave && updatingLeave.startsWith(`${leave.id}-`)}
+                                            onPress={() => {}} // Empty function for dropdown trigger
+                                            className="min-w-8 h-8"
                                         >
                                             <EllipsisVerticalIcon className="w-4 h-4" />
                                         </Button>
@@ -554,7 +559,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                                     </DropdownMenu>
                                 </Dropdown>
                             )}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
@@ -577,49 +582,46 @@ const LeaveEmployeeTable = React.forwardRef(({
           
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             {canEditLeaves && (
                                 <Tooltip content="Edit Leave">
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => {
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        color="primary"
+                                        isDisabled={updatingLeave && updatingLeave.startsWith(`${leave.id}-`)}
+                                        onPress={() => {
                                             if (updatingLeave && updatingLeave.startsWith(`${leave.id}-`)) return;
-                                       
                                             setCurrentLeave(leave);
                                             openModal("edit_leave");
                                         }}
-                                        sx={{
-                                            background: alpha(theme.palette.primary.main, 0.1),
-                                            '&:hover': {
-                                                background: alpha(theme.palette.primary.main, 0.2)
-                                            }
-                                        }}
+                                        className="min-w-8 h-8"
                                     >
                                         <PencilIcon className="w-4 h-4" />
-                                    </IconButton>
+                                    </Button>
                                 </Tooltip>
                             )}
                             {canDeleteLeaves && (
                                 <Tooltip content="Delete Leave" color="danger">
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => {
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        color="danger"
+                                        isDisabled={updatingLeave && updatingLeave.startsWith(`${leave.id}-`)}
+                                        onPress={() => {
                                             if (updatingLeave && updatingLeave.startsWith(`${leave.id}-`)) return;
                                             setCurrentLeave(leave);
                                             handleClickOpen(leave.id, "delete_leave");
                                         }}
-                                        sx={{
-                                            background: alpha(theme.palette.error.main, 0.1),
-                                            '&:hover': {
-                                                background: alpha(theme.palette.error.main, 0.2)
-                                            }
-                                        }}
+                                        className="min-w-8 h-8"
                                     >
                                         <TrashIcon className="w-4 h-4" />
-                                    </IconButton>
+                                    </Button>
                                 </Tooltip>
                             )}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
@@ -640,7 +642,7 @@ const LeaveEmployeeTable = React.forwardRef(({
 
     if (isMobile) {
         return (
-            <Box className="space-y-4">
+            <div className="space-y-4">
                 <ScrollShadow className="max-h-[70vh]">
                     {leaves.map((leave) => (
                         <MobileLeaveCard
@@ -659,7 +661,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                     ))}
                 </ScrollShadow>
                 {totalRows > perPage && (
-                    <Box className="flex justify-center pt-4">
+                    <div className="flex justify-center pt-4">
                         <Pagination
                             showControls
                             showShadow
@@ -670,14 +672,14 @@ const LeaveEmployeeTable = React.forwardRef(({
                             onChange={handlePageChange}
                             size="sm"
                         />
-                    </Box>
+                    </div>
                 )}
-            </Box>
+            </div>
         );
     }
 
     return (
-        <Box sx={{ maxHeight: "84vh", overflowY: "auto" }}>
+        <div className="max-h-[84vh] overflow-y-auto">
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
@@ -690,6 +692,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                     isHeaderSticky
                     removeWrapper
                     aria-label="Leave Management Table"
+                    disabledBehavior="selection"
                     classNames={{
                         wrapper: "min-h-[200px]",
                         table: "min-h-[300px]",
@@ -707,17 +710,17 @@ const LeaveEmployeeTable = React.forwardRef(({
                                 align={column.uid === "actions" ? "center" : "start"}
                                 className="bg-default-100/80 backdrop-blur-md"
                             >
-                                <Box className="flex items-center gap-1">
+                                <div className="flex items-center gap-1">
                                     {column.icon && <column.icon className="w-3 h-3" />}
                                     <span className="text-xs font-semibold">{column.name}</span>
-                                </Box>
+                                </div>
                             </TableColumn>
                         )}
                     </TableHeader>
                     <TableBody 
                         items={leaves}
                         emptyContent={
-                            <Box className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <CalendarDaysIcon className="w-12 h-12 text-default-300 mb-4" />
                                 <Typography variant="h6" color="textSecondary">
                                     No leaves found
@@ -725,7 +728,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                                 <Typography variant="body2" color="textSecondary">
                                     {employee ? `No leaves found for "${employee}"` : "No leave requests for the selected period"}
                                 </Typography>
-                            </Box>
+                            </div>
                         }
                     >
                         {(leave) => (
@@ -739,7 +742,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                 </Table>
             </ScrollShadow>
             {totalRows > perPage && (
-                <Box className="py-4 flex justify-center">
+                <div className="py-4 flex justify-center">
                     <Pagination
                         showControls
                         showShadow
@@ -753,9 +756,9 @@ const LeaveEmployeeTable = React.forwardRef(({
                     <div className="ml-4 text-xs text-gray-500">
                         Page {currentPage} of {lastPage} (Total: {totalRows} records)
                     </div>
-                </Box>
+                </div>
             )}
-        </Box>
+        </div>
     );
 });
 

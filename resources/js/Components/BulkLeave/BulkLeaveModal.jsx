@@ -30,6 +30,7 @@ import { usePage } from '@inertiajs/react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import GlassDialog from "@/Components/GlassDialog.jsx";
+import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
 import BulkCalendar from './BulkCalendar';
 import BulkValidationPreview from './BulkValidationPreview';
 
@@ -38,6 +39,7 @@ const BulkLeaveModal = ({
     onClose, 
     onSuccess,
     allUsers = [],
+    departments = [],
     leavesData = { leaveTypes: [], leaveCountsByUser: {} },
     isAdmin = false,
     existingLeaves = [],
@@ -48,7 +50,8 @@ const BulkLeaveModal = ({
     
     // Form state
     const [selectedDates, setSelectedDates] = useState([]);
-    const [selectedUserId, setSelectedUserId] = useState(auth?.user?.id || '');
+    const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
+    const [selectedUserId, setSelectedUserId] = useState(null);
     const [selectedLeaveType, setSelectedLeaveType] = useState('');
     const [reason, setReason] = useState('');
     const [allowPartialSuccess, setAllowPartialSuccess] = useState(false);
@@ -121,14 +124,36 @@ const BulkLeaveModal = ({
     useEffect(() => {
         if (open && selectedUserId && isAdmin) {
             fetchUserLeaveTypes(selectedUserId);
+        } else if (open && selectedUserId && !isAdmin) {
+            // For non-admin users, also fetch their leave types
+            fetchUserLeaveTypes(selectedUserId);
         }
     }, [selectedUserId, open, isAdmin, fetchUserLeaveTypes]);
+
+    // Initialize form when modal opens for current user
+    useEffect(() => {
+        if (open && auth?.user) {
+            // Auto-select current user's department and set user
+            const currentUser = allUsers?.find(user => user.id === auth.user.id);
+            if (currentUser && currentUser.department_id && !isAdmin) {
+                setSelectedDepartmentId(currentUser.department_id);
+                setSelectedUserId(auth.user.id);
+            } else if (isAdmin && !selectedDepartmentId && !selectedUserId) {
+                // For admin, set to current user as default
+                if (currentUser && currentUser.department_id) {
+                    setSelectedDepartmentId(currentUser.department_id);
+                    setSelectedUserId(auth.user.id);
+                }
+            }
+        }
+    }, [open, auth?.user, allUsers, isAdmin, selectedDepartmentId, selectedUserId]);
 
     // Reset form when modal closes
     useEffect(() => {
         if (!open) {
             setSelectedDates([]);
-            setSelectedUserId(auth?.user?.id || '');
+            setSelectedDepartmentId(null);
+            setSelectedUserId(auth?.user?.id || null);
             setSelectedLeaveType('');
             setReason('');
             setAllowPartialSuccess(false);
@@ -458,54 +483,29 @@ const BulkLeaveModal = ({
                                 </Typography>
                                 
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    {/* User Selection (Admin only) */}
+                                    {/* Department & User Selection (Admin only) */}
                                     {isAdmin && allUsers.length > 0 && (
-                                        <FormControl fullWidth error={Boolean(errors.user_id)}>
-                                            <InputLabel id="bulk-employee-label">Employee</InputLabel>
-                                            <Select
-                                                labelId="bulk-employee-label"
-                                                value={selectedUserId || ""}
-                                                onChange={(e) => {
-                                                    setSelectedUserId(e.target.value);
-                                                    setSelectedLeaveType(''); // Reset leave type when user changes
-                                                    setHasValidated(false);
-                                                    setUserLeaveTypes([]); // Clear current user leave types
-                                                }}
-                                                label="Employee"
-                                                disabled={isSubmitting || isValidating}
-                                                MenuProps={{
-                                                    PaperProps: {
-                                                        sx: {
-                                                            backdropFilter: 'blur(16px) saturate(200%)',
-                                                            background: theme.glassCard.background,
-                                                            border: theme.glassCard.border,
-                                                            borderRadius: 2,
-                                                            boxShadow: theme.glassCard.boxShadow,
-                                                            maxHeight: 300,
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                <MenuItem value="" disabled>Please select employee</MenuItem>
-                                                {allUsers.map(user => (
-                                                    <MenuItem key={user.id} value={user.id}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <Avatar
-                                                                showFallback
-                                                                src={user.profile_image_url || user.profile_image}
-                                                                name={user.name || 'Not assigned'}
-                                                                sx={{
-                                                                    width: 24,
-                                                                    height: 24,
-                                                                }}
-                                                            />
-                                                            {user.name}
-                                                        </Box>
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            <FormHelperText>{errors.user_id}</FormHelperText>
-                                        </FormControl>
+                                        <DepartmentEmployeeSelector
+                                            selectedDepartmentId={selectedDepartmentId}
+                                            selectedEmployeeId={selectedUserId}
+                                            onDepartmentChange={setSelectedDepartmentId}
+                                            onEmployeeChange={(empId) => {
+                                                setSelectedUserId(empId);
+                                                setSelectedLeaveType(''); // Reset leave type when user changes
+                                                setHasValidated(false);
+                                                setUserLeaveTypes([]); // Clear current user leave types
+                                            }}
+                                            allUsers={allUsers}
+                                            departments={departments}
+                                            showSearch={true}
+                                            error={errors}
+                                            theme={theme}
+                                            variant="outlined"
+                                            showAllOption={false}
+                                            autoSelectFirstDepartment={false} // Let our initialization effect handle this
+                                            required={true}
+                                            disabled={isSubmitting || isValidating}
+                                        />
                                     )}
 
                                     {/* Leave Type Selection */}

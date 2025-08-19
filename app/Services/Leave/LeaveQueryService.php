@@ -43,6 +43,7 @@ class LeaveQueryService
 
         $leavesQuery = Leave::with('employee')
             ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
+            ->join('users', 'leaves.user_id', '=', 'users.id') // Ensure user exists
             ->select('leaves.*', 'leave_settings.type as leave_type');
 
         // If a specific user_id is provided, filter by that user
@@ -278,13 +279,15 @@ class LeaveQueryService
         if ($calculateForAllUsers) {
             // Calculate for all users (admin view)
             $allLeaves = Leave::with('leaveSetting')
-                ->whereYear('from_date', $currentYear)
+                ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
+                ->whereYear('leaves.from_date', $currentYear)
                 ->get();
         } else {
             // Calculate for specific user only
             $allLeaves = Leave::with('leaveSetting')
-                ->where('user_id', $targetUserId)
-                ->whereYear('from_date', $currentYear)
+                ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
+                ->where('leaves.user_id', $targetUserId)
+                ->whereYear('leaves.from_date', $currentYear)
                 ->get();
         }
 
@@ -293,6 +296,11 @@ class LeaveQueryService
         // Leave counts aggregation
         $leaveCountsByUser = [];
         foreach ($allLeaves as $leave) {
+            // Skip leaves without valid leave settings
+            if (!$leave->leaveSetting) {
+                continue;
+            }
+            
             $type = $leave->leaveSetting->type ?? 'Unknown';
             $userId = $leave->user_id;
             $leaveCountsByUser[$userId][$type] = ($leaveCountsByUser[$userId][$type] ?? 0) + $leave->no_of_days;
@@ -351,6 +359,7 @@ class LeaveQueryService
 
         // Use join like in the main query for consistency
         $query = Leave::join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
+            ->join('users', 'leaves.user_id', '=', 'users.id') // Ensure user exists
             ->select('leaves.*', 'leave_settings.type as leave_type_name');
 
         // Base filtering

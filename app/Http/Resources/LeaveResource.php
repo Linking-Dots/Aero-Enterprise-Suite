@@ -29,7 +29,7 @@ class LeaveResource extends JsonResource
             'updated_at' => $this->updated_at,
             
             // Include employee data when available
-            'employee' => $this->when($this->relationLoaded('employee'), function () {
+            'employee' => $this->when($this->relationLoaded('employee') && $this->employee, function () {
                 return [
                     'id' => $this->employee->id,
                     'name' => $this->employee->name,
@@ -40,7 +40,7 @@ class LeaveResource extends JsonResource
             }),
             
             // Include leave setting data when available
-            'leave_setting' => $this->when($this->relationLoaded('leaveSetting'), function () {
+            'leave_setting' => $this->when($this->relationLoaded('leaveSetting') && $this->leaveSetting, function () {
                 return [
                     'id' => $this->leaveSetting->id,
                     'type' => $this->leaveSetting->type,

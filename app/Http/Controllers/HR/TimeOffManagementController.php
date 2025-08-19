@@ -91,8 +91,15 @@ class TimeOffManagementController extends Controller
 
         $leaves = Leave::where('status', 'approved')
                       ->with(['user', 'leaveSetting'])
+                      ->whereHas('user') // Ensure user exists
+                      ->whereHas('leaveSetting') // Ensure leave setting exists
                       ->get()
                       ->map(function ($leave) {
+                          // Additional safety checks
+                          if (!$leave->user || !$leave->leaveSetting) {
+                              return null;
+                          }
+                          
                           return [
                               'id' => 'leave-' . $leave->id,
                               'title' => $leave->user->name . ' - ' . $leave->leaveSetting->type,
@@ -107,7 +114,8 @@ class TimeOffManagementController extends Controller
                                   'reason' => $leave->reason
                               ]
                           ];
-                      });
+                      })
+                      ->filter(); // Remove null entries
 
         $events = $holidays->merge($leaves);
 

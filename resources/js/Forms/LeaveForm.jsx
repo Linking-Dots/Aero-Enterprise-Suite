@@ -23,6 +23,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { useTheme } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
+import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
 import {router, usePage} from "@inertiajs/react";
 import { Inertia } from '@inertiajs/inertia';
 
@@ -33,6 +34,7 @@ const LeaveForm = ({
                        setLeavesData,
                        currentLeave,
                        allUsers,
+                       departments = [],
                        setTotalRows,
                        setLastPage,
                        setLeaves,
@@ -48,6 +50,19 @@ const LeaveForm = ({
     const {auth} = usePage().props;
     const theme = useTheme();
     const [user_id, setUserId] = useState(currentLeave?.user_id || auth.user.id);
+    
+    // Initialize selectedDepartmentId based on currentLeave or user's department
+    const initializeDepartmentId = () => {
+        if (currentLeave?.user_id) {
+            // Find the user from allUsers to get their department
+            const leaveUser = allUsers?.find(user => user.id === currentLeave.user_id);
+            return leaveUser?.department_id || null;
+        }
+        // For new leaves, use the current user's department
+        return auth?.user?.department_id || null;
+    };
+    
+    const [selectedDepartmentId, setSelectedDepartmentId] = useState(initializeDepartmentId());
     // Initialize state variables
     const [leaveTypes, setLeaveTypes] = useState(leavesData?.leaveTypes || []);
     const [leaveCounts, setLeaveCounts] = useState([]);
@@ -138,6 +153,19 @@ const LeaveForm = ({
             }
         }
     }, [leavesData, user_id, currentLeave]);
+
+    // Update department and user ID when currentLeave changes (for edit mode)
+    useEffect(() => {
+        if (currentLeave) {
+            setUserId(currentLeave.user_id);
+            
+            // Find the user from allUsers to get their department
+            const leaveUser = allUsers?.find(user => user.id === currentLeave.user_id);
+            if (leaveUser?.department_id) {
+                setSelectedDepartmentId(leaveUser.department_id);
+            }
+        }
+    }, [currentLeave, allUsers]);
 
     // Update remaining leaves when user or leave type changes
     useEffect(() => {
@@ -346,7 +374,7 @@ const LeaveForm = ({
     return (
         <GlassDialog open={open} onClose={closeModal} fullWidth maxWidth="sm">
             <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h6">{currentLeave ? 'Edit Leave' : 'Add Leave'}</Typography>
+                <Typography variant="h6" component="h2">{currentLeave ? 'Edit Leave' : 'Add Leave'}</Typography>
                 <IconButton
                     onClick={closeModal}
                     sx={{ position: 'absolute', top: 8, right: 16 }}
@@ -461,54 +489,25 @@ const LeaveForm = ({
                                 helperText={errors.remainingLeaves}
                             />
                         </Grid>
-                        {route().current() === 'leaves' &&
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="leave-employee-label">Employee</InputLabel>
-                                    <Select
-                                        variant="outlined"
-                                        fullWidth
-                                        labelId="leave-employee-label"
-                                        value={user_id || "na"}
-                                        error={Boolean(errors.user_id)}
-                                        onChange={(e) => setUserId(e.target.value)}
-                                        label="Employee"
-                                        MenuProps={{
-                                            PaperProps: {
-                                                sx: {
-                                                    backdropFilter: 'blur(16px) saturate(200%)',
-                                                    background: theme.glassCard.background,
-                                                    border: theme.glassCard.border,
-                                                    borderRadius: 2,
-                                                    boxShadow: theme.glassCard.boxShadow,
-                                                },
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem value="na" disabled>Please select</MenuItem>
-                                        {allUsers.map(user => (
-                                            <MenuItem key={user.id} value={user.id}>
-                                                <Box sx={{display: 'flex'}}>
-                                                    <Avatar
-                                                        src={user.profile_image_url || user.profile_image}
-                                                        alt={user.name || 'Not assigned'}
-                                                        sx={{
-                                                            borderRadius: '50%',
-                                                            width: 23,
-                                                            height: 23,
-                                                            display: 'flex',
-                                                            mr: 1,
-                                                        }}
-                                                    />
-                                                    {user.name}
-                                                </Box>
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                    <FormHelperText>{errors.user_id}</FormHelperText>
-                                </FormControl>
+                        {route().current() === 'leaves' && (
+                            <Grid item xs={12}>
+                                <DepartmentEmployeeSelector
+                                    selectedDepartmentId={selectedDepartmentId}
+                                    selectedEmployeeId={user_id}
+                                    onDepartmentChange={setSelectedDepartmentId}
+                                    onEmployeeChange={setUserId}
+                                    allUsers={allUsers}
+                                    departments={departments}
+                                    showSearch={true}
+                                    error={errors}
+                                    theme={theme}
+                                    variant="outlined"
+                                    showAllOption={false}
+                                    autoSelectFirstDepartment={true}
+                                    required={true}
+                                />
                             </Grid>
-                        }
+                        )}
                         <Grid item xs={12}>
                             <TextField
                                 label="Leave Reason"
