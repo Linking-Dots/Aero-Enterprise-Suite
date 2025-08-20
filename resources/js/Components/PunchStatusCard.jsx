@@ -110,6 +110,30 @@ const PunchStatusCard = () => {
         fetchCurrentStatus();
         checkLocationConnectionStatus();
         checkNetworkStatus();
+
+        // Add event listeners for better responsiveness
+        const handleFocus = () => {
+            checkLocationConnectionStatus();
+            checkNetworkStatus();
+        };
+
+        const handleOnline = () => {
+            setConnectionStatus(prev => ({ ...prev, network: true }));
+        };
+
+        const handleOffline = () => {
+            setConnectionStatus(prev => ({ ...prev, network: false }));
+        };
+
+        window.addEventListener('focus', handleFocus);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
     }, []);
 
     const calculateRealtimeWorkTime = (currentTime) => {
@@ -273,8 +297,8 @@ const PunchStatusCard = () => {
                         { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
                     );
                 } else {
-                    // State is 'prompt' - we won't know until user grants/denies
-                    setConnectionStatus(prev => ({ ...prev, location: false }));
+                    // State is 'prompt' - test access which will trigger permission request
+                    testLocationAccess();
                 }
             }).catch(() => {
                 // Fallback if permissions API fails
@@ -295,8 +319,17 @@ const PunchStatusCard = () => {
             (error) => {
                 console.warn('Location permission check failed:', error);
                 setConnectionStatus(prev => ({ ...prev, location: false }));
+                
+                // Don't show toast here during initial check - only during actual punch attempts
+                if (error.code === 1) {
+                    console.log('Location permission denied by user');
+                } else if (error.code === 2) {
+                    console.log('Location position unavailable');
+                } else if (error.code === 3) {
+                    console.log('Location request timeout');
+                }
             },
-            { enableHighAccuracy: false, timeout: 3000, maximumAge: 300000 }
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
         );
     };
 
@@ -854,7 +887,7 @@ const PunchStatusCard = () => {
 
                     {/* Compact Connection Status */}
                     <Stack direction="row" spacing={0.5} justifyContent="center">
-                        <Tooltip title={`Location: ${connectionStatus.location ? 'Enabled and working' : 'Required - Click to enable location access'}`}>
+                        <Tooltip title={`Location: ${connectionStatus.location ? 'Enabled and working' : 'Required - Click to request location access'}`}>
                             <Chip 
                                 size="small" 
                                 icon={<GpsFixed sx={{ fontSize: 14 }} />}
@@ -864,16 +897,24 @@ const PunchStatusCard = () => {
                                 sx={{ 
                                     fontSize: '0.7rem', 
                                     height: 24,
-                                    cursor: connectionStatus.location ? 'default' : 'pointer'
+                                    cursor: 'pointer'
                                 }}
-                                onClick={!connectionStatus.location ? () => {
-                                    toast.info('Please enable location permissions:\n\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Refresh the page', {
-                                        style: {
-                                            whiteSpace: 'pre-line'
-                                        },
-                                        duration: 6000
-                                    });
-                                } : undefined}
+                                onClick={() => {
+                                    if (!connectionStatus.location) {
+                                        // Try to request location permission
+                                        testLocationAccess();
+                                        toast.info('Please allow location access when prompted.\n\nIf no prompt appears:\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Try again', {
+                                            style: {
+                                                whiteSpace: 'pre-line'
+                                            },
+                                            duration: 6000
+                                        });
+                                    } else {
+                                        // Refresh location status
+                                        checkLocationConnectionStatus();
+                                        toast.success('Location access is working correctly!');
+                                    }
+                                }}
                             />
                         </Tooltip>
                         <Tooltip title={`Network: ${connectionStatus.network ? 'Online' : 'Offline'}`}>
