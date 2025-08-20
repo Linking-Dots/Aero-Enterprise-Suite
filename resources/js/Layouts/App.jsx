@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Box, CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import { usePage } from "@inertiajs/react";
 import useTheme from "@/theme.jsx";
@@ -23,7 +23,7 @@ import SessionExpiredModal from '@/Components/SessionExpiredModal.jsx';
 import ThemeSettingDrawer from "@/Components/ThemeSettingDrawer.jsx";
 import UpdateNotification from '@/Components/UpdateNotification.jsx';
 import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
-import { useVersionManager } from '@/hooks/useVersionManager.js';
+import { useVersionManager } from '@/Hooks/useVersionManager.js';
 
 // Import service worker manager to trigger registration
 import '@/utils/serviceWorkerManager.js';
@@ -31,10 +31,10 @@ import '@/utils/serviceWorkerManager.js';
 import axios from 'axios';
 
 /**
- * Enhanced App Layout Component
- * Optimized for fresh data loading with minimal caching
+ * Enhanced App Layout Component with selective memoization
+ * Layout preferences are memoized for performance, but page data is always fresh
  */
-function App({ children }) {
+const App = React.memo(({ children }) => {
     // ===== STATE MANAGEMENT =====
     const [sessionExpired, setSessionExpired] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -108,34 +108,39 @@ function App({ children }) {
         return isSettingsPage ? getSettingsPages(permissions, currentAuth) : getPages(permissions, currentAuth);
     })();
 
-    // Theme and media query
-    const theme = useTheme(darkMode, themeColor);
+    // ===== LAYOUT PERFORMANCE OPTIMIZATION (Selective Memoization) =====
+    // Memoize layout preferences for performance, but keep data fresh
+    const theme = useMemo(() => 
+        useTheme(darkMode, themeColor), 
+        [darkMode, themeColor]
+    );
+    
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    // ===== SIMPLE TOGGLE HANDLERS (No useCallback) =====
-    const toggleDarkMode = () => {
+    // ===== LAYOUT TOGGLE HANDLERS (Memoized for Performance) =====
+    const toggleDarkMode = useCallback(() => {
         setDarkMode(prev => {
             const newValue = !prev;
             localStorage.setItem('darkMode', newValue);
             return newValue;
         });
-    };
+    }, []);
     
-    const toggleThemeColor = (color) => {
+    const toggleThemeColor = useCallback((color) => {
         setThemeColor(color);
         localStorage.setItem('themeColor', JSON.stringify(color));
-    };
+    }, []);
     
-    const toggleThemeDrawer = () => {
+    const toggleThemeDrawer = useCallback(() => {
         setThemeDrawerOpen(prev => !prev);
-    };
+    }, []);
     
-    const toggleSideBar = () => {
+    const toggleSideBar = useCallback(() => {
         setSideBarOpen(prev => !prev);
-    };
+    }, []);
 
-    // Handle app update
-    const handleUpdate = async () => {
+    // Handle app update (memoized for layout performance)
+    const handleUpdate = useCallback(async () => {
         setIsUpdating(true);
         try {
             await forceUpdate();
@@ -143,7 +148,7 @@ function App({ children }) {
             console.error('Update failed:', error);
             setIsUpdating(false);
         }
-    };
+    }, [forceUpdate]);
 
     // ===== INITIALIZATION EFFECTS =====
     // Initialize Firebase only when user is authenticated (one-time setup)
@@ -533,7 +538,10 @@ function App({ children }) {
             </HeroUIProvider>
         </ThemeProvider>
     );
-}
+});
 
-// Export without memo to ensure fresh rendering
+// Add display name for debugging
+App.displayName = 'App';
+
+// Export memoized layout component for layout performance
 export default App;

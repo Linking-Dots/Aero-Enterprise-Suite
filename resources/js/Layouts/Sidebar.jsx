@@ -56,22 +56,46 @@ const highlightSearchMatch = (text, searchTerm) => {
   });
 };
 
-// Custom hook for sidebar state management - simplified without localStorage persistence
+// Custom hook for sidebar layout state management with selective localStorage persistence
 const useSidebarState = () => {
-  const [openSubMenus, setOpenSubMenus] = useState(new Set());
+  // Initialize sidebar layout state from localStorage for UI persistence only
+  const [openSubMenus, setOpenSubMenus] = useState(() => {
+    try {
+      const stored = localStorage.getItem('sidebar_open_submenus');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Save layout state to localStorage when it changes
+  const updateOpenSubMenus = (newOpenSubMenus) => {
+    setOpenSubMenus(newOpenSubMenus);
+    try {
+      localStorage.setItem('sidebar_open_submenus', JSON.stringify([...newOpenSubMenus]));
+    } catch (error) {
+      console.warn('Failed to save sidebar state to localStorage:', error);
+    }
+  };
 
   const clearAllState = () => {
-    setOpenSubMenus(new Set());
+    const clearedState = new Set();
+    setOpenSubMenus(clearedState);
+    try {
+      localStorage.setItem('sidebar_open_submenus', JSON.stringify([]));
+    } catch (error) {
+      console.warn('Failed to clear sidebar state in localStorage:', error);
+    }
   };
 
   return {
     openSubMenus,
-    setOpenSubMenus,
+    setOpenSubMenus: updateOpenSubMenus,
     clearAllState
   };
 };
 
-const Sidebar = ({ toggleSideBar, pages, url, sideBarOpen }) => {
+const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(muiTheme.breakpoints.down('md'));
@@ -858,6 +882,9 @@ const Sidebar = ({ toggleSideBar, pages, url, sideBarOpen }) => {
       </div>
     </Box>
   );
-};
+});
+
+// Add display name for debugging
+Sidebar.displayName = 'Sidebar';
 
 export default Sidebar;

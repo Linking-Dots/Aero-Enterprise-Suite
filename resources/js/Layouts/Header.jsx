@@ -76,7 +76,7 @@ const useDeviceType = () => {
   return { isMobile, isTablet, isDesktop };
 };
 
-const Header = ({ 
+const Header = React.memo(({ 
   darkMode, 
   toggleDarkMode, 
   themeDrawerOpen, 
@@ -1073,8 +1073,9 @@ const Header = ({
       {(isTablet || isDesktop) && <DesktopHeader />}
     </>
   );
-};
+});
 
+// Add display name for debugging
 Header.displayName = 'Header';
 
 export default Header;
