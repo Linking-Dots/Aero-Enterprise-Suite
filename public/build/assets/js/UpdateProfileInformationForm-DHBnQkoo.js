@@ -1,1 +1,0 @@
-import{x as s,j as r}from"./app-BnwDOHvb.js";import{r as a}from"./react-core-DDvupgOx.js";import"./ui-libraries-CxFzkmxb.js";import"./mui-libraries-DeLqYkpc.js";import"./utilities-DT6SRl8s.js";const d=()=>{const[e,o]=a.useState(!1);return s({email:"",password:"",remember:!1}),r("div",{className:"auth-page-wrapper pt-5"})};export{d as default};

@@ -271,6 +271,13 @@ const PunchStatusCard = () => {
         }
     };
 
+    // Standardized geolocation options
+    const getLocationOptions = (isHighAccuracy = false, timeoutMs = 10000) => ({
+        enableHighAccuracy: isHighAccuracy,
+        timeout: timeoutMs,
+        maximumAge: isHighAccuracy ? 30000 : 300000 // 30s for high accuracy, 5min for regular
+    });
+
     // Enhanced location connection status check
     const checkLocationConnectionStatus = () => {
         if (!navigator.geolocation) {
@@ -285,7 +292,7 @@ const PunchStatusCard = () => {
                     setConnectionStatus(prev => ({ ...prev, location: false }));
                     return;
                 } else if (permission.state === 'granted') {
-                    // Test actual location access
+                    // Test actual location access with standard settings
                     navigator.geolocation.getCurrentPosition(
                         () => {
                             setConnectionStatus(prev => ({ ...prev, location: true }));
@@ -294,7 +301,7 @@ const PunchStatusCard = () => {
                             console.warn('Location test failed:', error);
                             setConnectionStatus(prev => ({ ...prev, location: false }));
                         },
-                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+                        getLocationOptions(false, 8000)
                     );
                 } else {
                     // State is 'prompt' - test access which will trigger permission request
@@ -329,7 +336,7 @@ const PunchStatusCard = () => {
                     console.log('Location request timeout');
                 }
             },
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+            getLocationOptions(false, 8000)
         );
     };
 
@@ -340,7 +347,7 @@ const PunchStatusCard = () => {
         }
 
         return new Promise((resolve, reject) => {
-            // First, check permissions if available
+            // First, check permissions if available to avoid unnecessary requests
             if (navigator.permissions) {
                 navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
                     if (permission.state === 'denied') {
@@ -349,32 +356,30 @@ const PunchStatusCard = () => {
                     }
                     
                     // Permission is granted or prompt, proceed with location request
-                    requestLocation(resolve, reject);
+                    requestLocationForPunch(resolve, reject);
                 }).catch(() => {
                     // Fallback if permissions API is not available
-                    requestLocation(resolve, reject);
+                    requestLocationForPunch(resolve, reject);
                 });
             } else {
                 // Fallback if permissions API is not available
-                requestLocation(resolve, reject);
+                requestLocationForPunch(resolve, reject);
             }
         });
     };
 
-    // Helper function to actually request location with retry mechanism
-    const requestLocation = (resolve, reject, attempt = 1) => {
-        const maxAttempts = 2;
+    // Helper function to actually request location with retry mechanism for punch operations
+    const requestLocationForPunch = (resolve, reject, attempt = 1) => {
+        const maxAttempts = 3; // Increased from 2 to 3 for better reliability
         
-        // Different settings for different attempts
-        const settings = attempt === 1 ? {
-            enableHighAccuracy: false, // Start with less demanding accuracy
-            timeout: 15000, // Longer timeout
-            maximumAge: 300000 // 5 minutes cache
-        } : {
-            enableHighAccuracy: true, // More accurate on second attempt
-            timeout: 20000, // Even longer timeout
-            maximumAge: 60000 // 1 minute cache
-        };
+        // Progressive accuracy strategy: start with balanced settings, then try high accuracy
+        const settings = attempt === 1 ? 
+            getLocationOptions(false, 12000) : // First attempt: balanced
+            attempt === 2 ?
+            getLocationOptions(true, 15000) :  // Second attempt: high accuracy
+            getLocationOptions(false, 20000);  // Final attempt: longer timeout
+
+        console.log(`Requesting location (attempt ${attempt}/${maxAttempts}) with settings:`, settings);
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -384,18 +389,26 @@ const PunchStatusCard = () => {
                     accuracy: position.coords.accuracy
                 };
                 console.log(`Successfully obtained location on attempt ${attempt}:`, locationData);
+                
+                // Update connection status on successful location fetch
+                setConnectionStatus(prev => ({ ...prev, location: true }));
+                
                 resolve(locationData);
             },
             (error) => {
-                console.error(`Error getting location data (attempt ${attempt}):`, error);
+                console.error(`Error getting location data (attempt ${attempt}/${maxAttempts}):`, error);
                 
-                // If it's not the last attempt and the error is timeout, try again
-                if (attempt < maxAttempts && error.code === 3) {
-                    console.log(`Retrying location request (attempt ${attempt + 1})...`);
+                // Set connection status to false on any error
+                setConnectionStatus(prev => ({ ...prev, location: false }));
+                
+                // Retry logic: retry on timeout or position unavailable errors
+                if (attempt < maxAttempts && (error.code === 3 || error.code === 2)) {
+                    console.log(`Retrying location request (attempt ${attempt + 1}/${maxAttempts}) in 1 second...`);
                     setTimeout(() => {
-                        requestLocation(resolve, reject, attempt + 1);
+                        requestLocationForPunch(resolve, reject, attempt + 1);
                     }, 1000);
                 } else {
+                    // No more retries or permission denied
                     reject(error);
                 }
             },
@@ -901,14 +914,34 @@ const PunchStatusCard = () => {
                                 }}
                                 onClick={() => {
                                     if (!connectionStatus.location) {
-                                        // Try to request location permission
-                                        testLocationAccess();
-                                        toast.info('Please allow location access when prompted.\n\nIf no prompt appears:\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Try again', {
-                                            style: {
-                                                whiteSpace: 'pre-line'
+                                        // Try to request location permission using standardized function
+                                        navigator.geolocation.getCurrentPosition(
+                                            () => {
+                                                setConnectionStatus(prev => ({ ...prev, location: true }));
+                                                toast.success('Location access granted successfully!');
                                             },
-                                            duration: 6000
-                                        });
+                                            (error) => {
+                                                console.warn('GPS chip location request failed:', error);
+                                                setConnectionStatus(prev => ({ ...prev, location: false }));
+                                                
+                                                let message = 'Please allow location access when prompted.\n\n';
+                                                if (error.code === 1) {
+                                                    message += 'Location access was denied. To enable:\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Try again';
+                                                } else if (error.code === 2) {
+                                                    message += 'Location unavailable. Please:\n1. Enable GPS on your device\n2. Move to an area with better signal\n3. Try again';
+                                                } else if (error.code === 3) {
+                                                    message += 'Location request timed out. Please:\n1. Check your internet connection\n2. Try again in a moment';
+                                                } else {
+                                                    message += 'If no prompt appears:\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Try again';
+                                                }
+                                                
+                                                toast.error(message, {
+                                                    style: { whiteSpace: 'pre-line' },
+                                                    duration: 8000
+                                                });
+                                            },
+                                            getLocationOptions(false, 10000)
+                                        );
                                     } else {
                                         // Refresh location status
                                         checkLocationConnectionStatus();
