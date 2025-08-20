@@ -16,9 +16,16 @@ class RouteWaypointValidator extends BaseAttendanceValidator
         $tolerance = $this->attendanceType->config['tolerance'] ?? 100;
         $userLat = $this->request->input('lat');
         $userLng = $this->request->input('lng');
+        $allowWithoutLocation = $this->attendanceType->config['allow_without_location'] ?? false;
 
-        if (!$userLat || !$userLng) {
-            return $this->errorResponse('Location data is required for route waypoint validation.');
+        // Check if location data is missing
+        if (! $userLat || ! $userLng) {
+            // If location is not provided, check if we allow attendance without location
+            if ($allowWithoutLocation) {
+                return $this->successResponse('Attendance recorded without location validation (location access denied).');
+            } else {
+                return $this->errorResponse('Location data is required for route waypoint validation. Please enable location access and try again.');
+            }
         }
 
         if (empty($waypoints)) {
@@ -26,11 +33,11 @@ class RouteWaypointValidator extends BaseAttendanceValidator
         }
 
         $routeValidation = $this->validateUserLocationWithRoute($userLat, $userLng, $waypoints, $tolerance);
-        
-        if (!$routeValidation['is_valid']) {
+
+        if (! $routeValidation['is_valid']) {
             return $this->errorResponse($routeValidation['message'], 403);
         }
-        
+
         return $this->successResponse($routeValidation['message'], $routeValidation['route_data'] ?? []);
     }
 
@@ -50,35 +57,36 @@ class RouteWaypointValidator extends BaseAttendanceValidator
             }
 
             $routeData = $this->getRouteFromOSRM($coordinates);
-            
-            if (!$routeData) {
+
+            if (! $routeData) {
                 return $this->fallbackDistanceValidation($userLat, $userLng, $waypoints, $tolerance);
             }
 
             $routeCoordinates = $routeData['routes'][0]['geometry']['coordinates'] ?? [];
-            
+
             if (empty($routeCoordinates)) {
                 return $this->fallbackDistanceValidation($userLat, $userLng, $waypoints, $tolerance);
             }
 
             $minDistance = $this->calculateMinDistanceToRoute($userLat, $userLng, $routeCoordinates);
             $isValid = $minDistance <= $tolerance;
-            
+
             return [
                 'is_valid' => $isValid,
-                'message' => $isValid 
-                    ? "Location verified within {$tolerance}m of the route (distance: " . round($minDistance, 2) . "m)."
-                    : "You are " . round($minDistance, 2) . "m away from the route. Maximum distance: {$tolerance}m.",
+                'message' => $isValid
+                    ? "Location verified within {$tolerance}m of the route (distance: ".round($minDistance, 2).'m).'
+                    : 'You are '.round($minDistance, 2)."m away from the route. Maximum distance: {$tolerance}m.",
                 'route_data' => [
                     'distance_to_route' => round($minDistance, 2),
                     'tolerance' => $tolerance,
                     'route_distance' => $routeData['routes'][0]['distance'] ?? null,
                     'route_duration' => $routeData['routes'][0]['duration'] ?? null,
-                ]
+                ],
             ];
 
         } catch (\Exception $e) {
-            Log::error('OSRM validation error: ' . $e->getMessage());
+            Log::error('OSRM validation error: '.$e->getMessage());
+
             return $this->fallbackDistanceValidation($userLat, $userLng, $waypoints, $tolerance);
         }
     }
@@ -91,9 +99,10 @@ class RouteWaypointValidator extends BaseAttendanceValidator
         $coordinates = [];
         foreach ($waypoints as $waypoint) {
             if (isset($waypoint['lat']) && isset($waypoint['lng'])) {
-                $coordinates[] = $waypoint['lng'] . ',' . $waypoint['lat'];
+                $coordinates[] = $waypoint['lng'].','.$waypoint['lat'];
             }
         }
+
         return $coordinates;
     }
 
@@ -105,15 +114,16 @@ class RouteWaypointValidator extends BaseAttendanceValidator
         $osrmBaseUrl = config('services.osrm.url', 'http://router.project-osrm.org');
         $coordinatesString = implode(';', $coordinates);
         $routeUrl = "{$osrmBaseUrl}/route/v1/driving/{$coordinatesString}?overview=full&geometries=geojson";
-        
+
         $routeResponse = Http::timeout(10)->get($routeUrl);
-        
-        if (!$routeResponse->successful()) {
+
+        if (! $routeResponse->successful()) {
             Log::warning('OSRM route request failed', [
                 'url' => $routeUrl,
                 'status' => $routeResponse->status(),
-                'response' => $routeResponse->body()
+                'response' => $routeResponse->body(),
             ]);
+
             return null;
         }
 
@@ -126,18 +136,18 @@ class RouteWaypointValidator extends BaseAttendanceValidator
     private function calculateMinDistanceToRoute($userLat, $userLng, $routeCoordinates): float
     {
         $minDistance = PHP_FLOAT_MAX;
-        
+
         foreach ($routeCoordinates as $coordinate) {
             $routeLng = $coordinate[0];
             $routeLat = $coordinate[1];
-            
+
             $distance = $this->calculateDistance($userLat, $userLng, $routeLat, $routeLng);
-            
+
             if ($distance < $minDistance) {
                 $minDistance = $distance;
             }
         }
-        
+
         return $minDistance;
     }
 
@@ -152,12 +162,12 @@ class RouteWaypointValidator extends BaseAttendanceValidator
         foreach ($waypoints as $index => $waypoint) {
             if (isset($waypoint['lat']) && isset($waypoint['lng'])) {
                 $distance = $this->calculateDistance(
-                    $userLat, 
-                    $userLng, 
-                    $waypoint['lat'], 
+                    $userLat,
+                    $userLng,
+                    $waypoint['lat'],
                     $waypoint['lng']
                 );
-                
+
                 if ($minDistance === null || $distance < $minDistance) {
                     $minDistance = $distance;
                     $nearestWaypoint = $index + 1;
@@ -169,15 +179,15 @@ class RouteWaypointValidator extends BaseAttendanceValidator
 
         return [
             'is_valid' => $isValid,
-            'message' => $isValid 
-                ? "Location verified within {$tolerance}m of waypoint {$nearestWaypoint} (distance: " . round($minDistance, 2) . "m)."
-                : "You are " . round($minDistance, 2) . "m away from the nearest waypoint. Maximum distance: {$tolerance}m.",
+            'message' => $isValid
+                ? "Location verified within {$tolerance}m of waypoint {$nearestWaypoint} (distance: ".round($minDistance, 2).'m).'
+                : 'You are '.round($minDistance, 2)."m away from the nearest waypoint. Maximum distance: {$tolerance}m.",
             'route_data' => [
                 'distance_to_nearest_waypoint' => round($minDistance, 2),
                 'nearest_waypoint' => $nearestWaypoint,
                 'tolerance' => $tolerance,
-                'fallback_used' => true
-            ]
+                'fallback_used' => true,
+            ],
         ];
     }
 }

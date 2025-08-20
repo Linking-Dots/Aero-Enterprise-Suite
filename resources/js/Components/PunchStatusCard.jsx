@@ -247,22 +247,56 @@ const PunchStatusCard = () => {
         }
     };
 
-    // Function to just check and set location connection status
+    // Enhanced location connection status check
     const checkLocationConnectionStatus = () => {
         if (!navigator.geolocation) {
             setConnectionStatus(prev => ({ ...prev, location: false }));
             return;
         }
 
+        // Use permissions API first if available
+        if (navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
+                if (permission.state === 'denied') {
+                    setConnectionStatus(prev => ({ ...prev, location: false }));
+                    return;
+                } else if (permission.state === 'granted') {
+                    // Test actual location access
+                    navigator.geolocation.getCurrentPosition(
+                        () => {
+                            setConnectionStatus(prev => ({ ...prev, location: true }));
+                        },
+                        (error) => {
+                            console.warn('Location test failed:', error);
+                            setConnectionStatus(prev => ({ ...prev, location: false }));
+                        },
+                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+                    );
+                } else {
+                    // State is 'prompt' - we won't know until user grants/denies
+                    setConnectionStatus(prev => ({ ...prev, location: false }));
+                }
+            }).catch(() => {
+                // Fallback if permissions API fails
+                testLocationAccess();
+            });
+        } else {
+            // Fallback for browsers without permissions API
+            testLocationAccess();
+        }
+    };
+
+    // Helper function to test location access
+    const testLocationAccess = () => {
         navigator.geolocation.getCurrentPosition(
             () => {
                 setConnectionStatus(prev => ({ ...prev, location: true }));
             },
             (error) => {
-                console.error('Error checking location connection:', error);
+                console.warn('Location permission check failed:', error);
                 setConnectionStatus(prev => ({ ...prev, location: false }));
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+            { enableHighAccuracy: false, timeout: 3000, maximumAge: 300000 }
         );
     };
 
@@ -273,22 +307,67 @@ const PunchStatusCard = () => {
         }
 
         return new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const locationData = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    resolve(locationData);
-                },
-                (error) => {
-                    console.error('Error getting location data:', error);
-                    reject(error);
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-            );
+            // First, check permissions if available
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
+                    if (permission.state === 'denied') {
+                        reject({ code: 1, message: 'User denied Geolocation' });
+                        return;
+                    }
+                    
+                    // Permission is granted or prompt, proceed with location request
+                    requestLocation(resolve, reject);
+                }).catch(() => {
+                    // Fallback if permissions API is not available
+                    requestLocation(resolve, reject);
+                });
+            } else {
+                // Fallback if permissions API is not available
+                requestLocation(resolve, reject);
+            }
         });
+    };
+
+    // Helper function to actually request location with retry mechanism
+    const requestLocation = (resolve, reject, attempt = 1) => {
+        const maxAttempts = 2;
+        
+        // Different settings for different attempts
+        const settings = attempt === 1 ? {
+            enableHighAccuracy: false, // Start with less demanding accuracy
+            timeout: 15000, // Longer timeout
+            maximumAge: 300000 // 5 minutes cache
+        } : {
+            enableHighAccuracy: true, // More accurate on second attempt
+            timeout: 20000, // Even longer timeout
+            maximumAge: 60000 // 1 minute cache
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const locationData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                console.log(`Successfully obtained location on attempt ${attempt}:`, locationData);
+                resolve(locationData);
+            },
+            (error) => {
+                console.error(`Error getting location data (attempt ${attempt}):`, error);
+                
+                // If it's not the last attempt and the error is timeout, try again
+                if (attempt < maxAttempts && error.code === 3) {
+                    console.log(`Retrying location request (attempt ${attempt + 1})...`);
+                    setTimeout(() => {
+                        requestLocation(resolve, reject, attempt + 1);
+                    }, 1000);
+                } else {
+                    reject(error);
+                }
+            },
+            settings
+        );
     };
 
 
@@ -326,6 +405,7 @@ const PunchStatusCard = () => {
         setLoading(true);
 
         try {
+            // Location is required for attendance - get it first
             const locationData = await fetchLocationData();
             const deviceFingerprint = getDeviceFingerprint();
 
@@ -344,11 +424,10 @@ const PunchStatusCard = () => {
                 timestamp: new Date().toLocaleString()
             });
 
-
             const context = {
-                lat: locationData?.latitude,
-                lng: locationData?.longitude,
-                accuracy: locationData?.accuracy,
+                lat: locationData.latitude,
+                lng: locationData.longitude,
+                accuracy: locationData.accuracy,
                 ip: currentIp,
                 wifi_ssid: 'Unknown',
                 device_fingerprint: JSON.stringify(deviceFingerprint),
@@ -371,20 +450,99 @@ const PunchStatusCard = () => {
                 // Show session info dialog on success
                 setSessionDialogOpen(true);
 
+                // Immediate UI feedback - optimistically update the UI
+                const now = new Date();
+                if (currentStatus === 'not_punched' || currentStatus === 'punched_out') {
+                    // User is punching in
+                    setCurrentStatus('punched_in');
+                    const newPunch = {
+                        punchin_time: now.toISOString(),
+                        punchout_time: null
+                    };
+                    setTodayPunches(prev => [...prev, newPunch]);
+                } else if (currentStatus === 'punched_in') {
+                    // User is punching out
+                    setCurrentStatus('punched_out');
+                    setTodayPunches(prev => {
+                        const updated = [...prev];
+                        if (updated.length > 0 && !updated[updated.length - 1].punchout_time) {
+                            updated[updated.length - 1].punchout_time = now.toISOString();
+                        }
+                        return updated;
+                    });
+                }
+
+                // Refresh data from server after a short delay to ensure consistency
+                setTimeout(async () => {
+                    await fetchCurrentStatus();
+                }, 1000);
+                
+                // Also refresh immediately in case the optimistic update is enough
                 await fetchCurrentStatus();
             } else {
                 toast.error(response.data.message);
             }
         } catch (error) {
             console.error('Error during punch operation:', error);
-            toast.error(error.response.data.message, {
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: alpha(theme.palette.success.main, 0.1),
-                        border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                        color: theme.palette.text.primary,
-                    }
-                });
+            
+            // Handle different types of errors with specific guidance
+            let errorMessage = 'Unable to record attendance. Please try again.';
+            let isLocationError = false;
+            
+            // Check if it's a location-related error
+            if (error.code === 1 || error.code === 2 || error.code === 3 || error.message?.includes('Geolocation')) {
+                isLocationError = true;
+                
+                switch (error.code) {
+                    case 1: // PERMISSION_DENIED
+                        errorMessage = 'Location access is required for attendance. Please:\n\n' +
+                                     '1. Click the location icon in your browser\'s address bar\n' +
+                                     '2. Select "Allow" for location access\n' +
+                                     '3. Refresh the page and try again';
+                        break;
+                    case 2: // POSITION_UNAVAILABLE
+                        errorMessage = 'Your location could not be determined. Please:\n\n' +
+                                     '1. Enable GPS/Location Services on your device\n' +
+                                     '2. Move to an area with better GPS signal\n' +
+                                     '3. Try again in a few moments';
+                        break;
+                    case 3: // TIMEOUT
+                        errorMessage = 'Location request timed out. Please:\n\n' +
+                                     '1. Check your internet connection\n' +
+                                     '2. Move to an area with better GPS signal\n' +
+                                     '3. Try again';
+                        break;
+                    default:
+                        if (error.message) {
+                            errorMessage = error.message;
+                        } else {
+                            errorMessage = 'Location access is required for attendance. Please enable location permissions and try again.';
+                        }
+                }
+            } else if (error.response && error.response.data && error.response.data.message) {
+                // Backend validation error
+                errorMessage = error.response.data.message;
+                
+                // If it's a location validation error from backend
+                if (errorMessage.includes('Location data is required') || errorMessage.includes('waypoint')) {
+                    isLocationError = true;
+                    errorMessage = 'Accurate location is required for attendance tracking. Please:\n\n' +
+                                 '1. Enable high-accuracy location in your browser\n' +
+                                 '2. Grant location permissions when prompted\n' +
+                                 '3. Ensure you\'re in an area with good GPS signal';
+                }
+            }
+            
+            toast.error(errorMessage, {
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: alpha(theme.palette.error.main, 0.1),
+                    border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                    color: theme.palette.text.primary,
+                    whiteSpace: 'pre-line', // Allow line breaks in error messages
+                },
+                duration: isLocationError ? 8000 : 5000, // Longer duration for location errors
+            });
 
         } finally {
             setLoading(false);
@@ -696,14 +854,26 @@ const PunchStatusCard = () => {
 
                     {/* Compact Connection Status */}
                     <Stack direction="row" spacing={0.5} justifyContent="center">
-                        <Tooltip title={`GPS: ${connectionStatus.location ? 'Connected' : 'Disconnected'}`}>
+                        <Tooltip title={`Location: ${connectionStatus.location ? 'Enabled and working' : 'Required - Click to enable location access'}`}>
                             <Chip 
                                 size="small" 
                                 icon={<GpsFixed sx={{ fontSize: 14 }} />}
                                 label="GPS"
-                                color={connectionStatus.location ? 'success' : 'default'}
+                                color={connectionStatus.location ? 'success' : 'error'}
                                 variant={connectionStatus.location ? 'filled' : 'outlined'}
-                                sx={{ fontSize: '0.7rem', height: 24 }}
+                                sx={{ 
+                                    fontSize: '0.7rem', 
+                                    height: 24,
+                                    cursor: connectionStatus.location ? 'default' : 'pointer'
+                                }}
+                                onClick={!connectionStatus.location ? () => {
+                                    toast.info('Please enable location permissions:\n\n1. Click the location icon in your browser address bar\n2. Select "Allow"\n3. Refresh the page', {
+                                        style: {
+                                            whiteSpace: 'pre-line'
+                                        },
+                                        duration: 6000
+                                    });
+                                } : undefined}
                             />
                         </Tooltip>
                         <Tooltip title={`Network: ${connectionStatus.network ? 'Online' : 'Offline'}`}>
