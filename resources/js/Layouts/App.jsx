@@ -58,8 +58,16 @@ const App = React.memo(({ children }) => {
         permissionCount: auth?.permissions?.length
     };
     
-    // Simple state without localStorage persistence for fresh data
-    const [sideBarOpen, setSideBarOpen] = useState(false);
+    // Sidebar state with localStorage persistence for layout preference
+    const [sideBarOpen, setSideBarOpen] = useState(() => {
+        try {
+            const stored = localStorage.getItem('sidebarOpen');
+            return stored ? JSON.parse(stored) : false;
+        } catch {
+            return false;
+        }
+    });
+    
     const [darkMode, setDarkMode] = useState(() => {
         try {
             return localStorage.getItem('darkMode') === 'true';
@@ -108,13 +116,9 @@ const App = React.memo(({ children }) => {
         return isSettingsPage ? getSettingsPages(permissions, currentAuth) : getPages(permissions, currentAuth);
     })();
 
-    // ===== LAYOUT PERFORMANCE OPTIMIZATION (Selective Memoization) =====
-    // Memoize layout preferences for performance, but keep data fresh
-    const theme = useMemo(() => 
-        useTheme(darkMode, themeColor), 
-        [darkMode, themeColor]
-    );
-    
+    // ===== LAYOUT COMPONENTS & THEME =====
+    // Theme and responsive breakpoints - hooks called at top level
+    const theme = useTheme(darkMode, themeColor);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     // ===== LAYOUT TOGGLE HANDLERS (Memoized for Performance) =====
@@ -136,7 +140,16 @@ const App = React.memo(({ children }) => {
     }, []);
     
     const toggleSideBar = useCallback(() => {
-        setSideBarOpen(prev => !prev);
+        setSideBarOpen(prev => {
+            const newValue = !prev;
+            try {
+                localStorage.setItem('sidebarOpen', JSON.stringify(newValue));
+                localStorage.setItem('sidebar_has_interacted', 'true');
+            } catch (error) {
+                console.warn('Failed to save sidebar state to localStorage:', error);
+            }
+            return newValue;
+        });
     }, []);
 
     // Handle app update (memoized for layout performance)
@@ -210,6 +223,23 @@ const App = React.memo(({ children }) => {
         }
         return '14, 165, 233'; // fallback to ocean blue
     };
+
+    // Handle responsive sidebar behavior
+    useEffect(() => {
+        // Close sidebar automatically on mobile when screen becomes small
+        if (isMobile && sideBarOpen) {
+            // Only auto-close if user manually made it mobile (not on initial load)
+            const hasInteracted = localStorage.getItem('sidebar_has_interacted');
+            if (hasInteracted) {
+                setSideBarOpen(false);
+                try {
+                    localStorage.setItem('sidebarOpen', JSON.stringify(false));
+                } catch (error) {
+                    console.warn('Failed to save responsive sidebar state:', error);
+                }
+            }
+        }
+    }, [isMobile]); // Only trigger when screen size changes
     
     // Session check with optimized interval (persistent across navigations)
     useEffect(() => {

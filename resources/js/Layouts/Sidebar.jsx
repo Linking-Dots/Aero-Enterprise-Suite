@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Box, Typography, useMediaQuery, useTheme as useMuiTheme } from '@mui/material';
 import { Link, usePage } from "@inertiajs/react";
 import {
@@ -69,14 +69,16 @@ const useSidebarState = () => {
   });
 
   // Save layout state to localStorage when it changes
-  const updateOpenSubMenus = (newOpenSubMenus) => {
-    setOpenSubMenus(newOpenSubMenus);
+  const updateOpenSubMenus = useCallback((newOpenSubMenus) => {
+    // Ensure we always have a valid Set
+    const validSet = newOpenSubMenus instanceof Set ? newOpenSubMenus : new Set();
+    setOpenSubMenus(validSet);
     try {
-      localStorage.setItem('sidebar_open_submenus', JSON.stringify([...newOpenSubMenus]));
+      localStorage.setItem('sidebar_open_submenus', JSON.stringify([...validSet]));
     } catch (error) {
       console.warn('Failed to save sidebar state to localStorage:', error);
     }
-  };
+  }, []);
 
   const clearAllState = () => {
     const clearedState = new Set();
@@ -103,7 +105,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
   
   const {
     openSubMenus,
-    setOpenSubMenus,
+    setOpenSubMenus: updateOpenSubMenus,
     clearAllState
   } = useSidebarState();
 
@@ -173,7 +175,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
       };
       
       const newExpandedMenus = expandAllWithMatches(pages);
-      setOpenSubMenus(newExpandedMenus);
+      updateOpenSubMenus(newExpandedMenus);
     }
   }, [searchTerm, pages]);
 
@@ -187,10 +189,8 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
         const currentParents = [...parentNames, page.name];
         
         if (page.route && "/" + page.route === targetUrl) {
-          setOpenSubMenus(prev => {
-            const newSet = new Set([...prev, ...currentParents.slice(0, -1)]);
-            return newSet;
-          });
+          const newSet = new Set([...openSubMenus, ...currentParents.slice(0, -1)]);
+          updateOpenSubMenus(newSet);
           return true;
         }
         
@@ -208,15 +208,13 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
 
   // Simple callback handlers - no useCallback for fresh execution
   const handleSubMenuToggle = (pageName) => {
-    setOpenSubMenus(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(pageName)) {
-        newSet.delete(pageName);
-      } else {
-        newSet.add(pageName);
-      }
-      return newSet;
-    });
+    const newSet = new Set(openSubMenus);
+    if (newSet.has(pageName)) {
+      newSet.delete(pageName);
+    } else {
+      newSet.add(pageName);
+    }
+    updateOpenSubMenus(newSet);
   };
 
   const handlePageClick = (pageName) => {
