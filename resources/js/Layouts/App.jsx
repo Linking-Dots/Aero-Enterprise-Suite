@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import { usePage } from "@inertiajs/react";
 import useTheme from "@/theme.jsx";
@@ -32,12 +32,12 @@ import axios from 'axios';
 
 /**
  * Enhanced App Layout Component
- * Optimized for performance with direct component imports (eager loading)
+ * Optimized for fresh data loading with minimal caching
  */
 function App({ children }) {
     // ===== STATE MANAGEMENT =====
     const [sessionExpired, setSessionExpired] = useState(false);
-    const [scrolled, setScrolled] = useState(false); // Track scroll position for shadow effect
+    const [scrolled, setScrolled] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     let { auth, app, url } = usePage().props;
     
@@ -50,24 +50,16 @@ function App({ children }) {
         dismissUpdate
     } = useVersionManager();
     
-    // Memoize auth to prevent unnecessary re-renders
-    const memoizedAuth = useMemo(() => ({
+    // Fresh auth data - no memoization to prevent stale user state
+    const currentAuth = {
         user: auth?.user,
         permissions: auth?.permissions,
         id: auth?.user?.id,
         permissionCount: auth?.permissions?.length
-    }), [auth?.user?.id, auth?.permissions?.length]);
+    };
     
-    // Initialize persistent state with localStorage (only once per app lifecycle)
-    const [sideBarOpen, setSideBarOpen] = useState(() => {
-        try {
-            const saved = localStorage.getItem('sidebar-open');
-            return saved !== null ? JSON.parse(saved) : false;
-        } catch {
-            return false;
-        }
-    });
-    
+    // Simple state without localStorage persistence for fresh data
+    const [sideBarOpen, setSideBarOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(() => {
         try {
             return localStorage.getItem('darkMode') === 'true';
@@ -103,59 +95,47 @@ function App({ children }) {
 
     // Persistent refs
     const contentRef = useRef(null);
-    const mainContentRef = useRef(null); // Reference for scroll shadow effect
+    const mainContentRef = useRef(null);
     const sessionCheckRef = useRef(null);
     const layoutInitialized = useRef(false);
 
-    // ===== MEMOIZED COMPUTATIONS =====
-    // Memoize permissions and pages - critical for performance
-    const permissions = useMemo(() => memoizedAuth?.permissions || [], [memoizedAuth?.permissions]);
+    // ===== FRESH DATA COMPUTATIONS (No Memoization) =====
+    // Always fresh permissions and pages - recalculate on every render for latest data
+    const permissions = currentAuth?.permissions || [];
     
-    const pages = useMemo(() => {
+    const pages = (() => {
         const isSettingsPage = url.startsWith('/settings') || url.includes('settings');
-        return isSettingsPage ? getSettingsPages(permissions, memoizedAuth) : getPages(permissions, memoizedAuth);
-    }, [url, permissions, memoizedAuth]);
+        return isSettingsPage ? getSettingsPages(permissions, currentAuth) : getPages(permissions, currentAuth);
+    })();
 
     // Theme and media query
     const theme = useTheme(darkMode, themeColor);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    // ===== OPTIMIZED TOGGLE HANDLERS =====
-    const toggleDarkMode = useCallback(() => {
+    // ===== SIMPLE TOGGLE HANDLERS (No useCallback) =====
+    const toggleDarkMode = () => {
         setDarkMode(prev => {
             const newValue = !prev;
-            // Use RAF for smoother UI updates
-            requestAnimationFrame(() => {
-                localStorage.setItem('darkMode', newValue);
-            });
+            localStorage.setItem('darkMode', newValue);
             return newValue;
         });
-    }, []);
+    };
     
-    const toggleThemeColor = useCallback((color) => {
+    const toggleThemeColor = (color) => {
         setThemeColor(color);
-        requestAnimationFrame(() => {
-            localStorage.setItem('themeColor', JSON.stringify(color));
-        });
-    }, []);
+        localStorage.setItem('themeColor', JSON.stringify(color));
+    };
     
-    const toggleThemeDrawer = useCallback(() => {
+    const toggleThemeDrawer = () => {
         setThemeDrawerOpen(prev => !prev);
-    }, []);
+    };
     
-    const toggleSideBar = useCallback(() => {
-        setSideBarOpen(prev => {
-            const newValue = !prev;
-            // Use RAF for smoother animations
-            requestAnimationFrame(() => {
-                localStorage.setItem('sidebar-open', JSON.stringify(newValue));
-            });
-            return newValue;
-        });
-    }, []);
+    const toggleSideBar = () => {
+        setSideBarOpen(prev => !prev);
+    };
 
     // Handle app update
-    const handleUpdate = useCallback(async () => {
+    const handleUpdate = async () => {
         setIsUpdating(true);
         try {
             await forceUpdate();
@@ -163,13 +143,12 @@ function App({ children }) {
             console.error('Update failed:', error);
             setIsUpdating(false);
         }
-    }, [forceUpdate]);
+    };
 
-  
     // ===== INITIALIZATION EFFECTS =====
     // Initialize Firebase only when user is authenticated (one-time setup)
     useEffect(() => {
-        if (!memoizedAuth?.user || layoutInitialized.current) return;
+        if (!currentAuth?.user || layoutInitialized.current) return;
 
         let mounted = true;
         
@@ -190,7 +169,7 @@ function App({ children }) {
         return () => {
             mounted = false;
         };
-    }, [memoizedAuth?.user?.id]);
+    }, [currentAuth?.user?.id]);
 
     // Apply theme to root with optimized scheduling
     useEffect(() => {
@@ -229,7 +208,7 @@ function App({ children }) {
     
     // Session check with optimized interval (persistent across navigations)
     useEffect(() => {
-        if (!memoizedAuth?.user) return;
+        if (!currentAuth?.user) return;
 
         const checkSession = async () => {
             try {
@@ -251,11 +230,11 @@ function App({ children }) {
             }
         };
 
-        // Initial check after 10 seconds, then every 30 seconds
+        // Check every 15 seconds for fresh session state
         const initialTimeout = setTimeout(() => {
             checkSession();
-            sessionCheckRef.current = setInterval(checkSession, 30000);
-        }, 10000);
+            sessionCheckRef.current = setInterval(checkSession, 15000);
+        }, 5000);
 
         return () => {
             clearTimeout(initialTimeout);
@@ -263,7 +242,7 @@ function App({ children }) {
                 clearInterval(sessionCheckRef.current);
             }
         };
-    }, [memoizedAuth?.user?.id]);
+    }, [currentAuth?.user?.id]);
         
 
 
@@ -295,7 +274,7 @@ function App({ children }) {
 
     // Hide app loading screen with improved timing (one-time initialization)
     useEffect(() => {
-        if (memoizedAuth?.user && window.AppLoader) {
+        if (currentAuth?.user && window.AppLoader) {
             // Give components time to mount and render
             const timer = setTimeout(() => {
                 window.AppLoader.updateLoadingMessage('Almost ready...', 'Loading your dashboard');
@@ -308,62 +287,53 @@ function App({ children }) {
             
             return () => clearTimeout(timer);
         }
-    }, [memoizedAuth?.user]);
+    }, [currentAuth?.user]);
 
-    // ===== ENHANCED MEMOIZED LAYOUT COMPONENTS WITH ANIMATIONS =====
-    // These components are memoized to prevent re-rendering on page navigation
-    // with smooth entry animations for better UX
-    const headerContent = useMemo(() => (
-        memoizedAuth?.user ? (
-            <FadeIn delay={0.1} direction="down" duration={0.5}>
-                <Header
-                    url={url}
-                    pages={pages}
-                    darkMode={darkMode}
-                    toggleDarkMode={toggleDarkMode}
-                    toggleThemeDrawer={toggleThemeDrawer}
-                    sideBarOpen={sideBarOpen}
-                    toggleSideBar={toggleSideBar}
-                    themeDrawerOpen={themeDrawerOpen}
-                />
-            </FadeIn>
-        ) : null
-    ), [url, pages, darkMode, toggleDarkMode, toggleThemeDrawer, sideBarOpen, toggleSideBar, themeDrawerOpen, memoizedAuth?.user]);
+    // ===== FRESH LAYOUT COMPONENTS (No Memoization) =====
+    // Components re-render on every update to reflect latest data
+    const headerContent = currentAuth?.user ? (
+        <FadeIn delay={0.1} direction="down" duration={0.5}>
+            <Header
+                url={url}
+                pages={pages}
+                darkMode={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                toggleThemeDrawer={toggleThemeDrawer}
+                sideBarOpen={sideBarOpen}
+                toggleSideBar={toggleSideBar}
+                themeDrawerOpen={themeDrawerOpen}
+            />
+        </FadeIn>
+    ) : null;
 
-    const sidebarContent = useMemo(() => (
-        memoizedAuth?.user ? (
-            <SlideIn direction="left" delay={0.2} duration={0.6}>
-                <Sidebar 
-                    url={url} 
-                    pages={pages} 
-                    toggleSideBar={toggleSideBar}
-                    sideBarOpen={sideBarOpen}
-                />
-            </SlideIn>
-        ) : null
-    ), [pages, toggleSideBar, sideBarOpen, memoizedAuth?.user]);
+    const sidebarContent = currentAuth?.user ? (
+        <SlideIn direction="left" delay={0.2} duration={0.6}>
+            <Sidebar 
+                url={url} 
+                pages={pages} 
+                toggleSideBar={toggleSideBar}
+                sideBarOpen={sideBarOpen}
+            />
+        </SlideIn>
+    ) : null;
 
-    const breadcrumbContent = useMemo(() => (
-        memoizedAuth?.user ? (
-            <FadeIn delay={0.3} direction="right" duration={0.4}>
-                <Breadcrumb />
-            </FadeIn>
-        ) : null
-    ), [memoizedAuth?.user]);
+    const breadcrumbContent = currentAuth?.user ? (
+        <FadeIn delay={0.3} direction="right" duration={0.4}>
+            <Breadcrumb />
+        </FadeIn>
+    ) : null;
 
-    const bottomNavContent = useMemo(() => (
-        memoizedAuth?.user && isMobile ? (
-            <SlideIn direction="up" delay={0.4} duration={0.5}>
-                <BottomNav
-                    setBottomNavHeight={setBottomNavHeight}
-                    contentRef={contentRef}
-                    auth={memoizedAuth}
-                    toggleSideBar={toggleSideBar}
-                    sideBarOpen={sideBarOpen}
-                />
-            </SlideIn>
-        ) : null
-    ), [memoizedAuth?.user, isMobile, setBottomNavHeight, toggleSideBar, sideBarOpen]);
+    const bottomNavContent = currentAuth?.user && isMobile ? (
+        <SlideIn direction="up" delay={0.4} duration={0.5}>
+            <BottomNav
+                setBottomNavHeight={setBottomNavHeight}
+                contentRef={contentRef}
+                auth={currentAuth}
+                toggleSideBar={toggleSideBar}
+                sideBarOpen={sideBarOpen}
+            />
+        </SlideIn>
+    ) : null;
 
     // ===== RENDER =====
     return (
@@ -565,5 +535,5 @@ function App({ children }) {
     );
 }
 
-// Export with memo to prevent unnecessary re-renders
-export default React.memo(App);
+// Export without memo to ensure fresh rendering
+export default App;

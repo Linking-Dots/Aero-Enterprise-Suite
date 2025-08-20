@@ -93,7 +93,7 @@ createInertiaApp({
     },
     title: (title) => {
         const page = window.Laravel?.inertiaProps || {};
-        const appName = page.app?.name || 'Aero Enterprise Suite';
+        const appName = page.app?.name || 'aeos365';
         return `${title} - ${appName}`;
     },
     resolve: (name) =>

@@ -82,7 +82,7 @@ const Footer = () => {
                                                 variant="h5" 
                                                 className={`font-bold ${GRADIENT_PRESETS.gradientText}`}
                                             >
-                                                Aero HR
+                                                aeos365
                                             </Typography>
                                             <Typography variant="caption" className="text-default-500">
                                                 Enterprise Solution

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Typography, useMediaQuery, useTheme as useMuiTheme } from '@mui/material';
 import { Link, usePage } from "@inertiajs/react";
 import {
@@ -56,44 +56,22 @@ const highlightSearchMatch = (text, searchTerm) => {
   });
 };
 
-// Custom hook for sidebar state management
+// Custom hook for sidebar state management - simplified without localStorage persistence
 const useSidebarState = () => {
-  const [openSubMenus, setOpenSubMenus] = useState(() => {
-    try {
-      const saved = localStorage.getItem('sidebar-open-submenus');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch {
-      return new Set();
-    }
-  });
+  const [openSubMenus, setOpenSubMenus] = useState(new Set());
 
-  const saveSubMenuState = useCallback((newSubMenus) => {
-    try {
-      localStorage.setItem('sidebar-open-submenus', JSON.stringify(Array.from(newSubMenus)));
-    } catch (error) {
-      console.warn('Failed to save submenu state to localStorage:', error);
-    }
-  }, []);
-
-  const clearAllState = useCallback(() => {
-    try {
-      localStorage.removeItem('sidebar-open-submenus');
-      localStorage.removeItem('sidebar-open');
-      setOpenSubMenus(new Set());
-    } catch (error) {
-      console.warn('Failed to clear sidebar state:', error);
-    }
-  }, []);
+  const clearAllState = () => {
+    setOpenSubMenus(new Set());
+  };
 
   return {
     openSubMenus,
     setOpenSubMenus,
-    saveSubMenuState,
     clearAllState
   };
 };
 
-const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
+const Sidebar = ({ toggleSideBar, pages, url, sideBarOpen }) => {
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(muiTheme.breakpoints.down('md'));
@@ -102,55 +80,32 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
   const {
     openSubMenus,
     setOpenSubMenus,
-    saveSubMenuState,
     clearAllState
   } = useSidebarState();
 
   const [activePage, setActivePage] = useState(url);
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const searchTimeoutRef = useRef(null);
   
-  // Debounce search term to improve performance
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    
-    searchTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 200); // 200ms delay
-    
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchTerm]);
+  // Fresh theme colors - no memoization for latest values
+  const themeColor = getThemePrimaryColor(muiTheme);
+  const themeColorRgba = hexToRgba(themeColor, 0.5);
   
-  // Stable references for theme colors
-  const themeColor = useMemo(() => getThemePrimaryColor(muiTheme), [muiTheme]);
-  const themeColorRgba = useMemo(() => hexToRgba(themeColor, 0.5), [themeColor]);
-  
-  // Stable grouped pages reference with search filtering
-  const groupedPages = useMemo(() => {
+  // Fresh grouped pages - always recalculate for latest data
+  const groupedPages = (() => {
     let allPages = pages;
     
-    // Filter pages based on debounced search term
-    if (debouncedSearchTerm.trim()) {
-      const searchLower = debouncedSearchTerm.toLowerCase();
+    // Filter pages based on search term
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
       
       const filterPagesRecursively = (pagesList) => {
         return pagesList.filter(page => {
-          // Check if page name matches
           const nameMatches = page.name.toLowerCase().includes(searchLower);
           
-          // Check if any submenu items match
           let hasMatchingSubMenu = false;
           if (page.subMenu) {
             const filteredSubMenu = filterPagesRecursively(page.subMenu);
             hasMatchingSubMenu = filteredSubMenu.length > 0;
-            // Update the page with filtered submenu for display
             if (hasMatchingSubMenu) {
               page = { ...page, subMenu: filteredSubMenu };
             }
@@ -167,16 +122,15 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
     const settingsPages = allPages.filter(page => page.category === 'settings');
     
     return { mainPages, settingsPages };
-  }, [pages, debouncedSearchTerm]);
+  })();
 
   // Auto-expand menus when searching
   useEffect(() => {
-    if (debouncedSearchTerm.trim()) {
-      // Expand all menus that have matching items when searching
+    if (searchTerm.trim()) {
       const expandAllWithMatches = (pagesList, expandedSet = new Set()) => {
         pagesList.forEach(page => {
           if (page.subMenu) {
-            const searchLower = debouncedSearchTerm.toLowerCase();
+            const searchLower = searchTerm.toLowerCase();
             const hasMatches = page.subMenu.some(subPage => {
               const matches = subPage.name.toLowerCase().includes(searchLower);
               if (subPage.subMenu) {
@@ -197,29 +151,25 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
       const newExpandedMenus = expandAllWithMatches(pages);
       setOpenSubMenus(newExpandedMenus);
     }
-  }, [debouncedSearchTerm, pages]);
+  }, [searchTerm, pages]);
 
-  // Update active page when URL changes (optimized)
+  // Update active page when URL changes
   useEffect(() => {
     setActivePage(url);
     
-    // Auto-expand parent menu if a submenu item is active
+    // Auto-expand parent menus if a submenu item is active
     const expandParentMenus = (menuItems, targetUrl, parentNames = []) => {
       for (const page of menuItems) {
         const currentParents = [...parentNames, page.name];
         
-        // Check if this page matches the current URL
         if (page.route && "/" + page.route === targetUrl) {
-          // Expand all parent menus
           setOpenSubMenus(prev => {
             const newSet = new Set([...prev, ...currentParents.slice(0, -1)]);
-            saveSubMenuState(newSet);
             return newSet;
           });
           return true;
         }
         
-        // Check submenu recursively
         if (page.subMenu) {
           if (expandParentMenus(page.subMenu, targetUrl, currentParents)) {
             return true;
@@ -230,10 +180,10 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
     };
     
     expandParentMenus(pages, url);
-  }, [url, pages, saveSubMenuState]);
+  }, [url, pages]);
 
-  // Stable callback handlers
-  const handleSubMenuToggle = useCallback((pageName) => {
+  // Simple callback handlers - no useCallback for fresh execution
+  const handleSubMenuToggle = (pageName) => {
     setOpenSubMenus(prev => {
       const newSet = new Set(prev);
       if (newSet.has(pageName)) {
@@ -241,24 +191,20 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
       } else {
         newSet.add(pageName);
       }
-      
-      // Save to localStorage
-      saveSubMenuState(newSet);
-      
       return newSet;
     });
-  }, [saveSubMenuState]);
+  };
 
-  const handlePageClick = useCallback((pageName) => {
+  const handlePageClick = (pageName) => {
     setActivePage(pageName);
     // Clear search when navigating to a page
     setSearchTerm('');
     if (isMobile) {
       toggleSideBar();
     }
-  }, [isMobile, toggleSideBar]);
+  };
 
-  const renderCompactMenuItem = useCallback((page, isSubMenu = false, level = 0) => {
+  const renderCompactMenuItem = (page, isSubMenu = false, level = 0) => {
     const isActive = activePage === "/" + page.route;
     const hasActiveSubPage = page.subMenu?.some(
       subPage => {
@@ -478,9 +424,9 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
         </AnimatePresence>
       </motion.div>
     );
-  }, [activePage, openSubMenus, handleSubMenuToggle, handlePageClick, themeColor, themeColorRgba, isMobile, searchTerm]);
+  };
 
-  const renderMenuItem = useCallback((page, isSubMenu = false, level = 0) => {
+  const renderMenuItem = (page, isSubMenu = false, level = 0) => {
     const isActive = page.route && activePage === "/" + page.route;
     const hasActiveSubPage = page.subMenu?.some(
       subPage => {
@@ -611,9 +557,9 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
         </div>
       </div>
     );
-  }, [activePage, openSubMenus, handleSubMenuToggle, handlePageClick, searchTerm]);
+  };
 
-  const SidebarContent = useMemo(() => (
+  const SidebarContent = (
     <motion.div 
       className="flex flex-col h-full w-full overflow-hidden"
       initial={{ opacity: 0, x: -20 }}
@@ -666,7 +612,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                   {app?.name || 'Company Name'}
                 </Typography>
                 <Typography variant="caption" className="text-default-400 text-xs font-medium">
-                  Aero Enterprise Suite
+                  aeos365
                 </Typography>
               </div>
             </motion.div>
@@ -890,14 +836,8 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
         </div>
       </motion.div>
     </motion.div>
-  ), [
-    auth.user, 
-    groupedPages.mainPages, 
-    groupedPages.settingsPages, 
-    renderCompactMenuItem, 
-    toggleSideBar,
-    searchTerm
-  ]);
+  );
+  
   // Unified Sidebar for both Mobile and Desktop
   return (
     <Box sx={{ 
@@ -918,6 +858,6 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
       </div>
     </Box>
   );
-});
+};
 
 export default Sidebar;

@@ -76,7 +76,7 @@ const useDeviceType = () => {
   return { isMobile, isTablet, isDesktop };
 };
 
-const Header = React.memo(({ 
+const Header = ({ 
   darkMode, 
   toggleDarkMode, 
   themeDrawerOpen, 
@@ -88,25 +88,22 @@ const Header = React.memo(({
 }) => {
   const theme = useTheme(darkMode);
   
-  // Memoize the toggleSideBar function to prevent unnecessary re-renders
-  const memoizedToggleSideBar = React.useCallback(() => {
-    toggleSideBar();
-  }, [toggleSideBar]);
   const { auth, app } = usePage().props;
   const [activePage, setActivePage] = useState(url);
   const { isMobile, isTablet, isDesktop } = useDeviceType();
   const trigger = useScrollTrigger();
+  
   useEffect(() => {
     setActivePage(url);
   }, [url]);
 
-  const handleNavigation = useCallback((route, method = 'get') => {
+  const handleNavigation = (route, method = 'get') => {
     router.visit(route, {
       method,
-      preserveState: true,
-      preserveScroll: true
+      preserveState: false, // Changed to false for fresh data
+      preserveScroll: false // Changed to false for fresh UI state
     });
-  }, []);
+  };
   // Mobile Header Component
   const MobileHeader = () => (
   <Box sx={{ p: 1.5 }}>
@@ -115,7 +112,7 @@ const Header = React.memo(({
         <Navbar
           shouldHideOnScroll
           maxWidth="full"
-          height="60px" // Increased from 50px for better logo space
+          height="60px"
           classNames={{
             base: "bg-transparent border-none shadow-none",
             wrapper: "px-2 sm:px-3 max-w-full",
@@ -1072,11 +1069,11 @@ const Header = React.memo(({
 
   return (
     <>
-      {isMobile && <MobileHeader toggleSideBar={memoizedToggleSideBar} />}
-      {(isTablet || isDesktop) && <DesktopHeader toggleSideBar={memoizedToggleSideBar} />}
+      {isMobile && <MobileHeader />}
+      {(isTablet || isDesktop) && <DesktopHeader />}
     </>
   );
-});
+};
 
 Header.displayName = 'Header';
 
