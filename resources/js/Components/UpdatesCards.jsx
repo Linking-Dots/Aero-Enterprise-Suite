@@ -17,7 +17,8 @@ import {
     XCircleIcon,
     DocumentTextIcon,
     SunIcon,
-    UserIcon
+    UserIcon,
+    Bars3BottomLeftIcon
 } from '@heroicons/react/24/outline';
 
 dayjs.extend(isBetween);
@@ -550,14 +551,15 @@ const UpdatesCards = () => {
                             <Divider />
                             <CardContent>
                                 <Box className="flex items-center gap-3">
-                                    <CalendarDaysIcon className="w-5 h-5 text-primary" />
+                                    
                                     <Box>
                                         <Typography variant="body1" fontWeight="600" color="text.primary">
+                                            <InformationCircleIcon className="w-4 h-4" />
                                             {upcomingHoliday.title}
                                         </Typography>
                                         
                                         <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
-                                            <ClockIcon className="w-4 h-4" />
+                                            <CalendarDaysIcon className="w-4 h-4" />
                                             {new Date(upcomingHoliday.from_date).toLocaleDateString('en-US', {
                                                 month: 'long',
                                                 day: 'numeric',
@@ -569,6 +571,7 @@ const UpdatesCards = () => {
                                             })}
                                         </Typography>
                                         <Typography variant="body3" color="text.secondary">
+                                            <Bars3BottomLeftIcon className="w-4 h-4" />
                                             {upcomingHoliday.description}
                                         </Typography>
                                     </Box>
