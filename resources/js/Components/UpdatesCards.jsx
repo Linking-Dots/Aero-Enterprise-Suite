@@ -553,8 +553,9 @@ const UpdatesCards = () => {
                                     <CalendarDaysIcon className="w-5 h-5 text-primary" />
                                     <Box>
                                         <Typography variant="body1" fontWeight="600" color="text.primary">
-                                            {upcomingHoliday.name}
+                                            {upcomingHoliday.title}
                                         </Typography>
+                                        
                                         <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
                                             <ClockIcon className="w-4 h-4" />
                                             {new Date(upcomingHoliday.from_date).toLocaleDateString('en-US', {
@@ -566,6 +567,9 @@ const UpdatesCards = () => {
                                                 day: 'numeric',
                                                 year: 'numeric'
                                             })}
+                                        </Typography>
+                                        <Typography variant="body3" color="text.secondary">
+                                            {upcomingHoliday.description}
                                         </Typography>
                                     </Box>
                                 </Box>
