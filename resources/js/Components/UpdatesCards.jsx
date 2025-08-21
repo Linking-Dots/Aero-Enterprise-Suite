@@ -553,7 +553,7 @@ const UpdatesCards = () => {
                                 <Box className="flex items-center gap-3">
                                     
                                     <Box>
-                                        <Typography variant="body1" fontWeight="600" color="text.primary">
+                                        <Typography variant="body1" fontWeight="600" color="text.primary" className="flex items-center gap-1 mt-1">
                                             <InformationCircleIcon className="w-4 h-4" />
                                             {upcomingHoliday.title}
                                         </Typography>
@@ -570,7 +570,7 @@ const UpdatesCards = () => {
                                                 year: 'numeric'
                                             })}
                                         </Typography>
-                                        <Typography variant="body3" color="text.secondary">
+                                        <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
                                             <Bars3BottomLeftIcon className="w-4 h-4" />
                                             {upcomingHoliday.description}
                                         </Typography>
