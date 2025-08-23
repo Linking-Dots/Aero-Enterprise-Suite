@@ -38,9 +38,11 @@ import {
   BuildingOfficeIcon,
   DevicePhoneMobileIcon,
   ComputerDesktopIcon,
+  DeviceTabletIcon,
   LockClosedIcon,
   LockOpenIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ClockIcon
 } from "@heroicons/react/24/outline";
 
 const UsersTable = ({ 
@@ -66,6 +68,36 @@ const UsersTable = ({
 }) => {
   const [loadingStates, setLoadingStates] = useState({});
   const theme = useTheme();
+
+  // Device detection functions (copied from UserDeviceManagement)
+  const getDeviceIcon = (userAgent, className = "w-5 h-5") => {
+    const ua = userAgent?.toLowerCase() || '';
+    
+    if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+      return <DevicePhoneMobileIcon className={`${className} text-primary`} />;
+    } else if (ua.includes('tablet') || ua.includes('ipad')) {
+      return <DeviceTabletIcon className={`${className} text-secondary`} />;
+    } else {
+      return <ComputerDesktopIcon className={`${className} text-default-500`} />;
+    }
+  };
+
+  const getDeviceType = (userAgent) => {
+    const ua = userAgent?.toLowerCase() || '';
+    
+    if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+      return 'Mobile Device';
+    } else if (ua.includes('tablet') || ua.includes('ipad')) {
+      return 'Tablet';
+    } else {
+      return 'Desktop';
+    }
+  };
+
+ 
+
+
+
 
   const statusColorMap = {
     active: "success",
@@ -126,43 +158,7 @@ const UsersTable = ({
     return promise;
   }
 
-  const handleStatusToggle = async (userId, value) => {
-    setLoading(userId, 'status', true);
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        const response = await axios.put(route('user.toggleStatus', { id: userId }), {
-          active: value,
-        });
-        if (response.status === 200) {
-          if (toggleUserStatusOptimized) {
-            toggleUserStatusOptimized(userId, value);
-          }
-          resolve([response.data.message || 'User status updated successfully']);
-        }
-      } catch (error) {
-        if (error.response?.status === 422) {
-          reject(error.response.data.errors || ['Failed to update user status.']);
-        } else {
-          reject(['An unexpected error occurred. Please try again later.']);
-        }
-      } finally {
-        setLoading(userId, 'status', false);
-      }
-    });
-    toast.promise(promise, {
-      pending: 'Updating user status...',
-      success: {
-        render({ data }) {
-          return data.join(', ');
-        },
-      },
-      error: {
-        render({ data }) {
-          return Array.isArray(data) ? data.join(', ') : data;
-        },
-      },
-    });
-  };
+
 
   const handleDelete = async (userId) => {
     setLoading(userId, 'delete', true);
@@ -280,7 +276,7 @@ const UsersTable = ({
         const safeIndex = typeof rowIndex === 'number' ? rowIndex : 0;
         const serialNumber = startIndex + safeIndex + 1;
         return <div className="flex items-center justify-center">
-                <div className="flex items-center justify-center w-8 h-8 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
+                <div className="flex items-center justify-center w-8 h-8 bg-content1/20 backdrop-blur-md rounded-lg border border-divider">
                   <span className="text-sm font-semibold text-foreground">
                     {serialNumber}
                   </span>
@@ -335,6 +331,7 @@ const UsersTable = ({
         );
 
       case "device_status":
+        const isToggling = isLoading(user.id, 'deviceToggle');
         return (
           <div className="flex items-center space-x-2">
             {user.single_device_login ? (
@@ -344,23 +341,56 @@ const UsersTable = ({
                   variant="flat"
                   color={user.active_device ? "warning" : "success"}
                   startContent={
-                    user.active_device ? (
+                    isToggling ? (
+                      <div className="animate-spin">
+                        <ArrowPathIcon className="w-3 h-3" />
+                      </div>
+                    ) : user.active_device ? (
                       <LockClosedIcon className="w-3 h-3" />
                     ) : (
                       <LockOpenIcon className="w-3 h-3" />
                     )
                   }
                 >
-                  {user.active_device ? 'Locked' : 'Free'}
+                  {isToggling ? 'Loading...' : user.active_device ? 'Locked' : 'Free'}
                 </Chip>
-                {user.active_device && (
-                  <Tooltip content={`Device: ${user.active_device.device_name || 'Unknown'}`}>
-                    <div className="flex items-center">
-                      {user.active_device.device_type === 'mobile' ? (
-                        <DevicePhoneMobileIcon className="w-4 h-4 text-default-400" />
-                      ) : (
-                        <ComputerDesktopIcon className="w-4 h-4 text-default-400" />
-                      )}
+                {user.active_device && !isToggling && (
+                  <Tooltip 
+                    content={
+                      <div className="bg-content1/20 backdrop-blur-md border border-divider rounded-lg p-4 shadow-2xl max-w-sm">
+                        <div className="flex items-center gap-3 mb-3">
+                          {getDeviceIcon(user.active_device.user_agent, "w-5 h-5")}
+                          <div>
+                            <div className="font-semibold text-foreground text-sm">
+                              {user.active_device.device_name || 'Unknown Device'}
+                            </div>
+                            <div className="text-xs text-default-500">
+                              {getDeviceType(user.active_device.user_agent)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 text-xs">
+                          
+                          
+                          <div className="pt-2 mt-2 border-t border-white/20">
+                            <div className="flex items-center gap-1">
+                              <ClockIcon className="w-3 h-3 text-success" />
+                              <span className="text-success text-xs font-medium">
+                                {user.active_device.is_active ? 'Currently Active' : 'Inactive'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    placement="top"
+                    classNames={{
+                      content: "p-0 bg-transparent shadow-none border-none"
+                    }}
+                  >
+                    <div className="flex items-center p-1 rounded hover:bg-content1/10 transition-colors cursor-default">
+                      {getDeviceIcon(user.active_device.user_agent, "w-4 h-4")}
                     </div>
                   </Tooltip>
                 )}
@@ -370,28 +400,45 @@ const UsersTable = ({
                 size="sm"
                 variant="flat"
                 color="default"
-                startContent={<ShieldCheckIcon className="w-3 h-3" />}
+                startContent={
+                  isToggling ? (
+                    <div className="animate-spin">
+                      <ArrowPathIcon className="w-3 h-3" />
+                    </div>
+                  ) : (
+                    <ShieldCheckIcon className="w-3 h-3" />
+                  )
+                }
               >
-                Disabled
+                {isToggling ? 'Loading...' : 'Disabled'}
               </Chip>
             )}
           </div>
         );
         
       case "status":
+        console.log('Rendering status for user:', user);
         return (
           <div className="flex items-center justify-center">
-            <Switch
-              size="sm"
-              color={user.active ? "success" : "danger"}
-              isSelected={user.active}
-              isDisabled={isLoading(user.id, 'status')}
-              startContent={isLoading(user.id, 'status') ? <Spinner size="sm" /> : null}
-              onChange={() => toggleUserStatus(user.id, user.active)}
-              classNames={{
-                wrapper: "group-data-[selected=true]:bg-success-500 group-data-[selected=false]:bg-danger-500",
-              }}
-            />
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={user.active}
+                onChange={() => toggleUserStatus(user.id, user.active)}
+                disabled={isLoading(user.id, 'status')}
+              />
+              <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-opacity-30 rounded-full peer transition-all duration-300 ${
+                user.active 
+                  ? 'bg-green-500 peer-focus:ring-green-300' 
+                  : 'bg-red-500 peer-focus:ring-red-300'
+              } peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
+              {isLoading(user.id, 'status') && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </label>
             <span className="ml-2 text-xs">
               {user.active ? "Active" : "Inactive"}
             </span>
@@ -489,30 +536,61 @@ const UsersTable = ({
                 <DropdownItem
                   textValue="Device Toggle"
                   onPress={() => {
-                    if (toggleSingleDeviceLogin) {
-                      toggleSingleDeviceLogin(user.id, !user.single_device_login);
+                    if (toggleSingleDeviceLogin && !isLoading(user.id, 'deviceToggle')) {
+                      setLoading(user.id, 'deviceToggle', true);
+                      toggleSingleDeviceLogin(user.id, !user.single_device_login)
+                        .finally(() => {
+                          setLoading(user.id, 'deviceToggle', false);
+                        });
                     }
                   }}
-                  isDisabled={deviceActions[user.id]}
-                  startContent={user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
+                  isDisabled={deviceActions[user.id] || isLoading(user.id, 'deviceToggle')}
+                  startContent={
+                    isLoading(user.id, 'deviceToggle') ? (
+                      <div className="animate-spin">
+                        <ArrowPathIcon className="w-4 h-4" />
+                      </div>
+                    ) : user.single_device_login ? (
+                      <LockOpenIcon className="w-4 h-4" />
+                    ) : (
+                      <LockClosedIcon className="w-4 h-4" />
+                    )
+                  }
                   className={user.single_device_login ? "text-orange-500" : "text-green-500"}
                 >
-                  {user.single_device_login ? 'Disable Device Lock' : 'Enable Device Lock'}
+                  {isLoading(user.id, 'deviceToggle') 
+                    ? 'Processing...' 
+                    : user.single_device_login 
+                      ? 'Disable Device Lock' 
+                      : 'Enable Device Lock'
+                  }
                 </DropdownItem>
                 
                 {user.single_device_login && user.active_device && (
                   <DropdownItem
                     textValue="Reset Device"
                     onPress={() => {
-                      if (resetUserDevice) {
-                        resetUserDevice(user.id);
+                      if (resetUserDevice && !isLoading(user.id, 'deviceReset')) {
+                        setLoading(user.id, 'deviceReset', true);
+                        resetUserDevice(user.id)
+                          .finally(() => {
+                            setLoading(user.id, 'deviceReset', false);
+                          });
                       }
                     }}
-                    isDisabled={deviceActions[user.id]}
-                    startContent={<ArrowPathIcon className="w-4 h-4" />}
+                    isDisabled={deviceActions[user.id] || isLoading(user.id, 'deviceReset')}
+                    startContent={
+                      isLoading(user.id, 'deviceReset') ? (
+                        <div className="animate-spin">
+                          <ArrowPathIcon className="w-4 h-4" />
+                        </div>
+                      ) : (
+                        <ArrowPathIcon className="w-4 h-4" />
+                      )
+                    }
                     className="text-red-500"
                   >
-                    Reset Device
+                    {isLoading(user.id, 'deviceReset') ? 'Resetting...' : 'Reset Device'}
                   </DropdownItem>
                 )}
                 
@@ -539,7 +617,7 @@ const UsersTable = ({
     if (!allUsers || !totalUsers || loading) return null;
     
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2 border-t border-white/10 bg-white/5 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2 border-t border-divider bg-content1/50 backdrop-blur-md">
         <span className="text-xs text-default-400 mb-3 sm:mb-0">
           Showing {((pagination.currentPage - 1) * pagination.perPage) + 1} to {
             Math.min(pagination.currentPage * pagination.perPage, totalUsers)
@@ -555,8 +633,8 @@ const UsersTable = ({
           variant="bordered"
           showControls
           classNames={{
-            item: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-            cursor: "bg-white/20 backdrop-blur-md border-white/20",
+            item: "bg-content1/20 backdrop-blur-md border-divider hover:bg-content1/30",
+            cursor: "bg-content1/40 backdrop-blur-md border-divider",
           }}
         />
       </div>
@@ -564,18 +642,18 @@ const UsersTable = ({
   };
 
   return (
-    <div className="w-full overflow-hidden flex flex-col border border-white/10 rounded-lg" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-      <div className="overflow-auto flex-grow">
+    <div className="w-full overflow-hidden flex flex-col border border-divider rounded-lg bg-content1/10 backdrop-blur-md" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+      <div className="overflow-auto flex-grow relative table-scroll-container frozen-column-container">
         <Table
           aria-label="Users table"
           removeWrapper
           classNames={{
             base: "bg-transparent min-w-[800px]", // Set minimum width to prevent squishing on small screens
-            th: "bg-white/5 backdrop-blur-md text-default-500 border-b border-white/10 font-medium text-xs sticky top-0 z-10",
-            td: "border-b border-white/5 py-3",
+            th: "backdrop-blur-md text-default-500 border-b border-divider font-medium text-xs sticky top-0 z-30 shadow-sm",
+            td: "border-b border-divider/50 py-3",
             table: "border-collapse",
-            thead: "bg-white/5",
-            tr: "hover:bg-white/5"
+            thead: "sticky top-0 z-30",
+            tr: "" // Remove conflicting hover styles, let CSS handle it
           }}
         >
           <TableHeader columns={columns}>
@@ -583,7 +661,14 @@ const UsersTable = ({
               <TableColumn 
                 key={column.uid} 
                 align={column.uid === "actions" ? "center" : column.uid === "sl" ? "center" : "start"}
-                width={column.uid === "sl" ? 60 : undefined}
+                width={column.uid === "sl" ? 60 : column.uid === "user" ? 240 : undefined}
+                className={
+                  column.uid === "sl" 
+                    ? "sticky-header-sl backdrop-blur-md" 
+                    : column.uid === "user" 
+                    ? "sticky-header-user backdrop-blur-md" 
+                    : "backdrop-blur-md sticky top-0 z-30"
+                }
               >
                 {column.name}
               </TableColumn>
@@ -599,9 +684,24 @@ const UsersTable = ({
               // Find the index of this item in the allUsers array to ensure accurate serial numbers
               const itemIndex = allUsers ? allUsers.findIndex(user => user.id === item.id) : index;
               return (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className="table-row-hover">
                   {(columnKey) => (
-                    <TableCell>{renderCell(item, columnKey, itemIndex)}</TableCell>
+                    <TableCell 
+                      className={
+                        columnKey === "sl" 
+                          ? "frozen-column sticky left-0 z-20 backdrop-blur-md border-r border-divider/30" 
+                          : columnKey === "user" 
+                          ? "frozen-column-user sticky z-20 backdrop-blur-md border-r border-divider/30" 
+                          : ""
+                      }
+                      style={
+                        columnKey === "user" 
+                          ? { left: '60px' } 
+                          : {}
+                      }
+                    >
+                      {renderCell(item, columnKey, itemIndex)}
+                    </TableCell>
                   )}
                 </TableRow>
               );

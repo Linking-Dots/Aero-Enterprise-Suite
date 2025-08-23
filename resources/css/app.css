@@ -3,6 +3,9 @@
 /* Import theme patterns for background support */
 @import './theme-patterns.css';
 
+/* Import frozen columns styling */
+@import './frozen-columns.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

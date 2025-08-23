@@ -148,8 +148,9 @@ self.addEventListener('activate', event => {
             // Take control of all clients immediately
             await self.clients.claim();
             
+            // Temporarily disable periodic version checking to prevent infinite reloads
             // Start periodic version checking
-            setInterval(checkVersion, 5 * 60 * 1000); // Check every 5 minutes
+            // setInterval(checkVersion, 5 * 60 * 1000); // Check every 5 minutes
         })()
     );
 });

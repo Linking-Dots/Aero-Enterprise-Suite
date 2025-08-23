@@ -1,6 +1,8 @@
 // Service Worker Registration and Management
 // This module handles service worker registration, updates, and version control
 
+import SERVICE_WORKER_CONFIG from './serviceWorkerConfig.js';
+
 class ServiceWorkerManager {
     constructor() {
         this.registration = null;
@@ -14,16 +16,18 @@ class ServiceWorkerManager {
 
     // Register service worker
     async register() {
-        if (!('serviceWorker' in navigator)) {
-            console.log('Service Worker not supported');
+        if (!SERVICE_WORKER_CONFIG.shouldEnable()) {
+            console.log('Service Worker registration skipped:', {
+                isDevelopment: SERVICE_WORKER_CONFIG.isDevelopment(),
+                hostname: window.location.hostname
+            });
             return false;
         }
 
         try {
-            this.registration = await navigator.serviceWorker.register('/service-worker.js', {
-                scope: '/',
-                updateViaCache: 'none'
-            });
+            this.registration = await navigator.serviceWorker.register('/service-worker.js', 
+                SERVICE_WORKER_CONFIG.getRegistrationOptions()
+            );
 
             console.log('Service Worker registered:', this.registration);
 
@@ -73,7 +77,8 @@ class ServiceWorkerManager {
         // Listen for controller change (after update)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             console.log('Service Worker controller changed');
-            window.location.reload();
+            // Temporarily disable automatic reload to prevent infinite reload loops
+            // window.location.reload();
         });
     }
 
@@ -240,8 +245,8 @@ class ServiceWorkerManager {
 // Create singleton instance
 const serviceWorkerManager = new ServiceWorkerManager();
 
-// Auto-register when module loads (in both development and production)
-const shouldRegister = 'serviceWorker' in navigator;
+// Auto-register when module loads (only in production or when explicitly enabled)
+const shouldRegister = SERVICE_WORKER_CONFIG.shouldEnable();
 
 if (shouldRegister) {
     // Register after page load to avoid blocking
@@ -252,6 +257,12 @@ if (shouldRegister) {
     } else {
         setTimeout(() => serviceWorkerManager.register(), 1000);
     }
+} else {
+    console.log('Service Worker registration skipped:', {
+        isDevelopment: SERVICE_WORKER_CONFIG.isDevelopment(),
+        hostname: window.location.hostname,
+        reason: SERVICE_WORKER_CONFIG.isDevelopment() ? 'Development environment' : 'Service Worker not supported'
+    });
 }
 
 export default serviceWorkerManager;

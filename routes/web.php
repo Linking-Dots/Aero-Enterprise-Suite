@@ -18,7 +18,6 @@ use App\Http\Controllers\JurisdictionController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\LMSController;
-use App\Http\Controllers\PicnicController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileImageController;
@@ -263,6 +262,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/{user}/devices/list', [UserDeviceController::class, 'list'])->name('users.device.list');
         Route::post('/users/devices/toggle', [UserDeviceController::class, 'toggleSingleDeviceLogin'])->name('users.device.toggle');
         Route::post('/users/devices/reset', [UserDeviceController::class, 'resetUserDevices'])->name('users.device.reset');
+        Route::post('/users/devices/logout', [UserDeviceController::class, 'forceLogoutDevice'])->name('users.device.logout');
     });
 
     // User's own device management

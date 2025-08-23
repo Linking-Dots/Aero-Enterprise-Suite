@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\UserDevice;
 use App\Services\DeviceTrackingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +24,11 @@ class UserDeviceController extends Controller
     {
         $this->authorize('viewAny', User::class); // Ensure admin permissions
 
+        // Load the current device relationship and other needed data
+        $user->load('currentDevice', 'department', 'roles');
+
         $devices = $user->devices()
-            ->orderBy('last_seen_at', 'desc')
+            ->orderBy('last_activity', 'desc')
             ->get()
             ->map(function ($device) {
                 return [
@@ -35,7 +37,7 @@ class UserDeviceController extends Controller
                     'user_agent' => $device->user_agent,
                     'ip_address' => $device->ip_address,
                     'location' => $device->location,
-                    'last_seen_at' => $device->last_seen_at,
+                    'last_seen_at' => $device->last_activity,
                     'is_active' => $device->is_active,
                     'created_at' => $device->created_at,
                 ];
@@ -47,11 +49,25 @@ class UserDeviceController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'phone' => $user->phone ?? null,
+                'profile_image_url' => $user->profile_image_url ?? null,
+                'department' => $user->department ? [
+                    'id' => $user->department->id,
+                    'name' => $user->department->name,
+                    'code' => $user->department->code ?? null,
+                ] : null,
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                    ];
+                }),
+                'created_at' => $user->created_at,
                 'single_device_login' => $user->single_device_login,
-                'active_device' => $user->activeDevice ? [
-                    'id' => $user->activeDevice->id,
-                    'device_name' => $user->activeDevice->device_name,
-                    'last_seen_at' => $user->activeDevice->last_seen_at,
+                'active_device' => $user->currentDevice ? [
+                    'id' => $user->currentDevice->id,
+                    'device_name' => $user->currentDevice->device_name,
+                    'last_seen_at' => $user->currentDevice->last_activity,
                 ] : null,
             ],
             'devices' => $devices,
@@ -65,8 +81,11 @@ class UserDeviceController extends Controller
     {
         $this->authorize('viewAny', User::class); // Ensure admin permissions
 
+        // Load the current device relationship and other needed data
+        $user->load('currentDevice', 'department', 'roles');
+
         $devices = $user->devices()
-            ->orderBy('last_seen_at', 'desc')
+            ->orderBy('last_activity', 'desc')
             ->get()
             ->map(function ($device) {
                 return [
@@ -75,7 +94,7 @@ class UserDeviceController extends Controller
                     'user_agent' => $device->user_agent,
                     'ip_address' => $device->ip_address,
                     'location' => $device->location,
-                    'last_seen_at' => $device->last_seen_at,
+                    'last_seen_at' => $device->last_activity,
                     'is_active' => $device->is_active,
                     'created_at' => $device->created_at,
                 ];
@@ -84,6 +103,31 @@ class UserDeviceController extends Controller
         return response()->json([
             'devices' => $devices,
             'count' => $devices->count(),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone ?? null,
+                'profile_image_url' => $user->profile_image_url ?? null,
+                'department' => $user->department ? [
+                    'id' => $user->department->id,
+                    'name' => $user->department->name,
+                    'code' => $user->department->code ?? null,
+                ] : null,
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                    ];
+                }),
+                'created_at' => $user->created_at,
+                'single_device_login' => $user->single_device_login,
+                'active_device' => $user->currentDevice ? [
+                    'id' => $user->currentDevice->id,
+                    'device_name' => $user->currentDevice->device_name,
+                    'last_seen_at' => $user->currentDevice->last_activity,
+                ] : null,
+            ],
         ]);
     }
 
@@ -108,15 +152,18 @@ class UserDeviceController extends Controller
             $user->disableSingleDeviceLogin();
         }
 
+        // Reload the user with current device relationship to get updated state
+        $user->load('currentDevice');
+
         return response()->json([
             'success' => true,
-            'message' => 'Single device login ' . ($enabled ? 'enabled' : 'disabled') . ' for user.',
+            'message' => __('device.single_device_login.'.($enabled ? 'enabled' : 'disabled')),
             'user' => [
                 'id' => $user->id,
                 'single_device_login' => $user->single_device_login,
-                'active_device' => $user->activeDevice ? [
-                    'id' => $user->activeDevice->id,
-                    'device_name' => $user->activeDevice->device_name,
+                'active_device' => $user->currentDevice ? [
+                    'id' => $user->currentDevice->id,
+                    'device_name' => $user->currentDevice->device_name,
                 ] : null,
             ],
         ]);
@@ -138,7 +185,7 @@ class UserDeviceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'User device has been reset. They can now login from a new device.',
+            'message' => __('device.device_reset.success'),
             'user' => [
                 'id' => $user->id,
                 'single_device_login' => $user->single_device_login,
@@ -153,9 +200,9 @@ class UserDeviceController extends Controller
     public function userDevices()
     {
         $user = Auth::user();
-        
+
         $devices = $user->devices()
-            ->orderBy('last_seen_at', 'desc')
+            ->orderBy('last_activity', 'desc')
             ->get()
             ->map(function ($device) {
                 return [
@@ -164,7 +211,7 @@ class UserDeviceController extends Controller
                     'user_agent' => $device->user_agent,
                     'ip_address' => $device->ip_address,
                     'location' => $device->location,
-                    'last_seen_at' => $device->last_seen_at,
+                    'last_seen_at' => $device->last_activity,
                     'is_active' => $device->is_active,
                     'is_current' => $device->session_id === request()->session()->getId(),
                     'created_at' => $device->created_at,
@@ -178,6 +225,35 @@ class UserDeviceController extends Controller
                 'total' => $devices->count(),
                 'active' => $devices->where('is_active', true)->count(),
                 'single_device_enabled' => $user->single_device_login,
+            ],
+        ]);
+    }
+
+    /**
+     * API: Force logout a specific device
+     */
+    public function forceLogoutDevice(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'device_id' => 'required|exists:user_devices,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $this->authorize('update', $user); // Ensure admin permissions
+
+        $device = $user->devices()->findOrFail($request->device_id);
+
+        // Deactivate the device
+        $device->deactivate();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('device.device_logout.success'),
+            'device' => [
+                'id' => $device->id,
+                'device_name' => $device->device_name,
+                'is_active' => false,
             ],
         ]);
     }

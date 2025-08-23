@@ -9,6 +9,7 @@ use App\Models\HRM\Department;
 use App\Models\HRM\Designation;
 use App\Models\HRM\Leave;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -18,7 +19,6 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class User
@@ -30,9 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class User extends Authenticatable implements HasMedia
 {
-    use HasFactory, Notifiable, HasRoles, HasPushSubscriptions, InteractsWithMedia, SoftDeletes, TwoFactorAuthenticatable;
-
-
+    use HasFactory, HasPushSubscriptions, HasRoles, InteractsWithMedia, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -180,7 +178,6 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Education::class);
     }
 
-
     public function setActiveStatus(bool $status)
     {
         if ($status) {
@@ -248,6 +245,14 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Get the active device (alias for currentDevice for compatibility).
+     */
+    public function activeDevice()
+    {
+        return $this->currentDevice();
+    }
+
+    /**
      * Check if single device login is enabled for this user.
      */
     public function hasSingleDeviceLoginEnabled(): bool
@@ -256,9 +261,17 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Accessor for single_device_login (for frontend compatibility).
+     */
+    public function getSingleDeviceLoginAttribute(): bool
+    {
+        return $this->single_device_login_enabled;
+    }
+
+    /**
      * Enable single device login for this user.
      */
-    public function enableSingleDeviceLogin(string $reason = null): bool
+    public function enableSingleDeviceLogin(?string $reason = null): bool
     {
         return $this->update([
             'single_device_login_enabled' => true,
@@ -269,7 +282,7 @@ class User extends Authenticatable implements HasMedia
     /**
      * Disable single device login for this user.
      */
-    public function disableSingleDeviceLogin(string $reason = null): bool
+    public function disableSingleDeviceLogin(?string $reason = null): bool
     {
         return $this->update([
             'single_device_login_enabled' => false,
@@ -280,7 +293,7 @@ class User extends Authenticatable implements HasMedia
     /**
      * Reset user devices (admin action).
      */
-    public function resetDevices(string $reason = null): bool
+    public function resetDevices(?string $reason = null): bool
     {
         // Deactivate all current devices
         $this->devices()->active()->update([
@@ -300,7 +313,7 @@ class User extends Authenticatable implements HasMedia
     public function canLoginFromDevice(string $deviceId): bool
     {
         // If single device login is not enabled, allow login
-        if (!$this->hasSingleDeviceLoginEnabled()) {
+        if (! $this->hasSingleDeviceLoginEnabled()) {
             return true;
         }
 
@@ -318,7 +331,7 @@ class User extends Authenticatable implements HasMedia
         $hasActiveDevices = $this->activeDevices()->exists();
 
         // If no active devices, allow login (first device or after reset)
-        return !$hasActiveDevices;
+        return ! $hasActiveDevices;
     }
 
     /**
@@ -347,10 +360,12 @@ class User extends Authenticatable implements HasMedia
         try {
             // Only use MediaLibrary - check if user has media in the profile_images collection
             $url = $this->getFirstMediaUrl('profile_images');
-            return !empty($url) ? $url : null;
+
+            return ! empty($url) ? $url : null;
         } catch (\Exception $e) {
             // Log the error and return null
-            Log::warning('Failed to get profile image URL for user ' . $this->id . ': ' . $e->getMessage());
+            Log::warning('Failed to get profile image URL for user '.$this->id.': '.$e->getMessage());
+
             return null;
         }
     }
