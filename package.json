@@ -54,6 +54,7 @@
         "@emotion/styled": "^11.13.0",
         "@heroicons/react": "^2.2.0",
         "@heroui/react": "^2.7.6",
+        "@heroui/theme": "^2.4.5",
         "@hookform/resolvers": "^5.2.1",
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/progress": "^0.1.2",
