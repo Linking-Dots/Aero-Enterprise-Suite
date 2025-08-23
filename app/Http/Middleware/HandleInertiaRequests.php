@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\CompanySetting;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
@@ -27,7 +28,7 @@ class HandleInertiaRequests extends Middleware
     /**
      * Handle the incoming request.
      */
-    public function handle(Request $request, callable $next)
+    public function handle(Request $request, Closure $next)
     {
         // For protected routes, ensure user is authenticated before processing Inertia
         if ($this->isProtectedRoute($request)) {
