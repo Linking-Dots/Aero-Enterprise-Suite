@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Dashboard({ auth }) {
+
     console.log(auth)
 
     const [updateMap, setUpdateMap] = useState(false);

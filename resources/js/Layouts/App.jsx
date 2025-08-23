@@ -241,7 +241,8 @@ const App = React.memo(({ children }) => {
         }
     }, [isMobile]); // Only trigger when screen size changes
     
-    // Session check with optimized interval (persistent across navigations)
+    // Session check is now handled by AuthGuard for better UX
+    // This keeps the existing modal as a fallback for edge cases
     useEffect(() => {
         if (!currentAuth?.user) return;
 
@@ -256,20 +257,18 @@ const App = React.memo(({ children }) => {
                     }
                 }
             } catch (error) {
-                console.error('Session check failed:', error);
-                setSessionExpired(true);
-                if (sessionCheckRef.current) {
-                    clearInterval(sessionCheckRef.current);
-                    sessionCheckRef.current = null;
-                }
+                console.error('Background session check failed:', error);
+                // Don't show modal for background check failures
+                // Let AuthGuard handle auth redirects
             }
         };
 
-        // Check every 15 seconds for fresh session state
+        // Check every 30 seconds for background session validation
+        // Reduced frequency since AuthGuard handles primary auth
         const initialTimeout = setTimeout(() => {
             checkSession();
-            sessionCheckRef.current = setInterval(checkSession, 15000);
-        }, 5000);
+            sessionCheckRef.current = setInterval(checkSession, 30000);
+        }, 10000);
 
         return () => {
             clearTimeout(initialTimeout);
