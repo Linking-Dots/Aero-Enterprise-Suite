@@ -25,9 +25,7 @@ return new class extends Migration
                 $table->timestamp('two_factor_confirmed_at')->nullable()->after('two_factor_recovery_codes');
             }
 
-            if (!Schema::hasColumn('users', 'profile_photo_path')) {
-                $table->string('profile_photo_path')->nullable()->after('profile_image');
-            }
+       
 
             // Security tracking columns
             if (!Schema::hasColumn('users', 'last_login_at')) {
@@ -155,7 +153,6 @@ return new class extends Migration
                 'two_factor_secret',
                 'two_factor_recovery_codes',
                 'two_factor_confirmed_at',
-                'profile_photo_path',
                 'last_login_at',
                 'last_login_ip',
                 'login_count',
