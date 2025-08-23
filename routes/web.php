@@ -46,7 +46,14 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::middleware(['auth', 'verified', 'single_device'])->group(function () {
+// Conditionally apply single_device middleware only if the class exists
+// This prevents errors on servers where the middleware hasn't been deployed yet
+$middlewareStack = ['auth', 'verified'];
+if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
+    $middlewareStack[] = 'single_device';
+}
+
+Route::middleware($middlewareStack)->group(function () {
 
     Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
 
