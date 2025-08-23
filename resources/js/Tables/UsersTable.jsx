@@ -35,7 +35,12 @@ import {
   HashtagIcon,
   CheckCircleIcon,
   XCircleIcon,
-  BuildingOfficeIcon 
+  BuildingOfficeIcon,
+  DevicePhoneMobileIcon,
+  ComputerDesktopIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline";
 
 const UsersTable = ({ 
@@ -54,6 +59,10 @@ const UsersTable = ({
   deleteUserOptimized,
   toggleUserStatusOptimized,
   updateUserRolesOptimized,
+  // Device management functions
+  toggleSingleDeviceLogin,
+  resetUserDevice,
+  deviceActions = {},
 }) => {
   const [loadingStates, setLoadingStates] = useState({});
   const theme = useTheme();
@@ -203,6 +212,7 @@ const UsersTable = ({
       { name: "USER", uid: "user" },
       { name: "EMAIL", uid: "email" },
       { name: "DEPARTMENT", uid: "department" },
+      { name: "DEVICE STATUS", uid: "device_status" },
       { name: "STATUS", uid: "status" },
       { name: "ROLES", uid: "roles" },
       { name: "ACTIONS", uid: "actions" }
@@ -212,8 +222,17 @@ const UsersTable = ({
     if (!isMobile && !isTablet) {
       baseColumns.splice(3, 0, { name: "PHONE", uid: "phone" });
     } else if (isMobile) {
-      // On mobile, remove phone and ensure roles column stays
+      // On mobile, remove phone and department to make room for device status
       baseColumns.splice(baseColumns.findIndex(col => col.uid === "department"), 1);
+      baseColumns.splice(baseColumns.findIndex(col => col.uid === "device_status"), 1);
+    } else if (isTablet) {
+      // On tablet, keep device status but maybe adjust positioning
+      const deviceIndex = baseColumns.findIndex(col => col.uid === "device_status");
+      if (deviceIndex > -1) {
+        // Move device status after user column
+        const deviceCol = baseColumns.splice(deviceIndex, 1)[0];
+        baseColumns.splice(2, 0, deviceCol);
+      }
     }
     
     return baseColumns;
@@ -312,6 +331,50 @@ const UsersTable = ({
           <div className="flex items-center">
             <BuildingOfficeIcon className="w-4 h-4 text-default-400 mr-2" />
             <span className="text-sm">{user?.department || "N/A"}</span>
+          </div>
+        );
+
+      case "device_status":
+        return (
+          <div className="flex items-center space-x-2">
+            {user.single_device_login ? (
+              <>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  color={user.active_device ? "warning" : "success"}
+                  startContent={
+                    user.active_device ? (
+                      <LockClosedIcon className="w-3 h-3" />
+                    ) : (
+                      <LockOpenIcon className="w-3 h-3" />
+                    )
+                  }
+                >
+                  {user.active_device ? 'Locked' : 'Free'}
+                </Chip>
+                {user.active_device && (
+                  <Tooltip content={`Device: ${user.active_device.device_name || 'Unknown'}`}>
+                    <div className="flex items-center">
+                      {user.active_device.device_type === 'mobile' ? (
+                        <DevicePhoneMobileIcon className="w-4 h-4 text-default-400" />
+                      ) : (
+                        <ComputerDesktopIcon className="w-4 h-4 text-default-400" />
+                      )}
+                    </div>
+                  </Tooltip>
+                )}
+              </>
+            ) : (
+              <Chip
+                size="sm"
+                variant="flat"
+                color="default"
+                startContent={<ShieldCheckIcon className="w-3 h-3" />}
+              >
+                Disabled
+              </Chip>
+            )}
           </div>
         );
         
@@ -413,14 +476,54 @@ const UsersTable = ({
                 </DropdownItem>
                 <DropdownItem 
                   textValue="Edit User"
-                  onPress={(e) => {
-                    e.preventDefault();
+                  onPress={() => {
                     if (onEdit) onEdit(user);
                   }}
                   className="text-amber-500"
                   startContent={<PencilIcon className="w-4 h-4" />}
                 >
                   Edit
+                </DropdownItem>
+                
+                {/* Device Management Section */}
+                <DropdownItem
+                  textValue="Device Toggle"
+                  onPress={() => {
+                    if (toggleSingleDeviceLogin) {
+                      toggleSingleDeviceLogin(user.id, !user.single_device_login);
+                    }
+                  }}
+                  isDisabled={deviceActions[user.id]}
+                  startContent={user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
+                  className={user.single_device_login ? "text-orange-500" : "text-green-500"}
+                >
+                  {user.single_device_login ? 'Disable Device Lock' : 'Enable Device Lock'}
+                </DropdownItem>
+                
+                {user.single_device_login && user.active_device && (
+                  <DropdownItem
+                    textValue="Reset Device"
+                    onPress={() => {
+                      if (resetUserDevice) {
+                        resetUserDevice(user.id);
+                      }
+                    }}
+                    isDisabled={deviceActions[user.id]}
+                    startContent={<ArrowPathIcon className="w-4 h-4" />}
+                    className="text-red-500"
+                  >
+                    Reset Device
+                  </DropdownItem>
+                )}
+                
+                <DropdownItem
+                  textValue="View Devices"
+                  href={route('users.device.show', { user: user.id })}
+                  as={Link}
+                  startContent={<DevicePhoneMobileIcon className="w-4 h-4" />}
+                  className="text-blue-500"
+                >
+                  View Device History
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>

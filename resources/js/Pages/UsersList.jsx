@@ -414,8 +414,7 @@ const UsersList = ({ title, roles }) => {
                   size="sm"
                   variant="light"
                   className="text-default-400 hover:text-foreground"
-                  onPress={(e) => {
-                    e.stopPropagation();
+                  onPress={() => {
                     router.visit(route('profile', { user: user.id }));
                   }}
                 >
@@ -430,7 +429,6 @@ const UsersList = ({ title, roles }) => {
                       size="sm"
                       variant="light"
                       className="text-default-400 hover:text-foreground"
-                      onPress={(e) => e.stopPropagation()}
                     >
                       <EllipsisVerticalIcon className="w-4 h-4" />
                     </Button>
@@ -440,8 +438,7 @@ const UsersList = ({ title, roles }) => {
                       key="toggle-device"
                       description={user.single_device_login ? "Disable device restriction" : "Enable device restriction"}
                       startContent={user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
-                      onPress={(e) => {
-                        e.stopPropagation();
+                      onPress={() => {
                         toggleSingleDeviceLogin(user.id, !user.single_device_login);
                       }}
                       isDisabled={deviceActions[user.id]}
@@ -455,8 +452,7 @@ const UsersList = ({ title, roles }) => {
                         description="Allow login from new device"
                         startContent={<ArrowPathIcon className="w-4 h-4" />}
                         color="warning"
-                        onPress={(e) => {
-                          e.stopPropagation();
+                        onPress={() => {
                           resetUserDevice(user.id);
                         }}
                         isDisabled={deviceActions[user.id]}
@@ -469,8 +465,7 @@ const UsersList = ({ title, roles }) => {
                       key="view-devices"
                       description="View device history"
                       startContent={<DevicePhoneMobileIcon className="w-4 h-4" />}
-                      onPress={(e) => {
-                        e.stopPropagation();
+                      onPress={() => {
                         router.visit(route('users.device.show', { user: user.id }));
                       }}
                     >
@@ -1100,6 +1095,10 @@ const UsersList = ({ title, roles }) => {
                       deleteUserOptimized={deleteUserOptimized}
                       toggleUserStatusOptimized={toggleUserStatusOptimized}
                       updateUserRolesOptimized={updateUserRolesOptimized}
+                      // Device management props
+                      toggleSingleDeviceLogin={toggleSingleDeviceLogin}
+                      resetUserDevice={resetUserDevice}
+                      deviceActions={deviceActions}
                     />
                   ) : (
                     <div className="p-4">
