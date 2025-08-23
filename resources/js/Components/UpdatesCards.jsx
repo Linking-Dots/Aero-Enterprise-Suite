@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, CardContent, CardHeader, Divider, Grid, Grow, Popover, Typography } from '@mui/material';
 import { Avatar, AvatarGroup, Skeleton, Card as HeroCard, Chip } from "@heroui/react";
 import GlassCard from "@/Components/GlassCard.jsx";
-import AuthenticatedWrapper from "@/Components/AuthenticatedWrapper.jsx";
 import { usePage } from "@inertiajs/react";
 import { useTheme } from "@mui/material/styles";
 import dayjs from 'dayjs';
@@ -300,37 +299,7 @@ const UpdatesCards = () => {
     const [upcomingLeaves, setUpcomingLeaves] = useState([]);
     const [upcomingHoliday, setUpcomingHoliday] = useState(null);
 
-    // Early return if user is not authenticated
-    if (!auth?.user || !auth?.authenticated) {
-        return (
-            <Box 
-                sx={{ 
-                    p: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: '200px'
-                }}
-            >
-                <HeroCard className="p-4 bg-warning-50 border-warning-200">
-                    <Box className="flex items-center gap-3">
-                        <InformationCircleIcon className="w-5 h-5 text-warning" />
-                        <Typography color="warning" variant="body1">
-                            Please log in to view updates
-                        </Typography>
-                    </Box>
-                </HeroCard>
-            </Box>
-        );
-    }
-
     useEffect(() => {
-        // Double-check authentication before making requests
-        if (!auth?.user || !auth?.authenticated) {
-            setLoading(false);
-            return;
-        }
-
         let isMounted = true;
         const controller = new AbortController();
         
@@ -341,11 +310,7 @@ const UpdatesCards = () => {
                 
                 const response = await axios.get(route('updates'), {
                     signal: controller.signal,
-                    timeout: 10000,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-                    }
+                    timeout: 10000
                 });
                 
                 if (isMounted && response.data) {
@@ -357,27 +322,11 @@ const UpdatesCards = () => {
             } catch (err) {
                 if (isMounted && !controller.signal.aborted) {
                     console.error('Failed to fetch updates:', err);
-                    
-                    // Handle authentication errors specifically
-                    if (err.response?.status === 401 || err.response?.status === 403) {
-                        // Clear stale data and redirect to login
-                        setUsers([]);
-                        setTodayLeaves([]);
-                        setUpcomingLeaves([]);
-                        setUpcomingHoliday(null);
-                        setError('Authentication expired. Please log in again.');
-                        
-                        // Optionally redirect immediately
-                        setTimeout(() => {
-                            window.location.href = '/login';
-                        }, 1000);
-                    } else {
-                        setError(err.message);
-                        setUsers([]);
-                        setTodayLeaves([]);
-                        setUpcomingLeaves([]);
-                        setUpcomingHoliday(null);
-                    }
+                    setError(err.message);
+                    setUsers([]);
+                    setTodayLeaves([]);
+                    setUpcomingLeaves([]);
+                    setUpcomingHoliday(null);
                 }
             } finally {
                 if (isMounted) {
@@ -392,15 +341,10 @@ const UpdatesCards = () => {
             isMounted = false;
             controller.abort();
         };
-    }, [auth?.user, auth?.authenticated]); // React to authentication changes
+    }, []);
 
     // Helper function to group leaves by type and count
     const getLeaveSummary = (day, leaves) => {
-        // Additional safety check for authentication
-        if (!auth?.user || !auth?.authenticated) {
-            return [];
-        }
-        
         let leavesData = leaves;
 
         const userLeaveMessage = (type) => {
@@ -539,107 +483,105 @@ const UpdatesCards = () => {
     }
 
     return (
-        <AuthenticatedWrapper>
-            <Box 
-                sx={{ p: 2 }}
-                component="section"
-                aria-label="Employee Updates Dashboard"
-            >
-                <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
-                    {sectionConfig.map((section, index) => (
-                        <Grid item xs={12} sm={6} md={4} key={section.title} sx={{ display: 'flex' }}>
-                            <Grow in timeout={300 + (index * 100)} style={{ width: '100%' }}>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, width: '100%' }}>
-                                    <UpdateSection 
-                                        title={section.title} 
-                                        items={section.items} 
-                                        users={users}
-                                        icon={section.icon}
-                                        color={section.color}
-                                    />
-                                </Box>
-                            </Grow>
-                        </Grid>
-                    ))}
-                </Grid>
-                
-                {upcomingHoliday && (
-                    <Grow in timeout={800}>
-                        <Box sx={{ mt: 3 }}>
-                            <GlassCard>
-                                <CardHeader
-                                    title={
-                                        <Box className="flex items-center gap-3">
-                                            <Box
-                                                sx={{
-                                                    bgcolor: '#f59e0b20',
-                                                    borderRadius: '12px',
-                                                    p: 1,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    minWidth: 40,
-                                                    minHeight: 40
-                                                }}
-                                            >
-                                                <SunIcon 
-                                                    style={{ 
-                                                        width: '20px', 
-                                                        height: '20px', 
-                                                        color: '#f59e0b',
-                                                        strokeWidth: 2
-                                                    }}
-                                                    aria-hidden="true"
-                                                />
-                                            </Box>
-                                            <Typography 
-                                                variant="h6"
-                                                component="h2"
-                                                sx={{ 
-                                                    fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                                                    fontWeight: 600
-                                                }}
-                                            >
-                                                Upcoming Holiday
-                                            </Typography>
-                                        </Box>
-                                    }
+        <Box 
+            sx={{ p: 2 }}
+            component="section"
+            aria-label="Employee Updates Dashboard"
+        >
+            <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
+                {sectionConfig.map((section, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={section.title} sx={{ display: 'flex' }}>
+                        <Grow in timeout={300 + (index * 100)} style={{ width: '100%' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, width: '100%' }}>
+                                <UpdateSection 
+                                    title={section.title} 
+                                    items={section.items} 
+                                    users={users}
+                                    icon={section.icon}
+                                    color={section.color}
                                 />
-                                <Divider />
-                                <CardContent>
+                            </Box>
+                        </Grow>
+                    </Grid>
+                ))}
+            </Grid>
+            
+            {upcomingHoliday && (
+                <Grow in timeout={800}>
+                    <Box sx={{ mt: 3 }}>
+                        <GlassCard>
+                            <CardHeader
+                                title={
                                     <Box className="flex items-center gap-3">
-                                        
-                                        <Box>
-                                            <Typography variant="body1" fontWeight="600" color="text.primary" className="flex items-center gap-1 mt-1">
-                                                <InformationCircleIcon className="w-4 h-4" />
-                                                {upcomingHoliday.title}
-                                            </Typography>
-                                            
-                                            <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
-                                                <CalendarDaysIcon className="w-4 h-4" />
-                                                {new Date(upcomingHoliday.from_date).toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    year: 'numeric'
-                                                })} - {new Date(upcomingHoliday.to_date).toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    year: 'numeric'
-                                                })}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
-                                                <Bars3BottomLeftIcon className="w-4 h-4" />
-                                                {upcomingHoliday.description}
-                                            </Typography>
+                                        <Box
+                                            sx={{
+                                                bgcolor: '#f59e0b20',
+                                                borderRadius: '12px',
+                                                p: 1,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                minWidth: 40,
+                                                minHeight: 40
+                                            }}
+                                        >
+                                            <SunIcon 
+                                                style={{ 
+                                                    width: '20px', 
+                                                    height: '20px', 
+                                                    color: '#f59e0b',
+                                                    strokeWidth: 2
+                                                }}
+                                                aria-hidden="true"
+                                            />
                                         </Box>
+                                        <Typography 
+                                            variant="h6"
+                                            component="h2"
+                                            sx={{ 
+                                                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            Upcoming Holiday
+                                        </Typography>
                                     </Box>
-                                </CardContent>
-                            </GlassCard>
-                        </Box>
-                    </Grow>
-                )}
-            </Box>
-        </AuthenticatedWrapper>
+                                }
+                            />
+                            <Divider />
+                            <CardContent>
+                                <Box className="flex items-center gap-3">
+                                    
+                                    <Box>
+                                        <Typography variant="body1" fontWeight="600" color="text.primary" className="flex items-center gap-1 mt-1">
+                                            <InformationCircleIcon className="w-4 h-4" />
+                                            {upcomingHoliday.title}
+                                        </Typography>
+                                        
+                                        <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
+                                            <CalendarDaysIcon className="w-4 h-4" />
+                                            {new Date(upcomingHoliday.from_date).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })} - {new Date(upcomingHoliday.to_date).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
+                                            <Bars3BottomLeftIcon className="w-4 h-4" />
+                                            {upcomingHoliday.description}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </GlassCard>
+                    </Box>
+                </Grow>
+            )}
+        </Box>
     );
 };
 

@@ -23,18 +23,18 @@ class VersionController extends Controller
     public function check(Request $request): JsonResponse
     {
         $clientVersion = $request->input('version');
-        
-        if (!$clientVersion) {
+
+        if (! $clientVersion) {
             return response()->json([
-                'error' => 'Version parameter is required'
+                'error' => 'Version parameter is required',
             ], 400);
         }
 
         $isMatch = VersionService::isVersionMatch($clientVersion);
-        
-        if (!$isMatch) {
+
+        if (! $isMatch) {
             VersionService::logVersionMismatch(
-                $clientVersion, 
+                $clientVersion,
                 $request->header('User-Agent')
             );
         }
@@ -43,7 +43,7 @@ class VersionController extends Controller
             'version_match' => $isMatch,
             'server_version' => VersionService::getCurrentVersion(),
             'client_version' => $clientVersion,
-            'needs_update' => !$isMatch,
+            'needs_update' => ! $isMatch,
             'timestamp' => now()->timestamp,
         ]);
     }

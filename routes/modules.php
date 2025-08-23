@@ -5,7 +5,6 @@ use App\Http\Controllers\Analytics\KPIController;
 use App\Http\Controllers\Analytics\ReportController as AnalyticsReportController;
 use App\Http\Controllers\Asset\AssetController;
 use App\Http\Controllers\Asset\MaintenanceController;
-// use App\Http\Controllers\FMS\ReportController as FMSReportController;
 use App\Http\Controllers\Compliance\AuditFindingController;
 use App\Http\Controllers\Compliance\ComplianceAuditController;
 use App\Http\Controllers\Compliance\ComplianceController;
@@ -18,6 +17,7 @@ use App\Http\Controllers\CRM\CustomerController;
 use App\Http\Controllers\CRM\InteractionController;
 use App\Http\Controllers\CRM\OpportunityController;
 use App\Http\Controllers\FMS\AccountController;
+use App\Http\Controllers\FMS\ReportController as FMSReportController;
 use App\Http\Controllers\FMS\TransactionController;
 use App\Http\Controllers\Helpdesk\KnowledgeBaseController;
 use App\Http\Controllers\Helpdesk\TicketController;
@@ -128,12 +128,11 @@ Route::middleware(['auth', 'verified'])->prefix('fms')->name('fms.')->group(func
 
     // Reports
     Route::middleware(['permission:fms.reports.view'])->group(function () {
-        // Route::get('/reports', [FMSReportController::class, 'index'])->name('reports.index');
-        // Route::get('/reports/{report}', [FMSReportController::class, 'show'])->name('reports.show');
+        Route::get('/reports', [FMSReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{report}', [FMSReportController::class, 'show'])->name('reports.show');
     });
 
-    // Budgets - Temporarily disabled
-    /*
+    // Budgets
     Route::middleware(['permission:fms.budgets.view'])->group(function () {
         Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
         Route::get('/budgets/create', [BudgetController::class, 'create'])->name('budgets.create');
@@ -143,7 +142,6 @@ Route::middleware(['auth', 'verified'])->prefix('fms')->name('fms.')->group(func
     Route::middleware(['permission:fms.budgets.create'])->post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::middleware(['permission:fms.budgets.update'])->put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
     Route::middleware(['permission:fms.budgets.delete'])->delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
-    */
 });
 
 // POS Routes

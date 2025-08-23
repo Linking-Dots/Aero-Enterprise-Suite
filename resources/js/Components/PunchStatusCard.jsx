@@ -66,6 +66,26 @@ const PunchStatusCard = () => {
     const { auth } = usePage().props;
     const user = auth.user;
 
+    // Early authentication check - don't render if not authenticated
+    if (!auth.check || !user) {
+        return (
+            <GlassCard sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                height: '100%',
+                width: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                p: 3
+            }}>
+                <CircularProgress size={40} />
+                <Typography sx={{ mt: 2, color: 'text.secondary' }}>
+                    Authenticating...
+                </Typography>
+            </GlassCard>
+        );
+    }
+
     // State management
     const [currentStatus, setCurrentStatus] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -107,14 +127,26 @@ const PunchStatusCard = () => {
 
     // Component initialization
     useEffect(() => {
-        fetchCurrentStatus();
-        checkLocationConnectionStatus();
-        checkNetworkStatus();
+        // Add a short delay to ensure authentication is properly verified
+        const initializeComponent = async () => {
+            // Wait a brief moment for authentication to be confirmed
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            if (auth.check && user) {
+                fetchCurrentStatus();
+                checkLocationConnectionStatus();
+                checkNetworkStatus();
+            }
+        };
+
+        initializeComponent();
 
         // Add event listeners for better responsiveness
         const handleFocus = () => {
-            checkLocationConnectionStatus();
-            checkNetworkStatus();
+            if (auth.check && user) {
+                checkLocationConnectionStatus();
+                checkNetworkStatus();
+            }
         };
 
         const handleOnline = () => {
@@ -134,7 +166,7 @@ const PunchStatusCard = () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []);
+    }, [auth.check, user]);
 
     const calculateRealtimeWorkTime = (currentTime) => {
         let totalSeconds = 0;
@@ -211,6 +243,12 @@ const PunchStatusCard = () => {
     };
 
     const fetchCurrentStatus = async () => {
+        // Skip if not authenticated
+        if (!auth.check || !user) {
+            console.log('Skipping punch status fetch - user not authenticated');
+            return;
+        }
+
         try {
             const response = await axios.get(route('attendance.current-user-punch'));
             const data = response.data;
@@ -265,6 +303,16 @@ const PunchStatusCard = () => {
             }
         } catch (error) {
             console.error('Error fetching current status:', error);
+            
+            // If it's an authentication error, handle gracefully
+            if (error.response?.status === 401 || error.response?.status === 419) {
+                console.log('Authentication error detected in punch status');
+                setCurrentStatus(null);
+                setTodayPunches([]);
+                setRealtimeWorkTime('00:00:00');
+                return;
+            }
+            
             toast.error('Failed to fetch attendance status');
             // Set safe defaults on error
             setRealtimeWorkTime('00:00:00');

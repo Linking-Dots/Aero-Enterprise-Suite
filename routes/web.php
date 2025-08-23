@@ -30,7 +30,6 @@ use App\Http\Controllers\Settings\LeaveSettingController;
 use App\Http\Controllers\SystemMonitoringController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Include authentication routes
@@ -39,32 +38,14 @@ require __DIR__.'/auth.php';
 Route::redirect('/', '/dashboard');
 
 Route::get('/session-check', function () {
-    $authenticated = Auth::check();
-    $user = Auth::user();
-
-    // Additional session validation
-    if ($authenticated && $user) {
-        // Check if the session is valid and user exists in database
-        $userExists = \App\Models\User::where('id', $user->id)->exists();
-        if (! $userExists) {
-            Auth::logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-            $authenticated = false;
-        }
-    }
-
-    return response()->json([
-        'authenticated' => $authenticated,
-        'timestamp' => now()->toISOString(),
-    ]);
-})->name('session-check');
+    return response()->json(['authenticated' => auth()->check()]);
+});
 
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'auth.session', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
 
@@ -175,7 +156,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'aut
 });
 
 // Administrative routes - require specific permissions
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'auth.session', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Document management routes
     Route::middleware(['permission:letters.view'])->group(function () {
@@ -306,7 +287,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'aut
     });
 
     // HR Module Settings
-    Route::prefix('settings/hr')->middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified'])->group(function () {
+    Route::prefix('settings/hr')->middleware(['auth', 'verified'])->group(function () {
         Route::middleware(['permission:hr.onboarding.view'])->get('/onboarding', [\App\Http\Controllers\Settings\HrmSettingController::class, 'index'])->name('settings.hr.onboarding');
         Route::middleware(['permission:hr.skills.view'])->get('/skills', [\App\Http\Controllers\Settings\HrmSettingController::class, 'index'])->name('settings.hr.skills');
         Route::middleware(['permission:hr.benefits.view'])->get('/benefits', [\App\Http\Controllers\Settings\HrmSettingController::class, 'index'])->name('settings.hr.benefits');
@@ -340,7 +321,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'aut
     Route::middleware(['permission:jurisdiction.update'])->post('/work-locations/update', [JurisdictionController::class, 'updateWorkLocation'])->name('updateWorkLocation');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/tasks-all-se', [TaskController::class, 'allTasks'])->name('allTasksSE');
     Route::post('/tasks-filtered-se', [TaskController::class, 'filterTasks'])->name('filterTasksSE');
@@ -365,7 +346,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'ver
 });
 
 // Enhanced Role Management Routes (with proper permission-based access control)
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'permission:roles.view', 'role_permission_sync'])->group(function () {
+Route::middleware(['auth', 'verified', 'permission:roles.view', 'role_permission_sync'])->group(function () {
     // Role Management Interface
     Route::get('/admin/roles-management', [RoleController::class, 'index'])->name('admin.roles-management');
     Route::get('/admin/roles/audit', [RoleController::class, 'getEnhancedRoleAudit'])->name('admin.roles.audit');
@@ -374,12 +355,12 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'ver
     Route::get('/admin/roles/snapshot', [RoleController::class, 'snapshot'])->name('admin.roles.snapshot');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'permission:roles.create'])->group(function () {
+Route::middleware(['auth', 'verified', 'permission:roles.create'])->group(function () {
     Route::post('/admin/roles', [RoleController::class, 'storeRole'])->name('admin.roles.store');
     Route::post('/admin/roles/clone', [RoleController::class, 'cloneRole'])->name('admin.roles.clone');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'permission:roles.update'])->group(function () {
+Route::middleware(['auth', 'verified', 'permission:roles.update'])->group(function () {
     Route::put('/admin/roles/{id}', [RoleController::class, 'updateRole'])->name('admin.roles.update');
     Route::post('/admin/roles/update-permission', [RoleController::class, 'updateRolePermission'])->name('admin.roles.update-permission');
     Route::post('/admin/roles/toggle-permission', [RoleController::class, 'togglePermission'])->name('admin.roles.toggle-permission');
@@ -388,20 +369,20 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'ver
     Route::patch('/admin/roles/{role}/permissions', [RoleController::class, 'batchUpdatePermissions'])->name('admin.roles.batch-permissions');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'permission:roles.delete'])->group(function () {
+Route::middleware(['auth', 'verified', 'permission:roles.delete'])->group(function () {
     Route::delete('/admin/roles/{id}', [RoleController::class, 'deleteRole'])->name('admin.roles.delete');
 });
 
 // Super Administrator only routes
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'role:Super Administrator'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(function () {
     Route::post('/admin/roles/initialize-enterprise', [RoleController::class, 'initializeEnterpriseSystem'])->name('admin.roles.initialize-enterprise');
 });
 
 // Test route for role controller
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified'])->get('/admin/roles-test', [RoleController::class, 'test'])->name('admin.roles.test');
+Route::middleware(['auth', 'verified'])->get('/admin/roles-test', [RoleController::class, 'test'])->name('admin.roles.test');
 
 // Role Debug Routes (for troubleshooting live server issues)
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'role:Super Administrator'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(function () {
     Route::get('/admin/roles/debug', [App\Http\Controllers\RoleDebugController::class, 'debug'])->name('admin.roles.debug');
     Route::post('/admin/roles/debug/refresh-cache', [App\Http\Controllers\RoleDebugController::class, 'refreshCache'])->name('admin.roles.debug.refresh-cache');
     Route::get('/admin/roles/debug/test-role', [App\Http\Controllers\RoleDebugController::class, 'testRole'])->name('admin.roles.debug.test-role');
@@ -409,7 +390,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'ver
 });
 
 // System Monitoring Routes (Super Administrator only)
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified', 'role:Super Administrator'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(function () {
     Route::get('/admin/system-monitoring', [SystemMonitoringController::class, 'index'])->name('admin.system-monitoring');
     Route::post('/admin/errors/{errorId}/resolve', [SystemMonitoringController::class, 'resolveError'])->name('admin.errors.resolve');
     Route::get('/admin/system-report', [SystemMonitoringController::class, 'exportReport'])->name('admin.system-report');
@@ -576,7 +557,7 @@ Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'ver
 });
 
 // API routes for dropdown data
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/designations/list', function () {
         return response()->json(\App\Models\HRM\Designation::select('id', 'title as name')->get());
     })->name('api.designations.list');
@@ -616,7 +597,7 @@ Route::get('/service-worker.js', function () {
 })->name('service-worker');
 
 // Temporary test route for debugging employee deletion authorization
-Route::middleware(['auth', \App\Http\Middleware\ValidateUserSession::class, 'verified'])->get('/test-employee-auth', function () {
+Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () {
     $currentUser = \Illuminate\Support\Facades\Auth::user();
     $employee = \App\Models\User::where('id', '!=', $currentUser->id)->first();
 

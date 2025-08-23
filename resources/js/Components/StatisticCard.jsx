@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Skeleton, Card } from '@heroui/react';
+import { usePage } from '@inertiajs/react';
 
 const StatisticCard = ({ title, value, icon: IconComponent, color, isLoaded, testId }) => (
     <Grow in timeout={300}>
@@ -103,6 +104,7 @@ const StatisticCard = ({ title, value, icon: IconComponent, color, isLoaded, tes
 );
 
 const StatisticsWidgets = () => {
+    const { auth } = usePage().props;
     const [statistics, setStatistics] = useState({
         total: 0,
         completed: 0,
@@ -113,6 +115,13 @@ const StatisticsWidgets = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        // Skip if not authenticated
+        if (!auth?.check || !auth?.user) {
+            console.log('Skipping statistics fetch - user not authenticated');
+            setLoading(false);
+            return;
+        }
+
         let isMounted = true;
         const controller = new AbortController();
         
@@ -134,6 +143,14 @@ const StatisticsWidgets = () => {
             } catch (err) {
                 if (isMounted && !controller.signal.aborted) {
                     console.error('Failed to fetch statistics:', err);
+                    
+                    // Handle authentication errors gracefully
+                    if (err.response?.status === 401 || err.response?.status === 419) {
+                        console.log('Authentication error detected in statistics');
+                        setError('Authentication required');
+                        return;
+                    }
+                    
                     setError(err.message);
                     setStatistics({
                         total: 0,
@@ -149,13 +166,15 @@ const StatisticsWidgets = () => {
             }
         };
 
-        fetchStatistics();
+        // Add a small delay to ensure authentication is verified
+        const timer = setTimeout(fetchStatistics, 100);
 
         return () => {
             isMounted = false;
             controller.abort();
+            clearTimeout(timer);
         };
-    }, []);
+    }, [auth?.check, auth?.user]);
 
     const statisticsConfig = [
         {

@@ -38,7 +38,7 @@ class VersionService
     /**
      * Log version mismatch for monitoring
      */
-    public static function logVersionMismatch(string $clientVersion, string $userAgent = null): void
+    public static function logVersionMismatch(string $clientVersion, ?string $userAgent = null): void
     {
         Log::info('Version mismatch detected', [
             'client_version' => $clientVersion,

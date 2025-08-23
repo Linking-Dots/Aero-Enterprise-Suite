@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -27,26 +27,26 @@ class ProfileImageController extends Controller
                     'image',
                     'mimes:jpeg,png,jpg,webp',
                     'max:2048', // 2MB max
-                    'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000'
-                ]
+                    'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000',
+                ],
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
             // Get the user
             $user = User::findOrFail($request->user_id);
-            
+
             // Check if current user can update this user's profile
-            if (!$this->canUpdateUserProfile($user)) {
+            if (! $this->canUpdateUserProfile($user)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized to update this user\'s profile image'
+                    'message' => 'Unauthorized to update this user\'s profile image',
                 ], 403);
             }
 
@@ -57,8 +57,8 @@ class ProfileImageController extends Controller
 
             // Upload new profile image
             $media = $user->addMediaFromRequest('profile_image')
-                ->usingName($user->name . ' Profile Image')
-                ->usingFileName(time() . '_profile.' . $request->file('profile_image')->getClientOriginalExtension())
+                ->usingName($user->name.' Profile Image')
+                ->usingFileName(time().'_profile.'.$request->file('profile_image')->getClientOriginalExtension())
                 ->toMediaCollection('profile_images');
 
             // Save user to refresh model state
@@ -76,28 +76,28 @@ class ProfileImageController extends Controller
                     'profile_image_url' => $user->profile_image_url,
                 ],
                 'profile_image_url' => $user->profile_image_url,
-                'media_id' => $media->id
+                'media_id' => $media->id,
             ]);
 
         } catch (FileDoesNotExist $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'File does not exist or is not accessible'
+                'message' => 'File does not exist or is not accessible',
             ], 400);
         } catch (FileIsTooBig $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'File is too large. Maximum size is 2MB.'
+                'message' => 'File is too large. Maximum size is 2MB.',
             ], 400);
         } catch (\Exception $e) {
-            Log::error('Profile image upload error: ' . $e->getMessage(), [
+            Log::error('Profile image upload error: '.$e->getMessage(), [
                 'user_id' => $request->user_id ?? null,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload profile image: ' . $e->getMessage()
+                'message' => 'Failed to upload profile image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -110,25 +110,25 @@ class ProfileImageController extends Controller
         try {
             // Validate the request
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|integer|exists:users,id'
+                'user_id' => 'required|integer|exists:users,id',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
             // Get the user
             $user = User::findOrFail($request->user_id);
-            
+
             // Check if current user can update this user's profile
-            if (!$this->canUpdateUserProfile($user)) {
+            if (! $this->canUpdateUserProfile($user)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized to update this user\'s profile image'
+                    'message' => 'Unauthorized to update this user\'s profile image',
                 ], 403);
             }
 
@@ -139,7 +139,7 @@ class ProfileImageController extends Controller
             } else {
                 $message = 'No profile image to remove';
             }
-            
+
             // Save user to refresh model state
             $user->save();
 
@@ -154,18 +154,18 @@ class ProfileImageController extends Controller
                     'name' => $user->name,
                     'profile_image_url' => null,
                 ],
-                'profile_image_url' => null
+                'profile_image_url' => null,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Profile image removal error: ' . $e->getMessage(), [
+            Log::error('Profile image removal error: '.$e->getMessage(), [
                 'user_id' => $request->user_id ?? null,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to remove profile image: ' . $e->getMessage()
+                'message' => 'Failed to remove profile image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -177,22 +177,22 @@ class ProfileImageController extends Controller
     {
         /** @var User $currentUser */
         $currentUser = Auth::user();
-        
+
         // User can update their own profile
         if ($currentUser->id === $user->id) {
             return true;
         }
-        
+
         // Admin users can update any profile
         if ($currentUser->hasRole('Super Administrator') || $currentUser->hasRole('Administrator')) {
             return true;
         }
-        
+
         // HR users can update employee profiles
         if ($currentUser->hasRole('HR Manager') && $user->hasRole('Employee')) {
             return true;
         }
-        
+
         return false;
     }
 }

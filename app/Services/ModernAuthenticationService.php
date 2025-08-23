@@ -30,49 +30,31 @@ class ModernAuthenticationService
         try {
             $riskLevel = $this->calculateRiskLevel($eventType, $status, $request, $user);
 
-            // Try to log to database first
-            try {
-                DB::table('authentication_events')->insert([
-                    'user_id' => $user?->id,
-                    'event_type' => $eventType,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'metadata' => json_encode(array_merge($metadata, [
-                        'route' => $request->route()?->getName(),
-                        'method' => $request->method(),
-                        'timestamp' => now()->toISOString(),
-                        'session_id' => session()->getId(),
-                    ])),
-                    'status' => $status,
-                    'risk_level' => $riskLevel,
-                    'occurred_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            } catch (\Exception $dbError) {
-                // Database logging failed, continue with file logging
-                Log::warning('Authentication database logging failed: '.$dbError->getMessage());
-            }
+            DB::table('authentication_events')->insert([
+                'user_id' => $user?->id,
+                'event_type' => $eventType,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'metadata' => json_encode(array_merge($metadata, [
+                    'route' => $request->route()?->getName(),
+                    'method' => $request->method(),
+                    'timestamp' => now()->toISOString(),
+                    'session_id' => session()->getId(),
+                ])),
+                'status' => $status,
+                'risk_level' => $riskLevel,
+                'occurred_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-            // Try to log to auth channel, fallback to default
-            try {
-                Log::channel('auth')->info("Authentication Event: {$eventType}", [
-                    'user_id' => $user?->id,
-                    'email' => $user?->email ?? $metadata['email'] ?? null,
-                    'status' => $status,
-                    'risk_level' => $riskLevel,
-                    'ip' => $request->ip(),
-                ]);
-            } catch (\Exception $logError) {
-                // Auth channel failed, use default
-                Log::info("Authentication Event: {$eventType}", [
-                    'user_id' => $user?->id,
-                    'email' => $user?->email ?? $metadata['email'] ?? null,
-                    'status' => $status,
-                    'risk_level' => $riskLevel,
-                    'ip' => $request->ip(),
-                ]);
-            }
+            Log::channel('auth')->info("Authentication Event: {$eventType}", [
+                'user_id' => $user?->id,
+                'email' => $user?->email ?? $metadata['email'] ?? null,
+                'status' => $status,
+                'risk_level' => $riskLevel,
+                'ip' => $request->ip(),
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to log authentication event', [
                 'error' => $e->getMessage(),

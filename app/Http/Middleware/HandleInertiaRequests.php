@@ -31,7 +31,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $userWithDesignation = $user ? \App\Models\User::with('designation')->find($user->id) : null;
+
+        // Only fetch detailed user data if session is valid and user is properly authenticated
+        $userWithDesignation = null;
+        $isAuthenticated = $user && $request->hasSession() && $request->session()->isStarted();
+
+        if ($isAuthenticated) {
+            $userWithDesignation = \App\Models\User::with('designation')->find($user->id);
+        }
 
         // Get company settings for global use
         $companySettings = CompanySetting::first();
@@ -40,11 +47,11 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $userWithDesignation ?: null,
-                'roles' => $user ? $user->roles->pluck('name')->toArray() : [],
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name')->toArray() : [],
-                'designation' => $userWithDesignation?->designation?->title,
-                'authenticated' => (bool) $user, // Explicit authentication status
+                'user' => $isAuthenticated ? $userWithDesignation : null,
+                'roles' => $isAuthenticated && $user ? $user->roles->pluck('name')->toArray() : [],
+                'permissions' => $isAuthenticated && $user ? $user->getAllPermissions()->pluck('name')->toArray() : [],
+                'designation' => $isAuthenticated ? $userWithDesignation?->designation?->title : null,
+                'check' => $isAuthenticated, // Explicit authentication status
             ],
 
             // Company Settings

@@ -65,28 +65,11 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Strict authentication check
-        if (! $user || ! Auth::check()) {
-            return response()->json([
-                'message' => 'Authentication required',
-            ], 401);
-        }
-
         // Check if user has permission to view updates
         if (! $user->can('core.updates.view')) {
             return response()->json([
                 'message' => 'Unauthorized access to updates',
             ], 403);
-        }
-
-        // Verify user still exists in database (additional security)
-        $userExists = User::where('id', $user->id)->exists();
-        if (! $userExists) {
-            Auth::logout();
-
-            return response()->json([
-                'message' => 'User not found',
-            ], 401);
         }
 
         $users = User::with('roles:name')
@@ -148,8 +131,6 @@ class DashboardController extends Controller
             'todayLeaves' => $todayLeaves,
             'upcomingLeaves' => $upcomingLeaves,
             'upcomingHoliday' => $upcomingHoliday,
-            'authenticated' => true,
-            'timestamp' => now()->toISOString(),
         ]);
     }
 }

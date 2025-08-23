@@ -51,7 +51,7 @@ class TrackSecurityActivity
             $this->detectSecurityAnomalies($request, $userId);
 
         } catch (\Exception $e) {
-            // Don't break the application flow - table might not exist
+            // Don't break the application flow
             Log::debug('Failed to update session activity: '.$e->getMessage());
         }
     }
@@ -98,7 +98,6 @@ class TrackSecurityActivity
             }
 
         } catch (\Exception $e) {
-            // Don't break the application flow - tables might not exist
             Log::debug('Failed to detect security anomalies: '.$e->getMessage());
         }
     }
@@ -109,7 +108,6 @@ class TrackSecurityActivity
     private function logSecurityEvent(string $eventType, array $data): void
     {
         try {
-            // Try to insert into security_events table
             DB::table('security_events')->insert([
                 'user_id' => $data['user_id'] ?? null,
                 'event_type' => $eventType,
@@ -123,12 +121,7 @@ class TrackSecurityActivity
                 'updated_at' => now(),
             ]);
         } catch (\Exception $e) {
-            // Table might not exist, log to file instead
-            Log::warning('Security event logged to file (table unavailable)', [
-                'event_type' => $eventType,
-                'data' => $data,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error('Failed to log security event: '.$e->getMessage());
         }
     }
 
@@ -138,13 +131,13 @@ class TrackSecurityActivity
     private function getSeverityForEvent(string $eventType): string
     {
         $severityMap = [
-            'ip_address_change' => 'medium',
-            'multiple_active_sessions' => 'low',
+            'ip_address_change' => 'warning',
+            'multiple_active_sessions' => 'info',
             'suspicious_activity' => 'critical',
-            'failed_login' => 'medium',
+            'failed_login' => 'warning',
         ];
 
-        return $severityMap[$eventType] ?? 'low';
+        return $severityMap[$eventType] ?? 'info';
     }
 
     /**
