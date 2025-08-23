@@ -46,6 +46,8 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
+// Conditionally apply single_device middleware only if the class exists
+// This prevents errors on servers where the middleware hasn't been deployed yet
 // Simple and reliable: Check class existence and use direct class reference
 $middlewareStack = ['auth', 'verified'];
 if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
@@ -53,6 +55,16 @@ if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
 }
 
 Route::middleware($middlewareStack)->group(function () {
+
+    // Dashboard routes - require dashboard permission
+    Route::middleware(['permission:core.dashboard.view'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
+    });
+
+    // Security Dashboard route - available to authenticated users
+    Route::get('/security/dashboard', function () {
+        return inertia('Security/Dashboard');
     })->name('security.dashboard');
 
     // Updates route - require updates permission
