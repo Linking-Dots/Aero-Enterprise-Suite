@@ -15,7 +15,7 @@ import Button from '@/Components/Button';
 import Checkbox from '@/Components/Checkbox';
 import { Typography } from '@mui/material';
 
-export default function Login({ status, canResetPassword }) {
+export default function Login({ status, canResetPassword, deviceBlocked, deviceMessage, blockedDeviceInfo }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -23,6 +23,7 @@ export default function Login({ status, canResetPassword }) {
     });
 
     const [showAlert, setShowAlert] = useState(false);
+    const [showDeviceAlert, setShowDeviceAlert] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     useEffect(() => {
@@ -32,6 +33,14 @@ export default function Login({ status, canResetPassword }) {
             return () => clearTimeout(timer);
         }
     }, [status]);
+
+    useEffect(() => {
+        if (deviceBlocked) {
+            setShowDeviceAlert(true);
+            const timer = setTimeout(() => setShowDeviceAlert(false), 12000);
+            return () => clearTimeout(timer);
+        }
+    }, [deviceBlocked]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -80,6 +89,68 @@ export default function Login({ status, canResetPassword }) {
                             >
                                 {status}
                             </motion.p>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Device Blocked Alert */}
+            {deviceBlocked && showDeviceAlert && (
+                <motion.div
+                    className="mb-6 p-5 rounded-xl border"
+                    style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        borderColor: 'rgba(239, 68, 68, 0.3)',
+                        backdropFilter: 'blur(10px)'
+                    }}
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    transition={{ duration: 0.4, type: "spring" }}
+                >
+                    <div className="flex items-start">
+                        <motion.div
+                            className="flex-shrink-0"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
+                        >
+                            <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
+                        </motion.div>
+                        <div className="ml-3 flex-1">
+                            <motion.h3
+                                className="text-sm font-semibold text-red-800 mb-1"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                Device Access Blocked
+                            </motion.h3>
+                            <motion.p
+                                className="text-sm text-red-700 mb-3"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                            >
+                                {deviceMessage || 'You can only be logged in from one device at a time.'}
+                            </motion.p>
+                            {blockedDeviceInfo && (
+                                <motion.div
+                                    className="text-xs text-red-600 bg-red-50 p-3 rounded-lg"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.5 }}
+                                >
+                                    <p className="font-medium mb-1">Currently active device:</p>
+                                    <p>• <span className="font-medium">Device:</span> {blockedDeviceInfo.device_name}</p>
+                                    <p>• <span className="font-medium">Browser:</span> {blockedDeviceInfo.browser} {blockedDeviceInfo.browser_version}</p>
+                                    <p>• <span className="font-medium">Platform:</span> {blockedDeviceInfo.platform}</p>
+                                    <p>• <span className="font-medium">Last active:</span> {blockedDeviceInfo.last_activity}</p>
+                                    {blockedDeviceInfo.location && (
+                                        <p>• <span className="font-medium">Location:</span> {blockedDeviceInfo.location}</p>
+                                    )}
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </motion.div>

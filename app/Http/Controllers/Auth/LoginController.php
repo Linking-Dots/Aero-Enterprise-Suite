@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\ModernAuthenticationService;
+use App\Services\DeviceTrackingService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,10 +18,14 @@ use Inertia\Response;
 class LoginController extends Controller
 {
     protected ModernAuthenticationService $authService;
+    protected DeviceTrackingService $deviceService;
 
-    public function __construct(ModernAuthenticationService $authService)
-    {
+    public function __construct(
+        ModernAuthenticationService $authService,
+        DeviceTrackingService $deviceService
+    ) {
         $this->authService = $authService;
+        $this->deviceService = $deviceService;
     }
 
     /**
@@ -31,6 +36,9 @@ class LoginController extends Controller
         return Inertia::render('Auth/Login', [
             'canResetPassword' => true,
             'status' => session('status'),
+            'deviceBlocked' => session('device_blocked', false),
+            'deviceMessage' => session('device_message'),
+            'blockedDeviceInfo' => session('blocked_device_info'),
         ]);
     }
 
@@ -109,7 +117,7 @@ class LoginController extends Controller
         }
 
         // Check if user account is active
-        if (!$user->is_active) {
+        if (!$user->active) {
             $this->authService->logAuthenticationEvent(
                 $user,
                 'login_inactive_account',
@@ -122,11 +130,40 @@ class LoginController extends Controller
             ]);
         }
 
+        // Check device restrictions if single device login is enabled
+        if ($user->hasSingleDeviceLoginEnabled()) {
+            $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
+            
+            if (!$deviceCheck['allowed']) {
+                $this->authService->logAuthenticationEvent(
+                    $user,
+                    'login_device_blocked',
+                    'failure',
+                    $request,
+                    [
+                        'device_id' => $deviceCheck['device_id'],
+                        'blocked_by_device' => $deviceCheck['blocked_by_device']?->id,
+                        'message' => $deviceCheck['message'],
+                    ]
+                );
+
+                throw ValidationException::withMessages([
+                    'email' => $deviceCheck['message'] . '. Please contact your administrator to reset your device access.',
+                ]);
+            }
+        }
+
         // Clear rate limiting on successful login
         RateLimiter::clear($key);
 
         // Login user
         Auth::login($user, $remember);
+
+        // Register/update device if single device login is enabled
+        if ($user->hasSingleDeviceLoginEnabled()) {
+            $sessionId = $request->session()->getId();
+            $this->deviceService->registerDevice($user, $request, $sessionId);
+        }
 
         // Update login statistics
         $this->authService->updateLoginStats($user, $request);
@@ -155,6 +192,10 @@ class LoginController extends Controller
         $user = Auth::user();
 
         if ($user) {
+            // Deactivate current device session
+            $sessionId = session()->getId();
+            $this->deviceService->deactivateDeviceBySession($sessionId);
+
             // Log logout event
             $this->authService->logAuthenticationEvent(
                 $user,
@@ -164,7 +205,6 @@ class LoginController extends Controller
             );
 
             // Update session tracking
-            $sessionId = session()->getId();
             DB::table('user_sessions')
                 ->where('session_id', $sessionId)
                 ->update([

@@ -30,6 +30,7 @@ use App\Http\Controllers\Settings\LeaveSettingController;
 use App\Http\Controllers\SystemMonitoringController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDeviceController;
 use Illuminate\Support\Facades\Route;
 
 // Include authentication routes
@@ -45,7 +46,7 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'single_device'])->group(function () {
 
     Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
 
@@ -249,6 +250,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:employees.delete'])->group(function () {
         Route::delete('/user/{id}', [EmployeeController::class, 'destroy'])->name('user.delete');
     });
+
+    // User Device Management routes
+    Route::middleware(['permission:users.view'])->group(function () {
+        Route::get('/users/{user}/devices', [UserDeviceController::class, 'show'])->name('users.device.show');
+        Route::get('/users/{user}/devices/list', [UserDeviceController::class, 'list'])->name('users.device.list');
+        Route::post('/users/devices/toggle', [UserDeviceController::class, 'toggleSingleDeviceLogin'])->name('users.device.toggle');
+        Route::post('/users/devices/reset', [UserDeviceController::class, 'resetUserDevices'])->name('users.device.reset');
+    });
+
+    // User's own device management
+    Route::get('/profile/devices', [UserDeviceController::class, 'userDevices'])->name('profile.devices');
+
+    // Current user device management (accessible to all authenticated users)
+    Route::get('/my-devices', [UserDeviceController::class, 'myDevices'])->name('user.my-devices');
+    Route::delete('/my-devices/{deviceId}', [UserDeviceController::class, 'removeMyDevice'])->name('user.my-devices.remove');
 
     // Company settings routes
     Route::middleware(['permission:company.settings'])->group(function () {

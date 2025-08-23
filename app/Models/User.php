@@ -117,6 +117,9 @@ class User extends Authenticatable implements HasMedia
         'attendance_config',
         'fcm_token',
         'preferences',
+        'single_device_login_enabled',
+        'device_reset_at',
+        'device_reset_reason',
     ];
 
     /**
@@ -144,6 +147,8 @@ class User extends Authenticatable implements HasMedia
         'attendance_config' => 'array',
         'preferences' => 'array',
         'active' => 'boolean',
+        'single_device_login_enabled' => 'boolean',
+        'device_reset_at' => 'datetime',
     ];
 
     /**
@@ -216,6 +221,121 @@ class User extends Authenticatable implements HasMedia
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Get the user's devices.
+     */
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
+    /**
+     * Get the user's active devices.
+     */
+    public function activeDevices()
+    {
+        return $this->hasMany(UserDevice::class)->active();
+    }
+
+    /**
+     * Get the current active device.
+     */
+    public function currentDevice()
+    {
+        return $this->hasOne(UserDevice::class)->active()->latest('last_activity');
+    }
+
+    /**
+     * Check if single device login is enabled for this user.
+     */
+    public function hasSingleDeviceLoginEnabled(): bool
+    {
+        return $this->single_device_login_enabled;
+    }
+
+    /**
+     * Enable single device login for this user.
+     */
+    public function enableSingleDeviceLogin(string $reason = null): bool
+    {
+        return $this->update([
+            'single_device_login_enabled' => true,
+            'device_reset_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Disable single device login for this user.
+     */
+    public function disableSingleDeviceLogin(string $reason = null): bool
+    {
+        return $this->update([
+            'single_device_login_enabled' => false,
+            'device_reset_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Reset user devices (admin action).
+     */
+    public function resetDevices(string $reason = null): bool
+    {
+        // Deactivate all current devices
+        $this->devices()->active()->update([
+            'is_active' => false,
+            'session_id' => null,
+        ]);
+
+        return $this->update([
+            'device_reset_at' => now(),
+            'device_reset_reason' => $reason ?: 'Admin reset',
+        ]);
+    }
+
+    /**
+     * Check if user can login from new device.
+     */
+    public function canLoginFromDevice(string $deviceId): bool
+    {
+        // If single device login is not enabled, allow login
+        if (!$this->hasSingleDeviceLoginEnabled()) {
+            return true;
+        }
+
+        // Check if this device is already registered and active
+        $existingDevice = $this->devices()
+            ->where('device_id', $deviceId)
+            ->active()
+            ->first();
+
+        if ($existingDevice) {
+            return true;
+        }
+
+        // Check if user has any active devices
+        $hasActiveDevices = $this->activeDevices()->exists();
+
+        // If no active devices, allow login (first device or after reset)
+        return !$hasActiveDevices;
+    }
+
+    /**
+     * Get device summary for display.
+     */
+    public function getDeviceSummary(): array
+    {
+        $devices = $this->devices()->orderBy('last_activity', 'desc')->get();
+
+        return [
+            'total_devices' => $devices->count(),
+            'active_devices' => $devices->where('is_active', true)->count(),
+            'current_device' => $devices->where('is_active', true)->first(),
+            'last_reset' => $this->device_reset_at,
+            'reset_reason' => $this->device_reset_reason,
+            'single_device_enabled' => $this->single_device_login_enabled,
+        ];
     }
 
     /**

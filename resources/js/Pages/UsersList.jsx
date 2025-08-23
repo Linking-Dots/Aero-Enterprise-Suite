@@ -21,7 +21,11 @@ import {
   Switch,
   Select,
   SelectItem,
-  Pagination
+  Pagination,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
 } from "@heroui/react";
 import { 
   UserPlusIcon,
@@ -45,7 +49,13 @@ import {
   ClockIcon,
   ChartPieIcon,
   ExclamationTriangleIcon,
-  SignalIcon
+  SignalIcon,
+  DevicePhoneMobileIcon,
+  ComputerDesktopIcon,
+  EllipsisVerticalIcon,
+  ArrowPathIcon,
+  LockClosedIcon,
+  LockOpenIcon
 } from "@heroicons/react/24/outline";
 import App from "@/Layouts/App.jsx";
 import GlassCard from "@/Components/GlassCard.jsx";
@@ -91,6 +101,9 @@ const UsersList = ({ title, roles }) => {
     perPage: 10,
     total: users.length
   });
+
+  // Device management loading state
+  const [deviceActions, setDeviceActions] = useState({});
 
   // Stats - Updated to match comprehensive backend stats structure
   const [stats, setStats] = useState({
@@ -287,8 +300,84 @@ const UsersList = ({ title, roles }) => {
     setUsers(prevUsers => prevUsers.map(user => 
       user.id === userId ? { ...user, roles: newRoles } : user
     ));
+    // Update stats after role change
+    fetchStats();
+  }, [fetchStats]);
+
+  // Device Management Functions
+  const toggleSingleDeviceLogin = useCallback(async (userId, enabled) => {
+    setDeviceActions(prev => ({ ...prev, [userId]: true }));
     
-    // No need to set loading state or fetch data again
+    try {
+      const response = await axios.post(route('users.device.toggle'), {
+        user_id: userId,
+        enabled: enabled
+      });
+
+      if (response.status === 200) {
+        // Update user in state
+        setUsers(prevUsers => prevUsers.map(user => 
+          user.id === userId ? { 
+            ...user, 
+            single_device_login: enabled,
+            active_device: enabled ? user.active_device : null
+          } : user
+        ));
+        
+        toast.success(
+          enabled 
+            ? 'Single device login enabled for user' 
+            : 'Single device login disabled for user'
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling single device login:', error);
+      toast.error('Failed to update device settings');
+    } finally {
+      setDeviceActions(prev => ({ ...prev, [userId]: false }));
+    }
+  }, []);
+
+  const resetUserDevice = useCallback(async (userId) => {
+    setDeviceActions(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      const response = await axios.post(route('users.device.reset'), {
+        user_id: userId
+      });
+
+      if (response.status === 200) {
+        // Update user in state
+        setUsers(prevUsers => prevUsers.map(user => 
+          user.id === userId ? { 
+            ...user, 
+            active_device: null
+          } : user
+        ));
+        
+        toast.success('User device has been reset');
+      }
+    } catch (error) {
+      console.error('Error resetting user device:', error);
+      toast.error('Failed to reset user device');
+    } finally {
+      setDeviceActions(prev => ({ ...prev, [userId]: false }));
+    }
+  }, []);
+
+  const showUserDevices = useCallback(async (userId) => {
+    try {
+      const response = await axios.get(route('users.device.list', { user: userId }));
+      
+      if (response.status === 200) {
+        const devices = response.data.devices;
+        // You could show this in a modal or separate page
+        toast.info(`User has ${devices.length} device record(s)`);
+      }
+    } catch (error) {
+      console.error('Error fetching user devices:', error);
+      toast.error('Failed to fetch device information');
+    }
   }, []);
 
   // User Card component for grid view
@@ -319,18 +408,77 @@ const UsersList = ({ title, roles }) => {
                 <p className="text-default-500 text-xs">{user.email}</p>
               </div>
               
-              <Button
-                isIconOnly
-                size="sm"
-                variant="light"
-                className="text-default-400 hover:text-foreground ml-2"
-                onPress={(e) => {
-                  e.stopPropagation();
-                  router.visit(route('profile', { user: user.id }));
-                }}
-              >
-                <PencilIcon className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  className="text-default-400 hover:text-foreground"
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.visit(route('profile', { user: user.id }));
+                  }}
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </Button>
+                
+                {/* Device Management Dropdown */}
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      className="text-default-400 hover:text-foreground"
+                      onPress={(e) => e.stopPropagation()}
+                    >
+                      <EllipsisVerticalIcon className="w-4 h-4" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Device Actions">
+                    <DropdownItem
+                      key="toggle-device"
+                      description={user.single_device_login ? "Disable device restriction" : "Enable device restriction"}
+                      startContent={user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        toggleSingleDeviceLogin(user.id, !user.single_device_login);
+                      }}
+                      isDisabled={deviceActions[user.id]}
+                    >
+                      {user.single_device_login ? 'Disable Device Lock' : 'Enable Device Lock'}
+                    </DropdownItem>
+                    
+                    {user.single_device_login && user.active_device && (
+                      <DropdownItem
+                        key="reset-device"
+                        description="Allow login from new device"
+                        startContent={<ArrowPathIcon className="w-4 h-4" />}
+                        color="warning"
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          resetUserDevice(user.id);
+                        }}
+                        isDisabled={deviceActions[user.id]}
+                      >
+                        Reset Device
+                      </DropdownItem>
+                    )}
+                    
+                    <DropdownItem
+                      key="view-devices"
+                      description="View device history"
+                      startContent={<DevicePhoneMobileIcon className="w-4 h-4" />}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        router.visit(route('users.device.show', { user: user.id }));
+                      }}
+                    >
+                      View Devices
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
             </div>
           </div>
         </div>
@@ -387,6 +535,19 @@ const UsersList = ({ title, roles }) => {
               {role}
             </Chip>
           ))}
+          
+          {/* Single Device Login Status */}
+          {user.single_device_login && (
+            <Chip
+              size="sm"
+              variant="flat"
+              color={user.active_device ? "warning" : "default"}
+              className="text-xs"
+              startContent={<ShieldCheckIcon className="w-3 h-3" />}
+            >
+              {user.active_device ? 'Device Locked' : 'Device Free'}
+            </Chip>
+          )}
         </div>
       </CardBody>
     </Card>
