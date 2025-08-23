@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\ProjectManagement\ProjectController;
-use App\Http\Controllers\ProjectManagement\MilestoneController;
-use App\Http\Controllers\ProjectManagement\TaskController;
-use App\Http\Controllers\ProjectManagement\IssueController;
-use App\Http\Controllers\ProjectManagement\ResourceController;
-use App\Http\Controllers\ProjectManagement\TimeTrackingController;
-use App\Http\Controllers\ProjectManagement\BudgetController;
 use App\Http\Controllers\ProjectManagement\GanttController;
+use App\Http\Controllers\ProjectManagement\IssueController;
+use App\Http\Controllers\ProjectManagement\MilestoneController;
+use App\Http\Controllers\ProjectManagement\ProjectController;
+use App\Http\Controllers\ProjectManagement\ResourceController;
+use App\Http\Controllers\ProjectManagement\TaskController;
+// use App\Http\Controllers\ProjectManagement\BudgetController;
+use App\Http\Controllers\ProjectManagement\TimeTrackingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -99,7 +99,8 @@ Route::middleware(['auth', 'verified'])->prefix('project-management')->name('pro
     Route::middleware(['permission:project-management.time-tracking.approve'])->post('/time-tracking/{timeEntry}/unapprove', [TimeTrackingController::class, 'unapprove'])->name('time-tracking.unapprove');
     Route::middleware(['permission:project-management.time-tracking.approve'])->post('/time-tracking/bulk-approve', [TimeTrackingController::class, 'bulkApprove'])->name('time-tracking.bulk-approve');
 
-    // Project Budget
+    // Project Budget - Temporarily disabled
+    /*
     Route::middleware(['permission:project-management.budget.view'])->group(function () {
         Route::get('/budgets', [BudgetController::class, 'index'])->name('project-budgets.index');
         Route::get('/budgets/create', [BudgetController::class, 'create'])->name('project-budgets.create');
@@ -114,6 +115,7 @@ Route::middleware(['auth', 'verified'])->prefix('project-management')->name('pro
     Route::middleware(['permission:project-management.budget.delete'])->delete('/budgets/{projectBudget}', [BudgetController::class, 'destroy'])->name('project-budgets.destroy');
     Route::middleware(['permission:project-management.budget.create'])->post('/budgets/{projectBudget}/expenses', [BudgetController::class, 'addExpense'])->name('project-budgets.add-expense');
     Route::middleware(['permission:project-management.budget.approve'])->post('/budgets/expenses/{expense}/approve', [BudgetController::class, 'approveExpense'])->name('project-budgets.approve-expense');
+    */
 
     // Gantt Charts
     Route::middleware(['permission:project-management.gantt.view'])->group(function () {

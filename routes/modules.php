@@ -1,68 +1,64 @@
 <?php
 
-use App\Http\Controllers\CRM\CustomerController;
-use App\Http\Controllers\CRM\OpportunityController;
-use App\Http\Controllers\CRM\InteractionController;
-use App\Http\Controllers\FMS\TransactionController;
-use App\Http\Controllers\FMS\AccountController;
+use App\Http\Controllers\Analytics\DashboardController as AnalyticsDashboardController;
+use App\Http\Controllers\Analytics\KPIController;
+use App\Http\Controllers\Analytics\ReportController as AnalyticsReportController;
+use App\Http\Controllers\Asset\AssetController;
+use App\Http\Controllers\Asset\MaintenanceController;
 // use App\Http\Controllers\FMS\ReportController as FMSReportController;
-use App\Http\Controllers\POS\SaleController;
-use App\Http\Controllers\POS\OrderController;
-use App\Http\Controllers\POS\CashierController;
+use App\Http\Controllers\Compliance\AuditFindingController;
+use App\Http\Controllers\Compliance\ComplianceAuditController;
+use App\Http\Controllers\Compliance\ComplianceController;
+use App\Http\Controllers\Compliance\CompliancePolicyController;
+use App\Http\Controllers\Compliance\ComplianceTrainingController;
+use App\Http\Controllers\Compliance\ControlledDocumentController;
+use App\Http\Controllers\Compliance\RegulatoryRequirementController;
+use App\Http\Controllers\Compliance\RiskAssessmentController;
+use App\Http\Controllers\CRM\CustomerController;
+use App\Http\Controllers\CRM\InteractionController;
+use App\Http\Controllers\CRM\OpportunityController;
+use App\Http\Controllers\FMS\AccountController;
+use App\Http\Controllers\FMS\TransactionController;
+use App\Http\Controllers\Helpdesk\KnowledgeBaseController;
+use App\Http\Controllers\Helpdesk\TicketController;
 use App\Http\Controllers\IMS\InventoryItemController;
 use App\Http\Controllers\IMS\StockController;
 use App\Http\Controllers\IMS\TransferController;
+use App\Http\Controllers\LMS\AssessmentController;
 use App\Http\Controllers\LMS\CourseController;
 use App\Http\Controllers\LMS\EnrollmentController;
-use App\Http\Controllers\LMS\AssessmentController;
-use App\Http\Controllers\SCM\SupplierController;
-use App\Http\Controllers\SCM\PurchaseController;
-use App\Http\Controllers\SCM\LogisticsController;
-use App\Http\Controllers\SCM\ProcurementController;
-use App\Http\Controllers\SCM\DemandForecastController;
-use App\Http\Controllers\SCM\ProductionPlanController;
-use App\Http\Controllers\SCM\ReturnManagementController;
-use App\Http\Controllers\SCM\ImportExportController;
-use App\Http\Controllers\Sales\OrderController as SalesOrderController;
-use App\Http\Controllers\Sales\InvoiceController;
-use App\Http\Controllers\Sales\QuoteController;
-use App\Http\Controllers\Helpdesk\TicketController;
-use App\Http\Controllers\Helpdesk\KnowledgeBaseController;
-use App\Http\Controllers\Asset\AssetController;
-use App\Http\Controllers\Asset\MaintenanceController;
-use App\Http\Controllers\Compliance\ComplianceController;
-use App\Http\Controllers\Compliance\CompliancePolicyController;
-use App\Http\Controllers\Compliance\RegulatoryRequirementController;
-use App\Http\Controllers\Compliance\RiskAssessmentController;
-use App\Http\Controllers\Compliance\ComplianceAuditController;
-use App\Http\Controllers\Compliance\AuditFindingController;
-use App\Http\Controllers\Compliance\ComplianceTrainingController;
-use App\Http\Controllers\Compliance\ControlledDocumentController;
-use App\Http\Controllers\Compliance\DocumentController;
-use App\Http\Controllers\Compliance\AuditController;
+use App\Http\Controllers\POS\CashierController;
+use App\Http\Controllers\POS\OrderController;
+use App\Http\Controllers\POS\SaleController;
+use App\Http\Controllers\Procurement\PurchaseOrderController;
+use App\Http\Controllers\Procurement\RFQController;
+use App\Http\Controllers\Procurement\VendorController;
 use App\Http\Controllers\Quality\InspectionController;
 use App\Http\Controllers\Quality\NCRController;
-use App\Http\Controllers\Analytics\ReportController as AnalyticsReportController;
-use App\Http\Controllers\Analytics\DashboardController as AnalyticsDashboardController;
-use App\Http\Controllers\Analytics\KPIController;
-use App\Http\Controllers\Procurement\PurchaseOrderController;
-use App\Http\Controllers\Procurement\VendorController;
-use App\Http\Controllers\Procurement\RFQController;
-use App\Http\Controllers\Settings\CRMSettingController;
-use App\Http\Controllers\Settings\FMSSettingController;
-use App\Http\Controllers\Settings\POSSettingController;
-use App\Http\Controllers\Settings\IMSSettingController;
-use App\Http\Controllers\Settings\LMSSettingController;
-use App\Http\Controllers\Settings\SCMSettingController;
-use App\Http\Controllers\Settings\SalesSettingController;
-use App\Http\Controllers\Settings\HelpdeskSettingController;
+use App\Http\Controllers\Sales\InvoiceController;
+use App\Http\Controllers\Sales\OrderController as SalesOrderController;
+use App\Http\Controllers\Sales\QuoteController;
+use App\Http\Controllers\SCM\DemandForecastController;
+use App\Http\Controllers\SCM\ImportExportController;
+use App\Http\Controllers\SCM\LogisticsController;
+use App\Http\Controllers\SCM\ProcurementController;
+use App\Http\Controllers\SCM\ProductionPlanController;
+use App\Http\Controllers\SCM\PurchaseController;
+use App\Http\Controllers\SCM\ReturnManagementController;
+use App\Http\Controllers\SCM\SupplierController;
+use App\Http\Controllers\Settings\AnalyticsSettingController;
 use App\Http\Controllers\Settings\AssetSettingController;
 use App\Http\Controllers\Settings\ComplianceSettingController;
+use App\Http\Controllers\Settings\CRMSettingController;
+use App\Http\Controllers\Settings\FMSSettingController;
+use App\Http\Controllers\Settings\HelpdeskSettingController;
+use App\Http\Controllers\Settings\IMSSettingController;
+use App\Http\Controllers\Settings\LMSSettingController;
+use App\Http\Controllers\Settings\POSSettingController;
 use App\Http\Controllers\Settings\QualitySettingController;
-use App\Http\Controllers\Settings\AnalyticsSettingController;
-use App\Http\Controllers\Settings\ProcurementSettingController;
+use App\Http\Controllers\Settings\SalesSettingController;
+use App\Http\Controllers\Settings\SCMSettingController;
 use Illuminate\Support\Facades\Route;
-
 
 // CRM Routes
 Route::middleware(['auth', 'verified'])->prefix('crm')->name('crm.')->group(function () {
@@ -136,7 +132,8 @@ Route::middleware(['auth', 'verified'])->prefix('fms')->name('fms.')->group(func
         // Route::get('/reports/{report}', [FMSReportController::class, 'show'])->name('reports.show');
     });
 
-    // Budgets
+    // Budgets - Temporarily disabled
+    /*
     Route::middleware(['permission:fms.budgets.view'])->group(function () {
         Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
         Route::get('/budgets/create', [BudgetController::class, 'create'])->name('budgets.create');
@@ -146,6 +143,7 @@ Route::middleware(['auth', 'verified'])->prefix('fms')->name('fms.')->group(func
     Route::middleware(['permission:fms.budgets.create'])->post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::middleware(['permission:fms.budgets.update'])->put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
     Route::middleware(['permission:fms.budgets.delete'])->delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
+    */
 });
 
 // POS Routes
