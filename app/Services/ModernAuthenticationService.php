@@ -7,15 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class ModernAuthenticationService
 {
     protected const MAX_LOGIN_ATTEMPTS = 5;
+
     protected const LOCKOUT_DURATION = 30; // minutes
+
     protected const SESSION_LIFETIME = 120; // minutes
 
     /**
@@ -31,31 +30,49 @@ class ModernAuthenticationService
         try {
             $riskLevel = $this->calculateRiskLevel($eventType, $status, $request, $user);
 
-            DB::table('authentication_events')->insert([
-                'user_id' => $user?->id,
-                'event_type' => $eventType,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'metadata' => json_encode(array_merge($metadata, [
-                    'route' => $request->route()?->getName(),
-                    'method' => $request->method(),
-                    'timestamp' => now()->toISOString(),
-                    'session_id' => session()->getId(),
-                ])),
-                'status' => $status,
-                'risk_level' => $riskLevel,
-                'occurred_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Try to log to database first
+            try {
+                DB::table('authentication_events')->insert([
+                    'user_id' => $user?->id,
+                    'event_type' => $eventType,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'metadata' => json_encode(array_merge($metadata, [
+                        'route' => $request->route()?->getName(),
+                        'method' => $request->method(),
+                        'timestamp' => now()->toISOString(),
+                        'session_id' => session()->getId(),
+                    ])),
+                    'status' => $status,
+                    'risk_level' => $riskLevel,
+                    'occurred_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $dbError) {
+                // Database logging failed, continue with file logging
+                Log::warning('Authentication database logging failed: '.$dbError->getMessage());
+            }
 
-            Log::channel('auth')->info("Authentication Event: {$eventType}", [
-                'user_id' => $user?->id,
-                'email' => $user?->email ?? $metadata['email'] ?? null,
-                'status' => $status,
-                'risk_level' => $riskLevel,
-                'ip' => $request->ip(),
-            ]);
+            // Try to log to auth channel, fallback to default
+            try {
+                Log::channel('auth')->info("Authentication Event: {$eventType}", [
+                    'user_id' => $user?->id,
+                    'email' => $user?->email ?? $metadata['email'] ?? null,
+                    'status' => $status,
+                    'risk_level' => $riskLevel,
+                    'ip' => $request->ip(),
+                ]);
+            } catch (\Exception $logError) {
+                // Auth channel failed, use default
+                Log::info("Authentication Event: {$eventType}", [
+                    'user_id' => $user?->id,
+                    'email' => $user?->email ?? $metadata['email'] ?? null,
+                    'status' => $status,
+                    'risk_level' => $riskLevel,
+                    'ip' => $request->ip(),
+                ]);
+            }
         } catch (\Exception $e) {
             Log::error('Failed to log authentication event', [
                 'error' => $e->getMessage(),
@@ -121,12 +138,12 @@ class ModernAuthenticationService
     {
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         // Check if account is manually locked
-        if ($user->account_locked_at && !$this->isLockExpired($user)) {
+        if ($user->account_locked_at && ! $this->isLockExpired($user)) {
             return true;
         }
 
@@ -135,6 +152,7 @@ class ModernAuthenticationService
 
         if ($recentFailures >= self::MAX_LOGIN_ATTEMPTS) {
             $this->lockAccount($user, 'too_many_failed_attempts');
+
             return true;
         }
 
@@ -207,15 +225,16 @@ class ModernAuthenticationService
             ->where('attempts', '<', 5)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return false;
         }
 
-        if (!Hash::check($token, $record->token)) {
+        if (! Hash::check($token, $record->token)) {
             // Increment attempts
             DB::table('password_reset_tokens_secure')
                 ->where('id', $record->id)
                 ->increment('attempts');
+
             return false;
         }
 
@@ -380,7 +399,7 @@ class ModernAuthenticationService
      */
     protected function isLockExpired(User $user): bool
     {
-        if (!$user->account_locked_at) {
+        if (! $user->account_locked_at) {
             return true;
         }
 
@@ -392,11 +411,21 @@ class ModernAuthenticationService
      */
     protected function getBrowserFromUserAgent(string $userAgent): string
     {
-        if (str_contains($userAgent, 'Chrome')) return 'Chrome';
-        if (str_contains($userAgent, 'Firefox')) return 'Firefox';
-        if (str_contains($userAgent, 'Safari')) return 'Safari';
-        if (str_contains($userAgent, 'Edge')) return 'Edge';
-        if (str_contains($userAgent, 'Opera')) return 'Opera';
+        if (str_contains($userAgent, 'Chrome')) {
+            return 'Chrome';
+        }
+        if (str_contains($userAgent, 'Firefox')) {
+            return 'Firefox';
+        }
+        if (str_contains($userAgent, 'Safari')) {
+            return 'Safari';
+        }
+        if (str_contains($userAgent, 'Edge')) {
+            return 'Edge';
+        }
+        if (str_contains($userAgent, 'Opera')) {
+            return 'Opera';
+        }
 
         return 'Unknown';
     }
@@ -406,11 +435,21 @@ class ModernAuthenticationService
      */
     protected function getPlatformFromUserAgent(string $userAgent): string
     {
-        if (str_contains($userAgent, 'Windows')) return 'Windows';
-        if (str_contains($userAgent, 'Macintosh')) return 'macOS';
-        if (str_contains($userAgent, 'Linux')) return 'Linux';
-        if (str_contains($userAgent, 'Android')) return 'Android';
-        if (str_contains($userAgent, 'iPhone') || str_contains($userAgent, 'iPad')) return 'iOS';
+        if (str_contains($userAgent, 'Windows')) {
+            return 'Windows';
+        }
+        if (str_contains($userAgent, 'Macintosh')) {
+            return 'macOS';
+        }
+        if (str_contains($userAgent, 'Linux')) {
+            return 'Linux';
+        }
+        if (str_contains($userAgent, 'Android')) {
+            return 'Android';
+        }
+        if (str_contains($userAgent, 'iPhone') || str_contains($userAgent, 'iPad')) {
+            return 'iOS';
+        }
 
         return 'Unknown';
     }
@@ -420,8 +459,12 @@ class ModernAuthenticationService
      */
     protected function getDeviceTypeFromUserAgent(string $userAgent): string
     {
-        if (str_contains($userAgent, 'Mobile') || str_contains($userAgent, 'Android')) return 'mobile';
-        if (str_contains($userAgent, 'Tablet') || str_contains($userAgent, 'iPad')) return 'tablet';
+        if (str_contains($userAgent, 'Mobile') || str_contains($userAgent, 'Android')) {
+            return 'mobile';
+        }
+        if (str_contains($userAgent, 'Tablet') || str_contains($userAgent, 'iPad')) {
+            return 'tablet';
+        }
 
         return 'desktop';
     }
