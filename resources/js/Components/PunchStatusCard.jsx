@@ -66,26 +66,6 @@ const PunchStatusCard = () => {
     const { auth } = usePage().props;
     const user = auth.user;
 
-    // Early authentication check - don't render if not authenticated
-    if (!auth.check || !user) {
-        return (
-            <GlassCard sx={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                height: '100%',
-                width: '100%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                p: 3
-            }}>
-                <CircularProgress size={40} />
-                <Typography sx={{ mt: 2, color: 'text.secondary' }}>
-                    Authenticating...
-                </Typography>
-            </GlassCard>
-        );
-    }
-
     // State management
     const [currentStatus, setCurrentStatus] = useState(null);
     const [loading, setLoading] = useState(false);
