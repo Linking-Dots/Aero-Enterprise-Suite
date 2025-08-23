@@ -41,6 +41,18 @@ const App = React.memo(({ children }) => {
     const [isUpdating, setIsUpdating] = useState(false);
     let { auth, app, url } = usePage().props;
     
+    // Authentication guard for the entire app
+    React.useEffect(() => {
+        // Check if we're on a protected route
+        const isProtectedRoute = !['/', '/login', '/register', '/forgot-password', '/reset-password'].includes(url);
+        
+        if (isProtectedRoute && (!auth?.check || !auth?.user)) {
+            console.warn('Protected route accessed without authentication, redirecting');
+            window.location.href = '/login';
+            return;
+        }
+    }, [auth, url]);
+    
     // Initialize version manager
     const {
         currentVersion,

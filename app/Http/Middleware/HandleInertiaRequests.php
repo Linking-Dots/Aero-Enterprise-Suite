@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\CompanySetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -24,6 +25,69 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
+     * Handle the incoming request.
+     */
+    public function handle(Request $request, callable $next)
+    {
+        // For protected routes, ensure user is authenticated before processing Inertia
+        if ($this->isProtectedRoute($request)) {
+            if (! Auth::check() || ! $request->user()) {
+                // Redirect unauthenticated users to login
+                return redirect()->route('login');
+            }
+        }
+
+        return parent::handle($request, $next);
+    }
+
+    /**
+     * Check if the current route requires authentication
+     */
+    protected function isProtectedRoute(Request $request): bool
+    {
+        $path = $request->path();
+
+        // List of routes that require authentication
+        $protectedPaths = [
+            'dashboard',
+            'stats',
+            'updates',
+            'leaves-employee',
+            'attendance-employee',
+            'security/dashboard',
+            'admin',
+            'hr',
+            'crm',
+            'fms',
+            'ims',
+            'pos',
+            'lms',
+            'project-management',
+            'quality',
+            'compliance',
+            'dms',
+            'analytics',
+        ];
+
+        // Check if current path starts with any protected path
+        foreach ($protectedPaths as $protectedPath) {
+            if (str_starts_with($path, $protectedPath)) {
+                return true;
+            }
+        }
+
+        // Also check if the route has auth middleware
+        $route = $request->route();
+        if ($route) {
+            $middleware = $route->middleware();
+
+            return in_array('auth', $middleware) || in_array('auth:web', $middleware);
+        }
+
+        return false;
+    }
+
+    /**
      * Define the props that are shared by default.
      *
      * @return array<string, mixed>
@@ -32,12 +96,21 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
-        // Only fetch detailed user data if session is valid and user is properly authenticated
+        // Strict authentication validation - multiple checks to ensure user is truly authenticated
         $userWithDesignation = null;
-        $isAuthenticated = $user && $request->hasSession() && $request->session()->isStarted();
+        $isAuthenticated = $user &&
+                          $request->hasSession() &&
+                          $request->session()->isStarted() &&
+                          Auth::check() &&
+                          Auth::id() === $user->id &&
+                          $request->session()->has('login_web_'.sha1('web'));
 
         if ($isAuthenticated) {
-            $userWithDesignation = \App\Models\User::with('designation')->find($user->id);
+            // Double-check user exists in database and is active
+            $userWithDesignation = \App\Models\User::where('id', $user->id)->first();
+            if (! $userWithDesignation) {
+                $isAuthenticated = false;
+            }
         }
 
         // Get company settings for global use

@@ -20,6 +20,20 @@ import {
 
 export default function Dashboard({ auth }) {
 
+    // Strict authentication check - redirect if not authenticated
+    React.useEffect(() => {
+        if (!auth?.check || !auth?.user) {
+            console.warn('Dashboard accessed without proper authentication, redirecting to login');
+            window.location.href = route('login');
+            return;
+        }
+    }, [auth]);
+
+    // Don't render anything if not authenticated
+    if (!auth?.check || !auth?.user) {
+        return null;
+    }
+
     console.log(auth)
 
     const [updateMap, setUpdateMap] = useState(false);
