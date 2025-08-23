@@ -51,7 +51,7 @@ class TrackSecurityActivity
             $this->detectSecurityAnomalies($request, $userId);
 
         } catch (\Exception $e) {
-            // Don't break the application flow
+            // Don't break the application flow - table might not exist
             Log::debug('Failed to update session activity: '.$e->getMessage());
         }
     }
@@ -98,6 +98,7 @@ class TrackSecurityActivity
             }
 
         } catch (\Exception $e) {
+            // Don't break the application flow - tables might not exist
             Log::debug('Failed to detect security anomalies: '.$e->getMessage());
         }
     }
@@ -137,13 +138,13 @@ class TrackSecurityActivity
     private function getSeverityForEvent(string $eventType): string
     {
         $severityMap = [
-            'ip_address_change' => 'warning',
-            'multiple_active_sessions' => 'info',
+            'ip_address_change' => 'medium',
+            'multiple_active_sessions' => 'low',
             'suspicious_activity' => 'critical',
-            'failed_login' => 'warning',
+            'failed_login' => 'medium',
         ];
 
-        return $severityMap[$eventType] ?? 'info';
+        return $severityMap[$eventType] ?? 'low';
     }
 
     /**
