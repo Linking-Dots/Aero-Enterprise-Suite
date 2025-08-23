@@ -46,7 +46,7 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::middleware(['auth', 'verified', 'single_device'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
 
