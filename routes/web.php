@@ -46,30 +46,13 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-// Method 4: Direct inline middleware implementation
+// Simple and reliable: Check class existence and use direct class reference
 $middlewareStack = ['auth', 'verified'];
-
-// Add inline single device middleware if the class exists
 if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
-    $middlewareStack[] = function ($request, $next) {
-        $middleware = app(\App\Http\Middleware\SingleDeviceLoginMiddleware::class);
-        return $middleware->handle($request, $next);
-    };
+    $middlewareStack[] = \App\Http\Middleware\SingleDeviceLoginMiddleware::class;
 }
 
 Route::middleware($middlewareStack)->group(function () {
-
-    Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
-
-    // Dashboard routes - require dashboard permission
-    Route::middleware(['permission:core.dashboard.view'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
-    });
-
-    // Security Dashboard route - available to authenticated users
-    Route::get('/security/dashboard', function () {
-        return inertia('Security/Dashboard');
     })->name('security.dashboard');
 
     // Updates route - require updates permission
