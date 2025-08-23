@@ -7,7 +7,6 @@ import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import axios from 'axios';
 import ErrorBoundary from './Components/ErrorBoundary/ErrorBoundary';
 import { AppStateProvider } from './Contexts/AppStateContext';
-import AuthGuard from './Components/AuthGuard';
 
 // Enhanced axios configuration with interceptors
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -111,9 +110,7 @@ createInertiaApp({
         root.render(
             <ErrorBoundary>
                 <AppStateProvider>
-                    <AuthGuard>
-                        <App {...props} />
-                    </AuthGuard>
+                    <App {...props} />
                 </AppStateProvider>
             </ErrorBoundary>
         );

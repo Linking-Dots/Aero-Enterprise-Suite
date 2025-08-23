@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Spinner } from '@heroui/react';
 
@@ -10,8 +10,7 @@ import { Spinner } from '@heroui/react';
  * when the user is not authenticated or session has expired.
  * It provides a seamless loading experience while checking auth status.
  */
-const AuthGuard = ({ children }) => {
-    const { auth, url } = usePage().props;
+const AuthGuard = ({ children, auth, url }) => {
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
