@@ -46,11 +46,15 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-// Conditionally apply single_device middleware only if the class exists
-// This prevents errors on servers where the middleware hasn't been deployed yet
+// Method 4: Direct inline middleware implementation
 $middlewareStack = ['auth', 'verified'];
+
+// Add inline single device middleware if the class exists
 if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
-    $middlewareStack[] = 'single_device';
+    $middlewareStack[] = function ($request, $next) {
+        $middleware = app(\App\Http\Middleware\SingleDeviceLoginMiddleware::class);
+        return $middleware->handle($request, $next);
+    };
 }
 
 Route::middleware($middlewareStack)->group(function () {
