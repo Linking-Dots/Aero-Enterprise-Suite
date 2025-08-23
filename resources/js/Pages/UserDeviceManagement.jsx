@@ -90,19 +90,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
 
-  // Debug initial state
-  console.log('UserDeviceManagement - Initial user data:', initialUser);
-  console.log('UserDeviceManagement - Current user state:', user);
-  console.log('UserDeviceManagement - single_device_login value:', user?.single_device_login);
-  console.log('UserDeviceManagement - Boolean conversion:', Boolean(user?.single_device_login));
-  useEffect(() => {
-    console.log('Initial user state:', initialUser);
-    console.log('Current user state:', user);
-  }, []);
 
-  useEffect(() => {
-    console.log('User state changed:', user);
-  }, [user]);
   
   // Filter and search states
   const [filters, setFilters] = useState({
@@ -279,7 +267,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
 
   // Toggle single device login for user
   const toggleSingleDeviceLogin = async (enabled) => {
-    console.log('toggleSingleDeviceLogin called with:', enabled);
+  
     setActionLoading(prev => ({ ...prev, toggle: true }));
     
     try {
@@ -288,7 +276,6 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
         enabled: enabled
       });
 
-      console.log('Toggle response:', response.data);
 
       if (response.status === 200 && response.data.success) {
         // Update user state with the response data from backend
@@ -298,7 +285,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
           active_device: response.data.user.active_device
         };
         
-        console.log('Updating user state:', newUserState);
+   
         setUser(newUserState);
         
         toast.success(response.data.message || 
@@ -773,7 +760,6 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                                 className="sr-only peer"
                                 checked={user.single_device_login}
                                 onChange={(e) => {
-                                  console.log('Toggle clicked:', e.target.checked, 'Current state:', user.single_device_login);
                                   toggleSingleDeviceLogin(e.target.checked);
                                 }}
                                 disabled={actionLoading.toggle}

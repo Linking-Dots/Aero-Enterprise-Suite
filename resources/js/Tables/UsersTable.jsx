@@ -417,7 +417,7 @@ const UsersTable = ({
         );
         
       case "status":
-        console.log('Rendering status for user:', user);
+ 
         return (
           <div className="flex items-center justify-center">
             <label className="relative inline-flex items-center cursor-pointer">

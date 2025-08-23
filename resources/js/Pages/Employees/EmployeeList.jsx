@@ -139,7 +139,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
         }
       });
 
-      console.log(data)
+    
       
       setEmployees(data.employees.data);
       setTotalRows(data.employees.total);

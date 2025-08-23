@@ -295,7 +295,7 @@ const LeaveEmployeeTable = React.forwardRef(({
         const user = getUserInfo(leave.user_id);
         const duration = getLeaveDuration(leave.from_date, leave.to_date);
         const statusConf = statusConfig[leave.status] || statusConfig['New'];
-        console.log(isAdminView ? "Admin View" : "User View");
+
 
         return (
             <GlassCard className="mb-2" shadow="sm">
