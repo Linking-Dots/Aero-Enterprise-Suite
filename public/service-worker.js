@@ -7,7 +7,7 @@ const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic`;
 const API_CACHE = `${CACHE_PREFIX}-api`;
 
 // Version will be replaced during build process
-const APP_VERSION = '1.1.3'; // This will be replaced by build process
+const APP_VERSION = '1.1.4'; // This will be replaced by build process
 
 // Cache configuration
 const CACHE_CONFIG = {

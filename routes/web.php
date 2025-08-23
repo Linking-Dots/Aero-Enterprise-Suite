@@ -30,6 +30,7 @@ use App\Http\Controllers\Settings\LeaveSettingController;
 use App\Http\Controllers\SystemMonitoringController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Include authentication routes
@@ -38,14 +39,32 @@ require __DIR__.'/auth.php';
 Route::redirect('/', '/dashboard');
 
 Route::get('/session-check', function () {
-    return response()->json(['authenticated' => auth()->check()]);
+    $authenticated = Auth::check();
+    $user = Auth::user();
+
+    // Additional session validation
+    if ($authenticated && $user) {
+        // Check if the session is valid and user exists in database
+        $userExists = \App\Models\User::where('id', $user->id)->exists();
+        if (! $userExists) {
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            $authenticated = false;
+        }
+    }
+
+    return response()->json([
+        'authenticated' => $authenticated,
+        'timestamp' => now()->toISOString(),
+    ]);
 });
 
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
 
     Route::get('/picnic', [PicnicController::class, 'index'])->name('picnic');
 
@@ -119,31 +138,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays');
         Route::post('/holidays-add', [HolidayController::class, 'create'])->name('holidays-add');
         Route::delete('/holidays-delete', [HolidayController::class, 'delete'])->name('holidays-delete');
-        
+
         // Legacy redirect for old holiday routes
         Route::get('/holidays-legacy', [HolidayController::class, 'index'])->name('holidays-legacy');
     });
 
-    //Profile Routes - own profile access
+    // Profile Routes - own profile access
     Route::middleware(['permission:profile.own.view'])->group(function () {
         Route::get('/profile/{user}', [ProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
-        
+
         // Profile Image Routes - dedicated endpoints for profile image management
         Route::post('/profile/image/upload', [ProfileImageController::class, 'upload'])->name('profile.image.upload');
         Route::delete('/profile/image/remove', [ProfileImageController::class, 'remove'])->name('profile.image.remove');
-        
+
         // New API endpoints for enhanced profile functionality (consistent with other modules)
         Route::get('/profile/{user}/stats', [ProfileController::class, 'stats'])->name('profile.stats');
         Route::get('/profile/{user}/export', [ProfileController::class, 'export'])->name('profile.export');
         Route::post('/profile/{user}/track-view', [ProfileController::class, 'trackView'])->name('profile.trackView');
 
-        //Education Routes:
+        // Education Routes:
         Route::post('/education/update', [EducationController::class, 'update'])->name('education.update');
         Route::delete('/education/delete', [EducationController::class, 'delete'])->name('education.delete');
 
-        //Experience Routes:
+        // Experience Routes:
         Route::post('/experience/update', [ExperienceController::class, 'update'])->name('experience.update');
         Route::delete('/experience/delete', [ExperienceController::class, 'delete'])->name('experience.delete');
     });
@@ -155,9 +174,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:leaves.view,leaves.own.view'])->get('/leave-summary', [LeaveController::class, 'summary'])->name('leave.summary');
 });
 
-
 // Administrative routes - require specific permissions
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
 
     // Document management routes
     Route::middleware(['permission:letters.view'])->group(function () {
@@ -205,7 +223,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/employees/paginate', [\App\Http\Controllers\EmployeeController::class, 'paginate'])->name('employees.paginate');
         Route::get('/employees/stats', [\App\Http\Controllers\EmployeeController::class, 'stats'])->name('employees.stats');
     });
-    
+
     // Department management routes
     Route::middleware(['permission:departments.view'])->get('/departments', [DepartmentController::class, 'index'])->name('departments');
     Route::middleware(['permission:departments.view'])->get('/api/departments', [DepartmentController::class, 'getDepartments'])->name('api.departments');
@@ -215,7 +233,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:departments.update'])->put('/departments/{id}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::middleware(['permission:departments.delete'])->delete('/departments/{id}', [DepartmentController::class, 'destroy'])->name('departments.delete');
     Route::middleware(['permission:departments.update'])->put('/users/{id}/department', [DepartmentController::class, 'updateUserDepartment'])->name('users.update-department');
-    
+
     Route::middleware(['permission:jurisdiction.view'])->get('/jurisdiction', [JurisdictionController::class, 'index'])->name('jurisdiction');
 
     // Daily works management routes
@@ -231,7 +249,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users', [UserController::class, 'index2'])->name('users');
         Route::get('/users/paginate', [UserController::class, 'paginate'])->name('users.paginate');
         Route::get('/users/stats', [UserController::class, 'stats'])->name('users.stats');
-        
+
         // Profile search for admin usage (consistent with other modules)
         Route::get('/profiles/search', [ProfileController::class, 'search'])->name('profiles.search');
     });
@@ -322,7 +340,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:jurisdiction.update'])->post('/work-locations/update', [JurisdictionController::class, 'updateWorkLocation'])->name('updateWorkLocation');
 });
 
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/tasks-all-se', [TaskController::class, 'allTasks'])->name('allTasksSE');
@@ -337,8 +354,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/tasks/daily-summary-filtered-se', [DailyWorkSummaryController::class, 'filterSummary'])->name('filterSummarySE');
     Route::get('/get-latest-timestamp', [TaskController::class, 'getLatestTimestamp'])->name('getLatestTimestamp');
     Route::get('/tasks/daily-summary-json', [DailyWorkSummaryController::class, 'dailySummary'])->name('dailySummaryJSON');
-
-
 
     Route::get('/reports', [ReportController::class, 'showReports'])->name('showReports');
     Route::get('/reports-json', [ReportController::class, 'allReports'])->name('allReports');
@@ -517,7 +532,6 @@ Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(funct
         Route::get('/courses', [LMSController::class, 'courses'])->name('lms.courses')->middleware('permission:lms.courses.view');
         Route::post('/courses', [LMSController::class, 'storeCourse'])->name('lms.courses.store')->middleware('permission:lms.courses.create');
 
-
         // Student Management
         Route::get('/students', [LMSController::class, 'students'])->name('lms.students')->middleware('permission:lms.students.view');
         Route::post('/students', [LMSController::class, 'storeStudent'])->name('lms.students.store')->middleware('permission:lms.students.create');
@@ -533,7 +547,6 @@ Route::middleware(['auth', 'verified', 'role:Super Administrator'])->group(funct
         // Assessment Management
         Route::get('/assessments', [LMSController::class, 'assessments'])->name('lms.assessments')->middleware('permission:lms.assessments.view');
         Route::post('/assessments', [LMSController::class, 'storeAssessment'])->name('lms.assessments.store')->middleware('permission:lms.assessments.create');
-
 
         // Certificate Management
         Route::get('/certificates', [LMSController::class, 'certificates'])->name('lms.certificates')->middleware('permission:lms.certificates.view');
@@ -580,7 +593,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'HR Manager',
                 'Project Manager',
                 'Department Manager',
-                'Team Lead'
+                'Team Lead',
             ]);
         })
             ->select('id', 'name')
@@ -596,7 +609,7 @@ Route::get('/service-worker.js', function () {
     if (file_exists($filePath)) {
         return response()->file($filePath, [
             'Content-Type' => 'application/javascript',
-            'Service-Worker-Allowed' => '/'
+            'Service-Worker-Allowed' => '/',
         ]);
     }
     abort(404);
@@ -606,17 +619,17 @@ Route::get('/service-worker.js', function () {
 Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () {
     $currentUser = \Illuminate\Support\Facades\Auth::user();
     $employee = \App\Models\User::where('id', '!=', $currentUser->id)->first();
-    
-    if (!$employee) {
+
+    if (! $employee) {
         return response()->json(['error' => 'No other employee found for testing']);
     }
-    
-    $controller = new \App\Http\Controllers\EmployeeController();
+
+    $controller = new \App\Http\Controllers\EmployeeController;
     $reflection = new ReflectionClass($controller);
     $method = $reflection->getMethod('canDeleteEmployee');
     $method->setAccessible(true);
     $canDelete = $method->invoke($controller, $currentUser, $employee);
-    
+
     return response()->json([
         'current_user' => [
             'id' => $currentUser->id,
@@ -632,17 +645,17 @@ Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () 
             'name' => $employee->name,
         ],
         'can_delete' => $canDelete,
-        'authorization_result' => $canDelete ? 'AUTHORIZED' : 'UNAUTHORIZED'
+        'authorization_result' => $canDelete ? 'AUTHORIZED' : 'UNAUTHORIZED',
     ]);
 });
 
 // Include all module routes
-require __DIR__ . '/modules.php';
-require __DIR__ . '/compliance.php';
-require __DIR__ . '/quality.php';
-require __DIR__ . '/analytics.php';
-require __DIR__ . '/project-management.php';
-require __DIR__ . '/hr.php';
-require __DIR__ . '/dms.php';
+require __DIR__.'/modules.php';
+require __DIR__.'/compliance.php';
+require __DIR__.'/quality.php';
+require __DIR__.'/analytics.php';
+require __DIR__.'/project-management.php';
+require __DIR__.'/hr.php';
+require __DIR__.'/dms.php';
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

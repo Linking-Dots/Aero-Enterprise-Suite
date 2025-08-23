@@ -24,7 +24,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
-         
+
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
@@ -33,6 +33,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\Cors::class,
+            \App\Http\Middleware\PreventCaching::class,
         ],
 
         'api' => [
@@ -56,11 +57,12 @@ class Kernel extends HttpKernel
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-          // Spatie Permission Middleware
+        'prevent.caching' => \App\Http\Middleware\PreventCaching::class,
+        // Spatie Permission Middleware
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-          // Custom Security Middleware
+        // Custom Security Middleware
         'api_security' => \App\Http\Middleware\ApiSecurityMiddleware::class,
         'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'role_hierarchy' => \App\Http\Middleware\RoleHierarchyMiddleware::class,
