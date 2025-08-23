@@ -5,7 +5,7 @@ use App\Http\Controllers\CRM\OpportunityController;
 use App\Http\Controllers\CRM\InteractionController;
 use App\Http\Controllers\FMS\TransactionController;
 use App\Http\Controllers\FMS\AccountController;
-use App\Http\Controllers\FMS\ReportController as FMSReportController;
+// use App\Http\Controllers\FMS\ReportController as FMSReportController;
 use App\Http\Controllers\POS\SaleController;
 use App\Http\Controllers\POS\OrderController;
 use App\Http\Controllers\POS\CashierController;
@@ -132,8 +132,8 @@ Route::middleware(['auth', 'verified'])->prefix('fms')->name('fms.')->group(func
 
     // Reports
     Route::middleware(['permission:fms.reports.view'])->group(function () {
-        Route::get('/reports', [FMSReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/{report}', [FMSReportController::class, 'show'])->name('reports.show');
+        // Route::get('/reports', [FMSReportController::class, 'index'])->name('reports.index');
+        // Route::get('/reports/{report}', [FMSReportController::class, 'show'])->name('reports.show');
     });
 
     // Budgets

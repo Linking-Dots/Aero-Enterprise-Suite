@@ -31,15 +31,6 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-
-        // Additional session validation - reject if session is invalid
-        if ($user && ! $request->session()->has('login_web_'.sha1(get_class($user)))) {
-            \Illuminate\Support\Facades\Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            $user = null;
-        }
-
         $userWithDesignation = $user ? \App\Models\User::with('designation')->find($user->id) : null;
 
         // Get company settings for global use
