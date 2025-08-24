@@ -991,10 +991,11 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         label="Search Employee"
                                                         placeholder="Enter employee name"
                                                         value={employee}
-                                                        onChange={handleSearch}
+                                                        onValueChange={setEmployee}
                                                         startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                                                         variant="bordered"
                                                         aria-label="Search employees"
+                                                        isClearable
                                                         classNames={{
                                                             inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
                                                         }}

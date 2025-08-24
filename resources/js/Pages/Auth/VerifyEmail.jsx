@@ -6,8 +6,8 @@ import {
     CheckCircleIcon,
     ExclamationTriangleIcon 
 } from '@heroicons/react/24/outline';
+import { Button as HeroButton } from '@heroui/react';
 import AuthLayout from '@/Components/AuthLayout';
-import Button from '@/Components/Button';
 import { useTheme } from '@mui/material/styles';
 
 export default function VerifyEmail({ status }) {
@@ -127,16 +127,16 @@ export default function VerifyEmail({ status }) {
                     transition={{ delay: 0.4 }}
                 >
                     <form onSubmit={submit}>
-                        <Button
+                        <HeroButton
                             type="submit"
-                            variant="primary"
+                            color="primary"
                             size="lg"
                             className="w-full"
-                            loading={processing}
+                            isLoading={processing}
                             disabled={processing}
                         >
                             {processing ? 'Sending...' : 'Resend verification email'}
-                        </Button>
+                        </HeroButton>
                     </form>
 
                     <motion.div

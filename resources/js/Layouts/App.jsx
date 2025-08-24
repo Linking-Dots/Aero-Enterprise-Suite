@@ -195,6 +195,9 @@ const App = React.memo(({ children }) => {
         // Apply theme immediately
         applyThemeToRoot(themeColor, darkMode);
         
+        // Apply HeroUI theme attribute for proper component theming
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        
         // Initialize background pattern from localStorage
         const savedBackground = localStorage.getItem('aero-hr-background');
         const backgroundPattern = savedBackground || 'pattern-glass-1'; 

@@ -160,47 +160,47 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="RFI Date"
                                 type="date"
                                 name="date"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.date}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'date', value } })}
                                 isInvalid={Boolean(errors.date)}
                                 errorMessage={errors.date}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="RFI Number"
                                 name="number"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.number}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'number', value } })}
                                 isInvalid={Boolean(errors.number)}
                                 errorMessage={errors.number}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="Planned Time"
                                 name="planned_time"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.planned_time}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'planned_time', value } })}
                                 isInvalid={Boolean(errors.planned_time)}
                                 errorMessage={errors.planned_time}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Select
-                                variant={'underlined'}
+                                variant="underlined"
                                 label="Type"
                                 name="type"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.type}
                                 isInvalid={Boolean(errors.type)}
                                 errorMessage={errors.type}
@@ -219,35 +219,34 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="Location"
                                 name="location"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.location}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'location', value } })}
                                 isInvalid={Boolean(errors.location)}
                                 errorMessage={errors.location}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="Description"
                                 name="description"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.description}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'description', value } })}
                                 isInvalid={Boolean(errors.description)}
                                 errorMessage={errors.description}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Select
-                                variant={'underlined'}
-                                select="true"
+                                variant="underlined"
                                 label="Road Type"
                                 name="side"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.side}
                                 onChange={handleChange}
                                 isInvalid={Boolean(errors.side)}
@@ -267,12 +266,12 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Input
-                                variant={"underlined"}
+                                variant="underlined"
                                 label="Quantity/Layer No."
                                 name="qty_layer"
-                                fullWidth
+                                className="w-full"
                                 value={dailyWorkData.qty_layer}
-                                onChange={handleChange}
+                                onValueChange={(value) => handleChange({ target: { name: 'qty_layer', value } })}
                                 isInvalid={Boolean(errors.qty_layer)}
                                 errorMessage={errors.qty_layer}
                             />

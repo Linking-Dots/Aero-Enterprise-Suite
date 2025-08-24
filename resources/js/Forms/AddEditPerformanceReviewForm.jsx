@@ -525,15 +525,15 @@ const AddEditPerformanceReviewForm = ({ open, onClose, performanceReview = null,
             <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                 <Button 
                     onClick={onClose} 
-                    variant="text"
+                    variant="light"
                 >
                     Cancel
                 </Button>
                 <Button 
                     type="submit"
                     form="performance-review-form"
-                    variant="primary"
-                    loading={loading}
+                    color="primary"
+                    isLoading={loading}
                 >
                     {isEditing ? 'Update Review' : 'Create Review'}
                 </Button>

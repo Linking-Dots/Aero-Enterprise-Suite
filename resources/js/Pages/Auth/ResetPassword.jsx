@@ -330,16 +330,16 @@ export default function ResetPassword({ token, email }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                 >
-                    <Button
+                    <HeroButton
                         type="submit"
-                        variant="primary"
+                        color="primary"
                         size="lg"
                         className="w-full"
-                        loading={processing}
+                        isLoading={processing}
                         disabled={processing}
                     >
                         {processing ? 'Updating password...' : 'Update password'}
-                    </Button>
+                    </HeroButton>
                 </motion.div>
             </form>
 

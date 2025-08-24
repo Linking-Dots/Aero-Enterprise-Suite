@@ -13,7 +13,7 @@ const GlassDropdown = forwardRef(({
     const theme = useTheme();
     
     // Filter out props that are not supported by HeroUI Dropdown
-    // These props were likely intended for NextUI or other dropdown libraries
+    // These props were likely intended for HeroUI or other dropdown libraries
     // - closeDelay: timing control not supported by HeroUI
     // - shouldBlockScroll: scroll behavior not supported by HeroUI  
     // - isKeyboardDismissDisabled: keyboard behavior not supported by HeroUI

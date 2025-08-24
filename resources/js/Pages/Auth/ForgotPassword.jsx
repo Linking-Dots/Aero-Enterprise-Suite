@@ -136,16 +136,16 @@ export default function ForgotPassword({ status }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <Button
+                    <HeroButton
                         type="submit"
-                        variant="primary"
+                        color="primary"
                         size="lg"
                         className="w-full"
-                        loading={processing}
+                        isLoading={processing}
                         disabled={processing}
                     >
                         {processing ? 'Sending...' : 'Send reset link'}
-                    </Button>
+                    </HeroButton>
                 </motion.div>
 
                 <motion.div

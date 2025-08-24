@@ -382,16 +382,16 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
                 >
-                    <Button
+                    <HeroButton
                         type="submit"
-                        variant="primary"
+                        color="primary"
                         size="lg"
                         className="w-full"
-                        loading={processing}
+                        isLoading={processing}
                         disabled={processing}
                     >
                         {processing ? 'Creating account...' : 'Create account'}
-                    </Button>
+                    </HeroButton>
                 </motion.div>
 
                 <motion.div

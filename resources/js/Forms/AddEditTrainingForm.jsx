@@ -177,7 +177,7 @@ const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, curren
                                 label="Training Title"
                                 placeholder="Enter training title"
                                 value={formData.title}
-                                onChange={(e) => handleChange({ target: { name: 'title', value: e.target.value }})}
+                                onValueChange={(value) => handleChange({ target: { name: 'title', value }})}
                                 isInvalid={!!errors.title}
                                 errorMessage={errors.title}
                                 isRequired
@@ -412,14 +412,14 @@ const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, curren
             <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                 <Button 
                     onClick={onClose} 
-                    variant="text"
+                    variant="light"
                 >
                     Cancel
                 </Button>
                 <Button 
                     onClick={handleSubmit}
-                    variant="primary"
-                    loading={loading}
+                    color="primary"
+                    isLoading={loading}
                 >
                     {isEditing ? 'Update Training' : 'Create Training'}
                 </Button>

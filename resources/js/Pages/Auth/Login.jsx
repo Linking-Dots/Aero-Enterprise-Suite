@@ -167,7 +167,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                         label="Email address"
                         placeholder="Enter your email"
                         value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
+                        onValueChange={(value) => setData('email', value)}
                         isInvalid={!!errors.email}
                         errorMessage={errors.email}
                         autoComplete="username"
@@ -176,28 +176,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                         startContent={
                             <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
                         }
-                        classNames={{
-                            base: "w-full",
-                            mainWrapper: "w-full",
-                            input: [
-                                "bg-transparent",
-                                "text-black dark:text-white",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            innerWrapper: "bg-transparent",
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focused=true]:bg-default-200/50",
-                                "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
-                            ],
-                        }}
+                       
                     />
                 </motion.div>
 
@@ -211,7 +190,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                         label="Password"
                         placeholder="Enter your password"
                         value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onValueChange={(value) => setData('password', value)}
                         isInvalid={!!errors.password}
                         errorMessage={errors.password}
                         autoComplete="current-password"
@@ -291,16 +270,16 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
-                    <Button
+                    <HeroButton
                         type="submit"
-                        variant="primary"
+                        color="primary"
                         size="lg"
                         className="w-full"
-                        loading={processing}
+                        isLoading={processing}
                         disabled={processing}
                     >
                         {processing ? 'Signing in...' : 'Sign in'}
-                    </Button>
+                    </HeroButton>
                 </motion.div>
 
                 <motion.div
