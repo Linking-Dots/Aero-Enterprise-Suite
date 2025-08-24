@@ -14,6 +14,7 @@ class UserDevice extends Model
     protected $fillable = [
         'user_id',
         'device_id',
+        'compatible_device_id',
         'device_name',
         'browser_name',
         'browser_version',

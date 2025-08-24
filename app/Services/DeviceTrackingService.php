@@ -20,13 +20,14 @@ class DeviceTrackingService
 
     /**
      * Generate a unique device identifier based on request data.
+     * Note: IP address is excluded from fingerprint to handle dynamic IPs.
      */
     public function generateDeviceId(Request $request): string
     {
         $userAgent = $request->userAgent() ?? '';
-        $ip = $request->ip() ?? '';
         
-        // Create a more stable device fingerprint
+        // Create a stable device fingerprint that doesn't include IP
+        // This prevents issues with dynamic IPs, WiFi switching, VPN usage, etc.
         $fingerprint = [
             'user_agent' => $userAgent,
             'accept_language' => $request->header('Accept-Language', ''),
@@ -35,7 +36,29 @@ class DeviceTrackingService
 
         $fingerprintString = json_encode($fingerprint);
         
-        return hash('sha256', $fingerprintString . $ip);
+        return hash('sha256', $fingerprintString);
+    }
+
+    /**
+     * Generate a more flexible device identifier for compatibility checks.
+     * This is used to identify similar devices even with minor differences.
+     */
+    public function generateCompatibleDeviceId(Request $request): string
+    {
+        $userAgent = $request->userAgent() ?? '';
+        
+        // Extract core browser and platform info, ignoring version details
+        $this->agent->setUserAgent($userAgent);
+        
+        $coreFingerprint = [
+            'browser' => $this->agent->browser(),
+            'platform' => $this->agent->platform(),
+            'device_type' => $this->agent->isMobile() ? 'mobile' : ($this->agent->isTablet() ? 'tablet' : 'desktop'),
+        ];
+
+        $fingerprintString = json_encode($coreFingerprint);
+        
+        return hash('sha256', $fingerprintString);
     }
 
     /**
@@ -104,7 +127,7 @@ class DeviceTrackingService
             ];
         }
 
-        // Check if this device is already registered and active
+        // First, check if this exact device is already registered and active
         $existingDevice = $user->devices()
             ->where('device_id', $deviceId)
             ->active()
@@ -119,10 +142,64 @@ class DeviceTrackingService
             ];
         }
 
-        // Check if user has any active devices
+        // If no exact match, check for compatible devices (same core browser/platform)
+        // This handles cases where minor changes in user agent or headers occur
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
+        $compatibleDevice = $user->devices()
+            ->where('compatible_device_id', $compatibleDeviceId)
+            ->active()
+            ->first();
+
+        if ($compatibleDevice) {
+            // Update the device with new device_id for future logins
+            $compatibleDevice->update(['device_id' => $deviceId]);
+            
+            return [
+                'allowed' => true,
+                'device_id' => $deviceId,
+                'existing_device' => $compatibleDevice,
+                'message' => 'Login from compatible device (updated fingerprint)',
+            ];
+        }
+
+        // Check if user has any active devices that would block this login
         $activeDevice = $user->activeDevices()->first();
 
         if ($activeDevice) {
+            // Additional check: see if this might be the same physical device
+            // by comparing core device characteristics
+            $deviceInfo = $this->getDeviceInfo($request);
+            $currentDeviceFingerprint = [
+                'browser_name' => $deviceInfo['browser_name'],
+                'platform' => $deviceInfo['platform'],
+                'device_type' => $deviceInfo['device_type'],
+            ];
+
+            $activeDeviceFingerprint = [
+                'browser_name' => $activeDevice->browser_name,
+                'platform' => $activeDevice->platform,
+                'device_type' => $activeDevice->device_type,
+            ];
+
+            // If the core characteristics match, this might be the same device
+            // with changed network conditions (IP, headers, etc.)
+            if ($currentDeviceFingerprint === $activeDeviceFingerprint) {
+                // Update the existing device with new fingerprint
+                $activeDevice->update([
+                    'device_id' => $deviceId,
+                    'compatible_device_id' => $compatibleDeviceId,
+                    'ip_address' => $deviceInfo['ip_address'],
+                    'user_agent' => $deviceInfo['user_agent'],
+                ]);
+
+                return [
+                    'allowed' => true,
+                    'device_id' => $deviceId,
+                    'existing_device' => $activeDevice,
+                    'message' => 'Login from same device (updated network fingerprint)',
+                ];
+            }
+
             return [
                 'allowed' => false,
                 'device_id' => $deviceId,
@@ -145,6 +222,7 @@ class DeviceTrackingService
     public function registerDevice(User $user, Request $request, string $sessionId): UserDevice
     {
         $deviceId = $this->generateDeviceId($request);
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
         $deviceInfo = $this->getDeviceInfo($request);
 
         // Check if device already exists
@@ -158,11 +236,13 @@ class DeviceTrackingService
                 'is_active' => true,
                 'ip_address' => $deviceInfo['ip_address'],
                 'device_fingerprint' => $deviceInfo['device_fingerprint'],
+                'compatible_device_id' => $compatibleDeviceId,
             ]);
         } else {
             // Create new device
             $device = $user->devices()->create([
                 'device_id' => $deviceId,
+                'compatible_device_id' => $compatibleDeviceId,
                 'session_id' => $sessionId,
                 'last_activity' => Carbon::now(),
                 'is_active' => true,
@@ -179,11 +259,26 @@ class DeviceTrackingService
     public function updateDeviceActivity(User $user, Request $request, string $sessionId = null): void
     {
         $deviceId = $this->generateDeviceId($request);
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
         
+        // First try to find by exact device ID
         $device = $user->devices()
             ->where('device_id', $deviceId)
             ->active()
             ->first();
+
+        // If not found, try to find by compatible device ID
+        if (!$device) {
+            $device = $user->devices()
+                ->where('compatible_device_id', $compatibleDeviceId)
+                ->active()
+                ->first();
+                
+            // Update the device ID if found through compatible ID
+            if ($device) {
+                $device->update(['device_id' => $deviceId]);
+            }
+        }
 
         if ($device) {
             $device->updateActivity($sessionId);
