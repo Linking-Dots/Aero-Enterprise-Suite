@@ -389,7 +389,7 @@ const UsersTable = ({
                       content: "p-0 bg-transparent shadow-none border-none"
                     }}
                   >
-                    <div className="flex items-center p-1 rounded hover:bg-content1/10 transition-colors cursor-default">
+                    <div className="flex items-center p-1 rounded-sm hover:bg-content1/10 transition-colors cursor-default">
                       {getDeviceIcon(user.active_device.user_agent, "w-4 h-4")}
                     </div>
                   </Tooltip>
@@ -428,7 +428,7 @@ const UsersTable = ({
                 onChange={() => toggleUserStatus(user.id, user.active)}
                 disabled={isLoading(user.id, 'status')}
               />
-              <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-opacity-30 rounded-full peer transition-all duration-300 ${
+              <div className={`w-11 h-6 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-opacity-30 rounded-full peer transition-all duration-300 ${
                 user.active 
                   ? 'bg-green-500 peer-focus:ring-green-300' 
                   : 'bg-red-500 peer-focus:ring-red-300'
@@ -643,13 +643,13 @@ const UsersTable = ({
 
   return (
     <div className="w-full overflow-hidden flex flex-col border border-divider rounded-lg bg-content1/10 backdrop-blur-md" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-      <div className="overflow-auto flex-grow relative table-scroll-container frozen-column-container">
+      <div className="overflow-auto grow relative table-scroll-container frozen-column-container">
         <Table
           aria-label="Users table"
           removeWrapper
           classNames={{
             base: "bg-transparent min-w-[800px]", // Set minimum width to prevent squishing on small screens
-            th: "backdrop-blur-md text-default-500 border-b border-divider font-medium text-xs sticky top-0 z-30 shadow-sm",
+            th: "backdrop-blur-md text-default-500 border-b border-divider font-medium text-xs sticky top-0 z-30 shadow-xs",
             td: "border-b border-divider/50 py-3",
             table: "border-collapse",
             thead: "sticky top-0 z-30",

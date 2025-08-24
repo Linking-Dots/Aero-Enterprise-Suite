@@ -289,7 +289,7 @@ const DeleteEmployeeModal = ({
                     onPress={onConfirm}
                     isLoading={loading}
                     startContent={!loading && <TrashIcon className="w-4 h-4" />}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg"
+                    className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg"
                 >
                     {loading ? 'Deleting...' : 'Delete Employee'}
                 </Button>

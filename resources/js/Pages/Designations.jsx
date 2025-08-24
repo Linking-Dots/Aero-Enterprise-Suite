@@ -178,7 +178,7 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                 label: isMobile ? "Add" : "Add Designation",
                 icon: <PlusIcon className="w-4 h-4" />,
                 onPress: () => openModal('add_designation'),
-                className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
             });
         }
         return buttons;

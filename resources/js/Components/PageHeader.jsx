@@ -29,13 +29,13 @@ const PageHeader = ({
             case 'minimal':
                 return "bg-white/10 backdrop-blur-md border-b border-white/10";
             case 'gradient':
-                return "bg-gradient-to-br from-white/20 via-white/10 to-transparent backdrop-blur-xl border-b border-white/20";
+                return "bg-linear-to-br from-white/20 via-white/10 to-transparent backdrop-blur-xl border-b border-white/20";
             default:
                 return GRADIENT_PRESETS.pageHeader;
         }
     };
     const getIconStyles = () => {
-        return "p-3 rounded-xl " + GRADIENT_PRESETS.iconContainer + " backdrop-blur-sm";
+        return "p-3 rounded-xl " + GRADIENT_PRESETS.iconContainer + " backdrop-blur-xs";
     };
     const getTitleStyles = () => {
         return GRADIENT_PRESETS.gradientText;

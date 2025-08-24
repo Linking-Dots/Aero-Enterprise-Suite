@@ -689,7 +689,7 @@ const EmployeeTable = ({
     <div className="w-full overflow-hidden flex flex-col border border-white/10 rounded-lg relative" style={{ maxHeight: 'calc(100vh - 200px)' }}>
       {/* Global loading overlay */}
       {loading && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-xs flex items-center justify-center z-50 rounded-lg">
           <div className="flex flex-col items-center gap-4 p-6 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
             <Spinner size="lg" color="primary" />
             <span className="text-sm text-foreground">Loading employees...</span>
@@ -697,7 +697,7 @@ const EmployeeTable = ({
         </div>
       )}
       
-      <div className="overflow-auto flex-grow">
+      <div className="overflow-auto grow">
         <Table
           aria-label="Employees table"
           removeWrapper

@@ -23,7 +23,7 @@ const UpdateNotification = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -100 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                className="fixed top-0 left-0 right-0 z-9999 bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg"
                 style={{ 
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)'

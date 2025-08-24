@@ -322,7 +322,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
         <CardBody className="p-4 flex flex-col h-full">
           {/* Card Header with Employee Info */}
           <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <ProfileAvatar
                 src={user?.profile_image_url || user?.profile_image}
                 name={user?.name}
@@ -355,12 +355,12 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
             {/* Contact Info */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-sm">
-                <EnvelopeIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+                <EnvelopeIcon className="w-4 h-4 text-default-400 shrink-0" />
                 <span className="text-default-600 text-xs truncate">{user?.email}</span>
               </div>
               {user?.phone && (
                 <div className="flex items-center gap-2 text-sm">
-                  <PhoneIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+                  <PhoneIcon className="w-4 h-4 text-default-400 shrink-0" />
                   <span className="text-default-600 text-xs">{user?.phone}</span>
                 </div>
               )}
@@ -428,7 +428,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                 {
                   label: isMobile ? "Add" : "Add Employee",
                   icon: <UserPlusIcon className="w-4 h-4" />,
-                  className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
                 }
               ]}
             >
@@ -450,7 +450,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                           <div className="flex items-center gap-2">
                             <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                className="h-full bg-linear-to-r from-blue-500 to-purple-500 rounded-full"
                                 style={{ width: `${dept.percentage}%` }}
                               />
                             </div>
@@ -535,7 +535,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                           <div className="flex items-center gap-2">
                             <div className="w-16 h-2 bg-white/10 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                                className="h-full bg-linear-to-r from-green-500 to-emerald-500 rounded-full"
                                 style={{ width: `${type.percentage}%` }}
                               />
                             </div>

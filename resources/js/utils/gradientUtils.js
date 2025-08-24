@@ -91,7 +91,7 @@ export const getCardGradientClasses = (gradientType = 'subtle', subtle = true) =
  * @returns {string} CSS classes for gradient text
  */
 export const getTextGradientClasses = () => {
-  return 'bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] bg-clip-text text-transparent font-bold';
+  return 'bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent font-bold';
 };
 
 /**
@@ -100,7 +100,7 @@ export const getTextGradientClasses = () => {
  * @returns {string} CSS classes for icon containers
  */
 export const getIconGradientClasses = (gradientType = 'light') => {
-  const baseClasses = 'p-3 rounded-xl border backdrop-blur-sm transition-all duration-300';
+  const baseClasses = 'p-3 rounded-xl border backdrop-blur-xs transition-all duration-300';
   const gradientClass = getGradientClass(gradientType);
   const borderClass = 'border-[rgba(var(--theme-primary-rgb),0.3)]';
   
@@ -112,22 +112,22 @@ export const getIconGradientClasses = (gradientType = 'light') => {
  */
 export const GRADIENT_PRESETS = {
   // Button presets
-  primaryButton: 'bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white hover:opacity-90',
-  secondaryButton: 'bg-gradient-to-r from-[rgba(var(--theme-primary-rgb),0.1)] to-[rgba(var(--theme-secondary-rgb),0.1)] border border-[rgba(var(--theme-primary-rgb),0.2)]',
+  primaryButton: 'bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white hover:opacity-90',
+  secondaryButton: 'bg-linear-to-r from-[rgba(var(--theme-primary-rgb),0.1)] to-[rgba(var(--theme-secondary-rgb),0.1)] border border-[rgba(var(--theme-primary-rgb),0.2)]',
   
   // Card presets
-  glassCard: 'bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20',
-  accentCard: 'bg-gradient-to-br from-[rgba(var(--theme-primary-rgb),0.1)] to-[rgba(var(--theme-secondary-rgb),0.1)] backdrop-blur-md border border-[rgba(var(--theme-primary-rgb),0.2)]',
+  glassCard: 'bg-linear-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20',
+  accentCard: 'bg-linear-to-br from-[rgba(var(--theme-primary-rgb),0.1)] to-[rgba(var(--theme-secondary-rgb),0.1)] backdrop-blur-md border border-[rgba(var(--theme-primary-rgb),0.2)]',
   
   // Header presets
-  pageHeader: 'bg-gradient-to-br from-slate-50/50 to-white/30 backdrop-blur-sm border-b border-white/20',
-  sectionHeader: 'bg-gradient-to-r from-[rgba(var(--theme-primary-rgb),0.05)] to-[rgba(var(--theme-secondary-rgb),0.05)]',
+  pageHeader: 'bg-linear-to-br from-slate-50/50 to-white/30 backdrop-blur-xs border-b border-white/20',
+  sectionHeader: 'bg-linear-to-r from-[rgba(var(--theme-primary-rgb),0.05)] to-[rgba(var(--theme-secondary-rgb),0.05)]',
     // Text presets
-  gradientText: 'bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] bg-clip-text text-transparent font-bold',    // Icon presets
-  iconContainer: 'bg-gradient-to-br from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] border border-[rgba(var(--theme-primary-rgb),0.3)]',
+  gradientText: 'bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent font-bold',    // Icon presets
+  iconContainer: 'bg-linear-to-br from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] border border-[rgba(var(--theme-primary-rgb),0.3)]',
   
   // Exact gradient theming as requested
-  exactGradient: 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30'
+  exactGradient: 'bg-linear-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30'
 };
 
 export default {

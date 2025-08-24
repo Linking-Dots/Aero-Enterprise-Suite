@@ -57,7 +57,7 @@ export default function ForgotPassword({ status }) {
                 >
                     <div className="flex items-center">
                         <motion.div
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
@@ -104,7 +104,7 @@ export default function ForgotPassword({ status }) {
                         autoFocus
                         required
                         startContent={
-                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         classNames={{
                             base: "w-full",
@@ -125,7 +125,7 @@ export default function ForgotPassword({ status }) {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
@@ -181,7 +181,7 @@ export default function ForgotPassword({ status }) {
             >
                 <div className="flex items-start">
                     <motion.div
-                        className="flex-shrink-0"
+                        className="shrink-0"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.5, type: "spring", stiffness: 500 }}

@@ -41,7 +41,7 @@ const highlightSearchMatch = (text, searchTerm) => {
       return (
         <span 
           key={index} 
-          className="bg-primary/20 text-primary-300 px-1 py-0.5 rounded-md font-semibold border border-primary/30 shadow-sm"
+          className="bg-primary/20 text-primary-300 px-1 py-0.5 rounded-md font-semibold border border-primary/30 shadow-xs"
           style={{ 
             background: 'rgba(59, 130, 246, 0.15)',
             color: '#93C5FD',
@@ -590,7 +590,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
     >
       {/* Fixed Header - Using PageHeader theming */}
       <motion.div 
-        className={`${GRADIENT_PRESETS.pageHeader} flex-shrink-0`}
+        className={`${GRADIENT_PRESETS.pageHeader} shrink-0`}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
@@ -838,12 +838,12 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
 
       {/* Fixed Footer - Using PageHeader theming */}
       <motion.div 
-        className="p-2 border-t border-white/10 flex-shrink-0"
+        className="p-2 border-t border-white/10 shrink-0"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 1.1 }}
       >
-        <div className={`flex items-center justify-between p-2 rounded-md backdrop-blur-sm transition-all duration-300 ${GRADIENT_PRESETS.accentCard}`}>
+        <div className={`flex items-center justify-between p-2 rounded-md backdrop-blur-xs transition-all duration-300 ${GRADIENT_PRESETS.accentCard}`}>
           <div className="flex items-center gap-1">
             <motion.div 
               className="w-1.5 h-1.5 bg-green-400 rounded-full"

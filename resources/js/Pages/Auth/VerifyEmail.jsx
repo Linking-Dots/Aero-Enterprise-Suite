@@ -170,7 +170,7 @@ export default function VerifyEmail({ status }) {
                 >
                     <div className="flex items-start">
                         <motion.div
-                            className="flex-shrink-0 mr-3 mt-0.5"
+                            className="shrink-0 mr-3 mt-0.5"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.6, type: "spring", stiffness: 500 }}

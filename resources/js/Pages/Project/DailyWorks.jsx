@@ -198,7 +198,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
             label: "Add Work",
             icon: <PlusIcon className="w-4 h-4" />,
             onPress: () => openModal('addDailyWork'),
-            className: "bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium"
+            className: "bg-linear-to-r from-blue-500 to-purple-500 text-white font-medium"
         }] : []),
         ...(auth.roles.includes('Administrator') ? [
             {
@@ -207,7 +207,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 variant: "flat",
                 color: "warning",
                 onPress: () => openModal('importDailyWorks'),
-                className: "bg-gradient-to-r from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30"
+                className: "bg-linear-to-r from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30"
             },
             {
                 label: "Export",
@@ -215,7 +215,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 variant: "flat", 
                 color: "success",
                 onPress: () => openModal('exportDailyWorks'),
-                className: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
+                className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
             }
         ] : [])
     ];

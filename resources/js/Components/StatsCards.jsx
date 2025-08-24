@@ -119,7 +119,7 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                 <CardBody className="p-3">
                                     <div className="flex items-center gap-2">
                                         {icon && (
-                                            <div className={`p-1.5 ${iconBg} rounded-md flex-shrink-0`}>
+                                            <div className={`p-1.5 ${iconBg} rounded-md shrink-0`}>
                                                 {React.isValidElement(icon) ? (
                                                     React.cloneElement(icon, {
                                                         className: `w-4 h-4 ${color}`,
@@ -154,7 +154,7 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                     <CardHeader className={`pb-2 ${isMobile ? 'p-3' : 'p-4'}`}>
                                         <div className="flex items-center gap-2">
                                             {icon && (
-                                                <div className={`${isMobile ? 'p-1.5' : 'p-2'} ${iconBg} rounded-lg flex-shrink-0`}>
+                                                <div className={`${isMobile ? 'p-1.5' : 'p-2'} ${iconBg} rounded-lg shrink-0`}>
                                                     {React.isValidElement(icon) ? (
                                                         React.cloneElement(icon, {
                                                             className: `${isMobile ? 'w-4 h-4' : 'w-5 h-5'} ${color}`,

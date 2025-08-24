@@ -140,7 +140,7 @@ const AuthGuard = ({ children, auth, url }) => {
     // Show loading screen only on initial auth check, not on route changes
     if (isCheckingAuth && !isPublicRoute && !hasInitialized.current) {
         return (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+            <div className="fixed inset-0 z-9999 flex items-center justify-center bg-linear-to-br from-slate-900 via-blue-900 to-slate-900">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -200,7 +200,7 @@ const AuthGuard = ({ children, auth, url }) => {
 
     // Fallback loading state (should rarely be seen)
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-900">
             <Spinner size="lg" color="primary" />
         </div>
     );

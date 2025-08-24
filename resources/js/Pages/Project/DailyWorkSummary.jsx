@@ -117,7 +117,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
             variant: "flat", 
             color: "success",
             onPress: () => openModal('exportDailyWorkSummary'),
-            className: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
+            className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
         }] : [])
     ];
 

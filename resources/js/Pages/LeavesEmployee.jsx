@@ -580,25 +580,25 @@ const LeavesEmployee = ({ title, allUsers }) => {
       label: "Add Leave",
       icon: <PlusIcon className="w-4 h-4" />,
       onPress: () => openModal('add_leave'),
-      className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+      className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
     },
     {
       label: "Add Bulk",
       icon: <CalendarIcon className="w-4 h-4" />,
       onPress: () => openModal('bulk_leave'),
-      className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+      className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
     },
     {
       label: "Current Year",
       icon: <CalendarIcon className="w-4 h-4" />,
       onPress: () => handleFilterChange('year', new Date().getFullYear()),
-      className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+      className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
     },
     {
       label: "Refresh",
       icon: <ArrowPathIcon className="w-4 h-4" />,
       onPress: fetchLeaves,
-      className: "bg-gradient-to-r from-[rgba(var(--theme-success-rgb),0.8)] to-[rgba(var(--theme-success-rgb),1)] text-white font-medium hover:opacity-90"
+      className: "bg-linear-to-r from-[rgba(var(--theme-success-rgb),0.8)] to-[rgba(var(--theme-success-rgb),1)] text-white font-medium hover:opacity-90"
     }
   ];
 
@@ -677,7 +677,7 @@ const LeavesEmployee = ({ title, allUsers }) => {
                   {totalDays > 0 && (
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-gradient-to-r from-red-400 to-orange-400 h-2 rounded-full transition-all duration-300"
+                        className="bg-linear-to-r from-red-400 to-orange-400 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(usedDays / totalDays) * 100}%` }}
                       />
                     </div>
@@ -790,19 +790,19 @@ const LeavesEmployee = ({ title, allUsers }) => {
                   label: "Add Leave",
                   icon: <PlusIcon className="w-4 h-4" />,
                   onPress: () => openModal('add_leave'),
-                  className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
                 },
                 {
                   label: "Current Year",
                   icon: <CalendarIcon className="w-4 h-4" />,
                   onPress: () => handleFilterChange('year', new Date().getFullYear()),
-                  className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
                 },
                 {
                   label: "Refresh",
                   icon: <ArrowPathIcon className="w-4 h-4" />,
                   onPress: fetchLeaves,
-                  className: "bg-gradient-to-r from-[rgba(var(--theme-success-rgb),0.8)] to-[rgba(var(--theme-success-rgb),1)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-[rgba(var(--theme-success-rgb),0.8)] to-[rgba(var(--theme-success-rgb),1)] text-white font-medium hover:opacity-90"
                 }
               ]}
             >

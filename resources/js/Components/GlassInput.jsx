@@ -28,20 +28,20 @@ const GlassInput = forwardRef(({
     switch (variant) {
       case 'primary':
         return darkMode
-          ? 'bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-400/30'
-          : 'bg-gradient-to-br from-blue-50/80 to-blue-100/60 border-blue-300/50';
+          ? 'bg-linear-to-br from-blue-900/30 to-blue-800/20 border-blue-400/30'
+          : 'bg-linear-to-br from-blue-50/80 to-blue-100/60 border-blue-300/50';
       case 'success':
         return darkMode
-          ? 'bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 border-emerald-400/30'
-          : 'bg-gradient-to-br from-emerald-50/80 to-emerald-100/60 border-emerald-300/50';
+          ? 'bg-linear-to-br from-emerald-900/30 to-emerald-800/20 border-emerald-400/30'
+          : 'bg-linear-to-br from-emerald-50/80 to-emerald-100/60 border-emerald-300/50';
       case 'danger':
         return darkMode
-          ? 'bg-gradient-to-br from-red-900/30 to-red-800/20 border-red-400/30'
-          : 'bg-gradient-to-br from-red-50/80 to-red-100/60 border-red-300/50';
+          ? 'bg-linear-to-br from-red-900/30 to-red-800/20 border-red-400/30'
+          : 'bg-linear-to-br from-red-50/80 to-red-100/60 border-red-300/50';
       default:
         return darkMode
-          ? 'bg-gradient-to-br from-slate-900/40 to-slate-800/20 border-white/20'
-          : 'bg-gradient-to-br from-white/80 to-white/60 border-white/40';
+          ? 'bg-linear-to-br from-slate-900/40 to-slate-800/20 border-white/20'
+          : 'bg-linear-to-br from-white/80 to-white/60 border-white/40';
     }
   };
 

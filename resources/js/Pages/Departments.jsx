@@ -194,7 +194,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                 <CardBody className="p-4 flex flex-col h-full">
                     {/* Card Header with Department Info */}
                     <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10">
-                        <div className="flex justify-center items-center h-10 w-10 rounded-lg bg-primary/20 text-primary flex-shrink-0">
+                        <div className="flex justify-center items-center h-10 w-10 rounded-lg bg-primary/20 text-primary shrink-0">
                             <BuildingOfficeIcon className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -227,7 +227,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                         {/* Location */}
                         {department.location && (
                             <div className="flex items-center gap-2 text-sm">
-                                <MapPinIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+                                <MapPinIcon className="w-4 h-4 text-default-400 shrink-0" />
                                 <span className="text-default-600 text-xs line-clamp-1">{department.location}</span>
                             </div>
                         )}
@@ -235,7 +235,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                         {/* Established Date */}
                         {department.established_date && (
                             <div className="flex items-center gap-2 text-sm">
-                                <CalendarIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+                                <CalendarIcon className="w-4 h-4 text-default-400 shrink-0" />
                                 <span className="text-default-600 text-xs">
                                     {dayjs(department.established_date).format('MMM D, YYYY')}
                                 </span>
@@ -244,7 +244,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                         
                         {/* Employees Count */}
                         <div className="flex items-center gap-2 text-sm">
-                            <UsersIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+                            <UsersIcon className="w-4 h-4 text-default-400 shrink-0" />
                             <span className="text-default-600 text-xs">
                                 {department.employee_count || 0} {department.employee_count === 1 ? 'Employee' : 'Employees'}
                             </span>
@@ -343,7 +343,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                 label: isMobile ? "Add" : "Add Department",
                 icon: <PlusIcon className="w-4 h-4" />,
                 onPress: () => openModal('add_department'),
-                className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
             });
         }
 

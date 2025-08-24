@@ -150,7 +150,7 @@ const AttendanceAdminTable = ({
                                             <div><strong>Remarks:</strong> {cellData?.remarks || 'N/A'}</div>
                                         </div>
                                     }
-                                    className="z-[99999]"
+                                    className="z-99999"
                                 >
                                     <Box
                                         className={`
@@ -410,7 +410,7 @@ const AttendanceAdminTable = ({
                                                                         </div>
                                                                     }
                                                                     placement="top"
-                                                                    className="z-[99999]"
+                                                                    className="z-99999"
                                                                 >
                                                                     <Box
                                                                         className="flex items-center justify-center cursor-help">

@@ -1,19 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Exo:ital,wght@0,100..900;1,100..900&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Merienda:wght@300..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Outfit:wght@100..900&display=swap');
-
-/* Material UI Roboto font imports */
-@import '@fontsource/roboto/300.css';
-@import '@fontsource/roboto/400.css';
-@import '@fontsource/roboto/500.css';
-@import '@fontsource/roboto/700.css';
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Exo:ital,wght@0,100..900;1,100..900&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Merienda:wght@300..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Outfit:wght@100..900&display=swap')
+layer(base);
 
 /* Import theme patterns for background support */
-@import './theme-patterns.css';
+@import './theme-patterns.css' layer(base);
 
-/* Import frozen columns styling */
-@import './frozen-columns.css';
+@import 'tailwindcss';
 
-@import "tailwindcss";
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 .user-icon {
     border-radius: 50%; /* Make the icon circular */
@@ -120,17 +129,17 @@
 /* Theme Gradient System */
 :root {
     /* Default Ocean Theme Gradients */
-    --theme-gradient-primary: linear-gradient(to right, theme('colors.sky.400'), theme('colors.sky.600'));
-    --theme-gradient-secondary: linear-gradient(to right, theme('colors.blue.400'), theme('colors.blue.600'));
-    --theme-gradient-accent: linear-gradient(to right, theme('colors.cyan.400'), theme('colors.blue.600'));
-    --theme-gradient-light: linear-gradient(to right, theme('colors.sky.100'), theme('colors.blue.100'));
-    --theme-gradient-dark: linear-gradient(to right, theme('colors.sky.800'), theme('colors.blue.900'));
-    --theme-gradient-subtle: linear-gradient(to right, theme('colors.sky.50'), theme('colors.blue.50'));
+    --theme-gradient-primary: linear-gradient(to right, #0ea5e9, #0284c7);
+    --theme-gradient-secondary: linear-gradient(to right, #60a5fa, #2563eb);
+    --theme-gradient-accent: linear-gradient(to right, #22d3ee, #2563eb);
+    --theme-gradient-light: linear-gradient(to right, #e0f2fe, #dbeafe);
+    --theme-gradient-dark: linear-gradient(to right, #075985, #1e3a8a);
+    --theme-gradient-subtle: linear-gradient(to right, #f0f9ff, #eff6ff);
     
     /* Multi-directional gradient utilities */
-    --theme-gradient-primary-br: linear-gradient(to bottom right, theme('colors.sky.400'), theme('colors.sky.600'));
-    --theme-gradient-secondary-br: linear-gradient(to bottom right, theme('colors.blue.400'), theme('colors.blue.600'));
-    --theme-gradient-accent-br: linear-gradient(to bottom right, theme('colors.cyan.400'), theme('colors.blue.600'));
+    --theme-gradient-primary-br: linear-gradient(to bottom right, #0ea5e9, #0284c7);
+    --theme-gradient-secondary-br: linear-gradient(to bottom right, #60a5fa, #2563eb);
+    --theme-gradient-accent-br: linear-gradient(to bottom right, #22d3ee, #2563eb);
 }
 
 /* Theme-aware gradient utility classes */

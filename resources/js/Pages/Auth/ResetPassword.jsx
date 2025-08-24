@@ -133,7 +133,7 @@ export default function ResetPassword({ token, email }) {
                         maxLength={6}
                         required
                         startContent={
-                            <KeyIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <KeyIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         classNames={{
                             base: "w-full",
@@ -154,7 +154,7 @@ export default function ResetPassword({ token, email }) {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
@@ -186,11 +186,11 @@ export default function ResetPassword({ token, email }) {
                             autoComplete="new-password"
                             required
                             startContent={
-                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                             }
                             endContent={
                                 <button
-                                    className="focus:outline-none"
+                                    className="focus:outline-hidden"
                                     type="button"
                                     onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                                 >
@@ -220,7 +220,7 @@ export default function ResetPassword({ token, email }) {
                                     "dark:hover:bg-default/70",
                                     "group-data-[focused=true]:bg-default-200/50",
                                     "dark:group-data-[focused=true]:bg-default/60",
-                                    "!cursor-text",
+                                    "cursor-text!",
                                 ],
                             }}
                         />
@@ -285,11 +285,11 @@ export default function ResetPassword({ token, email }) {
                         autoComplete="new-password"
                         required
                         startContent={
-                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         endContent={
                             <button
-                                className="focus:outline-none"
+                                className="focus:outline-hidden"
                                 type="button"
                                 onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
                             >
@@ -319,7 +319,7 @@ export default function ResetPassword({ token, email }) {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
@@ -357,7 +357,7 @@ export default function ResetPassword({ token, email }) {
             >
                 <div className="flex items-start">
                     <motion.div
-                        className="flex-shrink-0"
+                        className="shrink-0"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.7, type: "spring", stiffness: 500 }}

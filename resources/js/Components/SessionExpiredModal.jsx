@@ -20,7 +20,7 @@ export default function SessionExpiredModal({ setSessionExpired }) {
   }, [countdown]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-xs">
       <div className="inline-flex">
         <GlassCard className="p-6 text-center flex flex-col items-center space-y-4">
           <h2 className="text-2xl font-bold text-white">Session Expired</h2>

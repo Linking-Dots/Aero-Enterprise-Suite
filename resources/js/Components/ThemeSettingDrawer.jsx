@@ -76,7 +76,7 @@ const ThemeSettingDrawer = ({
   // Font family options
   const fontOptions = [
     { id: 'primary', name: 'Inter', description: 'Modern sans-serif (Default)', family: 'var(--font-primary)' },
-    { id: 'secondary', name: 'Fredoka', description: 'Friendly rounded font', family: 'var(--font-secondary)' },
+    { id: 'secondary', name: 'Fredoka', description: 'Friendly rounded-sm font', family: 'var(--font-secondary)' },
     { id: 'mono', name: 'JetBrains Mono', description: 'Developer monospace', family: 'var(--font-mono)' },
     { id: 'serif', name: 'Playfair Display', description: 'Elegant serif font', family: 'var(--font-serif)' }
   ];

@@ -129,7 +129,7 @@ const BulkValidationPreview = ({
                             </div>
                             
                             {balanceImpact.remaining_balance < 0 && (
-                                <div className="mt-2 p-2 rounded bg-danger/10 border border-danger/20">
+                                <div className="mt-2 p-2 rounded-sm bg-danger/10 border border-danger/20">
                                     <p className="text-sm text-danger">
                                         ⚠️ This request exceeds your available leave balance by {Math.abs(balanceImpact.remaining_balance)} days.
                                     </p>

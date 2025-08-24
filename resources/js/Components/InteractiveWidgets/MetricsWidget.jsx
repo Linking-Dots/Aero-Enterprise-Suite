@@ -57,7 +57,7 @@ const MetricsWidget = ({
           stroke={color}
           strokeWidth="2"
           points={points}
-          className="drop-shadow-sm"
+          className="drop-shadow-xs"
         />
       </svg>
     );

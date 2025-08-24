@@ -217,7 +217,7 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                         </Typography>
                         <Box id="leave-details-content" className="space-y-2">
                             <Box className="flex items-start gap-2">
-                                <UserIcon className="w-4 h-4 text-default-500 mt-0.5 flex-shrink-0" />
+                                <UserIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
                                 <Box>
                                     <Typography variant="caption" color="text.secondary" component="span">
                                         Employee:
@@ -229,7 +229,7 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                             </Box>
                             
                             <Box className="flex items-start gap-2">
-                                <CalendarDaysIcon className="w-4 h-4 text-default-500 mt-0.5 flex-shrink-0" />
+                                <CalendarDaysIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
                                 <Box>
                                     <Typography variant="caption" color="text.secondary" component="span">
                                         Duration:
@@ -256,7 +256,7 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                             </Box>
 
                             <Box className="flex items-start gap-2">
-                                <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 flex-shrink-0" />
+                                <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
                                 <Box>
                                     <Typography variant="caption" color="text.secondary" component="span">
                                         Reason:

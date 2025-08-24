@@ -1027,7 +1027,7 @@ const SystemMonitoringEnhanced = ({ title, initialData }) => {
                                         label: "Export Report",
                                         icon: <DocumentArrowDownIcon className="w-4 h-4" />,
                                         onPress: handleExportReport,
-                                        className: "bg-gradient-to-r from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] hover:from-[rgba(var(--theme-primary-rgb),0.3)] hover:to-[rgba(var(--theme-secondary-rgb),0.3)] border border-[rgba(var(--theme-primary-rgb),0.3)]"
+                                        className: "bg-linear-to-r from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] hover:from-[rgba(var(--theme-primary-rgb),0.3)] hover:to-[rgba(var(--theme-secondary-rgb),0.3)] border border-[rgba(var(--theme-primary-rgb),0.3)]"
                                     },
                                     {
                                         label: "Refresh Data",

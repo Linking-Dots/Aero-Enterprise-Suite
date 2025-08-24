@@ -1079,7 +1079,7 @@ const RoleManagement = (props) => {
                     <Button
                         onPress={() => openRoleModal()}
                         startContent={<PlusIcon className="w-4 h-4" />}
-                        className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 border border-blue-400/30 text-white"
+                        className="bg-linear-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 border border-blue-400/30 text-white"
                         variant="bordered"
                     >
                         Add Role
@@ -1133,7 +1133,7 @@ const RoleManagement = (props) => {
                             <div key={role.id} className="p-4 hover:bg-white/5 transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                                        <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
                                             {role.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div>
@@ -1269,7 +1269,7 @@ const RoleManagement = (props) => {
                     <Button
                         onPress={() => openPermissionModal()}
                         startContent={<PlusIcon className="w-4 h-4" />}
-                        className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-400/30 text-white"
+                        className="bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-400/30 text-white"
                         variant="bordered"
                     >
                         Add Permission
@@ -1319,7 +1319,7 @@ const RoleManagement = (props) => {
                         <div key={permission.id} className="p-4 hover:bg-white/5 transition-colors">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                    <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
                                         {permission.name ? permission.name.charAt(0).toUpperCase() : 'P'}
                                     </div>
                                     <div>
@@ -1524,7 +1524,7 @@ const RoleManagement = (props) => {
                                                     return (
                                                         <div 
                                                             key={permission.id}
-                                                            className="flex items-center justify-between p-2 rounded bg-white/5 hover:bg-white/10 transition-colors"
+                                                            className="flex items-center justify-between p-2 rounded-sm bg-white/5 hover:bg-white/10 transition-colors"
                                                         >
                                                             <div>
                                                                 <Typography variant="body2" className="font-medium">
@@ -1622,7 +1622,7 @@ const RoleManagement = (props) => {
                             <div key={user.id} className="p-4 hover:bg-white/5 transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">
+                                        <div className="w-10 h-10 rounded-full bg-linear-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">
                                             {user.name?.charAt(0).toUpperCase() || 'U'}
                                         </div>
                                         <div>

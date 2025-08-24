@@ -375,7 +375,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
                         <Box className="flex items-center gap-2">
-                            <CalendarDaysIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                            <CalendarDaysIcon className="w-4 h-4 text-primary shrink-0" />
                             <Box className="flex flex-col">
                                 <span>
                                     {dayjs(attendance.date).format('MMM D, YYYY')}
@@ -824,7 +824,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                         <GlassCard>
                             {/* Main Card Content */}
                             <CardHeader
-                                className="bg-gradient-to-br from-slate-50/50 to-white/30 backdrop-blur-sm border-b border-white/20"
+                                className="bg-linear-to-br from-slate-50/50 to-white/30 backdrop-blur-xs border-b border-white/20"
                                 title={
                                     <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'}`}>
                                         <div className="flex flex-col space-y-4">
@@ -834,7 +834,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                 <div className="flex items-center gap-3 lg:gap-4">
                                                     <div className={`
                                                         ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
-                                                        rounded-xl bg-gradient-to-br from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] border border-[rgba(var(--theme-primary-rgb),0.3)] backdrop-blur-sm
+                                                        rounded-xl bg-linear-to-br from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] border border-[rgba(var(--theme-primary-rgb),0.3)] backdrop-blur-xs
                                                     `}>
                                                         <ClockIcon 
                                                             className={`
@@ -847,7 +847,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         <Typography 
                                                             variant={isLargeScreen ? "h4" : isMediumScreen ? "h5" : "h6"}
                                                             className={`
-                                                                font-bold bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] bg-clip-text text-transparent
+                                                                font-bold bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent
                                                                 ${!isLargeScreen ? 'truncate' : ''}
                                                             `}
                                                             style={{
@@ -899,7 +899,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                             ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
                                                                         `} />
                                                                     }
-                                                                    className="bg-gradient-to-r from-[rgba(var(--theme-success-rgb),0.1)] to-[rgba(var(--theme-success-rgb),0.2)] hover:from-[rgba(var(--theme-success-rgb),0.2)] hover:to-[rgba(var(--theme-success-rgb),0.3)] border border-[rgba(var(--theme-success-rgb),0.2)] backdrop-blur-sm"
+                                                                    className="bg-linear-to-r from-[rgba(var(--theme-success-rgb),0.1)] to-[rgba(var(--theme-success-rgb),0.2)] hover:from-[rgba(var(--theme-success-rgb),0.2)] hover:to-[rgba(var(--theme-success-rgb),0.3)] border border-[rgba(var(--theme-success-rgb),0.2)] backdrop-blur-xs"
                                                                     onPress={exportExcel}
                                                                     isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
                                                                     isLoading={downloading === 'excel'}
@@ -920,7 +920,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                             ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
                                                                         `} />
                                                                     }
-                                                                    className="bg-gradient-to-r from-[rgba(var(--theme-danger-rgb),0.1)] to-[rgba(var(--theme-danger-rgb),0.2)] hover:from-[rgba(var(--theme-danger-rgb),0.2)] hover:to-[rgba(var(--theme-danger-rgb),0.3)] border border-[rgba(var(--theme-danger-rgb),0.2)] backdrop-blur-sm"
+                                                                    className="bg-linear-to-r from-[rgba(var(--theme-danger-rgb),0.1)] to-[rgba(var(--theme-danger-rgb),0.2)] hover:from-[rgba(var(--theme-danger-rgb),0.2)] hover:to-[rgba(var(--theme-danger-rgb),0.3)] border border-[rgba(var(--theme-danger-rgb),0.2)] backdrop-blur-xs"
                                                                     onPress={downloadPDF}
                                                                     isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
                                                                     isLoading={downloading === 'pdf'}

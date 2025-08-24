@@ -483,7 +483,7 @@ const UsersList = ({ title, roles }) => {
           {/* Phone */}
           {user.phone && (
             <div className="flex items-center gap-2 text-sm">
-              <PhoneIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+              <PhoneIcon className="w-4 h-4 text-default-400 shrink-0" />
               <span className="text-default-600 text-xs line-clamp-1">{user.phone}</span>
             </div>
           )}
@@ -491,7 +491,7 @@ const UsersList = ({ title, roles }) => {
           {/* Department */}
           {(user.department || user.department_id) && (
             <div className="flex items-center gap-2 text-sm">
-              <BuildingOfficeIcon className="w-4 h-4 text-default-400 flex-shrink-0" />
+              <BuildingOfficeIcon className="w-4 h-4 text-default-400 shrink-0" />
               <span className="text-default-600 text-xs">
                 {typeof user.department === 'string' 
                   ? user.department
@@ -629,7 +629,7 @@ const UsersList = ({ title, roles }) => {
         label: isMobile ? "Add" : "Add User",
         icon: <UserPlusIcon className="w-4 h-4" />,
         onPress: () => openModal('add'),
-        className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+        className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
       });
     }
 
@@ -705,7 +705,7 @@ const UsersList = ({ title, roles }) => {
                         {stats?.distribution?.by_role?.slice(0, 5).map((role, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-pink-400" />
+                              <div className="w-3 h-3 rounded-full bg-linear-to-r from-purple-400 to-pink-400" />
                               <span className="text-sm text-foreground truncate">{role.name}</span>
                             </div>
                             <div className="text-right">
@@ -738,7 +738,7 @@ const UsersList = ({ title, roles }) => {
                         {stats?.distribution?.by_department?.slice(0, 5).map((dept, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400" />
+                              <div className="w-3 h-3 rounded-full bg-linear-to-r from-blue-400 to-cyan-400" />
                               <span className="text-sm text-foreground truncate">{dept.name}</span>
                             </div>
                             <div className="text-right">

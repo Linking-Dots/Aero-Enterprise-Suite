@@ -474,7 +474,7 @@ const Header = React.memo(({
                                                   <span className={`menu-item-text ${isSubActive ? 'text-white' : 'text-default-700'}`}>
                                                     {subPage.name}
                                                   </span>
-                                                  <ChevronDownIcon className={`menu-item-chevron rotate-[-90deg] ${isSubActive ? 'text-white' : 'text-default-500'}`} />
+                                                  <ChevronDownIcon className={`menu-item-chevron -rotate-90 ${isSubActive ? 'text-white' : 'text-default-500'}`} />
                                                 </div>
                                               </div>
                                             </DropdownTrigger>
@@ -705,7 +705,7 @@ const Header = React.memo(({
           group relative flex items-center gap-3 cursor-pointer 
           hover:bg-white/10 active:bg-white/15 
           rounded-xl transition-all duration-300 ease-out
-          focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent
+          focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent
           ${size === "sm" ? "p-1.5" : "p-2"}
           ${props.className || ""}
         `}
@@ -744,7 +744,7 @@ const Header = React.memo(({
           />
           
           {/* Online indicator */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm">
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-xs">
             <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
           </div>
         </div>
@@ -830,7 +830,7 @@ const Header = React.memo(({
               />
 
               {/* Online pulse dot */}
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm">
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-xs">
                 <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
               </div>
             </div>

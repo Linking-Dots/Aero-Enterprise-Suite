@@ -160,7 +160,7 @@ const TimeOffDashboard = ({ title, holidays, leaveTypes, userLeaves, stats, curr
                   label: isMobile ? "Request" : "Request Time Off",
                   icon: <PlusIcon className="w-4 h-4" />,
                   onClick: () => router.visit(route('leaves-employee')),
-                  className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
                 }
               ]}
             >

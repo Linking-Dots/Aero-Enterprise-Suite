@@ -288,17 +288,17 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
               <GlassCard>
                 {/* Header Section with Gradient Background */}
                 <div className="relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20"></div>
                   <div className="relative px-6 py-8">
                     <div className="flex flex-col gap-6">
                       {/* Title and Description */}
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl backdrop-blur-sm border border-white/10">
+                          <div className="p-3 bg-linear-to-br from-blue-500/20 to-purple-500/20 rounded-2xl backdrop-blur-xs border border-white/10">
                             <ChartBarIcon className="w-8 h-8 text-blue-400" />
                           </div>
                           <div>
-                            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                               🚀 Performance Monitor
                             </h1>
                             <p className="text-gray-400 mt-1 text-sm md:text-base">

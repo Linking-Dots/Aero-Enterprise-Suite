@@ -151,7 +151,7 @@ const Footer = () => {
                                                     className="flex items-center gap-3 text-sm hover:text-primary transition-colors duration-200"
                                                     underline="none"
                                                 >
-                                                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-default-100 flex items-center justify-center">
+                                                    <div className="shrink-0 w-8 h-8 rounded-lg bg-default-100 flex items-center justify-center">
                                                         <IconComponent className="w-4 h-4" />
                                                     </div>
                                                     <div>

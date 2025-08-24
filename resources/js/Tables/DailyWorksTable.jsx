@@ -150,7 +150,7 @@ const DailyWorksTable = ({
     };
 
     const getWorkTypeIcon = (type, className = "w-4 h-4") => {
-        const iconClass = `${className} flex-shrink-0`;
+        const iconClass = `${className} shrink-0`;
         
         switch (type?.toLowerCase()) {
             case "embankment":
@@ -684,7 +684,7 @@ const DailyWorksTable = ({
 
                         {work.description && (
                             <Box className="flex items-start gap-2">
-                                <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 flex-shrink-0" />
+                                <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
                                 <Typography variant="body2" color="textSecondary" className="flex-1 break-words">
                                     {work.description}
                                 </Typography>

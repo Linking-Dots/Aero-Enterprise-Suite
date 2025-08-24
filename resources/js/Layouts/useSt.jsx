@@ -303,7 +303,7 @@ return (
                                     xs: '100%',
                                     md: sideBarOpen ? `calc(100% - 280px)` : '100%'
                                 },
-                                minWidth: 0, // Prevent flex-shrink issues
+                                minWidth: 0, // Prevent shrink issues
                                 willChange: 'margin',
                                 flexDirection: 'column',
                                 height: '100vh',

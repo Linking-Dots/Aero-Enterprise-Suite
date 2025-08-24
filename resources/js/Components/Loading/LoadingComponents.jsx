@@ -90,9 +90,9 @@ const SkeletonCard = React.memo(({
         aria-label="Loading content"
     >
         <Box className="p-6 space-y-4">
-            <Box className="h-4 bg-white/20 rounded w-3/4"></Box>
-            <Box className="h-4 bg-white/20 rounded w-1/2"></Box>
-            <Box className="h-4 bg-white/20 rounded w-2/3"></Box>
+            <Box className="h-4 bg-white/20 rounded-sm w-3/4"></Box>
+            <Box className="h-4 bg-white/20 rounded-sm w-1/2"></Box>
+            <Box className="h-4 bg-white/20 rounded-sm w-2/3"></Box>
         </Box>
     </Box>
 ));
@@ -111,7 +111,7 @@ const SkeletonTable = React.memo(({
                 {Array.from({ length: columns }).map((_, i) => (
                     <Box 
                         key={i} 
-                        className="h-4 bg-white/20 rounded animate-pulse" 
+                        className="h-4 bg-white/20 rounded-sm animate-pulse" 
                     />
                 ))}
             </Box>
@@ -125,7 +125,7 @@ const SkeletonTable = React.memo(({
                         {Array.from({ length: columns }).map((_, colIndex) => (
                             <Box 
                                 key={colIndex} 
-                                className="h-3 bg-white/15 rounded animate-pulse"
+                                className="h-3 bg-white/15 rounded-sm animate-pulse"
                                 sx={{ 
                                     animationDelay: `${(rowIndex * columns + colIndex) * 0.1}s`
                                 }}

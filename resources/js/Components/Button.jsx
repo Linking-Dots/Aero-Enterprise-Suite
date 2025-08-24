@@ -18,7 +18,7 @@ const Button = forwardRef(({
 }, ref) => {
     const theme = useTheme();
     
-    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden';
+    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden';
     
     const getVariantStyles = () => {
         switch (variant) {
@@ -50,7 +50,7 @@ const Button = forwardRef(({
                         transform: 'translateY(-1px)'
                     }
                 };
-            case 'outline':
+            case 'outline-solid':
                 return {
                     background: 'transparent',
                     color: theme.palette.primary.main,
@@ -134,7 +134,7 @@ const Button = forwardRef(({
             {/* Shimmer effect for primary buttons */}
             {variant === 'primary' && !isDisabled && (
                 <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
                     initial={{ x: '-100%' }}
                     animate={{ x: '100%' }}
                     transition={{

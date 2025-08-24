@@ -73,7 +73,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                 >
                     <div className="flex items-center">
                         <motion.div
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
@@ -110,7 +110,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                 >
                     <div className="flex items-start">
                         <motion.div
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
@@ -174,7 +174,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                         autoFocus
                         required
                         startContent={
-                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                        
                     />
@@ -196,11 +196,11 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                         autoComplete="current-password"
                         required
                         startContent={
-                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         endContent={
                             <button
-                                className="focus:outline-none"
+                                className="focus:outline-hidden"
                                 type="button"
                                 onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                             >
@@ -230,7 +230,7 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />

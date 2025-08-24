@@ -629,11 +629,11 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                   <GlassCard variant="glass" className="overflow-hidden">
                     <div className="flex flex-col lg:flex-row">
                       {/* Enhanced User Profile Section */}
-                      <div className="lg:w-2/5 bg-gradient-to-br from-white/5 to-white/10 p-6 border-r border-white/10">
+                      <div className="lg:w-2/5 bg-linear-to-br from-white/5 to-white/10 p-6 border-r border-white/10">
                         <div className="text-center mb-6">
                           {/* Profile Image */}
                           <div className="relative inline-block mb-4">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/60 via-secondary/60 to-accent/60 p-1 shadow-2xl">
+                            <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/60 via-secondary/60 to-accent/60 p-1 shadow-2xl">
                               <div className="w-full h-full rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden border border-white/20">
                                 {user.profile_image_url ? (
                                   <img 
@@ -649,7 +649,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                               </div>
                             </div>
                             {/* Online Status Indicator */}
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success/80 backdrop-blur-sm border-2 border-white/30 rounded-full flex items-center justify-center shadow-lg">
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success/80 backdrop-blur-xs border-2 border-white/30 rounded-full flex items-center justify-center shadow-lg">
                               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                             </div>
                           </div>
@@ -662,9 +662,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                         {/* Profile Details Grid */}
                         <div className="space-y-4">
                           {/* Department */}
-                          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
+                          <div className="bg-white/5 backdrop-blur-xs rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-primary/30">
+                              <div className="w-10 h-10 bg-primary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-primary/30">
                                 <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                               </div>
                               <div>
@@ -677,9 +677,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                           </div>
 
                           {/* Member Since */}
-                          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
+                          <div className="bg-white/5 backdrop-blur-xs rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-secondary/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-secondary/30">
+                              <div className="w-10 h-10 bg-secondary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-secondary/30">
                                 <CalendarIcon className="w-5 h-5 text-secondary" />
                               </div>
                               <div>
@@ -696,9 +696,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                           </div>
 
                           {/* User ID */}
-                          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
+                          <div className="bg-white/5 backdrop-blur-xs rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-success/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-success/30">
+                              <div className="w-10 h-10 bg-success/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-success/30">
                                 <UsersIcon className="w-5 h-5 text-success" />
                               </div>
                               <div>
@@ -717,7 +717,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                                 href={route('profile', { user: user.id })}
                                 size="sm"
                                 variant="flat"
-                                className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 backdrop-blur-sm"
+                                className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 backdrop-blur-xs"
                                 startContent={<ArrowTopRightOnSquareIcon className="w-4 h-4" />}
                               >
                                 View Profile
@@ -725,7 +725,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                               <Button
                                 size="sm"
                                 variant="flat"
-                                className="bg-secondary/20 text-secondary border-secondary/30 hover:bg-secondary/30 backdrop-blur-sm"
+                                className="bg-secondary/20 text-secondary border-secondary/30 hover:bg-secondary/30 backdrop-blur-xs"
                                 startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
                               >
                                 Export Data
@@ -743,10 +743,10 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                         </div>
 
                         {/* Single Device Login Control */}
-                        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-colors mb-6">
+                        <div className="bg-white/5 backdrop-blur-xs rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-colors mb-6">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-primary/30">
+                              <div className="w-12 h-12 bg-primary/20 backdrop-blur-xs rounded-xl flex items-center justify-center border border-primary/30">
                                 <ShieldCheckIcon className="w-6 h-6 text-primary" />
                               </div>
                               <div>
@@ -764,7 +764,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                                 }}
                                 disabled={actionLoading.toggle}
                               />
-                              <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-opacity-30 rounded-full peer transition-all duration-300 ${
+                              <div className={`w-11 h-6 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-opacity-30 rounded-full peer transition-all duration-300 ${
                                 user.single_device_login 
                                   ? 'bg-green-500 peer-focus:ring-green-300' 
                                   : 'bg-red-500 peer-focus:ring-red-300'
@@ -784,7 +784,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                               <Chip
                                 size="sm"
                                 variant="flat"
-                                className={`font-semibold backdrop-blur-sm ${
+                                className={`font-semibold backdrop-blur-xs ${
                                   !user.single_device_login ? "bg-default/20 text-default-600 border-default/30" :
                                   user.active_device ? "bg-warning/20 text-warning border-warning/30" :
                                   "bg-success/20 text-success border-success/30"
@@ -804,9 +804,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                             
                             {/* Active Device Info */}
                             {user.single_device_login && user.active_device && (
-                              <div className="bg-warning/10 backdrop-blur-sm border border-warning/20 rounded-lg p-4">
+                              <div className="bg-warning/10 backdrop-blur-xs border border-warning/20 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-10 h-10 bg-warning/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0 border border-warning/30">
+                                  <div className="w-10 h-10 bg-warning/20 backdrop-blur-xs rounded-lg flex items-center justify-center shrink-0 border border-warning/30">
                                     {user.active_device.device_name?.toLowerCase().includes('mobile') ? (
                                       <DevicePhoneMobileIcon className="w-5 h-5 text-warning" />
                                     ) : (
@@ -831,7 +831,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                                   <Button
                                     size="sm"
                                     variant="flat"
-                                    className="bg-danger/20 text-danger border-danger/30 hover:bg-danger/30 backdrop-blur-sm"
+                                    className="bg-danger/20 text-danger border-danger/30 hover:bg-danger/30 backdrop-blur-xs"
                                     startContent={actionLoading.reset ? 
                                       <ArrowPathIcon className="w-4 h-4 animate-spin" /> : 
                                       <ArrowPathIcon className="w-4 h-4" />
@@ -847,9 +847,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
 
                             {/* Information Panel */}
                             {user.single_device_login && !user.active_device && (
-                              <div className="bg-success/10 backdrop-blur-sm border border-success/20 rounded-lg p-4">
+                              <div className="bg-success/10 backdrop-blur-xs border border-success/20 rounded-lg p-4">
                                 <div className="flex items-center gap-3">
-                                  <CheckCircleIcon className="w-8 h-8 text-success flex-shrink-0" />
+                                  <CheckCircleIcon className="w-8 h-8 text-success shrink-0" />
                                   <div>
                                     <h5 className="font-semibold text-success mb-1">Ready for Device Lock</h5>
                                     <p className="text-sm text-success/80">
@@ -861,9 +861,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                             )}
 
                             {!user.single_device_login && (
-                              <div className="bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg p-4">
+                              <div className="bg-primary/10 backdrop-blur-xs border border-primary/20 rounded-lg p-4">
                                 <div className="flex items-center gap-3">
-                                  <GlobeAltIcon className="w-8 h-8 text-primary flex-shrink-0" />
+                                  <GlobeAltIcon className="w-8 h-8 text-primary shrink-0" />
                                   <div>
                                     <h5 className="font-semibold text-primary mb-1">Multiple Device Access</h5>
                                     <p className="text-sm text-primary/80">
@@ -1093,7 +1093,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                             <TableRow key={device.id} className="hover:bg-white/5 transition-colors">
                               <TableCell>
                                 <div className="flex items-center gap-3">
-                                  <div className="flex-shrink-0">
+                                  <div className="shrink-0">
                                     {getDeviceIcon(device.user_agent)}
                                   </div>
                                   <div className="min-w-0 flex-1">
@@ -1123,7 +1123,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-1">
-                                  <MapPinIcon className="w-3 h-3 text-default-400 flex-shrink-0" />
+                                  <MapPinIcon className="w-3 h-3 text-default-400 shrink-0" />
                                   <span className="text-sm text-foreground truncate">
                                     {device.location || 'Unknown'}
                                   </span>
@@ -1144,7 +1144,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-1">
-                                  <ClockIcon className="w-3 h-3 text-default-400 flex-shrink-0" />
+                                  <ClockIcon className="w-3 h-3 text-default-400 shrink-0" />
                                   <span className="text-sm text-foreground">
                                     {formatLastSeen(device.last_seen_at)}
                                   </span>
@@ -1282,7 +1282,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                 <GlassCard variant="glass">
                   <Box p={3}>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-primary/30">
+                      <div className="w-10 h-10 bg-primary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-primary/30">
                         {getDeviceIcon(selectedDevice.user_agent, "w-5 h-5")}
                       </div>
                       <div>
@@ -1310,7 +1310,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                 <GlassCard variant="glass">
                   <Box p={3}>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-secondary/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-secondary/30">
+                      <div className="w-10 h-10 bg-secondary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-secondary/30">
                         <WifiIcon className="w-5 h-5 text-secondary" />
                       </div>
                       <div>
@@ -1340,7 +1340,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
               <GlassCard variant="glass">
                 <Box p={3}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-success/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-success/30">
+                    <div className="w-10 h-10 bg-success/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-success/30">
                       <ClockIcon className="w-5 h-5 text-success" />
                     </div>
                     <div>
@@ -1385,7 +1385,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
               <GlassCard variant="glass">
                 <Box p={3}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-warning/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-warning/30">
+                    <div className="w-10 h-10 bg-warning/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-warning/30">
                       <IdentificationIcon className="w-5 h-5 text-warning" />
                     </div>
                     <div>
@@ -1402,7 +1402,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                       <Typography variant="caption" className="text-default-400 uppercase tracking-wide">
                         Device ID
                       </Typography>
-                      <Typography variant="body2" className="text-foreground font-mono mt-1 p-2 bg-white/5 rounded border border-white/10">
+                      <Typography variant="body2" className="text-foreground font-mono mt-1 p-2 bg-white/5 rounded-sm border border-white/10">
                         {selectedDevice.id}
                       </Typography>
                     </div>
@@ -1410,7 +1410,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                       <Typography variant="caption" className="text-default-400 uppercase tracking-wide">
                         User Agent
                       </Typography>
-                      <Typography variant="body2" className="text-foreground break-all mt-1 p-2 bg-white/5 rounded border border-white/10">
+                      <Typography variant="body2" className="text-foreground break-all mt-1 p-2 bg-white/5 rounded-sm border border-white/10">
                         {selectedDevice.user_agent}
                       </Typography>
                     </div>
@@ -1421,9 +1421,9 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
               {/* Security Actions */}
               {selectedDevice.is_active && (
                 <GlassCard variant="glass">
-                  <Box p={3} className="bg-danger/10 backdrop-blur-sm border border-danger/20">
+                  <Box p={3} className="bg-danger/10 backdrop-blur-xs border border-danger/20">
                     <div className="flex items-center gap-3 mb-3">
-                      <ExclamationTriangleIcon className="w-6 h-6 text-danger flex-shrink-0" />
+                      <ExclamationTriangleIcon className="w-6 h-6 text-danger shrink-0" />
                       <div>
                         <Typography variant="subtitle1" className="font-semibold text-danger">
                           Security Actions
@@ -1436,7 +1436,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                     <Button
                       size="sm"
                       variant="flat"
-                      className="bg-danger/20 text-danger border-danger/30 hover:bg-danger/30 backdrop-blur-sm"
+                      className="bg-danger/20 text-danger border-danger/30 hover:bg-danger/30 backdrop-blur-xs"
                       startContent={<ArrowTopRightOnSquareIcon className="w-4 h-4" />}
                       onPress={() => {
                         forceLogoutDevice(selectedDevice.id);

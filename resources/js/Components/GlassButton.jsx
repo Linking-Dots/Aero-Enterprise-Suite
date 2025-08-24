@@ -43,8 +43,8 @@ const GlassButton = forwardRef(({
 
   const getVariantStyles = () => {
     const baseStyles = darkMode 
-      ? 'bg-gradient-to-br from-slate-900/70 to-slate-800/50' 
-      : 'bg-gradient-to-br from-white/80 to-white/60';
+      ? 'bg-linear-to-br from-slate-900/70 to-slate-800/50' 
+      : 'bg-linear-to-br from-white/80 to-white/60';
 
     const borderStyles = darkMode
       ? 'border border-white/20'
@@ -53,16 +53,16 @@ const GlassButton = forwardRef(({
     switch (variant) {
       case 'primary':
         return darkMode
-          ? 'bg-gradient-to-br from-blue-900/80 to-blue-800/60 border border-blue-400/30 text-blue-100'
-          : 'bg-gradient-to-br from-blue-100/90 to-blue-50/70 border border-blue-300/50 text-blue-900';
+          ? 'bg-linear-to-br from-blue-900/80 to-blue-800/60 border border-blue-400/30 text-blue-100'
+          : 'bg-linear-to-br from-blue-100/90 to-blue-50/70 border border-blue-300/50 text-blue-900';
       case 'success':
         return darkMode
-          ? 'bg-gradient-to-br from-emerald-900/80 to-emerald-800/60 border border-emerald-400/30 text-emerald-100'
-          : 'bg-gradient-to-br from-emerald-100/90 to-emerald-50/70 border border-emerald-300/50 text-emerald-900';
+          ? 'bg-linear-to-br from-emerald-900/80 to-emerald-800/60 border border-emerald-400/30 text-emerald-100'
+          : 'bg-linear-to-br from-emerald-100/90 to-emerald-50/70 border border-emerald-300/50 text-emerald-900';
       case 'danger':
         return darkMode
-          ? 'bg-gradient-to-br from-red-900/80 to-red-800/60 border border-red-400/30 text-red-100'
-          : 'bg-gradient-to-br from-red-100/90 to-red-50/70 border border-red-300/50 text-red-900';
+          ? 'bg-linear-to-br from-red-900/80 to-red-800/60 border border-red-400/30 text-red-100'
+          : 'bg-linear-to-br from-red-100/90 to-red-50/70 border border-red-300/50 text-red-900';
       default:
         return `${baseStyles} ${borderStyles} ${darkMode ? 'text-white' : 'text-slate-900'}`;
     }
@@ -143,7 +143,7 @@ const GlassButton = forwardRef(({
       {/* Ripple effect overlay */}
       {isHovered && (
         <div 
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"
+          className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"
           style={{
             animation: 'shimmer 1.5s ease-in-out infinite',
           }}

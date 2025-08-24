@@ -349,7 +349,7 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
                   label: isMobile ? "Add" : "Add Holiday",
                   icon: <PlusIcon className="w-4 h-4" />,
                   onClick: onAddOpen,
-                  className: "bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-medium hover:opacity-90"
+                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
                 }
               ]}
             >
@@ -486,10 +486,10 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
         size="2xl"
         backdrop="blur"
         classNames={{
-          backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20",
-          base: "border-[#292f46] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md",
-          header: "border-b-[1px] border-[#292f46]",
-          footer: "border-t-[1px] border-[#292f46]",
+          backdrop: "bg-linear-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20",
+          base: "border-[#292f46] bg-linear-to-br from-white/10 to-white/5 backdrop-blur-md",
+          header: "border-b border-[#292f46]",
+          footer: "border-t border-[#292f46]",
         }}
       >
         <ModalContent>

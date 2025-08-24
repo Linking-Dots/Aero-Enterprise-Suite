@@ -115,7 +115,7 @@ export default function Register() {
                         autoFocus
                         required
                         startContent={
-                            <UserIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <UserIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         classNames={{
                             base: "w-full",
@@ -136,7 +136,7 @@ export default function Register() {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
@@ -158,7 +158,7 @@ export default function Register() {
                         autoComplete="username"
                         required
                         startContent={
-                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         classNames={{
                             base: "w-full",
@@ -179,7 +179,7 @@ export default function Register() {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
@@ -202,11 +202,11 @@ export default function Register() {
                             autoComplete="new-password"
                             required
                             startContent={
-                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                             }
                             endContent={
                                 <button
-                                    className="focus:outline-none"
+                                    className="focus:outline-hidden"
                                     type="button"
                                     onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                                 >
@@ -236,7 +236,7 @@ export default function Register() {
                                     "dark:hover:bg-default/70",
                                     "group-data-[focused=true]:bg-default-200/50",
                                     "dark:group-data-[focused=true]:bg-default/60",
-                                    "!cursor-text",
+                                    "cursor-text!",
                                 ],
                             }}
                         />
@@ -301,11 +301,11 @@ export default function Register() {
                         autoComplete="new-password"
                         required
                         startContent={
-                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none flex-shrink-0" />
+                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
                         }
                         endContent={
                             <button
-                                className="focus:outline-none"
+                                className="focus:outline-hidden"
                                 type="button"
                                 onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
                             >
@@ -335,7 +335,7 @@ export default function Register() {
                                 "dark:hover:bg-default/70",
                                 "group-data-[focused=true]:bg-default-200/50",
                                 "dark:group-data-[focused=true]:bg-default/60",
-                                "!cursor-text",
+                                "cursor-text!",
                             ],
                         }}
                     />
