@@ -25,6 +25,7 @@
           "@tailwindcss/postcss": "^4.1.12",
           "@vitejs/plugin-react": "^4.2.0",
           "axios": "^1.6.4",
+          "jiti": "^2.5.1",
           "jsdom": "^26.1.0",
           "laravel-vite-plugin": "^1.0",
           "lighthouse": "^12.6.1",
