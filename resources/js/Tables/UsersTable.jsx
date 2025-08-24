@@ -647,13 +647,19 @@ const UsersTable = ({
         <Table
           aria-label="Users table"
           removeWrapper
+          selectionMode="none"
+          isCompact={isMobile}
           classNames={{
-            base: "bg-transparent min-w-[800px]", // Set minimum width to prevent squishing on small screens
-            th: "backdrop-blur-md text-default-500 border-b border-divider font-medium text-xs sticky top-0 z-30 shadow-xs",
-            td: "border-b border-divider/50 py-3",
+            base: "bg-transparent min-w-[800px]",
+            wrapper: "p-0 bg-transparent shadow-none",
+            th: "backdrop-blur-md text-default-500 border-b border-divider font-medium text-xs sticky top-0 z-30 shadow-xs bg-content1/20",
+            td: "border-b border-divider/50 py-3 group-aria-[selected=false]:group-data-[hover=true]:before:bg-default-100",
             table: "border-collapse",
             thead: "sticky top-0 z-30",
-            tr: "" // Remove conflicting hover styles, let CSS handle it
+            tbody: "divide-y divide-divider/50",
+            tr: "group outline-none tap-highlight-transparent data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 data-[selected=true]:bg-default-100",
+            emptyWrapper: "text-center h-32",
+            loadingWrapper: "h-32",
           }}
         >
           <TableHeader columns={columns}>

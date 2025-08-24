@@ -8,22 +8,34 @@ import {
     useTheme,
     useMediaQuery,
     Grid,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import { 
-    Select, 
-    SelectItem, 
     Card, 
     CardBody, 
     CardHeader,
     Divider,
     Chip,
     Button,
-    Input,
     Tabs,
     Tab,
     Spacer,
     ButtonGroup
 } from "@heroui/react";
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
+import { 
+    glassyFormControlStyles, 
+    glassyMenuStyles,
+    glassyTextFieldStyles,
+    getFormControlStyles,
+    getTextFieldStyles 
+} from '@/utils/glassyStyles.js';
 import { 
     CalendarIcon, 
     ChartBarIcon, 
@@ -913,18 +925,21 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                 {/* Filters Section - Matching Employee View */}
                                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                                     <div className="flex-1">
-                                        <Input
+                                        <TextField
                                             label="Search Employee"
-                                            variant="bordered"
                                             placeholder="Search by name or ID..."
                                             value={filters.employee}
-                                            onValueChange={value => handleFilterChange('employee', value)}
-                                            startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                                            classNames={{
-                                                input: "bg-transparent",
-                                                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                            onChange={(e) => handleFilterChange('employee', e.target.value)}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <MagnifyingGlassIcon className="w-4 h-4" />
+                                                    </InputAdornment>
+                                                ),
                                             }}
-                                            size={isMobile ? "sm" : "md"}
+                                            fullWidth
+                                            size={isMobile ? "small" : "medium"}
+                                            sx={getTextFieldStyles('search')}
                                         />
                                     </div>
                                     <div className="flex gap-2 items-end">
@@ -945,55 +960,106 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                     <Fade in={true} timeout={300}>
                                         <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                <Select
-                                                label="Leave Status"
-                                                selectionMode="multiple"
-                                                variant="bordered"
-                                                selectedKeys={filters.status}
-                                                onSelectionChange={keys => handleFilterChange('status', Array.from(keys))}
-                                                classNames={{ trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15" }}
+                                                <FormControl 
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    sx={getFormControlStyles()}
                                                 >
-                                                <SelectItem key="pending" value="pending">Pending</SelectItem>
-                                                <SelectItem key="approved" value="approved">Approved</SelectItem>
-                                                <SelectItem key="rejected" value="rejected">Rejected</SelectItem>
-                                                <SelectItem key="new" value="new">New</SelectItem>
-                                                </Select>
+                                                    <InputLabel>Leave Status</InputLabel>
+                                                    <Select
+                                                        multiple
+                                                        value={filters.status}
+                                                        label="Leave Status"
+                                                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                                                        MenuProps={{ sx: glassyMenuStyles }}
+                                                        renderValue={(selected) => 
+                                                            selected.map(value => {
+                                                                const statusLabels = {
+                                                                    pending: 'Pending',
+                                                                    approved: 'Approved', 
+                                                                    rejected: 'Rejected',
+                                                                    new: 'New'
+                                                                };
+                                                                return statusLabels[value] || value;
+                                                            }).join(', ')
+                                                        }
+                                                    >
+                                                        <MenuItem value="pending">Pending</MenuItem>
+                                                        <MenuItem value="approved">Approved</MenuItem>
+                                                        <MenuItem value="rejected">Rejected</MenuItem>
+                                                        <MenuItem value="new">New</MenuItem>
+                                                    </Select>
+                                                </FormControl>
 
-                                                <Select
-                                                label="Leave Type"
-                                                variant="bordered"
-                                                selectionMode="multiple"
-                                                selectedKeys={filters.leaveType}
-                                                onSelectionChange={keys => handleFilterChange('leaveType', Array.from(keys))}
-                                                classNames={{ trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15" }}
+                                                <FormControl 
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    sx={getFormControlStyles()}
                                                 >
-                                                {leaveTypeOptions.map(option => (
-                                                    <SelectItem key={option.key} value={option.value}>{option.label}</SelectItem>
-                                                ))}
-                                                </Select>
+                                                    <InputLabel>Leave Type</InputLabel>
+                                                    <Select
+                                                        multiple
+                                                        value={filters.leaveType}
+                                                        label="Leave Type"
+                                                        onChange={(e) => handleFilterChange('leaveType', e.target.value)}
+                                                        MenuProps={{ sx: glassyMenuStyles }}
+                                                        renderValue={(selected) => 
+                                                            selected.map(value => {
+                                                                const option = leaveTypeOptions.find(opt => opt.value === value);
+                                                                return option ? option.label : value;
+                                                            }).join(', ')
+                                                        }
+                                                    >
+                                                        {leaveTypeOptions.map(option => (
+                                                            <MenuItem key={option.key} value={option.value}>
+                                                                {option.label}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
 
-                                                <Select
-                                                label="Department"
-                                                variant="bordered"
-                                                selectionMode="multiple"
-                                                selectedKeys={filters.department}
-                                                onSelectionChange={keys => handleFilterChange('department', Array.from(keys))}
-                                                classNames={{ trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15" }}
+                                                <FormControl 
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    sx={getFormControlStyles()}
                                                 >
-                                                {departments.map(department => (
-                                                    <SelectItem key={department.id} value={department.id}>{department.name}</SelectItem>
-                                                ))}
-                                                </Select>
+                                                    <InputLabel>Department</InputLabel>
+                                                    <Select
+                                                        multiple
+                                                        value={filters.department}
+                                                        label="Department"
+                                                        onChange={(e) => handleFilterChange('department', e.target.value)}
+                                                        MenuProps={{ sx: glassyMenuStyles }}
+                                                        renderValue={(selected) => 
+                                                            selected.map(value => {
+                                                                const dept = departments.find(d => d.id === value);
+                                                                return dept ? dept.name : value;
+                                                            }).join(', ')
+                                                        }
+                                                    >
+                                                        {departments.map(department => (
+                                                            <MenuItem key={department.id} value={department.id}>
+                                                                {department.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
 
-                                                <Input
+                                                <TextField
                                                     label="Month/Year"
                                                     type="month"
                                                     value={filters.selectedMonth}
                                                     onChange={handleMonthChange}
-                                                    startContent={<CalendarIcon className="w-4 h-4" />}
-                                                    variant="bordered"
-                                                    classNames={{ inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15" }}
-                                                    size={isMobile ? "sm" : "md"}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <CalendarIcon className="w-4 h-4" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                    fullWidth
+                                                    size={isMobile ? "small" : "medium"}
+                                                    sx={getTextFieldStyles()}
                                                 />
                                             </div>
                                             {/* Active Filters as Chips */}

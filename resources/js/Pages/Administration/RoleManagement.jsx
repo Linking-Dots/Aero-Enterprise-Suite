@@ -16,12 +16,13 @@ import {
   Tabs,
   Tab,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import LoadingButton from "@mui/lab/LoadingButton";
 import { 
   Button,
-  Input,
   Chip,
   Card,
   CardBody,
@@ -1087,18 +1088,40 @@ const RoleManagement = (props) => {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <Input
+                    <TextField
                         label="Search Roles"
-                        variant="bordered"
+                        variant="outlined"
                         placeholder="Search by role name..."
                         value={roleSearchQuery}
-                        onValueChange={handleRoleSearchChange}
-                        startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                        className="flex-1"
-                        classNames={{
-                            input: "bg-transparent text-white",
-                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70"
+                        onChange={(e) => handleRoleSearchChange(e.target.value)}
+                        fullWidth
+                        size="medium"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <MagnifyingGlassIcon className="w-4 h-4" />
+                                </InputAdornment>
+                            ),
+                            style: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }
+                        }}
+                        InputLabelProps={{
+                            style: { color: 'rgba(255, 255, 255, 0.7)' }
+                        }}
+                        sx={{
+                            flex: 1,
+                            '& .MuiInputBase-input': {
+                                backgroundColor: 'transparent',
+                                color: 'white'
+                            },
+                            '& .MuiOutlinedInput-root:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                            }
                         }}
                     />
                     <Select
@@ -1277,18 +1300,40 @@ const RoleManagement = (props) => {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <Input
+                    <TextField
                         label="Search Permissions"
-                        variant="bordered"
+                        variant="outlined"
                         placeholder="Search by permission name..."
                         value={permissionSearchQuery}
-                        onValueChange={handlePermissionSearchChange}
-                        startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                        className="flex-1"
-                        classNames={{
-                            input: "bg-transparent text-white",
-                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70"
+                        onChange={(e) => handlePermissionSearchChange(e.target.value)}
+                        fullWidth
+                        size="medium"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <MagnifyingGlassIcon className="w-4 h-4" />
+                                </InputAdornment>
+                            ),
+                            style: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }
+                        }}
+                        InputLabelProps={{
+                            style: { color: 'rgba(255, 255, 255, 0.7)' }
+                        }}
+                        sx={{
+                            flex: 1,
+                            '& .MuiInputBase-input': {
+                                backgroundColor: 'transparent',
+                                color: 'white'
+                            },
+                            '& .MuiOutlinedInput-root:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                            }
                         }}
                     />
                     <Select
@@ -1579,18 +1624,40 @@ const RoleManagement = (props) => {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <Input
+                    <TextField
                         label="Search Users"
-                        variant="bordered"
+                        variant="outlined"
                         placeholder="Search by user name or email..."
                         value={userSearchQuery}
-                        onValueChange={handleUserSearchChange}
-                        startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                        className="flex-1"
-                        classNames={{
-                            input: "bg-transparent text-white",
-                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70"
+                        onChange={(e) => handleUserSearchChange(e.target.value)}
+                        fullWidth
+                        size="medium"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <MagnifyingGlassIcon className="w-4 h-4" />
+                                </InputAdornment>
+                            ),
+                            style: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }
+                        }}
+                        InputLabelProps={{
+                            style: { color: 'rgba(255, 255, 255, 0.7)' }
+                        }}
+                        sx={{
+                            flex: 1,
+                            '& .MuiInputBase-input': {
+                                backgroundColor: 'transparent',
+                                color: 'white'
+                            },
+                            '& .MuiOutlinedInput-root:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                            }
                         }}
                     />
                     <Select
@@ -1778,22 +1845,45 @@ const RoleManagement = (props) => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
                     <div className="col-span-1">
-                        <Input
+                        <TextField
                             label="Role Name"
                             placeholder="Enter role name"
                             value={roleForm.name}
-                            onValueChange={(value) => setRoleForm(prev => ({ ...prev, name: value }))}
-                            isInvalid={!!formErrors.name}
-                            errorMessage={formErrors.name}
-                            description="Unique identifier for the role"
-                            isRequired
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70",
-                                description: "text-white/50"
+                            onChange={(e) => setRoleForm(prev => ({ ...prev, name: e.target.value }))}
+                            error={!!formErrors.name}
+                            helperText={formErrors.name || "Unique identifier for the role"}
+                            required
+                            disabled={isLoading}
+                            variant="outlined"
+                            fullWidth
+                            size="medium"
+                            InputProps={{
+                                style: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    color: 'white'
+                                }
+                            }}
+                            InputLabelProps={{
+                                style: { color: 'rgba(255, 255, 255, 0.7)' }
+                            }}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    color: 'white',
+                                    '&::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                    }
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                }
                             }}
                         />
                     </div>
@@ -1820,17 +1910,41 @@ const RoleManagement = (props) => {
                         </Select>
                     </div>
                     <div className="col-span-2">
-                        <Input
+                        <TextField
                             label="Description"
                             placeholder="Optional description of role responsibilities"
                             value={roleForm.description}
-                            onValueChange={(value) => setRoleForm(prev => ({ ...prev, description: value }))}
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70"
+                            onChange={(e) => setRoleForm(prev => ({ ...prev, description: e.target.value }))}
+                            disabled={isLoading}
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            size="medium"
+                            InputProps={{
+                                style: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    color: 'white'
+                                }
+                            }}
+                            InputLabelProps={{
+                                style: { color: 'rgba(255, 255, 255, 0.7)' }
+                            }}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    color: 'white',
+                                    '&::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                    }
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
+                                }
                             }}
                         />
                     </div>
@@ -1869,42 +1983,88 @@ const RoleManagement = (props) => {
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
                     <div className="col-span-1">
-                        <Input
+                        <TextField
                             label="Permission Name"
                             placeholder="e.g., users.create"
                             value={permissionForm.name}
-                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, name: value }))}
-                            isInvalid={!!formErrors.name}
-                            errorMessage={formErrors.name}
-                            description="Use format: module.action (e.g., users.create)"
-                            isRequired
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70",
-                                description: "text-white/50"
+                            onChange={(e) => setPermissionForm(prev => ({ ...prev, name: e.target.value }))}
+                            error={!!formErrors.name}
+                            helperText={formErrors.name || "Use format: module.action (e.g., users.create)"}
+                            required
+                            disabled={isLoading}
+                            variant="outlined"
+                            fullWidth
+                            size="medium"
+                            InputProps={{
+                                style: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    color: 'white'
+                                }
+                            }}
+                            InputLabelProps={{
+                                style: { color: 'rgba(255, 255, 255, 0.7)' }
+                            }}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    color: 'white',
+                                    '&::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                    }
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                }
                             }}
                         />
                     </div>
                     <div className="col-span-1">
-                        <Input
+                        <TextField
                             label="Display Name"
                             placeholder="Human-readable name"
                             value={permissionForm.display_name}
-                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, display_name: value }))}
-                            isInvalid={!!formErrors.display_name}
-                            errorMessage={formErrors.display_name}
-                            description="Human-readable name"
-                            isRequired
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70",
-                                description: "text-white/50"
+                            onChange={(e) => setPermissionForm(prev => ({ ...prev, display_name: e.target.value }))}
+                            error={!!formErrors.display_name}
+                            helperText={formErrors.display_name || "Human-readable name"}
+                            required
+                            disabled={isLoading}
+                            variant="outlined"
+                            fullWidth
+                            size="medium"
+                            InputProps={{
+                                style: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    color: 'white'
+                                }
+                            }}
+                            InputLabelProps={{
+                                style: { color: 'rgba(255, 255, 255, 0.7)' }
+                            }}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    color: 'white',
+                                    '&::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                    }
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                }
                             }}
                         />
                     </div>
@@ -1936,36 +2096,86 @@ const RoleManagement = (props) => {
                         </Select>
                     </div>
                     <div className="col-span-1">
-                        <Input
+                        <TextField
                             label="Guard Name"
                             placeholder="Usually 'web'"
                             value={permissionForm.guard_name}
-                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, guard_name: value }))}
-                            description="Usually 'web' for web permissions"
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70",
-                                description: "text-white/50"
+                            onChange={(e) => setPermissionForm(prev => ({ ...prev, guard_name: e.target.value }))}
+                            helperText="Usually 'web' for web permissions"
+                            disabled={isLoading}
+                            fullWidth
+                            size="small"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: '12px',
+                                    color: 'white',
+                                    '& fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'var(--primary-color)',
+                                    },
+                                    '& input::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        opacity: 1,
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    '&.Mui-focused': {
+                                        color: 'var(--primary-color)',
+                                    },
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                },
                             }}
                         />
                     </div>
                     <div className="col-span-2">
-                        <Input
+                        <TextField
                             label="Description"
                             placeholder="Optional description of what this permission allows"
                             value={permissionForm.description}
-                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, description: value }))}
-                            description="Optional description of what this permission allows"
-                            isDisabled={isLoading}
-                            variant="bordered"
-                            classNames={{
-                                input: "text-white placeholder:text-white/50",
-                                inputWrapper: "border-white/20 bg-white/5 hover:border-white/30 focus-within:border-primary/50",
-                                label: "text-white/70",
-                                description: "text-white/50"
+                            onChange={(e) => setPermissionForm(prev => ({ ...prev, description: e.target.value }))}
+                            helperText="Optional description of what this permission allows"
+                            disabled={isLoading}
+                            fullWidth
+                            size="small"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: '12px',
+                                    color: 'white',
+                                    '& fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'var(--primary-color)',
+                                    },
+                                    '& input::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        opacity: 1,
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    '&.Mui-focused': {
+                                        color: 'var(--primary-color)',
+                                    },
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                },
                             }}
                         />
                     </div>

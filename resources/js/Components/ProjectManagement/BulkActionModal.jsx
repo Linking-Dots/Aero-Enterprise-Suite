@@ -7,8 +7,6 @@ import {
     ModalBody,
     ModalFooter,
     Button,
-    Select,
-    SelectItem,
     Input,
     Textarea,
     Divider,
@@ -25,6 +23,12 @@ import {
     Avatar,
     AvatarGroup,
 } from "@heroui/react";
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
 import {
     DocumentArrowDownIcon,
     ArchiveBoxIcon,
@@ -270,65 +274,131 @@ const BulkActionModal = ({
             case 'export':
                 return (
                     <div className="space-y-4">
-                        <Select
-                            label="Export Format"
-                            selectedKeys={[formData.exportFormat]}
-                            onSelectionChange={(keys) => handleFormChange('exportFormat', Array.from(keys)[0])}
-                            variant="bordered"
+                        <FormControl 
+                            fullWidth 
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                },
+                            }}
                         >
-                            {exportFormats.map((format) => (
-                                <SelectItem key={format.key} value={format.key}>
-                                    <div>
-                                        <div className="font-medium">{format.label}</div>
-                                        <div className="text-sm text-default-500">{format.description}</div>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </Select>
+                            <InputLabel>Export Format</InputLabel>
+                            <Select
+                                value={formData.exportFormat}
+                                label="Export Format"
+                                onChange={(e) => handleFormChange('exportFormat', e.target.value)}
+                            >
+                                {exportFormats.map((format) => (
+                                    <MenuItem key={format.key} value={format.key}>
+                                        <div>
+                                            <div className="font-medium">{format.label}</div>
+                                            <div className="text-sm text-default-500">{format.description}</div>
+                                        </div>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
                 );
 
             case 'updatePriority':
                 return (
                     <div className="space-y-4">
-                        <Select
-                            label="New Priority Level"
-                            selectedKeys={[formData.priority]}
-                            onSelectionChange={(keys) => handleFormChange('priority', Array.from(keys)[0])}
-                            variant="bordered"
+                        <FormControl 
+                            fullWidth 
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                },
+                            }}
                         >
-                            {priorityOptions.map((priority) => (
-                                <SelectItem key={priority.key} value={priority.key}>
-                                    <div className="flex items-center justify-between w-full">
-                                        <span>{priority.label}</span>
-                                        <Chip size="sm" color={priority.color} variant="flat">
-                                            {priority.impact}
-                                        </Chip>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </Select>
+                            <InputLabel>New Priority Level</InputLabel>
+                            <Select
+                                value={formData.priority}
+                                label="New Priority Level"
+                                onChange={(e) => handleFormChange('priority', e.target.value)}
+                            >
+                                {priorityOptions.map((priority) => (
+                                    <MenuItem key={priority.key} value={priority.key}>
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{priority.label}</span>
+                                            <Chip size="sm" color={priority.color} variant="flat">
+                                                {priority.impact}
+                                            </Chip>
+                                        </div>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
                 );
 
             case 'updateStatus':
                 return (
                     <div className="space-y-4">
-                        <Select
-                            label="New Project Status"
-                            selectedKeys={[formData.status]}
-                            onSelectionChange={(keys) => handleFormChange('status', Array.from(keys)[0])}
-                            variant="bordered"
+                        <FormControl 
+                            fullWidth 
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                },
+                            }}
                         >
-                            {statusOptions.map((status) => (
-                                <SelectItem key={status.key} value={status.key}>
-                                    <div>
-                                        <div className="font-medium">{status.label}</div>
-                                        <div className="text-sm text-default-500">PMBOK Phase: {status.phase}</div>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </Select>
+                            <InputLabel>New Project Status</InputLabel>
+                            <Select
+                                value={formData.status}
+                                label="New Project Status"
+                                onChange={(e) => handleFormChange('status', e.target.value)}
+                            >
+                                {statusOptions.map((status) => (
+                                    <MenuItem key={status.key} value={status.key}>
+                                        <div>
+                                            <div className="font-medium">{status.label}</div>
+                                            <div className="text-sm text-default-500">PMBOK Phase: {status.phase}</div>
+                                        </div>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <Textarea
                             label="Status Change Notes"
                             placeholder="Provide context for this status change..."
@@ -366,21 +436,53 @@ const BulkActionModal = ({
             case 'addTags':
                 return (
                     <div className="space-y-4">
-                        <Select
-                            label="Select Tags/Categories"
-                            selectionMode="multiple"
-                            selectedKeys={formData.tags}
-                            onSelectionChange={(keys) => handleFormChange('tags', Array.from(keys))}
-                            variant="bordered"
+                        <FormControl 
+                            fullWidth 
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                },
+                            }}
                         >
-                            {availableTags?.map((tag) => (
-                                <SelectItem key={tag.id} value={tag.id}>
-                                    <Chip size="sm" color={tag.color} variant="flat">
-                                        {tag.name}
-                                    </Chip>
-                                </SelectItem>
-                            ))}
-                        </Select>
+                            <InputLabel>Select Tags/Categories</InputLabel>
+                            <Select
+                                multiple
+                                value={formData.tags}
+                                label="Select Tags/Categories"
+                                onChange={(e) => handleFormChange('tags', e.target.value)}
+                                renderValue={(selected) => 
+                                    selected.map(tagId => {
+                                        const tag = availableTags?.find(t => t.id === tagId);
+                                        return tag ? (
+                                            <Chip key={tag.id} size="sm" color={tag.color} variant="flat">
+                                                {tag.name}
+                                            </Chip>
+                                        ) : null;
+                                    })
+                                }
+                            >
+                                {availableTags?.map((tag) => (
+                                    <MenuItem key={tag.id} value={tag.id}>
+                                        <Chip size="sm" color={tag.color} variant="flat">
+                                            {tag.name}
+                                        </Chip>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <Input
                             label="Create New Category"
                             placeholder="Enter new category name..."
@@ -532,38 +634,63 @@ const BulkActionModal = ({
 
                     {/* Action Selection */}
                     <div className="space-y-4">
-                        <Select
-                            label="Select Action"
-                            placeholder="Choose an action to perform..."
-                            selectedKeys={[actionType]}
-                            onSelectionChange={(keys) => setActionType(Array.from(keys)[0])}
-                            variant="bordered"
+                        <FormControl 
+                            fullWidth 
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                },
+                            }}
                         >
-                            {actionTypes.map((action) => (
-                                <SelectItem key={action.key} value={action.key}>
-                                    <div className="flex items-start space-x-3">
-                                        <div className={`p-2 rounded-lg ${action.dangerous ? 'bg-danger-100' : 'bg-primary-100'}`}>
-                                            {action.icon}
-                                        </div>
-                                        <div>
-                                            <div className="font-medium flex items-center space-x-2">
-                                                <span>{action.label}</span>
-                                                {action.requiresApproval && (
-                                                    <Chip size="sm" color="warning" variant="flat">Requires Approval</Chip>
-                                                )}
-                                                {action.dangerous && (
-                                                    <Chip size="sm" color="danger" variant="flat">High Risk</Chip>
-                                                )}
+                            <InputLabel>Select Action</InputLabel>
+                            <Select
+                                value={actionType}
+                                label="Select Action"
+                                onChange={(e) => setActionType(e.target.value)}
+                                displayEmpty
+                            >
+                                <MenuItem value="">
+                                    <em>Choose an action to perform...</em>
+                                </MenuItem>
+                                {actionTypes.map((action) => (
+                                    <MenuItem key={action.key} value={action.key}>
+                                        <div className="flex items-start space-x-3">
+                                            <div className={`p-2 rounded-lg ${action.dangerous ? 'bg-danger-100' : 'bg-primary-100'}`}>
+                                                {action.icon}
                                             </div>
-                                            <div className="text-sm text-default-500">{action.description}</div>
-                                            <div className="text-xs text-default-400 mt-1">
-                                                Category: {action.category}
+                                            <div>
+                                                <div className="font-medium flex items-center space-x-2">
+                                                    <span>{action.label}</span>
+                                                    {action.requiresApproval && (
+                                                        <Chip size="sm" color="warning" variant="flat">Requires Approval</Chip>
+                                                    )}
+                                                    {action.dangerous && (
+                                                        <Chip size="sm" color="danger" variant="flat">High Risk</Chip>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-default-500">{action.description}</div>
+                                                <div className="text-xs text-default-400 mt-1">
+                                                    Category: {action.category}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </Select>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
                         {/* Action-specific Form */}
                         {actionType && (

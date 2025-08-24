@@ -9,7 +9,7 @@ import {
     EyeIcon,
     EyeSlashIcon
 } from '@heroicons/react/24/outline';
-import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
+import { TextField, Button as HeroButton, Checkbox as HeroCheckbox } from '@mui/material';
 import AuthLayout from '@/Components/AuthLayout';
 import Button from '@/Components/Button';
 import Checkbox from '@/Components/Checkbox';
@@ -103,41 +103,47 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <Input
+                    <TextField
                         type="text"
                         label="Full name"
                         placeholder="Enter your full name"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
-                        isInvalid={!!errors.name}
-                        errorMessage={errors.name}
+                        error={!!errors.name}
+                        helperText={errors.name}
                         autoComplete="name"
                         autoFocus
                         required
-                        startContent={
-                            <UserIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                        }
-                        classNames={{
-                            base: "w-full",
-                            mainWrapper: "w-full",
-                            input: [
-                                "bg-transparent",
-                                "text-black dark:text-white",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            innerWrapper: "bg-transparent",
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focused=true]:bg-default-200/50",
-                                "dark:group-data-[focused=true]:bg-default/60",
-                                "cursor-text!",
-                            ],
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                            startAdornment: (
+                                <UserIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
+                            ),
+                            sx: {
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(12px)',
+                                borderRadius: '12px',
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                                '&.Mui-focused': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                            }
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'primary.main',
+                                },
+                            },
                         }}
                     />
                 </motion.div>
@@ -147,40 +153,46 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <Input
+                    <TextField
                         type="email"
                         label="Email address"
                         placeholder="Enter your email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        isInvalid={!!errors.email}
-                        errorMessage={errors.email}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         autoComplete="username"
                         required
-                        startContent={
-                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                        }
-                        classNames={{
-                            base: "w-full",
-                            mainWrapper: "w-full",
-                            input: [
-                                "bg-transparent",
-                                "text-black dark:text-white",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            innerWrapper: "bg-transparent",
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focused=true]:bg-default-200/50",
-                                "dark:group-data-[focused=true]:bg-default/60",
-                                "cursor-text!",
-                            ],
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                            startAdornment: (
+                                <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
+                            ),
+                            sx: {
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(12px)',
+                                borderRadius: '12px',
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                                '&.Mui-focused': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                            }
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'primary.main',
+                                },
+                            },
                         }}
                     />
                 </motion.div>
@@ -191,53 +203,59 @@ export default function Register() {
                     transition={{ delay: 0.3 }}
                 >
                     <div>
-                        <Input
+                        <TextField
                             type={isPasswordVisible ? "text" : "password"}
                             label="Password"
                             placeholder="Create a strong password"
                             value={data.password}
                             onChange={handlePasswordChange}
-                            isInvalid={!!errors.password}
-                            errorMessage={errors.password}
+                            error={!!errors.password}
+                            helperText={errors.password}
                             autoComplete="new-password"
                             required
-                            startContent={
-                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                            }
-                            endContent={
-                                <button
-                                    className="focus:outline-hidden"
-                                    type="button"
-                                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                >
-                                    {isPasswordVisible ? (
-                                        <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    ) : (
-                                        <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    )}
-                                </button>
-                            }
-                            classNames={{
-                                base: "w-full",
-                                mainWrapper: "w-full",
-                                input: [
-                                    "bg-transparent",
-                                    "text-black dark:text-white",
-                                    "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                                ],
-                                innerWrapper: "bg-transparent",
-                                inputWrapper: [
-                                    "shadow-xl",
-                                    "bg-default-200/50",
-                                    "dark:bg-default/60",
-                                    "backdrop-blur-xl",
-                                    "backdrop-saturate-200",
-                                    "hover:bg-default-200/70",
-                                    "dark:hover:bg-default/70",
-                                    "group-data-[focused=true]:bg-default-200/50",
-                                    "dark:group-data-[focused=true]:bg-default/60",
-                                    "cursor-text!",
-                                ],
+                            variant="outlined"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
+                                ),
+                                endAdornment: (
+                                    <button
+                                        className="focus:outline-hidden"
+                                        type="button"
+                                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                    >
+                                        {isPasswordVisible ? (
+                                            <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                        ) : (
+                                            <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                        )}
+                                    </button>
+                                ),
+                                sx: {
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    backdropFilter: 'blur(12px)',
+                                    borderRadius: '12px',
+                                    '&:hover': {
+                                        background: 'rgba(255, 255, 255, 0.08)',
+                                    },
+                                    '&.Mui-focused': {
+                                        background: 'rgba(255, 255, 255, 0.08)',
+                                    },
+                                }
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'primary.main',
+                                    },
+                                },
                             }}
                         />
                         
@@ -290,53 +308,59 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
-                    <Input
+                    <TextField
                         type={isConfirmPasswordVisible ? "text" : "password"}
                         label="Confirm password"
                         placeholder="Confirm your password"
                         value={data.password_confirmation}
                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                        isInvalid={!!errors.password_confirmation}
-                        errorMessage={errors.password_confirmation}
+                        error={!!errors.password_confirmation}
+                        helperText={errors.password_confirmation}
                         autoComplete="new-password"
                         required
-                        startContent={
-                            <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                        }
-                        endContent={
-                            <button
-                                className="focus:outline-hidden"
-                                type="button"
-                                onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                            >
-                                {isConfirmPasswordVisible ? (
-                                    <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                ) : (
-                                    <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                )}
-                            </button>
-                        }
-                        classNames={{
-                            base: "w-full",
-                            mainWrapper: "w-full",
-                            input: [
-                                "bg-transparent",
-                                "text-black dark:text-white",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            innerWrapper: "bg-transparent",
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focused=true]:bg-default-200/50",
-                                "dark:group-data-[focused=true]:bg-default/60",
-                                "cursor-text!",
-                            ],
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                            startAdornment: (
+                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
+                            ),
+                            endAdornment: (
+                                <button
+                                    className="focus:outline-hidden"
+                                    type="button"
+                                    onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                                >
+                                    {isConfirmPasswordVisible ? (
+                                        <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                    ) : (
+                                        <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                    )}
+                                </button>
+                            ),
+                            sx: {
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(12px)',
+                                borderRadius: '12px',
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                                '&.Mui-focused': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                            }
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'primary.main',
+                                },
+                            },
                         }}
                     />
                 </motion.div>

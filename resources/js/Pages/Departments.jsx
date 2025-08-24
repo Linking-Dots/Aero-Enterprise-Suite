@@ -8,6 +8,8 @@ import {
     Fade,
     useTheme,
     useMediaQuery,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
     Select,
@@ -18,7 +20,6 @@ import {
     Divider,
     Chip,
     Button,
-    Input,
     ButtonGroup,
     User,
     Pagination
@@ -379,18 +380,47 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                                 {/* View Controls */}
                                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                                     <div className="flex-1">
-                                        <Input
+                                        <TextField
                                             label="Search Departments"
-                                            variant="bordered"
                                             placeholder="Search by name, code, or location..."
                                             value={filters.search}
-                                            onValueChange={(value) => handleFilterChange('search', value)}
-                                            startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                                            classNames={{
-                                                input: "bg-transparent",
-                                                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <MagnifyingGlassIcon className="w-4 h-4" />
+                                                    </InputAdornment>
+                                                ),
                                             }}
-                                            size={isMobile ? "sm" : "md"}
+                                            fullWidth
+                                            size={isMobile ? "small" : "medium"}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    backdropFilter: 'blur(10px)',
+                                                    borderRadius: '12px',
+                                                    color: 'white',
+                                                    '& fieldset': {
+                                                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                                    },
+                                                    '&.Mui-focused fieldset': {
+                                                        borderColor: 'var(--primary-color)',
+                                                    },
+                                                    '& input::placeholder': {
+                                                        color: 'rgba(255, 255, 255, 0.5)',
+                                                        opacity: 1,
+                                                    },
+                                                },
+                                                '& .MuiInputLabel-root': {
+                                                    color: 'rgba(255, 255, 255, 0.7)',
+                                                    '&.Mui-focused': {
+                                                        color: 'var(--primary-color)',
+                                                    },
+                                                },
+                                            }}
                                         />
                                     </div>
 

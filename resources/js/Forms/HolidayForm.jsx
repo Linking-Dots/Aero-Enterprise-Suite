@@ -17,11 +17,9 @@ import {
     Switch,
     IconButton,
     Box,
-    Chip
-} from "@mui/material";
-import {
+    Chip,
     Button
-} from "@heroui/react";
+} from "@mui/material";
 import {
     CalendarDaysIcon,
     XMarkIcon,
@@ -471,10 +469,24 @@ const HolidayForm = ({
                 
                 <DialogActions sx={{ padding: '16px 24px', justifyContent: 'flex-end', gap: 1 }}>
                     <Button
-                        color="danger"
-                        variant="light"
-                        onPress={closeModal}
+                        variant="outlined"
+                        onClick={closeModal}
                         disabled={processing}
+                        sx={{
+                            color: 'rgba(239, 68, 68, 0.9)',
+                            borderColor: 'rgba(239, 68, 68, 0.3)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            backdropFilter: 'blur(16px)',
+                            '&:hover': {
+                                borderColor: 'rgba(239, 68, 68, 0.5)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                            },
+                            '&:disabled': {
+                                color: 'rgba(239, 68, 68, 0.3)',
+                                borderColor: 'rgba(239, 68, 68, 0.1)',
+                            },
+                            borderRadius: '8px',
+                        }}
                     >
                         Cancel
                     </Button>

@@ -8,6 +8,7 @@ import {
     FormHelperText,
     Grid,
     IconButton,
+    InputAdornment,
     InputLabel,
     MenuItem,
     TextField,
@@ -18,7 +19,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import {toast} from 'react-toastify';
 import GlassDialog from '@/Components/GlassDialog.jsx';
 import {useTheme} from "@mui/material/styles";
-import {Button, Input, Select, SelectItem} from "@heroui/react";
 
 const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
     const theme = useTheme();
@@ -159,40 +159,43 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                 <DialogContent>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="RFI Date"
                                 type="date"
                                 name="date"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.date}
-                                onValueChange={(value) => handleChange({ target: { name: 'date', value } })}
-                                isInvalid={Boolean(errors.date)}
-                                errorMessage={errors.date}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.date)}
+                                helperText={errors.date}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="RFI Number"
                                 name="number"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.number}
-                                onValueChange={(value) => handleChange({ target: { name: 'number', value } })}
-                                isInvalid={Boolean(errors.number)}
-                                errorMessage={errors.number}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.number)}
+                                helperText={errors.number}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="Planned Time"
                                 name="planned_time"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.planned_time}
-                                onValueChange={(value) => handleChange({ target: { name: 'planned_time', value } })}
-                                isInvalid={Boolean(errors.planned_time)}
-                                errorMessage={errors.planned_time}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.planned_time)}
+                                helperText={errors.planned_time}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -218,27 +221,27 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                             </Select>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="Location"
                                 name="location"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.location}
-                                onValueChange={(value) => handleChange({ target: { name: 'location', value } })}
-                                isInvalid={Boolean(errors.location)}
-                                errorMessage={errors.location}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.location)}
+                                helperText={errors.location}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="Description"
                                 name="description"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.description}
-                                onValueChange={(value) => handleChange({ target: { name: 'description', value } })}
-                                isInvalid={Boolean(errors.description)}
-                                errorMessage={errors.description}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.description)}
+                                helperText={errors.description}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -265,15 +268,15 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                             </Select>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Input
-                                variant="underlined"
+                            <TextField
+                                variant="outlined"
                                 label="Quantity/Layer No."
                                 name="qty_layer"
-                                className="w-full"
+                                fullWidth
                                 value={dailyWorkData.qty_layer}
-                                onValueChange={(value) => handleChange({ target: { name: 'qty_layer', value } })}
-                                isInvalid={Boolean(errors.qty_layer)}
-                                errorMessage={errors.qty_layer}
+                                onChange={(e) => handleChange(e)}
+                                error={Boolean(errors.qty_layer)}
+                                helperText={errors.qty_layer}
                             />
                         </Grid>
                     </Grid>

@@ -7,19 +7,22 @@ import {
   useMediaQuery, 
   Grow, 
   Fade,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { 
   Button, 
-  Input, 
   Chip, 
   ButtonGroup,
   Card,
   CardBody,
   User,
   Divider,
-  Select,
-  SelectItem,
   Pagination
 } from "@heroui/react";
 
@@ -550,18 +553,47 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                 {/* View Controls */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <Input
+                    <TextField
                       label="Search Employees"
-                      variant="bordered"
                       placeholder="Search by name, email, or employee ID..."
                       value={filters.search}
-                      onValueChange={handleSearchChange}
-                      startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                      classNames={{
-                        input: "bg-transparent",
-                        inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <MagnifyingGlassIcon className="w-4 h-4" />
+                          </InputAdornment>
+                        ),
                       }}
-                      size={isMobile ? "sm" : "md"}
+                      fullWidth
+                      size={isMobile ? "small" : "medium"}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          color: 'white',
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'var(--primary-color)',
+                          },
+                          '& input::placeholder': {
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            opacity: 1,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          '&.Mui-focused': {
+                            color: 'var(--primary-color)',
+                          },
+                        },
+                      }}
                     />
                   </div>
 
@@ -606,66 +638,180 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                   <Fade in timeout={300}>
                     <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Select
-                          label="Department"
-                          variant="bordered"
-                          selectedKeys={filters.department !== 'all' ? [filters.department] : []}
-                          onSelectionChange={(keys) => {
-                            const value = Array.from(keys)[0] || 'all';
-                            handleDepartmentFilterChange(value);
-                          }}
-                          classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                          }}
-                        >
-                          <SelectItem key="all" value="all">All Departments</SelectItem>
-                          {departments?.map(dept => (
-                            <SelectItem key={dept.id.toString()} value={dept.id.toString()}>
-                              {dept.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
-
-                        <Select
-                          label="Designation"
-                          variant="bordered"
-                          selectedKeys={filters.designation !== 'all' ? [filters.designation] : []}
-                          onSelectionChange={(keys) => {
-                            const value = Array.from(keys)[0] || 'all';
-                            handleDesignationFilterChange(value);
-                          }}
-                          classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                          }}
-                        >
-                          <SelectItem key="all" value="all">All Designations</SelectItem>
-                          {filteredDesignations?.map(desig => (
-                            <SelectItem key={desig.id.toString()} value={desig.id.toString()}>
-                              {desig.title}
-                            </SelectItem>
-                          ))}
-                        </Select>
-
-                        {!isMobile && (
+                        <FormControl size="small">
+                          <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            Department
+                          </InputLabel>
                           <Select
-                            label="Attendance Type"
-                            variant="bordered"
-                            selectedKeys={filters.attendanceType !== 'all' ? [filters.attendanceType] : []}
-                            onSelectionChange={(keys) => {
-                              const value = Array.from(keys)[0] || 'all';
-                              handleAttendanceTypeFilterChange(value);
+                            value={filters.department}
+                            onChange={(e) => handleDepartmentFilterChange(e.target.value)}
+                            label="Department"
+                            sx={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              backdropFilter: 'blur(16px)',
+                              borderRadius: '12px',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                              },
+                              '& .MuiSelect-select': {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                              },
+                              '& .MuiSelect-icon': {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                              },
                             }}
-                            classNames={{
-                              trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                            MenuProps={{
+                              PaperProps: {
+                                sx: {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                  backdropFilter: 'blur(16px)',
+                                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                                  borderRadius: '12px',
+                                  '& .MuiMenuItem-root': {
+                                    color: 'rgba(255, 255, 255, 0.9)',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-selected': {
+                                      backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                    },
+                                  },
+                                },
+                              },
                             }}
                           >
-                            <SelectItem key="all" value="all">All Attendance Types</SelectItem>
-                            {attendanceTypes?.map(type => (
-                              <SelectItem key={type.id.toString()} value={type.id.toString()}>
-                                {type.name}
-                              </SelectItem>
+                            <MenuItem value="all">All Departments</MenuItem>
+                            {departments?.map(dept => (
+                              <MenuItem key={dept.id.toString()} value={dept.id.toString()}>
+                                {dept.name}
+                              </MenuItem>
                             ))}
                           </Select>
+                        </FormControl>
+
+                        <FormControl size="small">
+                          <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            Designation
+                          </InputLabel>
+                          <Select
+                            value={filters.designation}
+                            onChange={(e) => handleDesignationFilterChange(e.target.value)}
+                            label="Designation"
+                            sx={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              backdropFilter: 'blur(16px)',
+                              borderRadius: '12px',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                              },
+                              '& .MuiSelect-select': {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                              },
+                              '& .MuiSelect-icon': {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                              },
+                            }}
+                            MenuProps={{
+                              PaperProps: {
+                                sx: {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                  backdropFilter: 'blur(16px)',
+                                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                                  borderRadius: '12px',
+                                  '& .MuiMenuItem-root': {
+                                    color: 'rgba(255, 255, 255, 0.9)',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                    },
+                                    '&.Mui-selected': {
+                                      backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                    },
+                                  },
+                                },
+                              },
+                            }}
+                          >
+                            <MenuItem value="all">All Designations</MenuItem>
+                            {filteredDesignations?.map(desig => (
+                              <MenuItem key={desig.id.toString()} value={desig.id.toString()}>
+                                {desig.title}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+
+                        {!isMobile && (
+                          <FormControl size="small">
+                            <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                              Attendance Type
+                            </InputLabel>
+                            <Select
+                              value={filters.attendanceType}
+                              onChange={(e) => handleAttendanceTypeFilterChange(e.target.value)}
+                              label="Attendance Type"
+                              sx={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(16px)',
+                                borderRadius: '12px',
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: 'rgba(59, 130, 246, 0.5)',
+                                },
+                                '& .MuiSelect-select': {
+                                  color: 'rgba(255, 255, 255, 0.9)',
+                                },
+                                '& .MuiSelect-icon': {
+                                  color: 'rgba(255, 255, 255, 0.7)',
+                                },
+                              }}
+                              MenuProps={{
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '12px',
+                                    '& .MuiMenuItem-root': {
+                                      color: 'rgba(255, 255, 255, 0.9)',
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                      },
+                                      '&.Mui-selected': {
+                                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
+                            >
+                              <MenuItem value="all">All Attendance Types</MenuItem>
+                              {attendanceTypes?.map(type => (
+                                <MenuItem key={type.id.toString()} value={type.id.toString()}>
+                                  {type.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
                         )}
                       </div>
 

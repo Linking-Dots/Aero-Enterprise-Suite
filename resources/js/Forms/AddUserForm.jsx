@@ -21,10 +21,10 @@ import {PhotoCamera} from "@mui/icons-material";
 import {useTheme} from "@mui/material/styles";
 import LoadingButton from "@mui/lab/LoadingButton";
 import {toast} from "react-toastify";
-import {Input, SelectItem, Select} from "@heroui/react";
-import PasswordIcon from "@mui/icons-material/Password.js";
-import VisibilityOff from "@mui/icons-material/VisibilityOff.js";
-import Visibility from "@mui/icons-material/Visibility.js";
+import {TextField, SelectItem, Select} from "@mui/material";
+import PasswordIcon from "@mui/icons-material/Password";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
 
 const AddUserForm = ({user, allUsers, departments, designations,setUser, open, closeModal }) => {
 

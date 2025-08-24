@@ -13,8 +13,16 @@ import {
     MenuItem,
     Avatar,
     Chip,
-    Stack
+    Stack,
+    TextField,
+    Select,
+    Switch,
+    TextareaAutosize,
+    Button
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { 
     UserIcon,
     EnvelopeIcon,
@@ -24,15 +32,6 @@ import {
     ExclamationTriangleIcon,
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
-import { 
-    Button,
-    Input,
-    Select,
-    SelectItem,
-    Switch,
-    DatePicker,
-    Textarea
-} from '@heroui/react';
 import { useTheme } from '@mui/material/styles';
 import GlassDialog from './GlassDialog';
 
@@ -300,44 +299,119 @@ const EmployeeFormModal = ({
                         </Grid>
                         
                         <Grid item xs={12} sm={6}>
-                            <Input
+                            <TextField
                                 label="Full Name"
                                 placeholder="Enter employee's full name"
                                 value={formData.name}
-                                onValueChange={(value) => handleFieldChange('name', value)}
-                                isRequired
-                                isReadOnly={isView}
-                                isInvalid={touched.name && !!errors.name}
-                                errorMessage={touched.name && errors.name}
-                                startContent={<UserIcon className="w-4 h-4 text-gray-400" />}
+                                onChange={(e) => handleFieldChange('name', e.target.value)}
+                                required
+                                disabled={isView}
+                                error={touched.name && !!errors.name}
+                                helperText={touched.name && errors.name}
+                                fullWidth
+                                InputProps={{
+                                    startAdornment: <UserIcon className="w-4 h-4 text-gray-400 mr-2" />
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        backdropFilter: 'blur(16px)',
+                                        borderRadius: '12px',
+                                        '& fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                    '& .MuiOutlinedInput-input': {
+                                        color: 'rgba(255, 255, 255, 0.9)',
+                                    },
+                                }}
                             />
                         </Grid>
                         
                         <Grid item xs={12} sm={6}>
-                            <Input
+                            <TextField
                                 label="Email Address"
                                 placeholder="Enter email address"
                                 type="email"
                                 value={formData.email}
-                                onValueChange={(value) => handleFieldChange('email', value)}
-                                isRequired
-                                isReadOnly={isView}
-                                isInvalid={touched.email && !!errors.email}
-                                errorMessage={touched.email && errors.email}
-                                startContent={<EnvelopeIcon className="w-4 h-4 text-gray-400" />}
+                                onChange={(e) => handleFieldChange('email', e.target.value)}
+                                required
+                                disabled={isView}
+                                error={touched.email && !!errors.email}
+                                helperText={touched.email && errors.email}
+                                fullWidth
+                                InputProps={{
+                                    startAdornment: <EnvelopeIcon className="w-4 h-4 text-gray-400 mr-2" />
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        backdropFilter: 'blur(16px)',
+                                        borderRadius: '12px',
+                                        '& fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                    '& .MuiOutlinedInput-input': {
+                                        color: 'rgba(255, 255, 255, 0.9)',
+                                    },
+                                }}
                             />
                         </Grid>
                         
                         <Grid item xs={12} sm={6}>
-                            <Input
+                            <TextField
                                 label="Phone Number"
                                 placeholder="Enter phone number"
                                 value={formData.phone}
-                                onValueChange={(value) => handleFieldChange('phone', value)}
-                                isReadOnly={isView}
-                                isInvalid={touched.phone && !!errors.phone}
-                                errorMessage={touched.phone && errors.phone}
-                                startContent={<PhoneIcon className="w-4 h-4 text-gray-400" />}
+                                onChange={(e) => handleFieldChange('phone', e.target.value)}
+                                disabled={isView}
+                                error={touched.phone && !!errors.phone}
+                                helperText={touched.phone && errors.phone}
+                                fullWidth
+                                InputProps={{
+                                    startAdornment: <PhoneIcon className="w-4 h-4 text-gray-400 mr-2" />
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        backdropFilter: 'blur(16px)',
+                                        borderRadius: '12px',
+                                        '& fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                    '& .MuiOutlinedInput-input': {
+                                        color: 'rgba(255, 255, 255, 0.9)',
+                                    },
+                                }}
                             />
                         </Grid>
                         

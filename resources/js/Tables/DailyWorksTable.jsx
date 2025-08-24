@@ -9,7 +9,8 @@ import {
     CardContent,
     CardHeader,
     TextField,
-    CircularProgress
+    CircularProgress,
+    InputAdornment
 } from "@mui/material";
 import {
     Edit as EditIcon,
@@ -40,7 +41,6 @@ import {
     ScrollShadow,
     Select,
     SelectItem,
-    Input,
     Link
 } from "@heroui/react";
 import {
@@ -965,18 +965,36 @@ const DailyWorksTable = ({
             case "inspection_details":
                 return (
                     <TableCell>
-                        <Input
-                            size="sm"
-                            variant="bordered"
+                        <TextField
+                            size="small"
+                            variant="outlined"
                             placeholder="Enter inspection details..."
                             value={work.inspection_details || ''}
                             onChange={(e) => handleChange(work.id, work.number, 'inspection_details', e.target.value)}
-                            classNames={{
-                                input: "text-xs",
-                                inputWrapper: "min-h-10 bg-white/50 hover:bg-white/80 focus-within:bg-white/90 transition-colors",
-                                innerWrapper: "text-xs"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <DocumentCheckIcon className="w-4 h-4 text-default-400" />
+                                    </InputAdornment>
+                                ),
+                                style: {
+                                    fontSize: '0.75rem',
+                                    minHeight: '40px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                }
                             }}
-                            startContent={<DocumentCheckIcon className="w-4 h-4 text-default-400" />}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    fontSize: '0.75rem',
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                }
+                            }}
                         />
                     </TableCell>
                 );
@@ -1144,20 +1162,42 @@ const DailyWorksTable = ({
             case "completion_time":
                 return (
                     <TableCell>
-                        <Input
-                            size="sm"
+                        <TextField
+                            size="small"
                             type="datetime-local"
-                            variant="bordered"
+                            variant="outlined"
                             value={work.completion_time
                                 ? new Date(work.completion_time).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)
                                 : ''
                             }
                             onChange={(e) => handleChange(work.id, work.number, 'completion_time', e.target.value)}
-                            classNames={{
-                                input: "text-xs",
-                                inputWrapper: "min-h-10 bg-white/50 hover:bg-white/80 focus-within:bg-white/90 transition-colors"
+                            fullWidth
+                            InputLabelProps={{
+                                shrink: true,
                             }}
-                            startContent={<CheckCircleIcon className="w-4 h-4 text-default-400" />}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <CheckCircleIcon className="w-4 h-4 text-default-400" />
+                                    </InputAdornment>
+                                ),
+                                style: {
+                                    fontSize: '0.75rem',
+                                    minHeight: '40px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                }
+                            }}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    fontSize: '0.75rem',
+                                },
+                                '& .MuiOutlinedInput-root:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                }
+                            }}
                         />
                     </TableCell>
                 );
@@ -1168,19 +1208,41 @@ const DailyWorksTable = ({
                 return (
                     <TableCell>
                         {userIsAdmin ? (
-                            <Input
-                                size="sm"
+                            <TextField
+                                size="small"
                                 type="date"
-                                variant="bordered"
+                                variant="outlined"
                                 value={work.rfi_submission_date ? 
                                     new Date(work.rfi_submission_date).toISOString().slice(0, 10) : ''
                                 }
                                 onChange={(e) => handleChange(work.id, work.number, 'rfi_submission_date', e.target.value)}
-                                classNames={{
-                                    input: "text-xs",
-                                    inputWrapper: "min-h-10 bg-white/50 hover:bg-white/80 focus-within:bg-white/90 transition-colors"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
                                 }}
-                                startContent={<CalendarDaysIcon className="w-4 h-4 text-default-400" />}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <CalendarDaysIcon className="w-4 h-4 text-default-400" />
+                                        </InputAdornment>
+                                    ),
+                                    style: {
+                                        fontSize: '0.75rem',
+                                        minHeight: '40px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                    }
+                                }}
+                                sx={{
+                                    '& .MuiInputBase-input': {
+                                        fontSize: '0.75rem',
+                                    },
+                                    '& .MuiOutlinedInput-root:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    }
+                                }}
                             />
                         ) : (
                             <Box className="flex items-center gap-1">

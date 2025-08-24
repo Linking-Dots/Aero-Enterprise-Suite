@@ -6,11 +6,13 @@ import {
     Grow,
     useTheme,
     useMediaQuery,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Button
 } from '@mui/material';
 import { 
-    Select, 
-    SelectItem, 
-    Button, 
     DatePicker,
     ButtonGroup
 } from "@heroui/react";
@@ -233,27 +235,63 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                                         {(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer') && (
                                             <div className="flex gap-2 items-center">
                                                 <UserIcon className="w-5 h-5 text-default-400" />
-                                                <Select
-                                                    label="In Charge"
-                                                    selectedKeys={filterData.incharge === 'all' ? [] : [filterData.incharge]}
-                                                    onSelectionChange={(keys) => {
-                                                        const value = Array.from(keys)[0] || 'all';
-                                                        handleFilterChange('incharge', value);
-                                                    }}
-                                                    size="sm"
-                                                    variant="bordered"
-                                                    className="w-full sm:w-48"
-                                                    classNames={{
-                                                        trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                                                    }}
-                                                >
-                                                    <SelectItem key="all" value="all">All</SelectItem>
-                                                    {inCharges.map(inCharge => (
-                                                        <SelectItem key={inCharge.id} value={inCharge.id}>
-                                                            {inCharge.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </Select>
+                                                <FormControl size="small" sx={{ minWidth: 192 }}>
+                                                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                                                        In Charge
+                                                    </InputLabel>
+                                                    <Select
+                                                        value={filterData.incharge}
+                                                        onChange={(e) => handleFilterChange('incharge', e.target.value)}
+                                                        label="In Charge"
+                                                        sx={{
+                                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                            backdropFilter: 'blur(16px)',
+                                                            borderRadius: '12px',
+                                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                            },
+                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                                            },
+                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                                                            },
+                                                            '& .MuiSelect-select': {
+                                                                color: 'rgba(255, 255, 255, 0.9)',
+                                                            },
+                                                            '& .MuiSelect-icon': {
+                                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                            },
+                                                        }}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                                    backdropFilter: 'blur(16px)',
+                                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                                    borderRadius: '12px',
+                                                                    '& .MuiMenuItem-root': {
+                                                                        color: 'rgba(255, 255, 255, 0.9)',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                                                        },
+                                                                        '&.Mui-selected': {
+                                                                            backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                                                        },
+                                                                    },
+                                                                },
+                                                            },
+                                                        }}
+                                                    >
+                                                        <MenuItem value="all">All</MenuItem>
+                                                        {inCharges.map(inCharge => (
+                                                            <MenuItem key={inCharge.id} value={inCharge.id}>
+                                                                {inCharge.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
                                             </div>
                                         )}
                                     </div>

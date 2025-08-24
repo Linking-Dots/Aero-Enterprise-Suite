@@ -7,11 +7,18 @@ import {
   Grow, 
   Fade,
   useTheme,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Menu,
+  IconButton
 } from '@mui/material';
 import { 
   Button,
-  Input,
   Chip,
   ButtonGroup,
   Card,
@@ -19,14 +26,9 @@ import {
   User,
   Divider,
   Switch,
-  Select,
-  SelectItem,
-  Pagination,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem
+  Pagination
 } from "@heroui/react";
+import { getFormControlStyles, getTextFieldStyles } from '@/utils/glassyStyles.js';
 import { 
   UserPlusIcon,
   UsersIcon,
@@ -80,6 +82,9 @@ const UsersList = ({ title, roles }) => {
 
   // Modal states
   const [openModalType, setOpenModalType] = useState(null);
+  
+  // Menu anchor states for dropdowns
+  const [menuAnchors, setMenuAnchors] = useState({});
   
   // Filters
   const [filters, setFilters] = useState({
@@ -182,6 +187,21 @@ const UsersList = ({ title, roles }) => {
     } catch (error) {
       console.error('Error fetching user stats:', error);
     }
+  }, []);
+
+  // Menu helper functions
+  const handleMenuOpen = useCallback((event, menuKey) => {
+    setMenuAnchors(prev => ({
+      ...prev,
+      [menuKey]: event.currentTarget
+    }));
+  }, []);
+
+  const handleMenuClose = useCallback((menuKey) => {
+    setMenuAnchors(prev => ({
+      ...prev,
+      [menuKey]: null
+    }));
   }, []);
 
   // Fetch users data with server-side pagination
@@ -421,58 +441,96 @@ const UsersList = ({ title, roles }) => {
                   <PencilIcon className="w-4 h-4" />
                 </Button>
                 
-                {/* Device Management Dropdown */}
-                <Dropdown>
-                  <DropdownTrigger>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      className="text-default-400 hover:text-foreground"
-                    >
-                      <EllipsisVerticalIcon className="w-4 h-4" />
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu aria-label="Device Actions">
-                    <DropdownItem
-                      key="toggle-device"
-                      description={user.single_device_login ? "Disable device restriction" : "Enable device restriction"}
-                      startContent={user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
-                      onPress={() => {
-                        toggleSingleDeviceLogin(user.id, !user.single_device_login);
+                {/* Device Management Menu */}
+                <IconButton
+                  size="small"
+                  onClick={(event) => handleMenuOpen(event, `device-menu-${user.id}`)}
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    '&:hover': {
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  }}
+                >
+                  <EllipsisVerticalIcon className="w-4 h-4" />
+                </IconButton>
+                <Menu
+                  anchorEl={menuAnchors[`device-menu-${user.id}`]}
+                  open={Boolean(menuAnchors[`device-menu-${user.id}`])}
+                  onClose={() => handleMenuClose(`device-menu-${user.id}`)}
+                  sx={{
+                    '& .MuiPaper-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(16px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      minWidth: '200px',
+                    },
+                    '& .MuiMenuItem-root': {
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      padding: '8px 16px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      },
+                      '&.Mui-disabled': {
+                        color: 'rgba(255, 255, 255, 0.3)',
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose(`device-menu-${user.id}`);
+                      toggleSingleDeviceLogin(user.id, !user.single_device_login);
+                    }}
+                    disabled={deviceActions[user.id]}
+                    sx={{ gap: 1 }}
+                  >
+                    {user.single_device_login ? <LockOpenIcon className="w-4 h-4" /> : <LockClosedIcon className="w-4 h-4" />}
+                    <div>
+                      <div>{user.single_device_login ? 'Disable Device Lock' : 'Enable Device Lock'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        {user.single_device_login ? "Disable device restriction" : "Enable device restriction"}
+                      </div>
+                    </div>
+                  </MenuItem>
+                  
+                  {user.single_device_login && user.active_device && (
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose(`device-menu-${user.id}`);
+                        resetUserDevice(user.id);
                       }}
-                      isDisabled={deviceActions[user.id]}
+                      disabled={deviceActions[user.id]}
+                      sx={{ gap: 1 }}
                     >
-                      {user.single_device_login ? 'Disable Device Lock' : 'Enable Device Lock'}
-                    </DropdownItem>
-                    
-                    {user.single_device_login && user.active_device && (
-                      <DropdownItem
-                        key="reset-device"
-                        description="Allow login from new device"
-                        startContent={<ArrowPathIcon className="w-4 h-4" />}
-                        color="warning"
-                        onPress={() => {
-                          resetUserDevice(user.id);
-                        }}
-                        isDisabled={deviceActions[user.id]}
-                      >
-                        Reset Device
-                      </DropdownItem>
-                    )}
-                    
-                    <DropdownItem
-                      key="view-devices"
-                      description="View device history"
-                      startContent={<DevicePhoneMobileIcon className="w-4 h-4" />}
-                      onPress={() => {
-                        router.visit(route('users.device.show', { user: user.id }));
-                      }}
-                    >
-                      View Devices
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
+                      <ArrowPathIcon className="w-4 h-4" />
+                      <div>
+                        <div>Reset Device</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                          Allow login from new device
+                        </div>
+                      </div>
+                    </MenuItem>
+                  )}
+                  
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose(`device-menu-${user.id}`);
+                      router.visit(route('users.device.show', { user: user.id }));
+                    }}
+                    sx={{ gap: 1 }}
+                  >
+                    <DevicePhoneMobileIcon className="w-4 h-4" />
+                    <div>
+                      <div>View Devices</div>
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        View device history
+                      </div>
+                    </div>
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
           </div>
@@ -927,18 +985,20 @@ const UsersList = ({ title, roles }) => {
                 {/* View Controls */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <Input
-                      label="Search Users"
-                      variant="bordered"
+                    <TextField
                       placeholder="Search by name, email or phone..."
                       value={filters.search}
-                      onValueChange={(value) => handleFilterChange('search', value)}
-                      startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                      classNames={{
-                        input: "bg-transparent",
-                        inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                      onChange={(e) => handleFilterChange('search', e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <MagnifyingGlassIcon className="w-4 h-4" />
+                          </InputAdornment>
+                        ),
                       }}
-                      size={isMobile ? "sm" : "md"}
+                      fullWidth
+                      size={isMobile ? "small" : "medium"}
+                      sx={getTextFieldStyles('search')}
                     />
                   </div>
 
@@ -983,42 +1043,32 @@ const UsersList = ({ title, roles }) => {
                   <Fade in={true} timeout={300}>
                     <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Select
-                          label="Status"
-                          variant="bordered"
-                          selectedKeys={filters.status !== 'all' ? [filters.status] : []}
-                          onSelectionChange={(keys) => {
-                            const value = Array.from(keys)[0] || 'all';
-                            handleFilterChange('status', value);
-                          }}
-                          classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                          }}
-                        >
-                          <SelectItem key="all" value="all">All Statuses</SelectItem>
-                          <SelectItem key="active" value="active">Active Only</SelectItem>
-                          <SelectItem key="inactive" value="inactive">Inactive Only</SelectItem>
-                        </Select>
+                        <FormControl fullWidth size="small" sx={getFormControlStyles()}>
+                          <InputLabel>Status</InputLabel>
+                          <Select
+                            value={filters.status}
+                            onChange={(e) => handleFilterChange('status', e.target.value)}
+                          >
+                            <MenuItem value="all">All Statuses</MenuItem>
+                            <MenuItem value="active">Active Only</MenuItem>
+                            <MenuItem value="inactive">Inactive Only</MenuItem>
+                          </Select>
+                        </FormControl>
 
-                        <Select
-                          label="Role"
-                          variant="bordered"
-                          selectedKeys={filters.role !== 'all' ? [filters.role] : []}
-                          onSelectionChange={(keys) => {
-                            const value = Array.from(keys)[0] || 'all';
-                            handleFilterChange('role', value);
-                          }}
-                          classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                          }}
-                        >
-                          <SelectItem key="all" value="all">All Roles</SelectItem>
-                          {roles?.map(role => (
-                            <SelectItem key={role.toLowerCase()} value={role.toLowerCase()}>
-                              {role}
-                            </SelectItem>
-                          ))}
-                        </Select>
+                        <FormControl fullWidth size="small" sx={getFormControlStyles()}>
+                          <InputLabel>Role</InputLabel>
+                          <Select
+                            value={filters.role}
+                            onChange={(e) => handleFilterChange('role', e.target.value)}
+                          >
+                            <MenuItem value="all">All Roles</MenuItem>
+                            {roles?.map(role => (
+                              <MenuItem key={role.toLowerCase()} value={role.toLowerCase()}>
+                                {role}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </div>
 
                       {/* Active Filters */}

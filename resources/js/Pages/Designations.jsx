@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import {
-    Box, Typography, CircularProgress, Grow, Fade, useTheme, useMediaQuery,
+    Box, Typography, CircularProgress, Grow, Fade, useTheme, useMediaQuery, TextField, InputAdornment
 } from '@mui/material';
 import {
-    Select, SelectItem, Card, CardBody, Button, Input, ButtonGroup, Chip, Pagination
+    Select, SelectItem, Card, CardBody, Button, ButtonGroup, Chip, Pagination
 } from "@heroui/react";
 import {
     BuildingOffice2Icon, PlusIcon, FunnelIcon, MagnifyingGlassIcon,
@@ -200,13 +200,46 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                             <div className="p-4 sm:p-6">
                                 <StatsCards stats={statsCards} className="mb-6" />
                                 <div className="mb-6">
-                                    <Input
+                                    <TextField
                                         label="Search"
                                         placeholder="Search designations..."
                                         value={filters.search}
-                                        onValueChange={(value) => handleFilterChange('search', value)}
-                                        startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                                        size="md"
+                                        onChange={(e) => handleFilterChange('search', e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <MagnifyingGlassIcon className="w-4 h-4" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        fullWidth
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                backdropFilter: 'blur(10px)',
+                                                borderRadius: '12px',
+                                                color: 'white',
+                                                '& fieldset': {
+                                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: 'var(--primary-color)',
+                                                },
+                                                '& input::placeholder': {
+                                                    color: 'rgba(255, 255, 255, 0.5)',
+                                                    opacity: 1,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                '&.Mui-focused': {
+                                                    color: 'var(--primary-color)',
+                                                },
+                                            },
+                                        }}
                                     />
                                 </div>
                                 <div>

@@ -8,10 +8,12 @@ import {
   Grow,
   useTheme,
   useMediaQuery,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { 
-  Select, 
-  SelectItem, 
   Card, 
   CardBody, 
   CardHeader,
@@ -812,29 +814,73 @@ const LeavesEmployee = ({ title, allUsers }) => {
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
                     <div className="w-full sm:w-auto sm:min-w-[200px]">
-                      <Select
-                        label="Select Year"
-                        variant="bordered"
-                        selectedKeys={[String(filters.year)]}
-                        onSelectionChange={(keys) => {
-                          const selectedYear = Array.from(keys)[0];
-                          if (selectedYear) {
-                            handleFilterChange('year', Number(selectedYear));
-                          }
-                        }}
-                        startContent={<CalendarIcon className="w-4 h-4" />}
-                        classNames={{
-                          trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                          popoverContent: "bg-white/10 backdrop-blur-lg border-white/20",
-                        }}
-                        size={isMobile ? "sm" : "md"}
+                      <FormControl 
+                        size={isMobile ? "small" : "medium"} 
+                        sx={{ minWidth: 200, width: '100%' }}
                       >
-                        {yearOptions.map((year) => (
-                          <SelectItem key={year.key} value={year.value}>
-                            {year.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                        <InputLabel 
+                          sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}
+                        >
+                          <CalendarIcon className="w-4 h-4" />
+                          Select Year
+                        </InputLabel>
+                        <Select
+                          value={String(filters.year)}
+                          onChange={(e) => handleFilterChange('year', Number(e.target.value))}
+                          label="Select Year"
+                          sx={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(16px)',
+                            borderRadius: '12px',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(255, 255, 255, 0.2)',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(255, 255, 255, 0.3)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(59, 130, 246, 0.5)',
+                            },
+                            '& .MuiSelect-select': {
+                              color: 'rgba(255, 255, 255, 0.9)',
+                            },
+                            '& .MuiSelect-icon': {
+                              color: 'rgba(255, 255, 255, 0.7)',
+                            },
+                          }}
+                          MenuProps={{
+                            PaperProps: {
+                              sx: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(16px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '12px',
+                                '& .MuiMenuItem-root': {
+                                  color: 'rgba(255, 255, 255, 0.9)',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                  },
+                                  '&.Mui-selected': {
+                                    backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                  },
+                                },
+                              },
+                            },
+                          }}
+                        >
+                          {yearOptions.map((year) => (
+                            <MenuItem key={year.key} value={year.value}>
+                              {year.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </div>
 
                     <div className="flex gap-2">

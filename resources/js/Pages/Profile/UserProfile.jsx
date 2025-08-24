@@ -3,13 +3,12 @@ import {
     Box,
     useTheme,
     useMediaQuery,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
-    Input,
     ButtonGroup,
     Button,
-    Select,
-    SelectItem,
     Chip,
     Tabs,
     Tab,
@@ -17,6 +16,13 @@ import {
     CardBody,
     Spinner
 } from "@heroui/react";
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
+import { getTextFieldStyles } from '@/utils/glassyStyles.js';
 import {
     UserIcon,
     MagnifyingGlassIcon,
@@ -880,18 +886,21 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
                     className="flex flex-col sm:flex-row gap-4"
                 >
                     <div className="flex-1">
-                        <Input
+                        <TextField
                             label="Search Profile Sections"
-                            variant="bordered"
                             placeholder="Search sections, fields, or content..."
                             value={filters.search}
-                            onValueChange={value => handleFilterChange('search', value)}
-                            startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                            classNames={{
-                                input: "bg-transparent",
-                                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <MagnifyingGlassIcon className="w-4 h-4" />
+                                    </InputAdornment>
+                                ),
                             }}
-                            size={isMobile ? "sm" : "md"}
+                            fullWidth
+                            size={isMobile ? "small" : "medium"}
+                            sx={getTextFieldStyles('search')}
                         />
                     </div>
 
@@ -923,45 +932,77 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
                             <Card className="bg-white/10 backdrop-blur-md border-white/20">
                                 <CardBody className="p-4">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        <Select
-                                            label="Profile Section"
-                                            variant="bordered"
-                                            selectedKeys={filters.section !== 'all' ? [filters.section] : []}
-                                            onSelectionChange={(keys) => {
-                                                const value = Array.from(keys)[0] || 'all';
-                                                handleFilterChange('section', value);
-                                            }}
-                                            classNames={{
-                                                trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                        <FormControl 
+                                            fullWidth
+                                            variant="outlined"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    backdropFilter: 'blur(16px)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    borderRadius: 2,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    },
+                                                },
+                                                '& .MuiInputLabel-root': {
+                                                    color: 'text.secondary',
+                                                },
                                             }}
                                         >
-                                            <SelectItem key="all" value="all">All Sections</SelectItem>
-                                            <SelectItem key="basic" value="basic">Basic Information</SelectItem>
-                                            <SelectItem key="personal" value="personal">Personal Details</SelectItem>
-                                            <SelectItem key="work" value="work">Work Information</SelectItem>
-                                            <SelectItem key="emergency" value="emergency">Emergency Contacts</SelectItem>
-                                            <SelectItem key="bank" value="bank">Banking Details</SelectItem>
-                                            <SelectItem key="education" value="education">Education</SelectItem>
-                                            <SelectItem key="experience" value="experience">Experience</SelectItem>
-                                        </Select>
+                                            <InputLabel>Profile Section</InputLabel>
+                                            <Select
+                                                value={filters.section || 'all'}
+                                                label="Profile Section"
+                                                onChange={(e) => handleFilterChange('section', e.target.value)}
+                                            >
+                                                <MenuItem value="all">All Sections</MenuItem>
+                                                <MenuItem value="basic">Basic Information</MenuItem>
+                                                <MenuItem value="personal">Personal Details</MenuItem>
+                                                <MenuItem value="work">Work Information</MenuItem>
+                                                <MenuItem value="emergency">Emergency Contacts</MenuItem>
+                                                <MenuItem value="bank">Banking Details</MenuItem>
+                                                <MenuItem value="education">Education</MenuItem>
+                                                <MenuItem value="experience">Experience</MenuItem>
+                                            </Select>
+                                        </FormControl>
 
-                                        <Select
-                                            label="Completion Status"
-                                            variant="bordered"
-                                            selectedKeys={filters.completionStatus !== 'all' ? [filters.completionStatus] : []}
-                                            onSelectionChange={(keys) => {
-                                                const value = Array.from(keys)[0] || 'all';
-                                                handleFilterChange('completionStatus', value);
-                                            }}
-                                            classNames={{
-                                                trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                        <FormControl 
+                                            fullWidth
+                                            variant="outlined"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    backdropFilter: 'blur(16px)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    borderRadius: 2,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    },
+                                                },
+                                                '& .MuiInputLabel-root': {
+                                                    color: 'text.secondary',
+                                                },
                                             }}
                                         >
-                                            <SelectItem key="all" value="all">All Status</SelectItem>
-                                            <SelectItem key="completed" value="completed">Completed</SelectItem>
-                                            <SelectItem key="incomplete" value="incomplete">Incomplete</SelectItem>
-                                            <SelectItem key="empty" value="empty">Empty</SelectItem>
-                                        </Select>
+                                            <InputLabel>Completion Status</InputLabel>
+                                            <Select
+                                                value={filters.completionStatus || 'all'}
+                                                label="Completion Status"
+                                                onChange={(e) => handleFilterChange('completionStatus', e.target.value)}
+                                            >
+                                                <MenuItem value="all">All Status</MenuItem>
+                                                <MenuItem value="completed">Completed</MenuItem>
+                                                <MenuItem value="incomplete">Incomplete</MenuItem>
+                                                <MenuItem value="empty">Empty</MenuItem>
+                                            </Select>
+                                        </FormControl>
 
                                         <div className="flex items-center gap-2">
                                             <label className="text-sm text-default-600">Show Empty:</label>

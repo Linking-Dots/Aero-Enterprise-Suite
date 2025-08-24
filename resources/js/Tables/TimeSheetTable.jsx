@@ -4,11 +4,10 @@ import {
     CardContent,
     CardHeader,
     Typography,
-
     Grid,
-
     useMediaQuery,
-
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {    Table,
     TableHeader,
@@ -17,7 +16,6 @@ import {    Table,
     TableRow,
     TableCell,
     User,
-    Input,
     ScrollShadow,
     Pagination,
     Skeleton,
@@ -986,33 +984,57 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                         {canViewAllAttendance && (
                                             <>
                                                 <Grid item xs={12} sm={6} md={4}>
-                                                    <Input
+                                                    <TextField
                                                         type="text"
                                                         label="Search Employee"
                                                         placeholder="Enter employee name"
                                                         value={employee}
-                                                        onValueChange={setEmployee}
-                                                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
-                                                        variant="bordered"
-                                                        aria-label="Search employees"
-                                                        isClearable
-                                                        classNames={{
-                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                                        onChange={(e) => setEmployee(e.target.value)}
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        size="small"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                                                </InputAdornment>
+                                                            ),
+                                                            style: {
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                                backdropFilter: 'blur(10px)',
+                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                                borderRadius: '8px',
+                                                            }
                                                         }}
+                                                        aria-label="Search employees"
                                                     />
                                                 </Grid>
                                                 <Grid item xs={12} sm={6} md={4}>
-                                                    <Input
+                                                    <TextField
                                                         label="Select Date"
                                                         type="date"
-                                                        variant="bordered"
+                                                        variant="outlined"
                                                         onChange={handleDateChange}
                                                         value={new Date(selectedDate).toISOString().slice(0, 10) || ''}
-                                                        startContent={<CalendarDaysIcon className="w-4 h-4 text-default-400" />}
-                                                        aria-label="Select date for timesheet"
-                                                        classNames={{
-                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                                        fullWidth
+                                                        size="small"
+                                                        InputLabelProps={{
+                                                            shrink: true,
                                                         }}
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <CalendarDaysIcon className="w-4 h-4 text-default-400" />
+                                                                </InputAdornment>
+                                                            ),
+                                                            style: {
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                                backdropFilter: 'blur(10px)',
+                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                                borderRadius: '8px',
+                                                            }
+                                                        }}
+                                                        aria-label="Select date for timesheet"
                                                     />
                                                 </Grid>
                                             </>

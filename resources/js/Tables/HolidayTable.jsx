@@ -5,7 +5,9 @@ import {
     useMediaQuery,
     Box,
     Chip as MuiChip,
-    Fade
+    Fade,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
     Table,
@@ -19,7 +21,6 @@ import {
     Button,
     Card,
     CardBody,
-    Input,
     Select,
     SelectItem,
     Pagination,
@@ -264,20 +265,26 @@ const HolidayTable = ({
                 {/* Main search and filter toggle - Matching Leave page */}
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
-                        <Input
-                            isClearable
-                            label="Search Holidays"
-                            variant="bordered"
+                        <TextField
+                            variant="outlined"
                             placeholder="Search by title or description..."
-                            startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
                             value={filterValue}
-                            onClear={() => setFilterValue("")}
-                            onValueChange={setFilterValue}
-                            classNames={{
-                                input: "bg-transparent",
-                                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                            onChange={(e) => setFilterValue(e.target.value)}
+                            fullWidth
+                            size={isMobile ? "small" : "medium"}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <MagnifyingGlassIcon className="w-4 h-4" />
+                                    </InputAdornment>
+                                ),
+                                style: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '8px',
+                                }
                             }}
-                            size={isMobile ? "sm" : "md"}
                         />
                     </div>
                     <div className="flex gap-2 items-end">

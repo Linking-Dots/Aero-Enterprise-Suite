@@ -6,11 +6,12 @@ import {
   useTheme, 
   useMediaQuery, 
   Grow, 
-  Fade
+  Fade,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { 
   Button, 
-  Input, 
   Chip, 
   Card,
   CardBody,
@@ -30,10 +31,18 @@ import {
   ModalFooter,
   DateInput,
   Textarea,
-  Select,
-  SelectItem,
   useDisclosure
 } from "@heroui/react";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { 
+  getFormControlStyles,
+  getTextFieldStyles 
+} from '@/utils/glassyStyles.js';
 
 import { 
   CalendarDaysIcon,
@@ -360,39 +369,43 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <Input
+                    <TextField
                       label="Search Holidays"
-                      variant="bordered"
                       placeholder="Search by holiday name..."
                       value={searchTerm}
-                      onValueChange={setSearchTerm}
-                      startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                      classNames={{
-                        input: "bg-transparent",
-                        inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <MagnifyingGlassIcon className="w-4 h-4" />
+                          </InputAdornment>
+                        ),
                       }}
-                      size={isMobile ? "sm" : "md"}
+                      fullWidth
+                      size={isMobile ? "small" : "medium"}
+                      sx={getTextFieldStyles('search')}
                     />
                   </div>
 
                   <div className="flex gap-2 items-end">
-                    <Select
-                      label="Year"
-                      variant="bordered"
-                      selectedKeys={[selectedYear]}
-                      onSelectionChange={(keys) => setSelectedYear(Array.from(keys)[0])}
-                      className="w-32"
-                      classNames={{
-                        trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                      }}
+                    <FormControl 
+                      variant="outlined"
+                      sx={getFormControlStyles('default', 128)}
                     >
-                      <SelectItem key="all" value="all">All Years</SelectItem>
-                      {availableYears.map(year => (
-                        <SelectItem key={year.toString()} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </Select>
+                      <InputLabel>Year</InputLabel>
+                      <Select
+                        value={selectedYear}
+                        label="Year"
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                      >
+                        <MenuItem value="all">All Years</MenuItem>
+                        {availableYears.map(year => (
+                          <MenuItem key={year.toString()} value={year.toString()}>
+                            {year}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                     
                     <Button
                       isIconOnly={isMobile}
@@ -498,25 +511,34 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
           </ModalHeader>
           <ModalBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
+              <TextField
                 label="Holiday Title"
                 placeholder="Enter holiday name"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({...prev, title: e.target.value}))}
-                isRequired
+                required
+                fullWidth
+                sx={getTextFieldStyles()}
               />
               
-              <Select
-                label="Holiday Type"
-                selectedKeys={[formData.type]}
-                onSelectionChange={(keys) => setFormData(prev => ({...prev, type: Array.from(keys)[0]}))}
+              <FormControl 
+                fullWidth
+                variant="outlined"
+                sx={getFormControlStyles()}
               >
-                {holidayCategories.map(category => (
-                  <SelectItem key={category.key} value={category.key}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </Select>
+                <InputLabel>Holiday Type</InputLabel>
+                <Select
+                  value={formData.type}
+                  label="Holiday Type"
+                  onChange={(e) => setFormData(prev => ({...prev, type: e.target.value}))}
+                >
+                  {holidayCategories.map(category => (
+                    <MenuItem key={category.key} value={category.key}>
+                      {category.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               
               <DateInput
                 label="From Date"

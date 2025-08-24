@@ -7,7 +7,7 @@ import {
     CheckCircleIcon,
     InformationCircleIcon 
 } from '@heroicons/react/24/outline';
-import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
+import { TextField, Button as HeroButton, Checkbox as HeroCheckbox } from '@mui/material';
 import AuthLayout from '@/Components/AuthLayout';
 import Button from '@/Components/Button';
 import { useTheme } from '@mui/material/styles';
@@ -92,41 +92,47 @@ export default function ForgotPassword({ status }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <Input
+                    <TextField
                         type="email"
                         label="Email address"
                         placeholder="Enter your email address"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        isInvalid={!!errors.email}
-                        errorMessage={errors.email}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         autoComplete="username"
                         autoFocus
                         required
-                        startContent={
-                            <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                        }
-                        classNames={{
-                            base: "w-full",
-                            mainWrapper: "w-full",
-                            input: [
-                                "bg-transparent",
-                                "text-black dark:text-white",
-                                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                            ],
-                            innerWrapper: "bg-transparent",
-                            inputWrapper: [
-                                "shadow-xl",
-                                "bg-default-200/50",
-                                "dark:bg-default/60",
-                                "backdrop-blur-xl",
-                                "backdrop-saturate-200",
-                                "hover:bg-default-200/70",
-                                "dark:hover:bg-default/70",
-                                "group-data-[focused=true]:bg-default-200/50",
-                                "dark:group-data-[focused=true]:bg-default/60",
-                                "cursor-text!",
-                            ],
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                            startAdornment: (
+                                <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
+                            ),
+                            sx: {
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(12px)',
+                                borderRadius: '12px',
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                                '&.Mui-focused': {
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                },
+                            }
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'primary.main',
+                                },
+                            },
                         }}
                     />
                 </motion.div>

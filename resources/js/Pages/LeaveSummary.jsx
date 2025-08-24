@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import { Box, Typography, useMediaQuery, useTheme, Grow, Fade } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme, Grow, Fade, TextField, InputAdornment } from '@mui/material';
 import { 
     CalendarIcon, 
     PlusIcon,
@@ -25,7 +25,6 @@ import {
     TableCell,
     Chip,
     Button,
-    Input,
     Select,
     SelectItem,
     Pagination,
@@ -271,20 +270,46 @@ const LeaveSummary = ({ title, summaryData }) => {
                                 <div className="flex flex-col gap-4 mb-6">
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <div className="flex-1">
-                                            <Input
-                                                isClearable
+                                            <TextField
                                                 label="Search Employees"
-                                                variant="bordered"
                                                 placeholder="Search by name or department..."
-                                                startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                                                value={searchValue}
-                                                onClear={() => setSearchValue("")}
-                                                onValueChange={setSearchValue}
-                                                classNames={{
-                                                    input: "bg-transparent",
-                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <MagnifyingGlassIcon className="w-4 h-4" />
+                                                        </InputAdornment>
+                                                    ),
                                                 }}
-                                                size={isMobile ? "sm" : "md"}
+                                                value={searchValue}
+                                                onChange={(e) => setSearchValue(e.target.value)}
+                                                fullWidth
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                        backdropFilter: 'blur(10px)',
+                                                        borderRadius: '12px',
+                                                        color: 'white',
+                                                        '& fieldset': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            borderColor: 'var(--primary-color)',
+                                                        },
+                                                        '& input::placeholder': {
+                                                            color: 'rgba(255, 255, 255, 0.5)',
+                                                            opacity: 1,
+                                                        },
+                                                    },
+                                                    '& .MuiInputLabel-root': {
+                                                        color: 'rgba(255, 255, 255, 0.7)',
+                                                        '&.Mui-focused': {
+                                                            color: 'var(--primary-color)',
+                                                        },
+                                                    },
+                                                }}
                                             />
                                         </div>
                                         <div className="flex gap-2 items-end">

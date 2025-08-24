@@ -3,13 +3,15 @@ import {
     Box,
     Typography,
     Grid,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import { 
     Card, 
     CardBody, 
     CardHeader,
-    Select,
-    SelectItem,
     Progress,
     Chip
 } from "@heroui/react";
@@ -283,18 +285,61 @@ const ComplianceAnalytics = ({ timeRange = 'last_30_days' }) => {
                     <ChartBarIcon className="w-6 h-6" />
                     Compliance Analytics
                 </Typography>
-                <Select
-                    label="Time Range"
-                    selectedKeys={[selectedTimeRange]}
-                    onSelectionChange={(keys) => setSelectedTimeRange(Array.from(keys)[0])}
-                    className="w-48"
-                >
-                    <SelectItem key="last_7_days" value="last_7_days">Last 7 Days</SelectItem>
-                    <SelectItem key="last_30_days" value="last_30_days">Last 30 Days</SelectItem>
-                    <SelectItem key="last_90_days" value="last_90_days">Last 90 Days</SelectItem>
-                    <SelectItem key="last_6_months" value="last_6_months">Last 6 Months</SelectItem>
-                    <SelectItem key="last_year" value="last_year">Last Year</SelectItem>
-                </Select>
+                <FormControl size="small" sx={{ minWidth: 192 }}>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        Time Range
+                    </InputLabel>
+                    <Select
+                        value={selectedTimeRange}
+                        onChange={(e) => setSelectedTimeRange(e.target.value)}
+                        label="Time Range"
+                        sx={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(16px)',
+                            borderRadius: '12px',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                            },
+                            '& .MuiSelect-select': {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                            },
+                            '& .MuiSelect-icon': {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                            },
+                        }}
+                        MenuProps={{
+                            PaperProps: {
+                                sx: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '12px',
+                                    '& .MuiMenuItem-root': {
+                                        color: 'rgba(255, 255, 255, 0.9)',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        },
+                                        '&.Mui-selected': {
+                                            backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                                        },
+                                    },
+                                },
+                            },
+                        }}
+                    >
+                        <MenuItem value="last_7_days">Last 7 Days</MenuItem>
+                        <MenuItem value="last_30_days">Last 30 Days</MenuItem>
+                        <MenuItem value="last_90_days">Last 90 Days</MenuItem>
+                        <MenuItem value="last_6_months">Last 6 Months</MenuItem>
+                        <MenuItem value="last_year">Last Year</MenuItem>
+                    </Select>
+                </FormControl>
             </Box>
 
             {/* Summary Metrics */}

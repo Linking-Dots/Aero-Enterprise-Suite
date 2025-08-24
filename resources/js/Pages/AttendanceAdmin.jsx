@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Head} from '@inertiajs/react';
 import {Box, Grow, useMediaQuery, useTheme,} from '@mui/material';
-import {Input, Pagination} from "@heroui/react";
+import {TextField, Pagination, InputAdornment} from "@mui/material";
 import {
     CalendarIcon,
     ChartBarIcon,
@@ -342,33 +342,56 @@ const AttendanceAdmin = React.memo(({title}) => {
                                 <div className="mb-6">
                                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
                                         <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                            <Input
+                                            <TextField
                                                 label="Search Employee"
                                                 type="text"
                                                 value={employee}
                                                 onChange={handleSearch}
                                                 placeholder="Enter employee name..."
-                                                startContent={<MagnifyingGlassIcon className="w-4 h-4"/>}
-                                                variant="bordered"
-                                                classNames={{
-                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                                variant="outlined"
+                                                fullWidth
+                                                size={isMobile ? "small" : "medium"}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <MagnifyingGlassIcon className="w-4 h-4"/>
+                                                        </InputAdornment>
+                                                    ),
+                                                    style: {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                        backdropFilter: 'blur(10px)',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '12px',
+                                                    }
                                                 }}
-                                                size={isMobile ? "sm" : "md"}
                                             />
                                         </div>
 
                                         <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                            <Input
+                                            <TextField
                                                 label="Month/Year"
                                                 type="month"
                                                 value={filterData.currentMonth}
                                                 onChange={(e) => handleFilterChange('currentMonth', e.target.value)}
-                                                startContent={<CalendarIcon className="w-4 h-4"/>}
-                                                variant="bordered"
-                                                classNames={{
-                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                                variant="outlined"
+                                                fullWidth
+                                                size={isMobile ? "small" : "medium"}
+                                                InputLabelProps={{
+                                                    shrink: true,
                                                 }}
-                                                size={isMobile ? "sm" : "md"}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <CalendarIcon className="w-4 h-4"/>
+                                                        </InputAdornment>
+                                                    ),
+                                                    style: {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                        backdropFilter: 'blur(10px)',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '12px',
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     </div>

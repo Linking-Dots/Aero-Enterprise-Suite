@@ -17,7 +17,7 @@ import DailyWorksTable from '@/Tables/DailyWorksTable.jsx';
 import GlassCard from "@/Components/GlassCard.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
-import { Input, Pagination } from "@heroui/react";
+import { TextField, Pagination, InputAdornment } from "@mui/material";
 import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
 import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
 import DailyWorksDownloadForm from "@/Forms/DailyWorksDownloadForm.jsx";
@@ -288,17 +288,27 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                 {/* Search Section */}
                                 <div className="mb-6">
                                     <div className="w-full sm:w-auto sm:min-w-[300px]">
-                                        <Input
+                                        <TextField
                                             label="Search Work Logs"
                                             placeholder="Search by description, location, or notes..."
                                             value={search}
                                             onChange={handleSearch}
-                                            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
-                                            variant="bordered"
-                                            classNames={{
-                                                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                                            variant="outlined"
+                                            fullWidth
+                                            size={isMobile ? "small" : "medium"}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                                    </InputAdornment>
+                                                ),
+                                                style: {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    backdropFilter: 'blur(10px)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    borderRadius: '12px',
+                                                }
                                             }}
-                                            size={isMobile ? "sm" : "md"}
                                         />
                                     </div>
                                 </div>

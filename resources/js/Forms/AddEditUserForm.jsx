@@ -11,7 +11,6 @@ import {
     IconButton,
     InputLabel,
     MenuItem,
-    TextField,
     Typography
 } from "@mui/material";
 import React, {useEffect, useState} from "react";
@@ -21,10 +20,10 @@ import {PhotoCamera} from "@mui/icons-material";
 import {useTheme} from "@mui/material/styles";
 import LoadingButton from "@mui/lab/LoadingButton";
 import {toast} from "react-toastify";
-import {Input, SelectItem, Select} from "@heroui/react";
-import PasswordIcon from "@mui/icons-material/Password.js";
-import VisibilityOff from "@mui/icons-material/VisibilityOff.js";
-import Visibility from "@mui/icons-material/Visibility.js";
+import {TextField, Select} from "@mui/material";
+import PasswordIcon from "@mui/icons-material/Password";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
 
 const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
     

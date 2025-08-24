@@ -5,11 +5,19 @@ import {
     Button,
     CardContent,
     CardHeader,
-    Grid, Typography,
+    Grid, 
+    Typography,
+    TextField,
+    Pagination,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    InputAdornment
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import Grow from '@mui/material/Grow';
-import {Input, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
 import SearchIcon from '@mui/icons-material/Search';
 import GlassCard from '@/Components/GlassCard.jsx';
 import App from '@/Layouts/App.jsx';
@@ -133,23 +141,35 @@ const PicnicParticipants = ({ title, allUsers }) => {
                         <CardContent>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6} md={4}>
-                                    <Input
+                                    <TextField
                                         label="Search"
                                         fullWidth
-                                        variant="bordered"
+                                        variant="outlined"
                                         placeholder="Employee..."
                                         value={employee}
                                         onChange={handleSearch}
-                                        endContent={<SearchIcon />}
+                                        size="small"
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={4}>
-                                    <Input
+                                    <TextField
                                         label="Select Month"
                                         type="month"
-                                        variant="bordered"
+                                        variant="outlined"
                                         onChange={handleMonthChange}
                                         value={selectedMonth}
+                                        fullWidth
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
                                     />
                                 </Grid>
                             </Grid>
