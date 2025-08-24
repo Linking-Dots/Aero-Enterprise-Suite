@@ -4,7 +4,6 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {createInertiaApp} from '@inertiajs/react';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
-import {HeroUIProvider} from '@heroui/react';
 import axios from 'axios';
 import ErrorBoundary from './Components/ErrorBoundary/ErrorBoundary';
 import { AppStateProvider } from './Contexts/AppStateContext';
