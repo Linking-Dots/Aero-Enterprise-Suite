@@ -1,12 +1,21 @@
 {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "_Add-DnwAGdHM.js": {
     "file": "assets/js/Add-DnwAGdHM.js",
     "name": "Add",
     "imports": [
       "_react-core-SLWS96gT.js",
       "_mui-libraries-CQTi8RHu.js"
+=======
+  "_Add-CNpSLwub.js": {
+    "file": "assets/Add-CNpSLwub.js",
+    "name": "Add",
+    "imports": [
+      "resources/js/app.jsx",
+      "_App-whY0_PgO.js"
+>>>>>>> Stashed changes
 =======
   "_Add-CNpSLwub.js": {
     "file": "assets/Add-CNpSLwub.js",
@@ -48,6 +57,7 @@
   },
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "_App-WMq6RoU3.js": {
     "file": "assets/js/App-WMq6RoU3.js",
     "name": "App",
@@ -75,6 +85,13 @@
     "imports": [
       "resources/js/app.jsx",
 >>>>>>> Stashed changes
+=======
+  "_App-whY0_PgO.js": {
+    "file": "assets/App-whY0_PgO.js",
+    "name": "App",
+    "imports": [
+      "resources/js/app.jsx",
+>>>>>>> Stashed changes
       "_logo-CfQNLy2U.js",
       "_EnvelopeIcon-DYtxSQqd.js",
       "_UserIcon-Ch89lSMO.js",
@@ -82,6 +99,9 @@
       "_chunk-SSA7SXE4-CwjhqkNF.js",
       "_ExclamationTriangleIcon-C6Etxr_V.js"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -103,6 +123,7 @@
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_AuthLayout-Dl3foqE2.js": {
@@ -296,6 +317,78 @@
     ]
   },
 >>>>>>> Stashed changes
+=======
+  "_AuthLayout-D-IYjBsC.js": {
+    "file": "assets/AuthLayout-D-IYjBsC.js",
+    "name": "AuthLayout",
+    "imports": [
+      "resources/js/app.jsx",
+      "_logo-CfQNLy2U.js"
+    ]
+  },
+  "_Avatar-DuuqbjIn.js": {
+    "file": "assets/Avatar-DuuqbjIn.js",
+    "name": "Avatar",
+    "imports": [
+      "_logo-CfQNLy2U.js",
+      "resources/js/app.jsx",
+      "_App-whY0_PgO.js",
+      "_useSlot-Cnb0Rlda.js"
+    ]
+  },
+  "_BulkDeleteModal-CrmJnOV7.js": {
+    "file": "assets/BulkDeleteModal-CrmJnOV7.js",
+    "name": "BulkDeleteModal",
+    "imports": [
+      "resources/js/app.jsx",
+      "_App-whY0_PgO.js",
+      "_logo-CfQNLy2U.js",
+      "_TrashIcon-CloBOZ-O.js",
+      "_PencilIcon-BS_QTdXf.js",
+      "_EllipsisVerticalIcon-Bd0t_Shn.js",
+      "_XCircleIcon-DaoqS2ob.js",
+      "_CheckCircleIcon-C0RnkvSd.js",
+      "_ClockIcon-DRKpcvHJ.js",
+      "_ExclamationTriangleIcon-C45cJcxH.js",
+      "_UserIcon-Ch89lSMO.js",
+      "_InputAdornment-DWbv3Uuu.js",
+      "_CardContent-Dr2XfLTO.js",
+      "_colorManipulator-BQHAgYle.js",
+      "_chunk-F3UDT23P-C9zYK25D.js",
+      "_chunk-BOOVDPB6-5to7tsiY.js",
+      "_chunk-S574QCAN-CY8w87gI.js",
+      "_chunk-JOT4BT4P-DdkQVSt9.js",
+      "_chunk-EAPQ7RWQ-X8us5Cw9.js",
+      "_Clear-DEIruHJj.js",
+      "_GlassDialog-DlDj20KD.js",
+      "_DialogTitle-n4i8VQ5D.js",
+      "_DialogContent-Buy6bhT7.js",
+      "_TextField-BppgltFh.js",
+      "_Select-6qEezkdx.js",
+      "_LoadingButton-Df5WnXLU.js",
+      "_CircularProgress-CE3Tiwse.js",
+      "_DialogContentText-BxlR_yJE.js",
+      "_Button-D2aSymif.js",
+      "_Avatar-DuuqbjIn.js",
+      "_CardHeader-BqMsir7C.js",
+      "_InformationCircleIcon-Dnx7XZ5k.js",
+      "_XCircleIcon-D5i3OHpc.js",
+      "_ExclamationTriangleIcon-C6Etxr_V.js",
+      "_CheckCircleIcon-B_RrSLXz.js",
+      "_Popover-B0BuhAs7.js",
+      "_ListItemText-CQnnqqD6.js",
+      "_Divider-H-F0eXoG.js"
+    ]
+  },
+  "_Button-BUbOsEPF.js": {
+    "file": "assets/Button-BUbOsEPF.js",
+    "name": "Button",
+    "imports": [
+      "resources/js/app.jsx",
+      "_logo-CfQNLy2U.js"
+    ]
+  },
+>>>>>>> Stashed changes
   "_Button-D2aSymif.js": {
     "file": "assets/Button-D2aSymif.js",
     "name": "Button",
@@ -345,12 +438,21 @@
   },
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "_CheckCircle-CGZ_FjVu.js": {
     "file": "assets/js/CheckCircle-CGZ_FjVu.js",
     "name": "CheckCircle",
     "imports": [
       "_react-core-SLWS96gT.js",
       "_mui-libraries-CQTi8RHu.js"
+=======
+  "_CheckCircle-CxQNz4l-.js": {
+    "file": "assets/CheckCircle-CxQNz4l-.js",
+    "name": "CheckCircle",
+    "imports": [
+      "resources/js/app.jsx",
+      "_App-whY0_PgO.js"
+>>>>>>> Stashed changes
 =======
   "_CheckCircle-CxQNz4l-.js": {
     "file": "assets/CheckCircle-CxQNz4l-.js",
@@ -383,6 +485,7 @@
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_Checkbox-CkyQDFmf.js": {
@@ -480,6 +583,41 @@
     ]
   },
 >>>>>>> Stashed changes
+=======
+  "_Checkbox-BE5deUq-.js": {
+    "file": "assets/Checkbox-BE5deUq-.js",
+    "name": "Checkbox",
+    "imports": [
+      "resources/js/app.jsx",
+      "_logo-CfQNLy2U.js"
+    ]
+  },
+  "_CircularProgress-CE3Tiwse.js": {
+    "file": "assets/CircularProgress-CE3Tiwse.js",
+    "name": "CircularProgress",
+    "imports": [
+      "_logo-CfQNLy2U.js",
+      "resources/js/app.jsx"
+    ]
+  },
+  "_Clear-DEIruHJj.js": {
+    "file": "assets/Clear-DEIruHJj.js",
+    "name": "Clear",
+    "imports": [
+      "resources/js/app.jsx",
+      "_logo-CfQNLy2U.js",
+      "_App-whY0_PgO.js"
+    ]
+  },
+  "_Clear-Y8lWSL0h.js": {
+    "file": "assets/Clear-Y8lWSL0h.js",
+    "name": "Clear",
+    "imports": [
+      "resources/js/app.jsx",
+      "_App-whY0_PgO.js"
+    ]
+  },
+>>>>>>> Stashed changes
   "_ClockIcon-DRKpcvHJ.js": {
     "file": "assets/ClockIcon-DRKpcvHJ.js",
     "name": "ClockIcon",
@@ -494,6 +632,7 @@
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_DocumentArrowDownIcon-Z7LEdu9S.js": {
@@ -1102,6 +1241,8 @@
   "node_modules/@heroui/dom-animation/dist/index.mjs": {
     "file": "assets/js/index-C6dLdJTr.js",
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   "_DailyWorks-nhIFGPWH.js": {
@@ -1826,6 +1967,9 @@
   "node_modules/@heroui/dom-animation/dist/index.mjs": {
     "file": "assets/index-CdPMI6BD.js",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1833,6 +1977,7 @@
     "src": "node_modules/@heroui/dom-animation/dist/index.mjs",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_react-core-SLWS96gT.js"
@@ -1843,6 +1988,8 @@
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
       "_features-animation-Bw_RqQvo.js",
       "_create-visual-element-BuHeE9lo.js",
       "resources/js/app.jsx"
@@ -1851,6 +1998,9 @@
   "node_modules/canvg/lib/index.es.js": {
     "file": "assets/index.es-BU6ZdtUY.js",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1858,6 +2008,7 @@
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_react-core-SLWS96gT.js",
@@ -1868,6 +2019,8 @@
   "node_modules/dompurify/dist/purify.es.mjs": {
     "file": "assets/js/purify.es-CQJ0hv7W.js",
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
       "resources/js/app.jsx",
@@ -1923,6 +2076,9 @@
   "node_modules/dompurify/dist/purify.es.mjs": {
     "file": "assets/purify.es-CQJ0hv7W.js",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1933,7 +2089,11 @@
   "node_modules/html2canvas/dist/html2canvas.esm.js": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "file": "assets/js/html2canvas.esm-B0tyYwQk.js",
+=======
+    "file": "assets/html2canvas.esm-QH1iLAAe.js",
+>>>>>>> Stashed changes
 =======
     "file": "assets/html2canvas.esm-QH1iLAAe.js",
 >>>>>>> Stashed changes
@@ -1946,6 +2106,7 @@
   },
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "public/assets/images/logo.png": {
     "file": "assets/png/logo-DFQfDCzR.png",
     "src": "public/assets/images/logo.png"
@@ -1953,6 +2114,8 @@
   "resources/css/app.css": {
     "file": "assets/js/app-B9RuXsJe.js",
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   "node_modules/leaflet-fullscreen/dist/fullscreen.png": {
@@ -3252,6 +3415,9 @@
   "resources/js/app.jsx": {
     "file": "assets/app-C1U45Ebj.js",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -3260,8 +3426,11 @@
     "isEntry": true,
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "isDynamicEntry": true,
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     "dynamicImports": [
@@ -3313,6 +3482,7 @@
 >>>>>>> Stashed changes
     "css": [
       "assets/app-BwRx8BXR.css"
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     ]
   },
@@ -4457,6 +4627,8 @@
       "resources/js/Pages/UsersList.jsx"
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     ]
   },
   "resources/js/firebase-config.js": {
@@ -4468,7 +4640,11 @@
   "resources/js/utils/firebaseInit.js": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "file": "assets/js/firebaseInit-CB_saAc7.js",
+=======
+    "file": "assets/firebaseInit-CvKpZahc.js",
+>>>>>>> Stashed changes
 =======
     "file": "assets/firebaseInit-CvKpZahc.js",
 >>>>>>> Stashed changes
@@ -4481,9 +4657,13 @@
     "imports": [
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       "_ui-libraries-CePrafQA.js",
       "_utilities-DyZVG5is.js",
       "_react-core-SLWS96gT.js"
+=======
+      "resources/js/app.jsx"
+>>>>>>> Stashed changes
 =======
       "resources/js/app.jsx"
 >>>>>>> Stashed changes
