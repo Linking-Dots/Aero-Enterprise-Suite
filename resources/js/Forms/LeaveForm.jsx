@@ -2,25 +2,20 @@
 import React, {useState, useEffect} from 'react';
 import {
     Avatar,
-    Box,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
+    Button,
+    Input,
+    Textarea,
     Select,
-    TextField,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from "@mui/lab/LoadingButton";
-import { useTheme } from "@mui/material/styles";
+    SelectItem,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
+} from "@heroui/react";
+import { X } from 'lucide-react';
+import useTheme from "@/theme";
 import { toast } from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Box, Typography, useMediaQuery, useTheme, Grow } from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
     BriefcaseIcon, 
     PlusIcon,
@@ -17,7 +17,8 @@ import DailyWorksTable from '@/Tables/DailyWorksTable.jsx';
 import GlassCard from "@/Components/GlassCard.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
-import { TextField, Pagination, InputAdornment } from "@mui/material";
+import { Input, Pagination } from "@heroui/react";
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
 import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
 import DailyWorksDownloadForm from "@/Forms/DailyWorksDownloadForm.jsx";
@@ -26,8 +27,21 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
+    
+    // Custom media query
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);

@@ -1,18 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import dayjs from 'dayjs';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Grow,
-  useTheme,
-  useMediaQuery,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { Select, SelectItem } from "@heroui/react";
 import { 
   Card, 
   CardBody, 
@@ -47,9 +38,9 @@ import axios from 'axios';
 
 const LeavesEmployee = ({ title, allUsers }) => {
   const { auth } = usePage().props;
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const [totalRows, setTotalRows] = useState(0);
       const [lastPage, setLastPage] = useState(0);
   // State management

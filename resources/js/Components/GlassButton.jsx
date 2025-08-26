@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { Button } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Button } from '@heroui/react';
+
 
 const GlassButton = forwardRef(({
   children,
@@ -13,7 +13,7 @@ const GlassButton = forwardRef(({
   onClick,
   ...props
 }, ref) => {
-  const theme = useTheme();
+
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -86,9 +86,49 @@ const GlassButton = forwardRef(({
       : 'shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]';
   };
 
+  const getHeroUIVariant = () => {
+    switch (variant) {
+      case 'primary':
+        return 'solid';
+      case 'success':
+        return 'solid';
+      case 'danger':
+        return 'solid';
+      default:
+        return 'bordered';
+    }
+  };
+
+  const getHeroUIColor = () => {
+    switch (variant) {
+      case 'primary':
+        return 'primary';
+      case 'success':
+        return 'success';
+      case 'danger':
+        return 'danger';
+      default:
+        return 'default';
+    }
+  };
+
+  const getHeroUISize = () => {
+    switch (size) {
+      case 'small':
+        return 'sm';
+      case 'large':
+        return 'lg';
+      default:
+        return 'md';
+    }
+  };
+
   return (
     <Button
       ref={ref}
+      variant={getHeroUIVariant()}
+      color={getHeroUIColor()}
+      size={getHeroUISize()}
       className={`
         glass-button
         ${getVariantStyles()}
@@ -107,35 +147,10 @@ const GlassButton = forwardRef(({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      onClick={onClick}
-      sx={{
+      onPress={onClick}
+      style={{
         background: 'transparent',
-        boxShadow: 'none',
         transform: magneticEffect ? `translate(${mousePosition.x}px, ${mousePosition.y}px)` : 'none',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: darkMode 
-            ? 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)'
-            : 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)',
-          borderRadius: 'inherit',
-          pointerEvents: 'none',
-          zIndex: 1
-        },
-        '& > *': {
-          position: 'relative',
-          zIndex: 2
-        },
-        '&:hover': {
-        transform: 'translateY(-1px)',
-        boxShadow: darkMode 
-          ? '0 20px 40px rgba(0, 0, 0, 0.3)' 
-          : '0 20px 40px rgba(31, 38, 135, 0.15)',
-      },
       }}
       {...props}
     >

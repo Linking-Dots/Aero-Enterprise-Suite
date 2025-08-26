@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Box,
-    Divider,
-    IconButton,
-    Alert,
-    CircularProgress
-} from '@mui/material';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { 
+    Modal, 
+    ModalContent, 
+    ModalHeader, 
+    ModalBody, 
+    ModalFooter, 
+    Button, 
+    Divider,
+    CircularProgress
+} from '@heroui/react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -54,66 +51,75 @@ const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
     if (!department) return null;
     
     return (
-        <Dialog
-            open={open}
-            onClose={loading ? undefined : onClose}
-            maxWidth="sm"
-            fullWidth
-            aria-labelledby="delete-department-dialog"
+        <Modal
+            isOpen={open}
+            onOpenChange={loading ? undefined : onClose}
+            size="lg"
         >
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">Delete Department</Typography>
-                <IconButton edge="end" color="inherit" onClick={onClose} disabled={loading} aria-label="close">
-                    <XMarkIcon className="w-5 h-5" />
-                </IconButton>
-            </DialogTitle>
+            <ModalContent>
+                <ModalHeader className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Delete Department</h3>
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        onPress={onClose}
+                        isDisabled={loading}
+                        aria-label="close"
+                    >
+                        <XMarkIcon className="w-5 h-5" />
+                    </Button>
+                </ModalHeader>
+                
+                <Divider />
+                
+                <ModalBody>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-2">
+                            <ExclamationTriangleIcon className="w-8 h-8 text-yellow-500" />
+                            <p className="text-sm">
+                                Are you sure you want to delete the department <strong>{department.name}</strong>?
+                            </p>
+                        </div>
+                        
+                        {department.employee_count > 0 && (
+                            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+                                This department has {department.employee_count} employees assigned to it. You cannot delete a department with active employees. Please reassign these employees to other departments first.
+                            </div>
+                        )}
+                        
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+                                {error}
+                            </div>
+                        )}
+                        
+                        <p className="text-sm text-default-500 mt-1">
+                            This action cannot be undone. All associated data will be permanently removed.
+                        </p>
+                    </div>
+                </ModalBody>
             
-            <Divider />
-            
-            <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <ExclamationTriangleIcon className="w-8 h-8 text-yellow-500" />
-                        <Typography variant="body1">
-                            Are you sure you want to delete the department <strong>{department.name}</strong>?
-                        </Typography>
-                    </Box>
-                    
-                    {department.employee_count > 0 && (
-                        <Alert severity="warning" sx={{ mt: 2 }}>
-                            This department has {department.employee_count} employees assigned to it. You cannot delete a department with active employees. Please reassign these employees to other departments first.
-                        </Alert>
-                    )}
-                    
-                    {error && (
-                        <Alert severity="error" sx={{ mt: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-                    
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        This action cannot be undone. All associated data will be permanently removed.
-                    </Typography>
-                </Box>
-            </DialogContent>
-            
-            <Divider />
-            
-            <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} disabled={loading} color="inherit">
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleDelete}
-                    variant="contained"
-                    color="error"
-                    disabled={loading || department.employee_count > 0}
-                    startIcon={loading && <CircularProgress size={20} color="inherit" />}
-                >
-                    {loading ? 'Deleting...' : 'Delete Department'}
-                </Button>
-            </DialogActions>
-        </Dialog>
+                <Divider />
+                
+                <ModalFooter>
+                    <Button 
+                        onPress={onClose} 
+                        isDisabled={loading} 
+                        variant="light"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onPress={handleDelete}
+                        color="danger"
+                        isDisabled={loading || department.employee_count > 0}
+                        isLoading={loading}
+                    >
+                        {loading ? 'Deleting...' : 'Delete Department'}
+                    </Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
     );
 };
 

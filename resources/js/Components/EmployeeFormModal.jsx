@@ -32,7 +32,7 @@ import {
     ExclamationTriangleIcon,
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@mui/material/styles';
+
 import GlassDialog from './GlassDialog';
 
 const EmployeeFormModal = ({ 
@@ -46,7 +46,7 @@ const EmployeeFormModal = ({
     loading = false,
     mode = 'create' // 'create', 'edit', 'view'
 }) => {
-    const theme = useTheme();
+
     const isEdit = mode === 'edit';
     const isView = mode === 'view';
     const isCreate = mode === 'create';

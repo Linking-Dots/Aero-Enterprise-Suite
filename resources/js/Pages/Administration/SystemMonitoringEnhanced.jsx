@@ -1,43 +1,36 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, usePage } from "@inertiajs/react";
 import { 
-  Box, 
-  Typography, 
-  useMediaQuery, 
-  Grow, 
-  Fade,
-  useTheme,
-  Grid,
-  IconButton,
-  Alert,
-  LinearProgress,
+  Card,
+  CardBody,
+  CardHeader,
   Chip,
-  Paper,
+  Progress,
   Divider,
   Table,
+  TableHeader,
+  TableColumn,
   TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
-  TablePagination,
+  TableCell,
+  Pagination,
   Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Card,
-  CardContent,
-  CardHeader,
+  AccordionItem,
   Tooltip,
-  Badge
-} from '@mui/material';
-import LoadingButton from "@mui/lab/LoadingButton";
-import { 
+  Badge,
   Button,
+  Input,
   Select,
-  SelectItem,
+  SelectItem
+} from "@heroui/react";
+import { useTheme } from '@/Contexts/ThemeContext';
+import { 
+  Button as HeroButton,
+  Select as HeroSelect,
+  SelectItem as HeroSelectItem,
   Switch,
   Spinner,
-  Progress,
+  Progress as HeroProgress,
   Tabs,
   Tab
 } from "@heroui/react";
@@ -65,7 +58,7 @@ import {
   TableCellsIcon,
   PresentationChartLineIcon
 } from '@heroicons/react/24/outline';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { ChevronDown } from 'lucide-react';
 import App from "@/Layouts/App.jsx";
 import GlassCard from '@/Components/GlassCard';
 import PageHeader from '@/Components/PageHeader';
@@ -93,8 +86,22 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SystemMonitoringEnhanced = ({ title, initialData }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
+    
+    // Custom media query
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
+    
     const { auth, app } = usePage().props;
     
     // State management

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CardContent, CardHeader, Divider, Grid, Grow, Popover, Typography } from '@mui/material';
-import { Avatar, AvatarGroup, Skeleton, Card as HeroCard, Chip } from "@heroui/react";
+import { Avatar, AvatarGroup, Skeleton, Card as HeroCard, Chip, Popover, PopoverContent, PopoverTrigger, CardHeader, CardBody, Divider } from "@heroui/react";
+import { motion } from 'framer-motion';
 import GlassCard from "@/Components/GlassCard.jsx";
 import { usePage } from "@inertiajs/react";
-import { useTheme } from "@mui/material/styles";
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import axios from 'axios';
@@ -24,7 +23,6 @@ import {
 dayjs.extend(isBetween);
 
 const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
-    const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedLeave, setSelectedLeave] = useState(null);
 
@@ -64,20 +62,20 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
     };
 
     return (
-        <GlassCard sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <GlassCard className="h-full flex flex-col">
             <CardHeader
                 title={
-                    <Box className="flex items-center gap-3">
-                        <Box
-                            sx={{
-                                bgcolor: `${color}20`,
+                    <div className="flex items-center gap-3">
+                        <div 
+                            style={{
+                                backgroundColor: `${color}20`,
                                 borderRadius: '12px',
-                                p: 1,
+                                padding: '8px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                minWidth: 40,
-                                minHeight: 40
+                                minWidth: '40px',
+                                minHeight: '40px'
                             }}
                         >
                             <IconComponent 
@@ -89,61 +87,40 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                                 }}
                                 aria-hidden="true"
                             />
-                        </Box>
-                        <Typography 
-                            variant="h6"
-                            component="h2"
-                            sx={{ 
-                                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                                fontWeight: 600
-                            }}
-                        >
+                        </div>
+                        <h2 className="text-base sm:text-lg md:text-xl font-semibold">
                             {title}
-                        </Typography>
-                    </Box>
+                        </h2>
+                    </div>
                 }
-                sx={{ pb: 1 }}
+                className="pb-1"
             />
             <Divider />
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
+            <div className="flex-1 overflow-auto">
                 {items.map((item, index) => (
                     <React.Fragment key={index}>
-                        <Grow in timeout={300 + (index * 100)}>
-                            <CardContent 
-                                sx={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between', 
-                                    alignItems: 'center',
-                                    py: 2
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, mr: 2 }}>
-                                    <Typography 
-                                        variant="body2" 
-                                        color="text.primary"
-                                        sx={{ 
-                                            fontSize: { xs: '0.875rem', sm: '1rem' },
-                                            lineHeight: 1.4
-                                        }}
-                                    >
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: (index * 0.1), duration: 0.3 }}
+                            className="flex justify-between items-center py-2"
+                        >
+                                <div className="flex flex-col flex-1 mr-2">
+                                    <p className="text-sm sm:text-base leading-normal text-gray-900">
                                         {item.text}
-                                    </Typography>
+                                    </p>
                                     {item.leaves && item.leaves.length > 0 && (
-                                        <Typography 
-                                            variant="caption" 
-                                            color="text.secondary"
-                                            className="flex items-center gap-1 mt-1"
-                                        >
+                                        <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
                                             <UserGroupIcon className="w-3 h-3" />
                                             {item.leaves.length} employee{item.leaves.length > 1 ? 's' : ''}
-                                        </Typography>
+                                        </p>
                                     )}
-                                </Box>
+                                </div>
                                 {item.leaves && (
                                     (() => {
                                         const leaves = item.leaves.filter((leave) => leave.leave_type === item.type);
                                         return leaves.length > 0 && (
-                                            <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                                            <div className="flex gap-1 flex-shrink-0">
                                                 <AvatarGroup 
                                                     max={4} 
                                                     isBordered
@@ -165,16 +142,15 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                                                         );
                                                     })}
                                                 </AvatarGroup>
-                                            </Box>
+                                            </div>
                                         );
                                     })()
                                 )}
-                            </CardContent>
-                        </Grow>
+                        </motion.div>
                         {index < items.length - 1 && <Divider />}
                     </React.Fragment>
                 ))}
-            </Box>
+            </div>
 
             <Popover
                 id={id}
@@ -205,36 +181,30 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                 aria-describedby="leave-details-content"
             >
                 {selectedLeave && (
-                    <Box component="section" aria-labelledby="leave-details-title">
-                        <Typography 
+                    <section aria-labelledby="leave-details-title">
+                        <h3 
                             id="leave-details-title"
-                            variant="subtitle1" 
-                            fontWeight="600"
-                            className="flex items-center gap-2 mb-3"
+                            className="text-lg font-semibold flex items-center gap-2 mb-3"
                         >
                             <DocumentTextIcon className="w-5 h-5 text-primary" />
                             Leave Details
-                        </Typography>
-                        <Box id="leave-details-content" className="space-y-2">
-                            <Box className="flex items-start gap-2">
+                        </h3>
+                        <div id="leave-details-content" className="space-y-2">
+                            <div className="flex items-start gap-2">
                                 <UserIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" component="span">
-                                        Employee:
-                                    </Typography>
-                                    <Typography variant="body2" component="div" fontWeight="500">
+                                <div>
+                                    <span className="text-xs text-gray-600">Employee:</span>
+                                    <div className="text-sm font-medium">
                                         {users.find((user) => String(user.id) === String(selectedLeave.user_id))?.name || 'Unknown'}
-                                    </Typography>
-                                </Box>
-                            </Box>
+                                    </div>
+                                </div>
+                            </div>
                             
-                            <Box className="flex items-start gap-2">
+                            <div className="flex items-start gap-2">
                                 <CalendarDaysIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" component="span">
-                                        Duration:
-                                    </Typography>
-                                    <Typography variant="body2" component="div" fontWeight="500">
+                                <div>
+                                    <span className="text-xs text-gray-600">Duration:</span>
+                                    <div className="text-sm font-medium">
                                         {selectedLeave.from_date !== selectedLeave.to_date ?
                                             `${new Date(selectedLeave.from_date).toLocaleDateString('en-US', {
                                                 month: 'short',
@@ -251,28 +221,24 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                                                 year: 'numeric'
                                             })
                                         }
-                                    </Typography>
-                                </Box>
-                            </Box>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <Box className="flex items-start gap-2">
+                            <div className="flex items-start gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" component="span">
-                                        Reason:
-                                    </Typography>
-                                    <Typography variant="body2" component="div" fontWeight="500">
+                                <div>
+                                    <span className="text-xs text-gray-600">Reason:</span>
+                                    <div className="text-sm font-medium">
                                         {selectedLeave.reason || 'No reason provided'}
-                                    </Typography>
-                                </Box>
-                            </Box>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 {getLeaveStatusIcon(selectedLeave.status)}
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" component="span">
-                                        Status:
-                                    </Typography>
+                                <div>
+                                    <span className="text-xs text-gray-600">Status:</span>
                                     <Chip 
                                         label={selectedLeave.status || 'Pending'} 
                                         variant="flat" 
@@ -280,10 +246,10 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
                                         size="sm"
                                         className="ml-2"
                                     />
-                                </Box>
-                            </Box>
-                        </Box>
-                    </Box>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 )}
             </Popover>
         </GlassCard>
@@ -436,14 +402,13 @@ const UpdatesCards = () => {
 
     if (loading) {
         return (
-            <Box 
-                sx={{ p: 2 }}
-                component="section"
+            <section 
+                className="p-2"
                 aria-label="Employee updates loading"
             >
-                <Grid container spacing={3}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {[1, 2, 3].map((_, idx) => (
-                        <Grid item xs={12} sm={6} md={4} key={idx}>
+                        <div key={idx}>
                             <HeroCard className="w-full h-full p-4" radius="lg">
                                 <Skeleton className="rounded-lg mb-2" isLoaded={false}>
                                     <div className="h-6 w-2/3 rounded-lg bg-secondary" />
@@ -452,47 +417,43 @@ const UpdatesCards = () => {
                                     <div className="h-32 w-full rounded-lg bg-secondary-200" />
                                 </Skeleton>
                             </HeroCard>
-                        </Grid>
+                        </div>
                     ))}
-                </Grid>
-            </Box>
+                </div>
+            </section>
         );
     }
 
     if (error) {
         return (
-            <Box 
-                sx={{ 
-                    p: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: '200px'
-                }}
-            >
+            <div className="p-2 flex items-center justify-center min-h-[200px]">
                 <HeroCard className="p-4 bg-danger-50 border-danger-200">
-                    <Box className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                         <ExclamationTriangleIcon className="w-5 h-5 text-danger" />
-                        <Typography color="error" variant="body1">
+                        <p className="text-danger text-base">
                             Failed to load updates: {error}
-                        </Typography>
-                    </Box>
+                        </p>
+                    </div>
                 </HeroCard>
-            </Box>
+            </div>
         );
     }
 
     return (
-        <Box 
-            sx={{ p: 2 }}
-            component="section"
+        <section 
+            className="p-2"
             aria-label="Employee Updates Dashboard"
         >
-            <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-stretch">
                 {sectionConfig.map((section, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={section.title} sx={{ display: 'flex' }}>
-                        <Grow in timeout={300 + (index * 100)} style={{ width: '100%' }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, width: '100%' }}>
+                    <div key={section.title} className="flex">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: (index * 0.1), duration: 0.3 }}
+                            className="w-full"
+                        >
+                            <div className="flex flex-col flex-grow w-full">
                                 <UpdateSection 
                                     title={section.title} 
                                     items={section.items} 
@@ -500,31 +461,24 @@ const UpdatesCards = () => {
                                     icon={section.icon}
                                     color={section.color}
                                 />
-                            </Box>
-                        </Grow>
-                    </Grid>
+                            </div>
+                        </motion.div>
+                    </div>
                 ))}
-            </Grid>
+            </div>
             
             {upcomingHoliday && (
-                <Grow in timeout={800}>
-                    <Box sx={{ mt: 3 }}>
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.3 }}
+                >
+                    <div className="mt-3">
                         <GlassCard>
                             <CardHeader
                                 title={
-                                    <Box className="flex items-center gap-3">
-                                        <Box
-                                            sx={{
-                                                bgcolor: '#f59e0b20',
-                                                borderRadius: '12px',
-                                                p: 1,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                minWidth: 40,
-                                                minHeight: 40
-                                            }}
-                                        >
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-amber-100 rounded-xl p-1 flex items-center justify-center min-w-[40px] min-h-[40px]">
                                             <SunIcon 
                                                 style={{ 
                                                     width: '20px', 
@@ -534,31 +488,24 @@ const UpdatesCards = () => {
                                                 }}
                                                 aria-hidden="true"
                                             />
-                                        </Box>
-                                        <Typography 
-                                            variant="h6"
-                                            component="h2"
-                                            sx={{ 
-                                                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                                                fontWeight: 600
-                                            }}
-                                        >
+                                        </div>
+                                        <h2 className="text-base sm:text-lg md:text-xl font-semibold">
                                             Upcoming Holiday
-                                        </Typography>
-                                    </Box>
+                                        </h2>
+                                    </div>
                                 }
                             />
                             <Divider />
-                            <CardContent>
-                                <Box className="flex items-center gap-3">
+                            <CardBody>
+                                <div className="flex items-center gap-3">
                                     
-                                    <Box>
-                                        <Typography variant="body1" fontWeight="600" color="text.primary" className="flex items-center gap-1 mt-1">
+                                    <div>
+                                        <p className="font-semibold text-gray-900 flex items-center gap-1 mt-1">
                                             <InformationCircleIcon className="w-4 h-4" />
                                             {upcomingHoliday.title}
-                                        </Typography>
+                                        </p>
                                         
-                                        <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
+                                        <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                                             <CalendarDaysIcon className="w-4 h-4" />
                                             {new Date(upcomingHoliday.from_date).toLocaleDateString('en-US', {
                                                 month: 'long',
@@ -569,19 +516,19 @@ const UpdatesCards = () => {
                                                 day: 'numeric',
                                                 year: 'numeric'
                                             })}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" className="flex items-center gap-1 mt-1">
+                                        </p>
+                                        <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                                             <Bars3BottomLeftIcon className="w-4 h-4" />
                                             {upcomingHoliday.description}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </CardContent>
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardBody>
                         </GlassCard>
-                    </Box>
-                </Grow>
+                    </div>
+                </motion.div>
             )}
-        </Box>
+        </section>
     );
 };
 

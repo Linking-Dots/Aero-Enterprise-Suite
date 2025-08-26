@@ -1,27 +1,24 @@
 import React, {useState} from "react";
 import {
-    Box,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
+    Button,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
+} from "@heroui/react";
+import { X, Upload, FileText, File, FileImage } from 'lucide-react';
+
 import {toast} from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {Clear, CloudUpload, Description, InsertDriveFile, PictureAsPdf, Upload} from '@mui/icons-material';
 import {useDropzone} from 'react-dropzone';
 
 
 const DailyWorkUploadForm = ({ open, closeModal, setTotalRows, setData }) => {
     const [file, setFile] = useState(null);
     const [processing, setProcessing] = useState(false);
-    const theme = useTheme();
+
 
     const onFileChange = (acceptedFiles) => {
         setFile(acceptedFiles[0]);

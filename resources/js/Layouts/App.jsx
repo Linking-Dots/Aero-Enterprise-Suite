@@ -1,17 +1,11 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { Box, CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import { usePage } from "@inertiajs/react";
-import useTheme from "@/theme.jsx";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../css/theme-transitions.css';
-import '../../css/smooth-animations.css';
 import { Inertia } from '@inertiajs/inertia';
 import { getPages } from '@/Props/pages.jsx';
 import { getSettingsPages } from '@/Props/settings.jsx';
-import { HeroUIProvider } from "@heroui/react";
-import { applyThemeToRoot } from "@/utils/themeUtils.js";
-import {ScrollShadow} from "@heroui/react";
+import { ScrollShadow, Divider } from "@heroui/react";
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Direct imports - eager loading with smooth animations
@@ -25,6 +19,7 @@ import UpdateNotification from '@/Components/UpdateNotification.jsx';
 import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
 import { useVersionManager } from '@/Hooks/useVersionManager.js';
 import AuthGuard from '@/Components/AuthGuard.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 
 // Import service worker manager to trigger registration
 import '@/utils/serviceWorkerManager.js';
@@ -32,14 +27,15 @@ import '@/utils/serviceWorkerManager.js';
 import axios from 'axios';
 
 /**
- * Enhanced App Layout Component with selective memoization
- * Layout preferences are memoized for performance, but page data is always fresh
+ * Enhanced App Layout Component following HeroUI best practices
+ * Redesigned with proper modal portaling and clean layout structure
  */
 const App = React.memo(({ children }) => {
     // ===== STATE MANAGEMENT =====
     const [sessionExpired, setSessionExpired] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [themeDrawerOpen, setThemeDrawerOpen] = useState(false);
     let { auth, app, url } = usePage().props;
     
     // Initialize version manager
@@ -69,36 +65,6 @@ const App = React.memo(({ children }) => {
         }
     });
     
-    const [darkMode, setDarkMode] = useState(() => {
-        try {
-            return localStorage.getItem('darkMode') === 'true';
-        } catch {
-            return false;
-        }
-    });
-    
-    const [themeColor, setThemeColor] = useState(() => {
-        try {
-            const stored = localStorage.getItem('themeColor');
-            return stored ? JSON.parse(stored) : {
-                name: "OCEAN", 
-                primary: "#0ea5e9", 
-                secondary: "#0284c7",
-                gradient: "from-sky-500 to-blue-600",
-                description: "Ocean Blue - Professional & Trustworthy"
-            };
-        } catch {
-            return {
-                name: "OCEAN", 
-                primary: "#0ea5e9", 
-                secondary: "#0284c7",
-                gradient: "from-sky-500 to-blue-600",
-                description: "Ocean Blue - Professional & Trustworthy"
-            };
-        }
-    });
-    
-    const [themeDrawerOpen, setThemeDrawerOpen] = useState(false);
     const [bottomNavHeight, setBottomNavHeight] = useState(0);
     const [loading, setLoading] = useState(false);
 
@@ -118,24 +84,10 @@ const App = React.memo(({ children }) => {
     })();
 
     // ===== LAYOUT COMPONENTS & THEME =====
-    // Theme and responsive breakpoints - hooks called at top level
-    const theme = useTheme(darkMode, themeColor);
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    // Responsive breakpoints
+    const isMobile = useMediaQuery('(max-width: 768px)'); // md breakpoint
 
     // ===== LAYOUT TOGGLE HANDLERS (Memoized for Performance) =====
-    const toggleDarkMode = useCallback(() => {
-        setDarkMode(prev => {
-            const newValue = !prev;
-            localStorage.setItem('darkMode', newValue);
-            return newValue;
-        });
-    }, []);
-    
-    const toggleThemeColor = useCallback((color) => {
-        setThemeColor(color);
-        localStorage.setItem('themeColor', JSON.stringify(color));
-    }, []);
-    
     const toggleThemeDrawer = useCallback(() => {
         setThemeDrawerOpen(prev => !prev);
     }, []);
@@ -192,41 +144,13 @@ const App = React.memo(({ children }) => {
 
     // Apply theme to root with optimized scheduling
     useEffect(() => {
-        // Apply theme immediately
-        applyThemeToRoot(themeColor, darkMode);
-        
-        // Apply HeroUI theme attribute for proper component theming
-        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-        
         // Initialize background pattern from localStorage
         const savedBackground = localStorage.getItem('aero-hr-background');
         const backgroundPattern = savedBackground || 'pattern-glass-1'; 
         
         // Apply background pattern immediately
         document.documentElement.setAttribute('data-background', backgroundPattern);
-        
-        // Apply theme mode for background variations
-        document.body.setAttribute('data-theme-mode', darkMode ? 'dark' : 'light');
-        
-        // Force immediate background application with theme colors for overlays
-        const root = document.documentElement;
-        root.style.setProperty('--theme-primary-rgb', hexToRgb(themeColor.primary));
-        root.style.setProperty('--theme-secondary-rgb', hexToRgb(themeColor.secondary));
-        root.style.setProperty('--theme-primary', themeColor.primary);
-        root.style.setProperty('--theme-secondary', themeColor.secondary);
-    }, [darkMode, themeColor]);
-
-    // Helper function to convert hex to RGB
-    const hexToRgb = (hex) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        if (result) {
-            const r = parseInt(result[1], 16);
-            const g = parseInt(result[2], 16);
-            const b = parseInt(result[3], 16);
-            return `${r}, ${g}, ${b}`;
-        }
-        return '14, 165, 233'; // fallback to ocean blue
-    };
+    }, []);
 
     // Handle responsive sidebar behavior
     useEffect(() => {
@@ -334,12 +258,8 @@ const App = React.memo(({ children }) => {
             <Header
                 url={url}
                 pages={pages}
-                darkMode={darkMode}
-                toggleDarkMode={toggleDarkMode}
-                toggleThemeDrawer={toggleThemeDrawer}
                 sideBarOpen={sideBarOpen}
                 toggleSideBar={toggleSideBar}
-                themeDrawerOpen={themeDrawerOpen}
             />
         </FadeIn>
     ) : null;
@@ -375,10 +295,17 @@ const App = React.memo(({ children }) => {
 
     // ===== RENDER =====
     return (
-        <AuthGuard auth={auth} url={url}>
-            <ThemeProvider theme={theme}>
-                <HeroUIProvider>
-                    {/* Version Update Notification */}
+        <>
+            {/* Theme Settings Drawer - Rendered outside layout to avoid z-index conflicts */}
+            <ThemeSettingDrawer
+                isOpen={themeDrawerOpen}
+                onClose={toggleThemeDrawer}
+            />
+            
+            <AuthGuard auth={auth} url={url}>
+                {/* HeroUI Layout Container - No background to allow theme system control */}
+                <div className="relative w-full h-screen overflow-hidden">
+                    {/* Global Overlays and Modals - Positioned outside main layout */}
                     <UpdateNotification
                         isVisible={isUpdateAvailable}
                         onUpdate={handleUpdate}
@@ -387,20 +314,11 @@ const App = React.memo(({ children }) => {
                         version={currentVersion}
                     />
                     
-                    {/* Global modals and overlays */}
                     {sessionExpired && (
                         <SessionExpiredModal setSessionExpired={setSessionExpired}/>
                     )}
                     
-                    <ThemeSettingDrawer
-                        toggleThemeColor={toggleThemeColor}
-                        themeColor={themeColor}
-                        darkMode={darkMode}
-                        toggleDarkMode={toggleDarkMode}
-                        toggleThemeDrawer={toggleThemeDrawer}
-                        themeDrawerOpen={themeDrawerOpen}
-                    />
-                    
+                    {/* Toast Notifications - Global positioning */}
                     <ToastContainer
                         position="top-center"
                         autoClose={5000}
@@ -413,165 +331,147 @@ const App = React.memo(({ children }) => {
                         pauseOnHover
                         theme="colored"
                     />
-                    
-                    <CssBaseline />
-                    
-                    {/* Main layout container */}
-                    <main id="app-main" className={`${darkMode ? "dark" : "light"}`}>
-                        
-                        <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-                            {/* Mobile overlay */}
-                            {isMobile && sideBarOpen && (
-                                <Box
-                                    onClick={toggleSideBar}
-                                    sx={{
-                                        position: 'fixed',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        bgcolor: 'rgba(0,0,0,0.5)',
-                                        zIndex: 1199,
-                                        transition: 'opacity 0.2s ease',
-                                        willChange: 'opacity',
-                                    }}
-                                />
-                            )}
-                            
-                            {/* Persistent Sidebar */}
-                            {sidebarContent && (
-                                <Box
-                                    sx={{
-                                        position: 'fixed',
-                                        top: 0,
-                                        left: 0,
-                                        height: '100vh', // Fixed to viewport height
-                                        zIndex: 1200,
-                                        width: isMobile ? '280px' : '280px',
-                                        transform: sideBarOpen ? 'translate3d(0, 0, 0)' : 'translate3d(-100%, 0, 0)',
-                                        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        overflow: 'hidden', // Prevent container scrolling
-                                        willChange: 'transform',
-                                        backfaceVisibility: 'hidden',
-                                        WebkitBackfaceVisibility: 'hidden',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        boxShadow: sideBarOpen ? '0 0 20px rgba(0,0,0,0.1)' : 'none',
-                                    }}
-                                >
-                                    {sidebarContent}
-                                </Box>
-                            )}
 
-                            {/* Main content area - this is where page content updates */}
-                            <Box
-                                ref={contentRef}
-                                sx={{
-                                    pb: `${bottomNavHeight}px`,
-                                    display: 'flex',
-                                    flex: 1,
-                                    transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    marginLeft: { 
-                                        xs: 0, 
-                                        md: sideBarOpen ? '280px' : '0' 
-                                    },
-                                    width: { 
-                                        xs: '100%', 
-                                        md: sideBarOpen ? 'calc(100% - 280px)' : '100%' 
-                                    },
-                                    minWidth: 0,
-                                    maxWidth: '100vw',
-                                    willChange: 'margin, width',
-                                    flexDirection: 'column',
-                                    height: '100vh',
-                                    overflow: 'hidden', // Changed from 'auto' to 'hidden'
-                                    position: 'relative',
-                                }}
+                {/* Floating Theme Settings Button - Only show for authenticated users */}
+                {currentAuth?.user && (
+                    <div className="fixed bottom-8 right-8 z-50">
+                        <motion.button
+                            onClick={toggleThemeDrawer}
+                            className="
+                                flex items-center justify-center
+                                w-16 h-16 
+                                bg-primary text-primary-foreground
+                                rounded-full shadow-xl hover:shadow-2xl
+                                transition-all duration-300 ease-out
+                                hover:scale-110 active:scale-95
+                                border-3 border-primary-200
+                                backdrop-blur-sm
+                                relative
+                            "
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5, duration: 0.4, type: "spring", stiffness: 260, damping: 20 }}
+                        >
+                            <svg 
+                                className="w-6 h-6" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
                             >
-                            
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                                />
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+                                />
+                            </svg>
+                        </motion.button>
+                    </div>
+                )}
+                
+                {/* Main Application Layout */}
+                <div className="flex h-full overflow-hidden">
+                    {/* Mobile Sidebar Overlay */}
+                    <AnimatePresence>
+                        {isMobile && sideBarOpen && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={toggleSideBar}
+                                className="fixed inset-0 bg-black/50 z-[40] lg:hidden"
+                            />
+                        )}
+                    </AnimatePresence>
+                    
+                    {/* Sidebar Container - Different behavior for desktop vs mobile */}
+                    {sideBarOpen && (
+                        <aside
+                            className={`
+                                ${isMobile 
+                                    ? 'fixed top-0 left-0 h-full z-[50] w-[280px] transform transition-transform duration-300 ease-out translate-x-0' 
+                                    : 'relative w-[280px] h-full'
+                                }
+                                border-r border-divider
+                            `}
+                        >
+                            {sidebarContent}
+                        </aside>
+                    )}
 
-                                {/* Persistent Header */}
-                                <Box
-                                    sx={{
-                                        position: 'sticky',
-                                        top: 0,
-                                        zIndex: 5,
-                                    
-                                    }}
-                                >
-                                    {headerContent}
-                                    {breadcrumbContent}
-                                </Box>
-                                
-                                {/* Dynamic page content with smooth transitions */}
-                                <Box
-                                    ref={mainContentRef}
-                                    component="section"
-                                    sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        overflow: 'auto',
-                                        position: 'relative',
-                                        WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-                                        scrollbarWidth: 'thin',
-                                        '&::-webkit-scrollbar': {
-                                            width: '6px',
-                                        },
-                                        '&::-webkit-scrollbar-thumb': {
-                                            backgroundColor: theme => theme.palette.mode === 'dark' 
-                                                ? 'rgba(255,255,255,0.2)' 
-                                                : 'rgba(0,0,0,0.2)',
-                                            borderRadius: '3px',
-                                        },
-                                    
-                                    }}
-                                    role="main"
-                                    aria-label="Main content"
-                                >
-                                    <ScrollShadow>
+                    {/* Main Content Container - Expands when sidebar is hidden */}
+                    <main
+                        ref={contentRef}
+                        className="flex flex-1 flex-col h-full overflow-hidden"
+                        style={{ 
+                            paddingBottom: `${bottomNavHeight}px`
+                        }}
+                    >
+                        {/* Header Section */}
+                        <header className="sticky top-0 z-[30] border-b border-divider">
+                            {headerContent}
+                            <Divider />
+                            {breadcrumbContent}
+                        </header>
+                        
+                        {/* Page Content Section - No background to allow theme control */}
+                        <section 
+                            ref={mainContentRef}
+                            className="flex-1 overflow-auto"
+                            role="main"
+                            aria-label="Main content"
+                        >
+                            <ScrollShadow 
+                                className="h-full"
+                                hideScrollBar={false}
+                                size={40}
+                            >
+                                <div className="min-h-full p-4">
+                                    <AnimatePresence mode="wait">
                                         <motion.div
-                                            key={url} // Re-trigger animation on route change
-                                            initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                                            key={url}
+                                            initial={{ opacity: 0, y: 20 }}
                                             animate={{ 
                                                 opacity: 1, 
-                                                y: 0, 
-                                                scale: 1,
+                                                y: 0,
                                                 transition: {
-                                                    duration: 0.4,
+                                                    duration: 0.3,
                                                     ease: "easeOut"
                                                 }
                                             }}
                                             exit={{ 
                                                 opacity: 0, 
-                                                y: -5, 
-                                                scale: 1.01,
+                                                y: -10,
                                                 transition: {
                                                     duration: 0.2,
                                                     ease: "easeIn"
                                                 }
                                             }}
-                                            style={{
-                                                width: '100%',
-                                                maxWidth: '100%',
-                                                margin: '0 auto'
-                                            }}
+                                            className="w-full"
                                         >
                                             {children}
                                         </motion.div>
-                                    </ScrollShadow>
-                                </Box>
-                                
-                               
-                                
-                                {/* Persistent Bottom Navigation */}
-                                {bottomNavContent}
-                            </Box>
-                        </Box>
+                                    </AnimatePresence>
+                                </div>
+                            </ScrollShadow>
+                        </section>
+                        
+                        {/* Bottom Navigation */}
+                        {bottomNavContent}
                     </main>
-                </HeroUIProvider>
-            </ThemeProvider>
+                </div>
+            </div>
         </AuthGuard>
+        </>
     );
 });
 

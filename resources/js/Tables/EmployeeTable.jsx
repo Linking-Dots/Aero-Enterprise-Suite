@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link, router } from '@inertiajs/react';
-import { useTheme } from "@mui/material/styles";
 import { toast } from "react-toastify";
-import { CircularProgress } from "@mui/material";
 import axios from 'axios';
 import { 
   Table, 
@@ -66,7 +64,18 @@ const EmployeeTable = ({
   updateEmployeeOptimized,
   deleteEmployeeOptimized
 }) => {
-  const theme = useTheme();
+  // Custom theme for glassmorphism styling
+  const glassTheme = {
+    glassCard: {
+      background: 'rgba(15, 20, 25, 0.15)',
+      border: '1px solid rgba(255, 255, 255, 0.2)'
+    },
+    palette: {
+      text: {
+        primary: '#ffffff'
+      }
+    }
+  };
   
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -112,7 +121,7 @@ const EmployeeTable = ({
         render() {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <CircularProgress size={16} />
+              <Spinner size="sm" />
               <span style={{ marginLeft: '8px' }}>Updating department...</span>
             </div>
           );
@@ -120,9 +129,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       success: {
@@ -132,9 +141,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       error: {
@@ -144,9 +153,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
     });
@@ -179,7 +188,7 @@ const EmployeeTable = ({
         render() {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <CircularProgress size={16} />
+              <Spinner size="sm" />
               <span style={{ marginLeft: '8px' }}>Updating designation...</span>
             </div>
           );
@@ -187,9 +196,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       success: {
@@ -199,9 +208,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       error: {
@@ -211,9 +220,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
     });
@@ -252,7 +261,7 @@ const EmployeeTable = ({
         render() {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <CircularProgress size={16} />
+              <Spinner size="sm" />
               <span style={{ marginLeft: '8px' }}>Updating attendance type...</span>
             </div>
           );
@@ -260,9 +269,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       success: {
@@ -272,9 +281,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       error: {
@@ -284,9 +293,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
     });
@@ -343,7 +352,7 @@ const EmployeeTable = ({
         render() {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <CircularProgress size={16} />
+              <Spinner size="sm" />
               <span style={{ marginLeft: '8px' }}>Deleting employee...</span>
             </div>
           );
@@ -351,9 +360,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       success: {
@@ -363,9 +372,9 @@ const EmployeeTable = ({
         icon: '✅',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
       error: {
@@ -375,9 +384,9 @@ const EmployeeTable = ({
         icon: '❌',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: theme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: theme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: theme.palette?.text?.primary || '#ffffff',
+          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
+          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
+          color: glassTheme.palette?.text?.primary || '#ffffff',
         },
       },
     });

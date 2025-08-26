@@ -1,65 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
     Card,
-    CardContent,
-    Typography,
+    CardBody,
+    CardHeader,
     Button,
-    CircularProgress,
-    Alert,
+    Spinner,
     Chip,
-    Grid,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemIcon,
     Divider,
-    Paper,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
     Avatar,
-    Stack,
-    Fab,
     Tooltip,
     Badge,
-    LinearProgress,
-    Collapse
-} from '@mui/material';
+    Progress
+} from '@heroui/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import GlassDialog from '@/Components/GlassDialog';
 import {
-    AccessTime,
-    LocationOn,
+    Clock,
+    MapPin,
     Wifi,
     QrCode,
     CheckCircle,
-    Error,
-    PlayArrow,
-    Stop,
-    Schedule,
-    Today,
-    Person,
+    AlertCircle,
+    Play,
+    Square,
+    Calendar,
+    CalendarDays,
+    User,
     Settings,
-    Refresh,
-    TimerOutlined,
-    WorkOutline,
+    RotateCcw,
+    Timer,
+    Briefcase,
     TrendingUp,
-    ExpandMore,
-    ExpandLess,
-    Security,
-    SignalWifi4Bar,
-    GpsFixed,
-    Language,
-    Close
-} from '@mui/icons-material';
-import { useTheme, alpha } from '@mui/material/styles';
+    ChevronDown,
+    ChevronUp,
+    Shield,
+    Signal,
+    Navigation,
+    Globe,
+    X
+} from 'lucide-react';
+import useTheme from '@/theme';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { usePage } from '@inertiajs/react';
 import GlassCard from './GlassCard';
 import ProfileAvatar from './ProfileAvatar';
+
+// Utility function to replace MUI's alpha function
+const alpha = (color, opacity) => {
+    if (color.startsWith('#')) {
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return color.replace(/[\d.]+\)$/, `${opacity})`);
+};
 
 const PunchStatusCard = () => {
     const theme = useTheme();

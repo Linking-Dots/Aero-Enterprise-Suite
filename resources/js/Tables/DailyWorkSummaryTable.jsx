@@ -1,13 +1,16 @@
 import React from 'react';
-import {
-    Box,
-    Typography,
-    useMediaQuery,
-    CardContent,
-    CardHeader,
-} from "@mui/material";
-import { useTheme, alpha } from "@mui/material/styles";
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage } from "@inertiajs/react";
+
+// Alpha utility function for creating transparent colors
+const alpha = (color, opacity) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 import {
     Table,
     TableHeader,
@@ -44,7 +47,7 @@ import GlassCard from "@/Components/GlassCard";
 
 const DailyWorkSummaryTable = ({ filteredData }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
+    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -98,19 +101,19 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
 
         return (
             <GlassCard className="mb-2" shadow="sm">
-                <CardContent className="p-3">
-                    <Box className="flex items-start justify-between mb-3">
-                        <Box className="flex items-center gap-3 flex-1">
-                            <Box className="flex flex-col">
-                                <Typography variant="body2" fontWeight="bold" className="text-primary">
+                <CardBody className="p-3">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-primary">
                                     {formatDate(summary.date)}
-                                </Typography>
-                                <Typography variant="caption" color="textSecondary">
+                                </span>
+                                <span className="text-xs text-default-500">
                                     {summary.totalDailyWorks} total works
-                                </Typography>
-                            </Box>
-                        </Box>
-                        <Box className="flex items-center gap-2">
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
                             <Chip
                                 size="sm"
                                 variant="flat"
@@ -119,96 +122,96 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                             >
                                 {completionPercentage}%
                             </Chip>
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
 
                     <Divider className="my-3" />
 
                     {/* Progress bars */}
-                    <Box className="space-y-3 mb-3">
-                        <Box>
-                            <Box className="flex justify-between items-center mb-1">
-                                <Typography variant="caption" className="text-xs">
+                    <div className="space-y-3 mb-3">
+                        <div>
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs">
                                     Completion Progress
-                                </Typography>
-                                <Typography variant="caption" className="text-xs font-medium">
+                                </span>
+                                <span className="text-xs font-medium">
                                     {summary.completed}/{summary.totalDailyWorks}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                             <Progress
                                 value={parseFloat(completionPercentage)}
                                 color={getPercentageColor(parseFloat(completionPercentage))}
                                 size="sm"
                                 className="w-full"
                             />
-                        </Box>
+                        </div>
 
                         {summary.rfiSubmissions > 0 && (
-                            <Box>
-                                <Box className="flex justify-between items-center mb-1">
-                                    <Typography variant="caption" className="text-xs">
+                            <div>
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs text-default-600">
                                         RFI Submission
-                                    </Typography>
-                                    <Typography variant="caption" className="text-xs font-medium">
+                                    </span>
+                                    <span className="text-xs font-medium">
                                         {summary.rfiSubmissions}/{summary.completed}
-                                    </Typography>
-                                </Box>
+                                    </span>
+                                </div>
                                 <Progress
                                     value={parseFloat(rfiSubmissionPercentage)}
                                     color={getPercentageColor(parseFloat(rfiSubmissionPercentage))}
                                     size="sm"
                                     className="w-full"
                                 />
-                            </Box>
+                            </div>
                         )}
-                    </Box>
+                    </div>
 
                     {/* Work type breakdown */}
-                    <Box className="grid grid-cols-3 gap-2">
-                        <Box className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
                             {getWorkTypeIcon("embankment", summary.embankment)}
-                            <Typography variant="caption" className="text-xs mt-1">
+                            <span className="text-xs mt-1 text-default-600">
                                 Embankment
-                            </Typography>
-                            <Typography variant="body2" fontWeight="medium" className="text-xs">
+                            </span>
+                            <span className="text-xs font-medium">
                                 {summary.embankment}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                         
-                        <Box className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
                             {getWorkTypeIcon("structure", summary.structure)}
-                            <Typography variant="caption" className="text-xs mt-1">
+                            <span className="text-xs mt-1 text-default-600">
                                 Structure
-                            </Typography>
-                            <Typography variant="body2" fontWeight="medium" className="text-xs">
+                            </span>
+                            <span className="text-xs font-medium">
                                 {summary.structure}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                         
-                        <Box className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
                             {getWorkTypeIcon("pavement", summary.pavement)}
-                            <Typography variant="caption" className="text-xs mt-1">
+                            <span className="text-xs mt-1 text-default-600">
                                 Pavement
-                            </Typography>
-                            <Typography variant="body2" fontWeight="medium" className="text-xs">
+                            </span>
+                            <span className="text-xs font-medium">
                                 {summary.pavement}
-                            </Typography>
-                        </Box>
-                    </Box>
+                            </span>
+                        </div>
+                    </div>
 
                     {/* Additional metrics */}
                     <Divider className="my-3" />
-                    <Box className="flex justify-between text-xs">
-                        <Box className="flex items-center gap-1">
+                    <div className="flex justify-between text-xs">
+                        <div className="flex items-center gap-1">
                             <ArrowPathSolid className="w-3 h-3 text-warning" />
                             <span>Resubmissions: {summary.resubmissions}</span>
-                        </Box>
-                        <Box className="flex items-center gap-1">
+                        </div>
+                        <div className="flex items-center gap-1">
                             <ClockSolid className="w-3 h-3 text-danger" />
                             <span>Pending: {pending}</span>
-                        </Box>
-                    </Box>
-                </CardContent>
+                        </div>
+                    </div>
+                </CardBody>
             </GlassCard>
         );
     };
@@ -226,36 +229,36 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
             case "date":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <CalendarDaysIcon className="w-3 h-3 text-default-500" />
-                            <Typography variant="body2" className="text-sm font-medium">
+                            <span className="text-sm font-medium">
                                 {formatDate(summary.date)}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "totalDailyWorks":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <DocumentTextIcon className="w-3 h-3 text-primary" />
-                            <Typography variant="body2" className="text-sm font-bold">
+                            <span className="text-sm font-bold">
                                 {summary.totalDailyWorks}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "resubmissions":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <ArrowPathSolid className="w-3 h-3 text-warning" />
-                            <Typography variant="body2" className="text-sm">
+                            <span className="text-sm">
                                 {summary.resubmissions}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
@@ -264,43 +267,43 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
             case "pavement":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             {getWorkTypeIcon(columnKey, summary[columnKey])}
-                            <Typography variant="body2" className="text-sm">
+                            <span className="text-sm">
                                 {summary[columnKey]}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "completed":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <CheckCircleSolid className="w-3 h-3 text-success" />
-                            <Typography variant="body2" className="text-sm font-medium text-success">
+                            <span className="text-sm font-medium text-success">
                                 {summary.completed}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "pending":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <ClockSolid className="w-3 h-3 text-danger" />
-                            <Typography variant="body2" className="text-sm font-medium text-danger">
+                            <span className="text-sm font-medium text-danger">
                                 {pending}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "completionPercentage":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <Progress
                                 value={parseFloat(completionPercentage)}
                                 color={getPercentageColor(parseFloat(completionPercentage))}
@@ -315,26 +318,26 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                             >
                                 {completionPercentage}%
                             </Chip>
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
             case "rfiSubmissions":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <DocumentIcon className="w-3 h-3 text-info" />
-                            <Typography variant="body2" className="text-sm">
+                            <span className="text-sm">
                                 {summary.rfiSubmissions}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "rfiSubmissionPercentage":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {summary.rfiSubmissions > 0 ? (
                                 <>
                                     <Progress
@@ -353,11 +356,11 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                                     </Chip>
                                 </>
                             ) : (
-                                <Typography variant="body2" className="text-sm text-default-400">
+                                <span className="text-sm text-default-400">
                                     -
-                                </Typography>
+                                </span>
                             )}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
@@ -382,18 +385,18 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
 
     if (isMobile) {
         return (
-            <Box className="space-y-4">
+            <div className="space-y-4">
                 <ScrollShadow className="max-h-[70vh]">
                     {filteredData?.map((summary, index) => (
                         <MobileSummaryCard key={index} summary={summary} />
                     ))}
                 </ScrollShadow>
-            </Box>
+            </div>
         );
     }
 
     return (
-        <Box sx={{ maxHeight: "70vh", overflowY: "auto" }}>
+        <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
@@ -418,25 +421,25 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                                 key={column.uid} 
                                 className="bg-default-100/80 backdrop-blur-md"
                             >
-                                <Box className="flex items-center gap-1">
+                                <div className="flex items-center gap-1">
                                     {column.icon && <column.icon className="w-3 h-3" />}
                                     <span className="text-xs font-semibold">{column.name}</span>
-                                </Box>
+                                </div>
                             </TableColumn>
                         )}
                     </TableHeader>
                     <TableBody 
                         items={filteredData || []}
                         emptyContent={
-                            <Box className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <ChartBarIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <Typography variant="h6" color="textSecondary">
+                                <h6 className="text-lg font-semibold text-default-600 mb-2">
                                     No summary data found
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
+                                </h6>
+                                <p className="text-sm text-default-500">
                                     No work summary available for the selected period
-                                </Typography>
-                            </Box>
+                                </p>
+                            </div>
                         }
                     >
                         {(summary) => (
@@ -447,7 +450,7 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                     </TableBody>
                 </Table>
             </ScrollShadow>
-        </Box>
+        </div>
     );
 };
 

@@ -1,35 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Typography,
-    Grid,
-    Button,
-    CardContent,
+    Card,
+    CardBody,
     CardHeader,
-    TextField,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    IconButton,
-    FormControl,
-    InputLabel,
-    MenuItem,
+    Button,
+    Input,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
     Select,
-    OutlinedInput,
+    SelectItem,
     Chip,
-    FormHelperText,
-    Grow,
-    CardActions,
-    Divider
-} from '@mui/material';
-import LoadingButton from "@mui/lab/LoadingButton";
+    Switch,
+    Divider,
+    Spacer
+} from '@heroui/react';
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
 import GlassCard from '@/Components/GlassCard';
 import { PlusIcon, PencilSquareIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { toast } from "react-toastify";
-import { useTheme } from "@mui/material/styles";
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMediaQuery } from '@/Hooks/useMediaQuery';
 import axios from 'axios';
 
 const weekDays = [
@@ -38,11 +33,11 @@ const weekDays = [
 ];
 
 const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attendanceTypes: initialTypes }) => {
-    const theme = useTheme();
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [settings, setSettings] = useState(initialSettings || {});
     const [types, setTypes] = useState(initialTypes || []);
-    const [typeDialogOpen, setTypeDialogOpen] = useState(false);
-    const [waypointDialogOpen, setWaypointDialogOpen] = useState(false);
+    const typeModal = useDisclosure();
+    const waypointModal = useDisclosure();
     const [editingType, setEditingType] = useState(null);
     const [typeForm, setTypeForm] = useState({ config: {} });
 
@@ -131,11 +126,11 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
         } else {
             setEditingType(type);
             setTypeForm({ config: type.config || {} });
-            setTypeDialogOpen(true);
+            typeModal.onOpen();
         }
     };
 
-    const closeTypeDialog = () => setTypeDialogOpen(false);
+    const closeTypeDialog = () => typeModal.onClose();
 
     const handleTypeConfigChange = (key, value) => {
         setTypeForm(f => ({
@@ -176,11 +171,11 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
                 });
             }
         }
-        setWaypointDialogOpen(true);
+        waypointModal.onOpen();
     };
 
     const closeWaypointDialog = () => {
-        setWaypointDialogOpen(false);
+        waypointModal.onClose();
         setEditingType(null);
         // Reset form
         setWaypointForm({
@@ -320,33 +315,31 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
     return (
         <>
             <Head title={title} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <Grow in>
-                            <GlassCard>
-                                <CardHeader 
-                                    title="Attendance Settings"
-                                
-                                />
-                                <form onSubmit={handleSettingsSubmit}>
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom>Office Timing</Typography>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    label="Office Start Time"
-                                                    type="time"
-                                                    value={formData.office_start_time}
-                                                    onChange={(e) => handleChange('office_start_time', e.target.value)}
-                                                    fullWidth
-                                                    InputLabelProps={{ shrink: true }}
-                                                    error={Boolean(errors.office_start_time)}
-                                                    helperText={errors.office_start_time}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
+            <div className="flex justify-center p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl w-full">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full"
+                    >
+                        <GlassCard>
+                            <CardHeader className="pb-0">
+                                <h3 className="text-xl font-bold">Attendance Settings</h3>
+                            </CardHeader>
+                            <form onSubmit={handleSettingsSubmit}>
+                                <CardBody className="space-y-6">
+                                    <div>
+                                        <h4 className="text-lg font-semibold mb-4">Office Timing</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <Input
+                                                label="Office Start Time"
+                                                type="time"
+                                                value={formData.office_start_time}
+                                                onChange={(e) => handleChange('office_start_time', e.target.value)}
+                                                isInvalid={Boolean(errors.office_start_time)}
+                                                errorMessage={errors.office_start_time}
+                                            />
+                                            <Input
                                                     label="Office End Time"
                                                     type="time"
                                                     value={formData.office_end_time}
@@ -356,30 +349,28 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
                                                     error={Boolean(errors.office_end_time)}
                                                     helperText={errors.office_end_time}
                                                 />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
+                                            </div>
+                                            <div>
+                                                <Input
                                                     label="Break Time Duration (minutes)"
                                                     type="number"
                                                     value={formData.break_time_duration}
                                                     onChange={(e) => handleChange('break_time_duration', parseInt(e.target.value))}
-                                                    fullWidth
-                                                    error={Boolean(errors.break_time_duration)}
-                                                    helperText={errors.break_time_duration}
+                                                    isInvalid={Boolean(errors.break_time_duration)}
+                                                    errorMessage={errors.break_time_duration}
                                                 />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
+                                            </div>
+                                            <div>
+                                                <Input
                                                     label="Late Mark After (minutes)"
                                                     type="number"
                                                     value={formData.late_mark_after}
                                                     onChange={(e) => handleChange('late_mark_after', parseInt(e.target.value))}
-                                                    fullWidth
-                                                    error={Boolean(errors.late_mark_after)}
-                                                    helperText={errors.late_mark_after}
+                                                    isInvalid={Boolean(errors.late_mark_after)}
+                                                    errorMessage={errors.late_mark_after}
                                                 />
-                                            </Grid>
-                                        </Grid>
+                                            </div>
+                                        </div>
 
                                         <Typography variant="h6" gutterBottom sx={{ marginTop: 2 }}>Attendance Rules</Typography>
                                         <Grid container spacing={3}>
@@ -407,9 +398,9 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
                                             </Grid>
                                         </Grid>
 
-                                        <Typography variant="h6" gutterBottom sx={{ marginTop: 2 }}>Weekend Settings</Typography>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12}>
+                                        <h3 className="text-lg font-semibold mb-4">Weekend Settings</h3>
+                                        <div className="grid grid-cols-1 gap-6">
+                                            <div>
                                                 <FormControl fullWidth>
                                                     <InputLabel id="weekend-days">Weekend Days</InputLabel>
                                                     <Select
@@ -445,40 +436,42 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
                                                             </MenuItem>
                                                         ))}
                                                     </Select>
-                                                    <FormHelperText>{errors.weekend_days}</FormHelperText>
+                                                    {errors.weekend_days && (
+                                                        <p className="text-xs text-danger mt-1">{errors.weekend_days}</p>
+                                                    )}
                                                 </FormControl>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
+                                            </div>
+                                        </div>
+                                    </CardBody>
 
-                                    <CardActions sx={{ justifyContent: 'center' }}>
-                                        <LoadingButton
-                                            loading={loading}
-                                            sx={{
-                                                borderRadius: '50px',
-                                                padding: '6px 16px',
-                                            }}
-                                            variant="outlined"
+                                    <div className="flex justify-center px-6 pb-6">
+                                        <Button
+                                            isLoading={loading}
                                             color="primary"
+                                            variant="solid"
                                             type="submit"
+                                            className="rounded-full px-8 py-3"
                                         >
                                             Save
-                                        </LoadingButton>
-                                    </CardActions>
+                                        </Button>
+                                    </div>
                                 </form>
                             </GlassCard>
-                        </Grow>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                        </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full"
+                    >
                         <GlassCard>
                             <CardHeader
                                 title="Attendance Types"
                                 
                             />
-                            <CardContent>
-                                <Grid container spacing={2}>
+                            <CardBody>
+                                <div className="space-y-4">
                                     {types.map(type => (
-                                        <Grid item xs={12} key={type.id}>
+                                        <div key={type.id}>
                                             <Box
                                                 sx={{
                                                     display: 'flex',
@@ -523,14 +516,14 @@ const AttendanceSettings = ({ title, attendanceSettings: initialSettings, attend
                                                     </IconButton>
                                                 </Box>
                                             </Box>
-                                        </Grid>
+                                        </div>
                                     ))}
-                                </Grid>
-                            </CardContent>
+                                </div>
+                            </CardBody>
                         </GlassCard>
-                    </Grid>
-                </Grid>
-            </Box>
+                    </motion.div>
+                </div>
+            </div>
 
             {/* Regular Type Config Dialog */}
             <Dialog open={typeDialogOpen} onClose={closeTypeDialog} maxWidth="sm" fullWidth>

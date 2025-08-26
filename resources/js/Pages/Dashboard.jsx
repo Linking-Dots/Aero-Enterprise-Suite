@@ -3,20 +3,14 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Direct imports - eager loading
-import TimeSheetTable from '@/Tables/TimeSheetTable.jsx';
-import UserLocationsCard from '@/Components/UserLocationsCard.jsx';
-import UpdatesCards from '@/Components/UpdatesCards.jsx';
-import HolidayCard from '@/Components/HolidayCard.jsx';
-import StatisticCard from '@/Components/StatisticCard.jsx';
+// import TimeSheetTable from '@/Tables/TimeSheetTable.jsx';
+// import UserLocationsCard from '@/Components/UserLocationsCard.jsx';
+// import UpdatesCards from '@/Components/UpdatesCards.jsx';
+// import StatisticCard from '@/Components/StatisticCard.jsx';
 import PunchStatusCard from '@/Components/PunchStatusCard.jsx';
 import App from "@/Layouts/App.jsx";
-import { Grid, Box } from "@mui/material";
 
-import { 
-    HomeIcon, 
-    CalendarDaysIcon,
-    ChartBarIcon 
-} from '@heroicons/react/24/outline';
+
 
 export default function Dashboard({ auth }) {
 
@@ -112,7 +106,7 @@ export default function Dashboard({ auth }) {
         setUpdateMap(prev => !prev);
     };
 
-    return (
+    return ( 
         <>
             <Head title="Dashboard" />
             <motion.div
@@ -121,16 +115,13 @@ export default function Dashboard({ auth }) {
                 animate="visible"
                 
             >
-                <Box sx={{ 
-                    width: '100%',
-                    // Remove extra padding since App.jsx now provides consistent padding
-                }}>
+                <div className="w-full">
                     {/*<NoticeBoard/>*/}
                     <motion.div key="main-grid" variants={itemVariants}>
-                        <Grid container spacing={2}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Punch Status Card - for employees and self-service users */}
                             {hasEveryPermission(['attendance.own.punch', 'attendance.own.view']) &&
-                                <Grid key="punch-status-grid" item xs={12} md={6} sx={{ display: 'flex' }}>
+                                <div key="punch-status-grid" className="flex">
                                     <motion.div
                                         key="punch-status-card"
                                         variants={staggerItemVariants}
@@ -143,11 +134,11 @@ export default function Dashboard({ auth }) {
                                     >
                                         <PunchStatusCard handlePunchSuccess={handlePunchSuccess} />
                                     </motion.div>
-                                </Grid>
+                                </div>
                             }
-                            {/* Statistics Card - for users with dashboard access */}
+                            {/* Statistics Card - for users with dashboard access
                             {hasPermission('core.dashboard.view') &&
-                                <Grid key="statistics-grid" item xs={12} md={6} sx={{ display: 'flex' }}>
+                                <div key="statistics-grid" className="flex">
                                     <motion.div
                                         key="statistics-card"
                                         variants={staggerItemVariants}
@@ -160,13 +151,13 @@ export default function Dashboard({ auth }) {
                                     >
                                         <StatisticCard />
                                     </motion.div>
-                                </Grid>
-                            }
-                        </Grid>
+                                </div>
+                            } */}
+                        </div>
                     </motion.div>
                     
                     {/* Admin/Manager level components */}
-                    {hasAnyPermission(['attendance.view', 'employees.view']) && (
+                    {/* {hasAnyPermission(['attendance.view', 'employees.view']) && (
                         <motion.div
                             variants={containerVariants}
                             initial="hidden"
@@ -194,10 +185,10 @@ export default function Dashboard({ auth }) {
                                 />
                             </motion.div>
                         </motion.div>
-                    )}
+                    )} */}
                     
                     {/* Updates and holidays - available to all authenticated users */}
-                    {hasPermission('core.updates.view') && (
+                    {/* {hasPermission('core.updates.view') && (
                         <motion.div
                             key="updates-section"
                             variants={staggerItemVariants}
@@ -207,10 +198,10 @@ export default function Dashboard({ auth }) {
                         >
                             <UpdatesCards />
                         </motion.div>
-                    )}
+                    )} */}
                     
                 
-                </Box>
+                </div>
             </motion.div>
         </>
     );

@@ -1,31 +1,20 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     Avatar,
-    Box,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormControlLabel,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
+    Button,
+    Input,
     Select,
+    SelectItem,
     Switch,
-    TextField,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from "@mui/lab/LoadingButton";
+    Spinner
+} from "@heroui/react";
+import { X } from 'lucide-react';
 import { 
     CalendarDaysIcon, 
     ExclamationTriangleIcon,
     CheckCircleIcon 
 } from '@heroicons/react/24/outline';
-import { useTheme } from "@mui/material/styles";
+
 import { usePage } from '@inertiajs/react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -46,7 +35,7 @@ const BulkLeaveModal = ({
     publicHolidays = []
 }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
+
     
     // Form state
     const [selectedDates, setSelectedDates] = useState([]);
@@ -370,10 +359,10 @@ const BulkLeaveModal = ({
                 pending: {
                     render() {
                         return (
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
-                                <span style={{ marginLeft: '8px' }}>Creating bulk leave requests...</span>
-                            </div>
+                                <div className="flex items-center">
+                                    <Spinner size="sm" />
+                                    <span className="ml-2">Creating bulk leave requests...</span>
+                                </div>
                         );
                     },
                     icon: false,
@@ -431,36 +420,38 @@ const BulkLeaveModal = ({
 
     return (
         <GlassDialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', pb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                    <CalendarDaysIcon style={{ width: 24, height: 24, color: theme.palette.primary.main }} />
-                    <Box>
-                        <Typography variant="h6" component="h2">
+            <div className="flex items-center p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 flex-1">
+                    <CalendarDaysIcon style={{ width: 24, height: 24, color: theme.colors.primary }} />
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Add Bulk Leave
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                             Select multiple dates and create leave requests in batch
-                        </Typography>
-                    </Box>
-                </Box>
-                <IconButton
-                    onClick={onClose}
-                    sx={{ position: 'absolute', top: 8, right: 16 }}
-                    disabled={isSubmitting}
+                        </p>
+                    </div>
+                </div>
+                <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={onClose}
+                    isDisabled={isSubmitting}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+                    <X size={20} />
+                </Button>
+            </div>
             
-            <DialogContent sx={{ py: 3 }}>
-                <Grid container spacing={3}>
+            <div className="py-6 px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column: Calendar */}
-                    <Grid item xs={12} lg={6}>
-                        <Box sx={{ position: 'sticky', top: 0 }}>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <div>
+                        <div className="sticky top-0">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                 <CalendarDaysIcon style={{ width: 20, height: 20 }} />
                                 Select Dates
-                            </Typography>
+                            </h3>
                             <BulkCalendar
                                 selectedDates={selectedDates}
                                 onDatesChange={(dates) => {
@@ -470,19 +461,19 @@ const BulkLeaveModal = ({
                                 userId={selectedUserId}
                                 fetchFromAPI={true} // Enable API-driven data fetching
                             />
-                        </Box>
-                    </Grid>
+                        </div>
+                    </div>
                     
                     {/* Right Column: Form and Validation */}
-                    <Grid item xs={12} lg={6}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <div>
+                        <div className="flex flex-col gap-6">
                             {/* Form Controls */}
-                            <Box>
-                                <Typography variant="h6" gutterBottom>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                     Leave Details
-                                </Typography>
+                                </h3>
                                 
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <div className="flex flex-col gap-4">
                                     {/* Department & User Selection (Admin only) */}
                                     {isAdmin && allUsers.length > 0 && (
                                         <DepartmentEmployeeSelector
@@ -509,74 +500,63 @@ const BulkLeaveModal = ({
                                     )}
 
                                     {/* Leave Type Selection */}
-                                    <FormControl fullWidth error={Boolean(errors.leave_type_id)}>
-                                        <InputLabel id="bulk-leave-type-label">Leave Type</InputLabel>
+                                    <div>
                                         <Select
-                                            labelId="bulk-leave-type-label"
-                                            value={selectedLeaveType || ''}
-                                            onChange={(e) => {
-                                                setSelectedLeaveType(e.target.value);
+                                            label="Leave Type"
+                                            selectedKeys={selectedLeaveType ? [selectedLeaveType] : []}
+                                            onSelectionChange={(keys) => {
+                                                const value = Array.from(keys)[0];
+                                                setSelectedLeaveType(value);
                                                 setHasValidated(false);
                                             }}
-                                            label="Leave Type"
-                                            disabled={isSubmitting || isValidating || loadingLeaveTypes}
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    sx: {
-                                                        backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
-                                                        borderRadius: 2,
-                                                        boxShadow: theme.glassCard.boxShadow,
-                                                        maxHeight: 300,
-                                                    },
-                                                },
-                                            }}
+                                            isDisabled={isSubmitting || isValidating || loadingLeaveTypes}
+                                            isInvalid={Boolean(errors.leave_type_id)}
+                                            errorMessage={errors.leave_type_id}
                                         >
-                                            <MenuItem value="" disabled>
-                                                {loadingLeaveTypes ? 'Loading leave types...' : 'Select Leave Type'}
-                                            </MenuItem>
-                                            {leaveTypes.map((type) => {
-                                                // Handle both new structure (with balance info) and old structure
-                                                let remaining, isDisabled;
-                                                
-                                                if (userLeaveTypes.length > 0) {
-                                                    // New structure with balance info
-                                                    remaining = type.remaining;
-                                                    isDisabled = remaining <= 0;
-                                                } else {
-                                                    // Fallback to old structure
-                                                    const leaveCount = leaveCounts?.find(lc => lc.leave_type === type.type);
-                                                    remaining = leaveCount ? (type.days - leaveCount.days_used) : type.days;
-                                                    isDisabled = remaining <= 0;
-                                                }
-                                                
-                                                return (
-                                                    <MenuItem 
-                                                        key={type.id} 
-                                                        value={type.type}
-                                                        disabled={isDisabled}
-                                                        title={isDisabled ? 'No remaining leaves available' : ''}
-                                                    >
-                                                        <Box display="flex" justifyContent="space-between" width="100%">
-                                                            <span>{type.type}</span>
-                                                            <span>
-                                                                ({remaining} remaining)
-                                                            </span>
-                                                        </Box>
-                                                    </MenuItem>
-                                                );
-                                            })}
+                                            {loadingLeaveTypes ? (
+                                                <SelectItem key="loading" isDisabled>
+                                                    Loading leave types...
+                                                </SelectItem>
+                                            ) : (
+                                                leaveTypes.map((type) => {
+                                                    // Handle both new structure (with balance info) and old structure
+                                                    let remaining, isDisabled;
+                                                    
+                                                    if (userLeaveTypes.length > 0) {
+                                                        // New structure with balance info
+                                                        remaining = type.remaining;
+                                                        isDisabled = remaining <= 0;
+                                                    } else {
+                                                        // Fallback to old structure
+                                                        const leaveCount = leaveCounts?.find(lc => lc.leave_type === type.type);
+                                                        remaining = leaveCount ? (type.days - leaveCount.days_used) : type.days;
+                                                        isDisabled = remaining <= 0;
+                                                    }
+                                                    
+                                                    return (
+                                                        <SelectItem 
+                                                            key={type.type} 
+                                                            value={type.type}
+                                                            isDisabled={isDisabled}
+                                                            title={isDisabled ? 'No remaining leaves available' : ''}
+                                                        >
+                                                            <div className="flex justify-between w-full">
+                                                                <span>{type.type}</span>
+                                                                <span>
+                                                                    ({remaining} remaining)
+                                                                </span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    );
+                                                })
+                                            )}
                                         </Select>
-                                        <FormHelperText>{errors.leave_type_id}</FormHelperText>
-                                    </FormControl>
+                                    </div>
 
                                     {/* Remaining Leaves Display */}
                                     {selectedLeaveType && (
-                                        <TextField
+                                        <Input
                                             label="Remaining Leaves"
-                                            type="text"
-                                            fullWidth
                                             value={(() => {
                                                 const selectedType = leaveTypes.find(lt => lt.type === selectedLeaveType);
                                                 
@@ -594,24 +574,14 @@ const BulkLeaveModal = ({
                                                     totalDays = selectedType?.days;
                                                 }
                                                 
-                                                return `${remaining || 0} remaining`;
+                                                return `${remaining || 0} remaining of ${totalDays || 0} total`;
                                             })()}
-                                            InputProps={{ 
-                                                readOnly: true,
-                                                endAdornment: (
-                                                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                                                        of {(() => {
-                                                            const selectedType = leaveTypes.find(lt => lt.type === selectedLeaveType);
-                                                            return userLeaveTypes.length > 0 ? selectedType?.days : selectedType?.days;
-                                                        })()} total
-                                                    </Typography>
-                                                )
-                                            }}
+                                            isReadOnly
                                         />
                                     )}
 
                                     {/* Reason */}
-                                    <TextField
+                                    <Input
                                         label="Reason for Leave"
                                         placeholder="Please provide a detailed reason for your leave request..."
                                         value={reason}
@@ -619,66 +589,54 @@ const BulkLeaveModal = ({
                                             setReason(e.target.value);
                                             setHasValidated(false);
                                         }}
-                                        multiline
-                                        rows={3}
-                                        fullWidth
-                                        required
-                                        error={Boolean(errors.reason) || (reason.length > 0 && reason.length < 5)}
-                                        helperText={
+                                        isRequired
+                                        isInvalid={Boolean(errors.reason) || (reason.length > 0 && reason.length < 5)}
+                                        errorMessage={
                                             errors.reason || 
                                             (reason.length > 0 && reason.length < 5 ? "Reason must be at least 5 characters" : 
                                             `${reason.length}/500 characters`)
                                         }
-                                        inputProps={{ maxLength: 500 }}
-                                        disabled={isSubmitting || isValidating}
+                                        maxLength={500}
+                                        isDisabled={isSubmitting || isValidating}
                                     />
 
                                     {/* Options */}
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={allowPartialSuccess}
-                                                onChange={(e) => setAllowPartialSuccess(e.target.checked)}
-                                                size="small"
-                                                disabled={isSubmitting || isValidating}
-                                            />
-                                        }
-                                        label={
-                                            <Box>
-                                                <Typography variant="body2">
-                                                    Allow partial success
-                                                </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Valid dates will be processed even if some dates fail validation
-                                                </Typography>
-                                            </Box>
-                                        }
-                                    />
-                                </Box>
-                            </Box>
+                                    <div className="flex items-start gap-3">
+                                        <Switch
+                                            isSelected={allowPartialSuccess}
+                                            onValueChange={setAllowPartialSuccess}
+                                            size="sm"
+                                            isDisabled={isSubmitting || isValidating}
+                                        />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                Allow partial success
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Valid dates will be processed even if some dates fail validation
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Summary Information */}
                             {selectedDates.length > 0 && (
-                                <Box 
-                                    sx={{ 
-                                        p: 2, 
-                                        borderRadius: 2, 
-                                        background: theme.palette.background.paper,
-                                        border: `1px solid ${theme.palette.divider}`
-                                    }}
+                                <div 
+                                    className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
                                 >
-                                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                                         Selected Dates Summary
-                                    </Typography>
-                                    <Typography variant="body1">
+                                    </p>
+                                    <p className="text-base font-medium text-gray-900 dark:text-white">
                                         <strong>{selectedDates.length}</strong> date{selectedDates.length !== 1 ? 's' : ''} selected
-                                    </Typography>
+                                    </p>
                                     {selectedLeaveType && (
-                                        <Typography variant="body2" color="text.secondary">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
                                             Leave type: {selectedLeaveType}
-                                        </Typography>
+                                        </p>
                                     )}
-                                </Box>
+                                </div>
                             )}
 
                             {/* Validation and Preview */}
@@ -687,47 +645,47 @@ const BulkLeaveModal = ({
                                 balanceImpact={balanceImpact}
                                 isValidating={isValidating}
                             />
-                        </Box>
-                    </Grid>
-                </Grid>
-            </DialogContent>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <DialogActions sx={{ padding: '16px 24px', justifyContent: 'space-between', gap: 2 }}>
-                <LoadingButton
-                    variant="outlined"
-                    onClick={onClose}
-                    disabled={isSubmitting}
-                    sx={{ borderRadius: '50px' }}
+            <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 gap-4">
+                <Button
+                    variant="bordered"
+                    onPress={onClose}
+                    isDisabled={isSubmitting}
+                    className="rounded-full"
                 >
                     Cancel
-                </LoadingButton>
+                </Button>
                 
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                    <LoadingButton
-                        variant="outlined"
+                <div className="flex gap-2">
+                    <Button
+                        variant="bordered"
                         color="primary"
-                        onClick={handleValidate}
-                        loading={isValidating}
-                        disabled={!canValidate || isSubmitting}
-                        startIcon={!isValidating && <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />}
-                        sx={{ borderRadius: '50px' }}
+                        onPress={handleValidate}
+                        isLoading={isValidating}
+                        isDisabled={!canValidate || isSubmitting}
+                        startContent={!isValidating && <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />}
+                        className="rounded-full"
                     >
                         {isValidating ? 'Validating...' : 'Validate Dates'}
-                    </LoadingButton>
+                    </Button>
                     
-                    <LoadingButton
-                        variant="contained"
+                    <Button
+                        variant="solid"
                         color="primary"
-                        onClick={handleSubmit}
-                        loading={isSubmitting}
-                        disabled={!canSubmit || isValidating}
-                        startIcon={!isSubmitting && <CheckCircleIcon style={{ width: 16, height: 16 }} />}
-                        sx={{ borderRadius: '50px' }}
+                        onPress={handleSubmit}
+                        isLoading={isSubmitting}
+                        isDisabled={!canSubmit || isValidating}
+                        startContent={!isSubmitting && <CheckCircleIcon style={{ width: 16, height: 16 }} />}
+                        className="rounded-full"
                     >
                         {isSubmitting ? 'Creating...' : `Create ${selectedDates.length} Leave Request${selectedDates.length !== 1 ? 's' : ''}`}
-                    </LoadingButton>
-                </Box>
-            </DialogActions>
+                    </Button>
+                </div>
+            </div>
         </GlassDialog>
     );
 };

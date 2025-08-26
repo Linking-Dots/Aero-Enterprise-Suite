@@ -1,22 +1,17 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    TextField,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
-import {toast} from "react-toastify";
+    Spinner,
+    Input,
+    Button
+} from "@heroui/react";
+import { X } from 'lucide-react';
+
+import { toast } from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 
-
 const BankInformationForm = ({ user, setUser, open, closeModal }) => {
+
+    const primaryColor = getThemePrimaryColor();
     const [initialUserData, setInitialUserData] = useState({
         id: user.id,
         bank_name: user.bank_name || '', // Default to empty string if not provided
@@ -32,7 +27,7 @@ const BankInformationForm = ({ user, setUser, open, closeModal }) => {
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    const theme = useTheme();
+ 
 
     const handleChange = (key, value) => {
         setInitialUserData((prevUser) => {

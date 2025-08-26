@@ -1,24 +1,24 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     Checkbox,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    IconButton,
+    Button,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
     Table,
+    TableHeader,
+    TableColumn,
     TableBody,
-    TableCell,
-    TableHead,
     TableRow,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
-import {toast} from "react-toastify";
+    TableCell
+} from "@heroui/react";
+import { X, Download } from 'lucide-react';
+
+import { toast } from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {Download} from '@mui/icons-material';
 
 import * as XLSX from 'xlsx';
 import axios from "axios";
@@ -58,7 +58,7 @@ const DailyWorksDownloadForm = ({ open, closeModal, search, filterData, users })
     }, [filterData, search]);
 
     const [processing, setProcessing] = useState(false);
-    const theme = useTheme();
+
     const columns = [
 
         { label: 'Date', key: 'date'  },

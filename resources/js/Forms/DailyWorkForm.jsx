@@ -1,27 +1,23 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    TextField,
-    Typography,
-} from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from '@mui/lab/LoadingButton';
-import {toast} from 'react-toastify';
+    Button,
+    Input,
+    Select,
+    SelectItem,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+} from '@heroui/react';
+import { X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import GlassDialog from '@/Components/GlassDialog.jsx';
-import {useTheme} from "@mui/material/styles";
+
 
 const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
-    const theme = useTheme();
+
     const [dailyWorkData, setDailyWorkData] = useState({
         id: currentRow?.id || '',
         date: currentRow?.date || new Date().toISOString().split('T')[0],
@@ -89,7 +85,7 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                     render() {
                         return (
                             <div style={{display: 'flex', alignItems: 'center'}}>
-                                <CircularProgress/>
+                                <Spinner size="sm" />
                                 <span style={{marginLeft: '8px'}}>Updating daily work ...</span>
                             </div>
                         );
@@ -144,61 +140,56 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
 
     return (
         <GlassDialog open={open} onClose={closeModal}>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Add Task</Typography>
-                <IconButton
-                    variant="outlined"
-                    color="primary"
-                    onClick={closeModal}
-                    sx={{ position: 'absolute', top: 8, right: 16 }}
-                >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
-            <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+            <ModalContent>
+                <ModalHeader className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold">Add Task</h2>
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        onPress={closeModal}
+                        className="absolute top-2 right-2"
+                    >
+                        <X size={20} />
+                    </Button>
+                </ModalHeader>
+                <form onSubmit={handleSubmit}>
+                    <ModalBody>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="RFI Date"
                                 type="date"
                                 name="date"
-                                fullWidth
                                 value={dailyWorkData.date}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.date)}
-                                helperText={errors.date}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
+                                isInvalid={Boolean(errors.date)}
+                                errorMessage={errors.date}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+                        </div>
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="RFI Number"
                                 name="number"
-                                fullWidth
                                 value={dailyWorkData.number}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.number)}
-                                helperText={errors.number}
+                                isInvalid={Boolean(errors.number)}
+                                errorMessage={errors.number}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+                        </div>
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="Planned Time"
                                 name="planned_time"
-                                fullWidth
                                 value={dailyWorkData.planned_time}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.planned_time)}
-                                helperText={errors.planned_time}
+                                isInvalid={Boolean(errors.planned_time)}
+                                errorMessage={errors.planned_time}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
+                        </div>
+                        <div className="col-span-1">
                             <Select
                                 variant="underlined"
                                 label="Type"
@@ -219,32 +210,30 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                                 <SelectItem key="Embankment" value="Embankment">Embankment</SelectItem>
                                 <SelectItem key="Pavement" value="Pavement">Pavement</SelectItem>
                             </Select>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+                        </div>
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="Location"
                                 name="location"
-                                fullWidth
                                 value={dailyWorkData.location}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.location)}
-                                helperText={errors.location}
+                                isInvalid={Boolean(errors.location)}
+                                errorMessage={errors.location}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+                        </div>
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="Description"
                                 name="description"
-                                fullWidth
                                 value={dailyWorkData.description}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.description)}
-                                helperText={errors.description}
+                                isInvalid={Boolean(errors.description)}
+                                errorMessage={errors.description}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
+                        </div>
+                        <div className="col-span-1">
                             <Select
                                 variant="underlined"
                                 label="Road Type"
@@ -266,41 +255,35 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
                                 <SelectItem key="TR-R" value="TR-R">TR-R</SelectItem>
                                 <SelectItem key="TR-L" value="TR-L">TR-L</SelectItem>
                             </Select>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                variant="outlined"
+                        </div>
+                        <div className="col-span-1">
+                            <Input
+                                variant="bordered"
                                 label="Quantity/Layer No."
                                 name="qty_layer"
-                                fullWidth
                                 value={dailyWorkData.qty_layer}
                                 onChange={(e) => handleChange(e)}
-                                error={Boolean(errors.qty_layer)}
-                                helperText={errors.qty_layer}
+                                isInvalid={Boolean(errors.qty_layer)}
+                                errorMessage={errors.qty_layer}
                             />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        padding: '16px',
-                    }}
-                >
-                    <Button
-                        disabled={!dataChanged}
-                        radius={'lg'}
-                        variant="bordered"
-                        color="primary"
-                        type="submit"
-                        isLoading={processing}
+                        </div>
+                        </div>
+                    </ModalBody>
+                    <ModalFooter className="flex justify-end"
                     >
-                        Submit
-                    </Button>
-                </DialogActions>
-            </form>
+                        <Button
+                            isDisabled={!dataChanged}
+                            radius={'lg'}
+                            variant="bordered"
+                            color="primary"
+                            type="submit"
+                            isLoading={processing}
+                        >
+                            Submit
+                        </Button>
+                    </ModalFooter>
+                </form>
+            </ModalContent>
         </GlassDialog>
     );
 };

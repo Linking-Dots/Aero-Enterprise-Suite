@@ -1,29 +1,18 @@
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Avatar,
-    Box,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
+    Spinner,
     Select,
-    TextField,
-    Typography
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from "@mui/lab/LoadingButton";
-import { useTheme } from "@mui/material/styles";
+    SelectItem,
+    Input,
+    Button
+} from "@heroui/react";
+import { X } from 'lucide-react';
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import { toast } from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {router, usePage} from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { Inertia } from '@inertiajs/inertia';
 
 const LeaveForm = ({
@@ -41,7 +30,8 @@ const LeaveForm = ({
 }) => {
 
     const {auth} = usePage().props;
-    const theme = useTheme();
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
     const [user_id, setUserId] = useState(currentLeave?.user_id || auth.user.id);
     // Initialize state variables
     const [leaveTypes, setLeaveTypes] = useState(leavesData.leaveTypes || []);

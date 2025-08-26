@@ -1,29 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import {
-    Box,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    Divider
-} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from "@mui/lab/LoadingButton";
+    Button,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Divider,
+    Chip
+} from "@heroui/react";
+import { X } from 'lucide-react';
 import { 
     TrashIcon,
     ExclamationTriangleIcon,
     CheckCircleIcon 
 } from '@heroicons/react/24/outline';
-import { useTheme } from "@mui/material/styles";
+
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import { Chip } from "@heroui/react";
 
 const BulkDeleteModal = ({ 
     open, 
@@ -32,7 +28,7 @@ const BulkDeleteModal = ({
     selectedLeaves = [],
     allUsers = []
 }) => {
-    const theme = useTheme();
+
     
     // State
     const [isDeleting, setIsDeleting] = useState(false);

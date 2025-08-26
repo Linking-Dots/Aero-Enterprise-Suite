@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import { 
-  CircularProgress,
-  Chip,
-  Button,
-  IconButton,
-  Tooltip,
-  Alert,
-  useTheme,
-  useMediaQuery,
-  Grow,
-  Fade
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
   Card, 
   CardBody, 
-  CardHeader
+  CardHeader,
+  Chip,
+  Button,
+  Spinner,
+  Progress
 } from "@heroui/react";
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import {
-  Refresh as RefreshIcon,
-  Download as DownloadIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon
-} from '@mui/icons-material';
+  RefreshCw,
+  Download,
+  TrendingUp,
+  Gauge,
+  AlertTriangle,
+  CheckCircle
+} from 'lucide-react';
 import { 
   ChartBarIcon, 
   CpuChipIcon,
@@ -44,8 +38,21 @@ import GlassCard from "@/Components/GlassCard.jsx";
  * Displays Core Web Vitals, feature performance, and system metrics.
  */
 const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isDark } = useTheme();
+  const primaryColor = getThemePrimaryColor();
+  
+  // Custom media query
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   // State Management
   const [loading, setLoading] = useState(true);

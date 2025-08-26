@@ -1,14 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import {
-    Typography,
-    useTheme,
-    useMediaQuery,
-    Box,
-    Chip as MuiChip,
-    Fade,
-    TextField,
-    InputAdornment
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import {
     Table,
     TableHeader,
@@ -28,7 +19,8 @@ import {
     DropdownTrigger,
     DropdownMenu,
     DropdownItem,
-    ButtonGroup
+    ButtonGroup,
+    Input
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -52,8 +44,39 @@ const HolidayTable = ({
     onFilteredDataChange,
     isLoading = false 
 }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // Custom responsive hook
+    const useResponsive = () => {
+        const [isMobile, setIsMobile] = useState(false);
+        
+        useEffect(() => {
+            const checkDevice = () => {
+                setIsMobile(window.innerWidth < 640);
+            };
+            
+            checkDevice();
+            window.addEventListener('resize', checkDevice);
+            return () => window.removeEventListener('resize', checkDevice);
+        }, []);
+        
+        return { isMobile };
+    };
+    
+    const { isMobile } = useResponsive();
+    
+    // Custom theme
+    const glassTheme = {
+        palette: {
+            primary: { main: '#3b82f6' },
+            secondary: { main: '#64748b' },
+            success: { main: '#10b981' },
+            warning: { main: '#f59e0b' },
+            error: { main: '#ef4444' },
+            background: { paper: 'rgba(15, 20, 25, 0.15)' },
+            text: { primary: '#ffffff', secondary: '#94a3b8' }
+        },
+        spacing: (factor) => `${0.25 * factor}rem`,
+        borderRadius: '12px'
+    };
     
     // State for filtering and pagination
     const [filterValue, setFilterValue] = useState('');
@@ -265,25 +288,19 @@ const HolidayTable = ({
                 {/* Main search and filter toggle - Matching Leave page */}
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
-                        <TextField
-                            variant="outlined"
+                        <Input
                             placeholder="Search by title or description..."
                             value={filterValue}
                             onChange={(e) => setFilterValue(e.target.value)}
-                            fullWidth
-                            size={isMobile ? "small" : "medium"}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <MagnifyingGlassIcon className="w-4 h-4" />
-                                    </InputAdornment>
-                                ),
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '8px',
-                                }
+                            size={isMobile ? "sm" : "md"}
+                            startContent={
+                                <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                            }
+                            variant="bordered"
+                            className="bg-white/5 backdrop-blur-md border-white/20"
+                            classNames={{
+                                input: "text-foreground placeholder:text-default-400",
+                                inputWrapper: "hover:border-white/30 group-data-[focus=true]:border-primary/50"
                             }}
                         />
                     </div>
@@ -304,9 +321,14 @@ const HolidayTable = ({
 
                 {/* Advanced filters panel - Matching Leave page */}
                 {showFilters && (
-                    <Fade in={true} timeout={300}>
-                        <div className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10"
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <Select
                                     label="Holiday Type"
                                     selectionMode="multiple"
@@ -460,8 +482,7 @@ const HolidayTable = ({
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    </Fade>
+                    </motion.div>
                 )}
 
                 {/* Results count */}
@@ -520,12 +541,12 @@ const HolidayTable = ({
             <Card className="bg-white/5 backdrop-blur-md border-white/10">
                 <CardBody className="text-center py-12">
                     <CalendarDaysIcon className="w-16 h-16 mx-auto mb-4 text-default-300" />
-                    <Typography variant="h6" className="mb-2">
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
                         No Holidays Found
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    </h3>
+                    <p className="text-default-500 text-sm">
                         No company holidays have been configured yet.
-                    </Typography>
+                    </p>
                 </CardBody>
             </Card>
         );

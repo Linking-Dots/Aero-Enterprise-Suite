@@ -1,24 +1,18 @@
 import React, { useState, useCallback } from "react";
-import {
-    Box,
-    Typography,
-    IconButton,
-    Stack,
-    useMediaQuery,
-    Tooltip as MuiTooltip,
-    CardContent,
-    CardHeader,
-    TextField,
-    CircularProgress,
-    InputAdornment
-} from "@mui/material";
-import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-} from "@mui/icons-material";
-import { useTheme, alpha } from "@mui/material/styles";
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage } from "@inertiajs/react";
 import { toast } from "react-toastify";
+
+// Alpha utility function for creating transparent colors
+const alpha = (color, opacity) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 import {
     Table,
     TableHeader,
@@ -41,7 +35,8 @@ import {
     ScrollShadow,
     Select,
     SelectItem,
-    Link
+    Link,
+    Spinner
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -95,7 +90,7 @@ const DailyWorksTable = ({
     onPageChange
 }) => {
     const { auth, users, jurisdictions } = usePage().props;
-    const theme = useTheme();
+    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -118,32 +113,32 @@ const DailyWorksTable = ({
         'new': {
             color: 'primary',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha(theme.palette.primary.main, 0.1),
-            textColor: theme.palette.primary.main,
+            bgColor: alpha(theme.colors.primary, 0.1),
+            textColor: theme.colors.primary,
             label: 'New Work',
             description: 'Newly created work item'
         },
         'resubmission': {
             color: 'warning',
             icon: ArrowPathSolid,
-            bgColor: alpha(theme.palette.warning.main, 0.1),
-            textColor: theme.palette.warning.main,
+            bgColor: alpha('#f59e0b', 0.1), // warning color
+            textColor: '#f59e0b',
             label: 'Resubmission Required',
             description: 'Work needs to be resubmitted'
         },
         'completed': {
             color: 'success',
             icon: CheckCircleSolid,
-            bgColor: alpha(theme.palette.success.main, 0.1),
-            textColor: theme.palette.success.main,
+            bgColor: alpha('#10b981', 0.1), // success color
+            textColor: '#10b981',
             label: 'Completed',
             description: 'Work has been completed successfully'
         },
         'emergency': {
             color: 'danger',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha(theme.palette.error.main, 0.1),
-            textColor: theme.palette.error.main,
+            bgColor: alpha('#ef4444', 0.1), // danger color
+            textColor: '#ef4444',
             label: 'Emergency Work',
             description: 'Urgent work requiring immediate attention'
         }
@@ -358,7 +353,7 @@ const DailyWorksTable = ({
                 render() {
                     return (
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <CircularProgress />
+                            <Spinner size="sm" />
                             <span style={{ marginLeft: '8px' }}>Uploading RFI file...</span>
                         </div>
                     );
@@ -618,19 +613,19 @@ const DailyWorksTable = ({
 
         return (
             <GlassCard className="mb-2" shadow="sm">
-                <CardContent className="p-3">
-                    <Box className="flex items-start justify-between mb-3">
-                        <Box className="flex items-center gap-3 flex-1">
-                            <Box className="flex flex-col">
-                                <Typography variant="body2" fontWeight="bold" className="text-primary">
+                <CardBody className="p-3">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-primary">
                                     {work.number}
-                                </Typography>
-                                <Typography variant="caption" color="textSecondary">
+                                </span>
+                                <span className="text-xs text-default-500">
                                     {formatDate(work.date)}
-                                </Typography>
-                            </Box>
-                        </Box>
-                        <Box className="flex items-center gap-2">
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
                             {getStatusChip(work.status)}
                             {userIsAdmin && (
                                 <Dropdown>
@@ -662,33 +657,33 @@ const DailyWorksTable = ({
                                     </DropdownMenu>
                                 </Dropdown>
                             )}
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
 
                     <Divider className="my-3" />
 
-                    <Stack spacing={2}>
-                        <Box className="flex items-center gap-2">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
                             {getWorkTypeIcon(work.type, "w-4 h-4")}
-                            <Typography variant="body2" fontWeight="medium" className="capitalize">
+                            <span className="text-sm font-medium capitalize">
                                 {work.type || 'Standard Work'}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
 
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <MapPinIcon className="w-4 h-4 text-default-500" />
-                            <Typography variant="body2" color="textSecondary">
+                            <span className="text-sm text-default-500">
                                 {work.location || 'Location not specified'}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
 
                         {work.description && (
-                            <Box className="flex items-start gap-2">
+                            <div className="flex items-start gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
-                                <Typography variant="body2" color="textSecondary" className="flex-1 break-words">
+                                <span className="text-sm text-default-500 flex-1 break-words">
                                     {work.description}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
 
                         <Box className="flex items-center gap-2">
@@ -751,7 +746,7 @@ const DailyWorksTable = ({
                                 </Chip>
                             </Box>
                         )}
-                    </Stack>
+                    </div>
 
                     {(userIsAdmin || userIsSE) && (
                         <>
@@ -781,7 +776,7 @@ const DailyWorksTable = ({
                             </Box>
                         </>
                     )}
-                </CardContent>
+                </CardBody>
             </GlassCard>
         );
     };

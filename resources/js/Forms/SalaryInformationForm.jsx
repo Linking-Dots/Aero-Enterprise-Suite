@@ -1,23 +1,18 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    CardActions,
-    CardContent,
+    Card,
+    CardBody,
     CardHeader,
-    CircularProgress,
+    Spinner,
     Divider,
-    FormControl,
-    Grid,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
     Select,
-    TextField,
-    Typography
-} from '@mui/material';
+    SelectItem,
+    Input,
+    Button
+} from '@heroui/react';
 import GlassCard from '@/Components/GlassCard';
-import LoadingButton from "@mui/lab/LoadingButton";
-import {useTheme} from "@mui/material/styles";
-import {toast} from "react-toastify"; // Assuming GlassCard is a custom component
+import useTheme, { getThemePrimaryColor } from '@/theme';
+import { toast } from "react-toastify"; // Assuming GlassCard is a custom component
 
 
 const SalaryInformationForm = ({user, setUser}) => {
@@ -46,7 +41,8 @@ const SalaryInformationForm = ({user, setUser}) => {
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    const theme = useTheme();
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
 
     const handleChange = (key, value) => {
         setInitialUserData((prevUser) => {

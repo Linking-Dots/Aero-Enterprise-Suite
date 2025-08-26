@@ -1,16 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import {
-    Box,
-    Typography,
-    CircularProgress,
-    Grow,
-    Fade,
-    useTheme,
-    useMediaQuery,
-    TextField,
-    InputAdornment
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import {
     Select,
     SelectItem,
@@ -22,7 +12,9 @@ import {
     Button,
     ButtonGroup,
     User,
-    Pagination
+    Pagination,
+    Input,
+    Spinner
 } from "@heroui/react";
 import {
     BuildingOffice2Icon,
@@ -50,15 +42,16 @@ import App from '@/Layouts/App.jsx';
 import DepartmentTable from '@/Tables/DepartmentTable.jsx';
 import DepartmentForm from '@/Forms/DepartmentForm.jsx';
 import DeleteDepartmentForm from '@/Forms/DeleteDepartmentForm.jsx';
+import { useTheme } from '@/Contexts/ThemeContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 
 const Departments = ({ title, departments: initialDepartments, managers, parentDepartments, stats: initialStats, filters: initialFilters }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const { theme } = useTheme();
+    const [isMobile] = useState(window.innerWidth < 640);
+    const [isTablet] = useState(window.innerWidth < 768);
     
     // State for departments data
     const [departmentsData, setDepartmentsData] = useState(initialDepartments || { data: [] });
@@ -363,8 +356,12 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
         <App>
             <Head title={title} />
             
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in={true} timeout={800}>
+            <div className="flex justify-center p-2">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <GlassCard>
                         <PageHeader
                             title="Department Management"
@@ -380,47 +377,12 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                                 {/* View Controls */}
                                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                                     <div className="flex-1">
-                                        <TextField
+                                        <Input
                                             label="Search Departments"
                                             placeholder="Search by name, code, or location..."
                                             value={filters.search}
                                             onChange={(e) => handleFilterChange('search', e.target.value)}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <MagnifyingGlassIcon className="w-4 h-4" />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            fullWidth
-                                            size={isMobile ? "small" : "medium"}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    backdropFilter: 'blur(10px)',
-                                                    borderRadius: '12px',
-                                                    color: 'white',
-                                                    '& fieldset': {
-                                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                    },
-                                                    '&:hover fieldset': {
-                                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                        borderColor: 'var(--primary-color)',
-                                                    },
-                                                    '& input::placeholder': {
-                                                        color: 'rgba(255, 255, 255, 0.5)',
-                                                        opacity: 1,
-                                                    },
-                                                },
-                                                '& .MuiInputLabel-root': {
-                                                    color: 'rgba(255, 255, 255, 0.7)',
-                                                    '&.Mui-focused': {
-                                                        color: 'var(--primary-color)',
-                                                    },
-                                                },
-                                            }}
+                                            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                                         />
                                     </div>
 
@@ -462,8 +424,12 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
 
                                 {/* Filters Section */}
                                 {showFilters && (
-                                    <Fade in={true} timeout={300}>
-                                        <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10"
+                                    >
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 <Select
                                                     label="Status"
@@ -543,27 +509,26 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                                                     )}
                                                 </div>
                                             )}
-                                        </div>
-                                    </Fade>
+                                        </motion.div>
                                 )}
 
                                 {/* Content Area */}
                                 <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 overflow-hidden">
                                     <div className="p-4 border-b border-white/10">
-                                        <Typography variant="h6" className="font-semibold text-foreground">
+                                        <h3 className="text-lg font-semibold text-foreground">
                                             {viewMode === 'table' ? 'Department Table' : 'Department Grid'} 
                                             <span className="text-sm text-default-500 ml-2">
                                                 ({departmentsData.total || 0} {departmentsData.total === 1 ? 'department' : 'departments'})
                                             </span>
-                                        </Typography>
+                                        </h3>
                                     </div>
                                     
                                     {loading ? (
                                         <div className="text-center py-8">
-                                            <CircularProgress size={40} />
-                                            <Typography className="mt-4" color="textSecondary">
+                                            <Spinner size="lg" />
+                                            <p className="mt-4 text-default-500">
                                                 Loading departments data...
-                                            </Typography>
+                                            </p>
                                         </div>
                                     ) : viewMode === 'table' ? (
                                         <DepartmentTable
@@ -597,12 +562,12 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                                             ) : (
                                                 <div className="text-center py-8">
                                                     <BuildingOffice2Icon className="w-12 h-12 mx-auto text-default-300 mb-2" />
-                                                    <Typography variant="body1" color="textSecondary">
+                                                    <p className="text-default-500 mb-1">
                                                         No departments found
-                                                    </Typography>
-                                                    <Typography variant="caption" color="textSecondary">
+                                                    </p>
+                                                    <p className="text-xs text-default-400">
                                                         Try adjusting your search or filters
-                                                    </Typography>
+                                                    </p>
                                                 </div>
                                             )}
                                             
@@ -630,8 +595,8 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
                             </div>
                         </PageHeader>
                     </GlassCard>
-                </Grow>
-            </Box>
+                </motion.div>
+            </div>
             
             {/* Department Form Modal */}
             {(modalState.type === 'add_department' || modalState.type === 'edit_department') && (

@@ -1,15 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { RefreshCcw } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
-    Box,
-    CardContent,
-    CardHeader,
-    Typography,
-    Grid,
-    useMediaQuery,
-    TextField,
-    InputAdornment
-} from '@mui/material';
-import {    Table,
+    Table,
     TableHeader,
     TableColumn,
     TableBody,
@@ -20,15 +13,19 @@ import {    Table,
     Pagination,
     Skeleton,
     Card as HeroCard,
+    CardBody,
+    CardHeader,
     Divider,
     Button,
     Button as HeroButton,
-    Link
+    Link,
+    Input
 } from "@heroui/react";
-import Grow from '@mui/material/Grow';
 import GlassCard from "@/Components/GlassCard.jsx";
 import { usePage } from "@inertiajs/react";
 import dayjs from "dayjs";
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { 
     MagnifyingGlassIcon,
     CalendarDaysIcon,
@@ -37,16 +34,19 @@ import {
     ExclamationTriangleIcon,
     CheckCircleIcon,
     XCircleIcon,
-
     UserGroupIcon,
     DocumentArrowDownIcon,
-
-   
 } from '@heroicons/react/24/outline';
-import { Refresh } from '@mui/icons-material';
-
 import axios from 'axios';
-import { useTheme, alpha } from '@mui/material/styles';
+
+// Alpha utility function for creating transparent colors
+const alpha = (color, opacity) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 import { AbsentUsersInlineCard } from '@/Components/TimeSheet/AbsentUsersInlineCard';
 
@@ -372,14 +372,14 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
             case "date":
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <CalendarDaysIcon className="w-4 h-4 text-primary shrink-0" />
-                            <Box className="flex flex-col">
+                            <div className="flex flex-col">
                                 <span>
                                     {dayjs(attendance.date).format('MMM D, YYYY')}
                                 </span>
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );
             case "employee":
@@ -422,9 +422,9 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 case "clockin_time":
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <ClockIcon className="w-4 h-4 text-success" />
-                            <Box className="flex flex-col">
+                            <div className="flex flex-col">
                                 <span>
                                     {attendance.punchin_time 
                                         ? formatTime(attendance.punchin_time, attendance.date) || 'Invalid time'
@@ -436,15 +436,15 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                         First punch
                                     </span>
                                 )}
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );            case "clockout_time":
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <ClockIcon className="w-4 h-4 text-danger" />
-                            <Box className="flex flex-col">
+                            <div className="flex flex-col">
                                 <span>
                                     {attendance.punchout_time 
                                         ? formatTime(attendance.punchout_time, attendance.date) || 'Invalid time'
@@ -458,8 +458,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                         Last punch
                                     </span>
                                 )}
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );case "production_time":
                 const hasWorkTime = attendance.total_work_minutes > 0;
@@ -472,45 +472,45 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                     
                     return (
                         <TableCell className={`${cellBaseClasses}`}>
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <ClockIcon className={`w-4 h-4 ${hasIncompletePunch ? 'text-warning' : 'text-primary'}`} />
-                                <Box className="flex flex-col">
+                                <div className="flex flex-col">
                                     <span className="font-medium">{`${hours}h ${minutes}m`}</span>
                                     <span className="text-xs text-default-500">
                                         {hasIncompletePunch ? 'Partial data - in progress' : 'Total worked time'}
                                     </span>
-                                </Box>
-                            </Box>
+                                </div>
+                            </div>
                         </TableCell>
                     );
                 } else if (isCurrentlyWorking) {
                     // Currently working (today's date and has punch in but no punch out)
                     return (
                         <TableCell className={`${cellBaseClasses}`}>
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <ClockIcon className="w-4 h-4 text-warning" />
-                                <Box className="flex flex-col">
+                                <div className="flex flex-col">
                                     <span className="text-warning">In Progress</span>
                                     <span className="text-xs text-default-500">
                                         Currently working
                                     </span>
-                                </Box>
-                            </Box>
+                                </div>
+                            </div>
                         </TableCell>
                     );
                 } else if (attendance.punchin_time && !attendance.punchout_time && !isCurrentDate) {
                     // Past date with incomplete punch
                     return (
                         <TableCell className={`${cellBaseClasses}`}>
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <ExclamationTriangleIcon className="w-4 h-4 text-danger" />
-                                <Box className="flex flex-col">
+                                <div className="flex flex-col">
                                     <span className="text-danger">Incomplete punch</span>
                                     <span className="text-xs text-default-500">
                                         Missing punch out
                                     </span>
-                                </Box>
-                            </Box>
+                                </div>
+                            </div>
                         </TableCell>
                     );
                 }
@@ -518,23 +518,23 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 // No punch in at all
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <ExclamationTriangleIcon className="w-4 h-4 text-warning" />
-                            <Box className="flex flex-col">
+                            <div className="flex flex-col">
                                 <span className="text-warning">No work time</span>
                                 <span className="text-xs text-default-500">
                                     No attendance
                                 </span>
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );
             case "punch_details":
                 return (
                     <TableCell className={`${cellBaseClasses}`}>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <ClockIcon className="w-4 h-4 text-default-400" />
-                            <Box className="flex flex-col">
+                            <div className="flex flex-col">
                                 <span className="text-xs font-medium">
                                     {attendance.punch_count || 0} punch{(attendance.punch_count || 0) !== 1 ? 'es' : ''}
                                 </span>
@@ -548,8 +548,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                         All complete
                                     </span>
                                 )}
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                     </TableCell>
                 );
             default:
@@ -716,17 +716,17 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
     if (url === '/attendance-employee') {
     
         return (
-            <Box 
+            <div 
                 role="region"
                 aria-label="Attendance data table"
                 className="w-full"
             >
                 {error ? (
                     <HeroCard className="p-4 bg-danger-50 border-danger-200">
-                        <Box className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <ExclamationTriangleIcon className="w-5 h-5 text-danger" />
-                            <Typography color="error" variant="body1">{error}</Typography>
-                        </Box>
+                            <p className="text-danger">{error}</p>
+                        </div>
                     </HeroCard>
                 ) : (
                     <>
@@ -756,26 +756,26 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                 align="start"
                                                 aria-label={column.ariaLabel || column.name}
                                             >
-                                                <Box className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2">
                                                     {column.icon && <column.icon className="w-4 h-4" />}
                                                     <span className="text-sm font-medium">{column.name}</span>
-                                                </Box>
+                                                </div>
                                             </TableColumn>
                                         )}
                                     </TableHeader>
                                     <TableBody 
-                                        items={attendances}                                                                emptyContent={
-                                        <Box className="flex flex-col items-center justify-center py-12">
-                                            <ClockIcon className="w-16 h-16 text-default-300 mb-4" />
-                                            <Typography variant="h6" className="mb-2">
-                                                No Attendance Records
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                No attendance records found for the selected date
-                                            </Typography>
-                                            
-                                        </Box>
-                                    }
+                                        items={attendances}
+                                        emptyContent={
+                                            <div className="flex flex-col items-center justify-center py-12">
+                                                <ClockIcon className="w-16 h-16 text-default-300 mb-4" />
+                                                <h6 className="text-lg font-semibold mb-2">
+                                                    No Attendance Records
+                                                </h6>
+                                                <p className="text-default-500">
+                                                    No attendance records found for the selected date
+                                                </p>
+                                            </div>
+                                        }
                                     >
                                         {(attendance) => (
                                             <TableRow key={attendance.id || attendance.user_id}>
@@ -787,7 +787,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                             </Skeleton>
                         </ScrollShadow>
                         {totalRows > perPage && (
-                            <Box className="py-4 flex justify-center">
+                            <div className="py-4 flex justify-center">
                                 <Pagination
                                     initialPage={1}
                                     isCompact
@@ -800,31 +800,32 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                     onChange={handlePageChange}
                                     aria-label="Timesheet pagination"
                                 />
-                            </Box>
+                            </div>
                         )}
                     </>
                 )}
-            </Box>
+            </div>
         );
     }    
     // Admin view - render full layout with combined GlassCard wrapper
     return (
-        <Box 
-            sx={{ display: 'flex', justifyContent: 'center', p: 2 }}
-            component="main"
+        <div 
+            className="flex justify-center p-2"
             role="main"
             aria-label="Timesheet Management"
         >
-            <Grid container spacing={2}>
+            <div className="space-y-4">
                 {/* Combined Attendance and Absent Users Card */}
-                <Grid item xs={12}>
-                    <Grow in timeout={500}>
+                <div className="w-full">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
                         <GlassCard>
                             {/* Main Card Content */}
-                            <CardHeader
-                                className="bg-linear-to-br from-slate-50/50 to-white/30 backdrop-blur-xs border-b border-white/20"
-                                title={
-                                    <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'}`}>
+                            <CardHeader className="bg-linear-to-br from-slate-50/50 to-white/30 backdrop-blur-xs border-b border-white/20 p-0">
+                                <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
                                         <div className="flex flex-col space-y-4">
                                             {/* Main Header Content */}
                                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -842,24 +843,24 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <Typography 
-                                                            variant={isLargeScreen ? "h4" : isMediumScreen ? "h5" : "h6"}
-                                                            className={`
-                                                                font-bold bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent
-                                                                ${!isLargeScreen ? 'truncate' : ''}
-                                                            `}
-                                                            style={{
-                                                                fontFamily: 'var(--font-current)',
-                                                                transition: 'all var(--transition)'
-                                                            }}
+                                                        <h4 className={`
+                                                            ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                            font-bold bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent
+                                                            ${!isLargeScreen ? 'truncate' : ''}
+                                                        `}
+                                                        style={{
+                                                            fontFamily: 'var(--font-current)',
+                                                            transition: 'all var(--transition)'
+                                                        }}
                                                         >
                                                             Daily Timesheet
-                                                        </Typography>
-                                                        <Typography 
-                                                            variant={isLargeScreen ? "body2" : "caption"} 
-                                                            color="textSecondary"
-                                                            className={!isLargeScreen ? 'truncate' : ''}
-                                                            style={{
+                                                        </h4>
+                                                        <p className={`
+                                                            ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                            text-default-500
+                                                            ${!isLargeScreen ? 'truncate' : ''}
+                                                        `}
+                                                        style={{
                                                                 fontFamily: 'var(--font-current)',
                                                                 transition: 'all var(--transition)'
                                                             }}
@@ -869,21 +870,14 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                 day: 'numeric',
                                                                 year: isLargeScreen ? 'numeric' : undefined,
                                                             })}
-                                                        </Typography>
+                                                        </p>
                                                     </div>
                                                 </div>                                                {/* Action Buttons */}
                                                 <div className="flex items-center gap-4">
                                                     {lastCheckedText && (
-                                                        <Typography 
-                                                            variant="caption" 
-                                                            color="textSecondary"
-                                                            sx={{
-                                                                fontSize: '0.75rem',
-                                                                display: { xs: 'block', sm: 'block' }
-                                                            }}
-                                                        >
+                                                        <span className="text-xs text-default-500">
                                                             Updated: {lastCheckedText}
-                                                        </Typography>
+                                                        </span>
                                                     )}
                                                     <div className="flex items-center gap-2">
                                                         {canExportAttendance && (
@@ -942,137 +936,107 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                 <div className="flex items-center gap-6 pt-2 border-t border-white/10">
                                                     <div className="flex items-center gap-2">
                                                         <CheckCircleIcon className="w-4 h-4 text-success" />
-                                                        <Typography variant="caption" color="textSecondary">
+                                                        <span className="text-xs text-gray-500">
                                                             Present: {totalRows}
-                                                        </Typography>
+                                                        </span>
                                                     </div>
                                                     {canViewAllAttendance && (
                                                         <div className="flex items-center gap-2">
                                                             <ExclamationTriangleIcon className="w-4 h-4 text-warning" />
-                                                            <Typography variant="caption" color="textSecondary">
+                                                            <span className="text-xs text-gray-500">
                                                                 Absent: {absentUsers.length}
-                                                            </Typography>
+                                                            </span>
                                                         </div>
                                                     )}
                                                     <div className="flex items-center gap-2">
                                                         <UserGroupIcon className="w-4 h-4 text-primary" />
-                                                        <Typography variant="caption" color="textSecondary">
+                                                        <span className="text-xs text-gray-500">
                                                             Total: {totalRows + absentUsers.length}
-                                                        </Typography>
+                                                        </span>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                }
-                                sx={{ 
-                                    padding: 0,
-                                    '& .MuiCardHeader-content': { 
-                                        width: '100%',
-                                        overflow: 'hidden' 
-                                    }
-                                }}
-                            />
+                            </CardHeader>
                             <Divider />
-                            <CardContent>
-                                <Box 
-                                    component="section"
+                            <CardBody>
+                                <div 
                                     role="search"
                                     aria-label="Timesheet filters"
                                 >
-                                    <Grid container spacing={3}>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                         {canViewAllAttendance && (
                                             <>
-                                                <Grid item xs={12} sm={6} md={4}>
-                                                    <TextField
+                                                <div className="col-span-1">
+                                                    <Input
                                                         type="text"
                                                         label="Search Employee"
                                                         placeholder="Enter employee name"
                                                         value={employee}
                                                         onChange={(e) => setEmployee(e.target.value)}
-                                                        variant="outlined"
-                                                        fullWidth
-                                                        size="small"
-                                                        InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                                                </InputAdornment>
-                                                            ),
-                                                            style: {
-                                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                                backdropFilter: 'blur(10px)',
-                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                                borderRadius: '8px',
-                                                            }
+                                                        variant="bordered"
+                                                        size="sm"
+                                                        startContent={
+                                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                                        }
+                                                        classNames={{
+                                                            input: "bg-transparent",
+                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20"
                                                         }}
                                                         aria-label="Search employees"
                                                     />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6} md={4}>
-                                                    <TextField
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <Input
                                                         label="Select Date"
                                                         type="date"
-                                                        variant="outlined"
+                                                        variant="bordered"
                                                         onChange={handleDateChange}
                                                         value={new Date(selectedDate).toISOString().slice(0, 10) || ''}
-                                                        fullWidth
-                                                        size="small"
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <CalendarDaysIcon className="w-4 h-4 text-default-400" />
-                                                                </InputAdornment>
-                                                            ),
-                                                            style: {
-                                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                                backdropFilter: 'blur(10px)',
-                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                                borderRadius: '8px',
-                                                            }
+                                                        size="sm"
+                                                        startContent={
+                                                            <CalendarDaysIcon className="w-4 h-4 text-default-400" />
+                                                        }
+                                                        classNames={{
+                                                            input: "bg-transparent",
+                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20"
                                                         }}
                                                         aria-label="Select date for timesheet"
                                                     />
-                                                </Grid>
+                                                </div>
                                             </>
                                         )}
-                                    </Grid>
-                                </Box>
-                            </CardContent>
+                                    </div>
+                                </div>
+                            </CardBody>
                             <Divider />                           
-                            <CardContent>
+                            <CardBody>
                                 {/* Two Column Layout for Present and Absent Users */}
-                                <Grid container spacing={3}>
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                                     {/* Present Users - Attendance Table */}
-                                    <Grid item xs={12} md={canViewAllAttendance ? 9 : 12}>
+                                    <div className={`${canViewAllAttendance ? 'md:col-span-9' : 'md:col-span-12'}`}>
                                         {error ? (
                                             <HeroCard className="p-4 bg-danger-50 border-danger-200">
-                                                <Box className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3">
                                                     <ExclamationTriangleIcon className="w-5 h-5 text-danger" />
-                                                    <Typography color="error" variant="body1">{error}</Typography>
-                                                </Box>
+                                                    <p className="text-danger">{error}</p>
+                                                </div>
                                             </HeroCard>
                                         ) : (                                            
-                                            <Box 
+                                            <div 
                                                 role="region"
                                                 aria-label="Present employees attendance table"
                                                 className="border-r border-gray-200 pr-4"
-                                                sx={{ borderRightColor: 'rgba(0, 0, 0, 0.1)' }}
                                             >
                                                  
                                             
-                                                <Box className="mb-4">
-                                                    <Typography 
-                                                        variant="h6" 
-                                                        className="font-semibold text-blue-600 flex items-center gap-2"
-                                                    >
+                                                <div className="mb-4">
+                                                    <h6 className="text-lg font-semibold text-blue-600 flex items-center gap-2">
                                                         <CheckCircleIcon className="w-5 h-5" />
                                                         Present Employees ({totalRows})
-                                                    </Typography>
-                                                </Box>
+                                                    </h6>
+                                                </div>
                                                 <ScrollShadow
                                                     orientation="horizontal"
                                                     className="overflow-y-hidden"
@@ -1094,22 +1058,22 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                             <TableHeader columns={columns}>
                                                                 {(column) => (
                                                                     <TableColumn key={column.uid} align="start">
-                                                                        <Box className="flex items-center gap-2">
+                                                                        <div className="flex items-center gap-2">
                                                                             {column.icon && <column.icon className="w-4 h-4" />}
                                                                             <span className="text-sm font-medium">{column.name}</span>
-                                                                        </Box>
+                                                                        </div>
                                                                     </TableColumn>
                                                                 )}
                                                             </TableHeader>
                                                             <TableBody 
                                                                 items={attendances}
                                                                 emptyContent={
-                                                                    <Box className="flex flex-col items-center justify-center py-8">
+                                                                    <div className="flex flex-col items-center justify-center py-8">
                                                                         <ClockIcon className="w-12 h-12 text-default-300 mb-4" />
-                                                                        <Typography variant="body1" color="textSecondary">
+                                                                        <p className="text-default-500">
                                                                             No attendance records found
-                                                                        </Typography>
-                                                                    </Box>
+                                                                        </p>
+                                                                    </div>
                                                                 }
                                                             >
                                                                 {(attendance) => (
@@ -1122,7 +1086,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                     </Skeleton>
                                                 </ScrollShadow>
                                                 {totalRows > perPage && (
-                                                    <Box className="py-4 flex justify-center">
+                                                    <div className="py-4 flex justify-center">
                                                         <Pagination
                                                             initialPage={1}
                                                             isCompact
@@ -1135,30 +1099,30 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                             onChange={handlePageChange}
                                                             aria-label="Timesheet pagination"
                                                         />
-                                                    </Box>
+                                                    </div>
                                                 )}
-                                            </Box>
+                                            </div>
                                         )}
-                                    </Grid>
+                                    </div>
 
                                     {/* Absent Users Section */}
                                     {canViewAllAttendance && (
-                                        <Grid item xs={12} md={3}>
+                                        <div className="md:col-span-3">
                                             <AbsentUsersInlineCard 
                                                 absentUsers={absentUsers}
                                                 selectedDate={selectedDate}
                                                 getUserLeave={getUserLeave}
                                             />
-                                        </Grid>
+                                        </div>
                                     )}
-                                </Grid>
-                            </CardContent>
+                                </div>
+                            </CardBody>
                         </GlassCard>
-                    </Grow>
+                    </motion.div>
                     {/* End of Main Card Content */}
-                </Grid>
-            </Grid>
-        </Box>
+                </div>
+            </div>
+        </div>
     );
 };
 

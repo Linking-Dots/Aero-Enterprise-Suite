@@ -5,13 +5,8 @@ layer(base);
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
 
-
-/* Import theme patterns for background support */
-@import './theme-patterns.css' layer(base);
-
 @import "tailwindcss";
 @plugin '../../hero.ts';
-/* Note: You may need to change the path to fit your project structure */
 @source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
 
@@ -84,6 +79,24 @@ layer(base);
 * {
     scrollbar-width: thin;
     scrollbar-color: rgba(136, 136, 136, 0.7) transparent;
+}
+
+/* Enhanced scrollbar for main content areas */
+.main-content-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-content-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--heroui-foreground), 0.2);
+    border-radius: 3px;
+}
+
+.main-content-scrollbar.dark::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.main-content-scrollbar.light::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .leaflet-routing-container {
@@ -376,4 +389,75 @@ layer(base);
 /* Ensure dropdown containers are compact */
 .dropdown-menu-container [data-slot="base"] {
     padding: 2px !important;
+}
+
+/* Enhanced Glass Card Styles */
+.glass-card-enhanced {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.glass-card-enhanced:hover::before {
+    left: 100%;
+}
+
+/* Shadow utilities for enhanced cards */
+.shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Mouse tracking for interactive effects */
+.glass-card-enhanced {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+}
+
+/* Gradient border animation */
+@keyframes gradient-border {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-gradient-border {
+    background-size: 200% 200%;
+    animation: gradient-border 3s ease infinite;
+}
+
+/* Enhanced backdrop blur support */
+@supports (backdrop-filter: blur(20px)) {
+    .backdrop-blur-enhanced {
+        -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+        backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+    }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(20px)) {
+    .backdrop-blur-enhanced {
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .dark .backdrop-blur-enhanced {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
 }

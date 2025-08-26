@@ -1,18 +1,20 @@
 import React, { useState, useCallback } from "react";
 import {
-    Typography,
-    Stack,
-    useMediaQuery,
-    Tooltip as MuiTooltip,
-    CardContent,
-    CardHeader,
-} from "@mui/material";
-import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    MoreVert as MoreVertIcon
-} from "@mui/icons-material";
-import { useTheme, alpha } from "@mui/material/styles";
+    PencilIcon as EditIcon,
+    TrashIcon as DeleteIcon,
+    EllipsisVerticalIcon as MoreVertIcon
+} from '@heroicons/react/24/outline';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+
+// Alpha utility function for creating transparent colors
+const alpha = (color, opacity) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 import { usePage } from "@inertiajs/react";
 import { toast } from "react-toastify";
 import {
@@ -88,7 +90,7 @@ const LeaveEmployeeTable = React.forwardRef(({
     fetchLeavesStats 
 }, ref) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
+    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -150,26 +152,26 @@ const LeaveEmployeeTable = React.forwardRef(({
         'New': {
             color: 'primary',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha(theme.palette.primary.main, 0.1),
-            textColor: theme.palette.primary.main
+            bgColor: alpha(theme.colors.primary, 0.1),
+            textColor: theme.colors.primary
         },
         'Pending': {
             color: 'warning',
             icon: ClockSolid,
-            bgColor: alpha(theme.palette.warning.main, 0.1),
-            textColor: theme.palette.warning.main
+            bgColor: alpha('#f59e0b', 0.1), // warning color
+            textColor: '#f59e0b'
         },
         'Approved': {
             color: 'success',
             icon: CheckCircleSolid,
-            bgColor: alpha(theme.palette.success.main, 0.1),
-            textColor: theme.palette.success.main
+            bgColor: alpha('#10b981', 0.1), // success color
+            textColor: '#10b981'
         },
         'Declined': {
             color: 'danger',
             icon: XCircleSolid,
-            bgColor: alpha(theme.palette.error.main, 0.1),
-            textColor: theme.palette.error.main
+            bgColor: alpha('#ef4444', 0.1), // danger color
+            textColor: '#ef4444'
         }
     };
 
@@ -299,7 +301,7 @@ const LeaveEmployeeTable = React.forwardRef(({
 
         return (
             <GlassCard className="mb-2" shadow="sm">
-                <CardContent className="p-3">
+                <CardBody className="p-3">
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1">
                             {isAdminView && (
@@ -382,19 +384,19 @@ const LeaveEmployeeTable = React.forwardRef(({
 
                     <Divider className="my-3" />
 
-                    <Stack spacing={2}>
+                    <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                             <DocumentTextIcon className="w-4 h-4 text-primary" />
-                            <Typography variant="body2" fontWeight="medium">
+                            <span className="text-sm font-medium">
                                 {leave.leave_type}
-                            </Typography>
+                            </span>
                         </div>
 
                         <div className="flex items-center gap-2">
                             <CalendarDaysIcon className="w-4 h-4 text-default-500" />
-                            <Typography variant="body2" color="textSecondary">
+                            <span className="text-sm text-default-500">
                                 {formatDate(leave.from_date)} - {formatDate(leave.to_date)}
-                            </Typography>
+                            </span>
                             <Chip size="sm" variant="bordered" color="default">
                                 {duration}
                             </Chip>
@@ -403,12 +405,12 @@ const LeaveEmployeeTable = React.forwardRef(({
                         {leave.reason && (
                             <div className="flex items-start gap-2">
                                 <ClockIconOutline className="w-4 h-4 text-default-500 mt-0.5" />
-                                <Typography variant="body2" color="textSecondary" className="flex-1">
+                                <span className="text-sm text-default-500 flex-1">
                                     {leave.reason}
-                                </Typography>
+                                </span>
                             </div>
                         )}
-                    </Stack>
+                    </div>
 
                     {isAdminView && canApproveLeaves && (
                         <>
@@ -441,7 +443,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                             </div>
                         </>
                     )}
-                </CardContent>
+                </CardBody>
             </GlassCard>
         );
     };
@@ -492,9 +494,9 @@ const LeaveEmployeeTable = React.forwardRef(({
                     <TableCell>
                         <div className="flex items-center gap-1">
                             {getLeaveTypeIcon(leave.leave_type)}
-                            <Typography variant="body2" className="text-sm font-medium capitalize">
+                            <span className="text-sm font-medium capitalize">
                                 {leave.leave_type}
-                            </Typography>
+                            </span>
                         </div>
                     </TableCell>
                 );
@@ -507,13 +509,13 @@ const LeaveEmployeeTable = React.forwardRef(({
                         <div className="flex items-center gap-1">
                             <CalendarDaysIcon className="w-3 h-3 text-default-500" />
                             <div>
-                                <Typography variant="body2" className="text-sm">
+                                <span className="text-sm">
                                     {formatDate(leave[columnKey])}
-                                </Typography>
+                                </span>
                                 {columnKey === "from_date" && (
-                                    <Typography variant="caption" className="text-xs" color="textSecondary">
+                                    <div className="text-xs text-default-500">
                                         {getLeaveDuration(leave.from_date, leave.to_date)}
-                                    </Typography>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -566,15 +568,11 @@ const LeaveEmployeeTable = React.forwardRef(({
             case "reason":
                 return (
                     <TableCell>
-                        <MuiTooltip title={leave.reason || "No reason provided"}>
-                            <Typography 
-                                variant="caption" 
-                                className="max-w-xs truncate cursor-help text-xs"
-                                color="textSecondary"
-                            >
+                        <Tooltip content={leave.reason || "No reason provided"}>
+                            <span className="max-w-xs truncate cursor-help text-xs text-default-500">
                                 {leave.reason || "No reason provided"}
-                            </Typography>
-                        </MuiTooltip>
+                            </span>
+                        </Tooltip>
                     </TableCell>
                 );
 
@@ -722,12 +720,12 @@ const LeaveEmployeeTable = React.forwardRef(({
                         emptyContent={
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <CalendarDaysIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <Typography variant="h6" color="textSecondary">
+                                <h6 className="text-lg font-semibold text-default-500">
                                     No leaves found
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
+                                </h6>
+                                <p className="text-sm text-default-500">
                                     {employee ? `No leaves found for "${employee}"` : "No leave requests for the selected period"}
-                                </Typography>
+                                </p>
                             </div>
                         }
                     >

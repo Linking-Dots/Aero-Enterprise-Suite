@@ -1,20 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage, router } from "@inertiajs/react";
-import { 
-  Box, 
-  Typography, 
-  useTheme, 
-  useMediaQuery, 
-  Grow, 
-  Fade,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
   Button, 
   Chip, 
@@ -23,7 +9,11 @@ import {
   CardBody,
   User,
   Divider,
-  Pagination
+  Pagination,
+  Input,
+  Select,
+  SelectItem,
+  Spinner
 } from "@heroui/react";
 
 import { 
@@ -49,6 +39,7 @@ import {
 import App from "@/Layouts/App.jsx";
 import GlassCard from "@/Components/GlassCard.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
+import { useTheme } from '@/Contexts/ThemeContext';
 import StatsCards from "@/Components/StatsCards.jsx";
 import EmployeeTable from "@/Tables/EmployeeTable.jsx";
 import ProfileAvatar from "@/Components/ProfileAvatar.jsx";
@@ -56,9 +47,9 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const EmployeesList = ({ title, departments, designations, attendanceTypes }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const { theme } = useTheme();
+  const [isMobile] = useState(window.innerWidth < 640);
+  const [isTablet] = useState(window.innerWidth < 768);
   
   // State for employee data with server-side pagination
   const [employees, setEmployees] = useState([]);
@@ -419,8 +410,12 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
     <>
       <Head title={title} />
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-        <Grow in timeout={800}>
+      <div className="flex justify-center p-2">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+        >
           <GlassCard>
             <PageHeader
               title="Employee Directory"
@@ -443,9 +438,9 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Department Distribution */}
                   <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <Typography variant="h6" className="font-semibold text-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       Department Distribution
-                    </Typography>
+                    </h3>
                     <div className="space-y-3">
                       {stats.distribution?.by_department?.slice(0, 5).map((dept, index) => (
                         <div key={index} className="flex items-center justify-between">
@@ -466,9 +461,9 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
 
                   {/* Hiring Trends */}
                   <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <Typography variant="h6" className="font-semibold text-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       Hiring Trends
-                    </Typography>
+                    </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-default-600">Last 30 Days</span>
@@ -501,9 +496,9 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
 
                   {/* Workforce Health */}
                   <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <Typography variant="h6" className="font-semibold text-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       Workforce Health
-                    </Typography>
+                    </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-default-600">Retention Rate</span>
@@ -528,9 +523,9 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
 
                   {/* Attendance Type Distribution */}
                   <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <Typography variant="h6" className="font-semibold text-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       Attendance Types
-                    </Typography>
+                    </h3>
                     <div className="space-y-3">
                       {stats.distribution?.by_attendance_type?.map((type, index) => (
                         <div key={index} className="flex items-center justify-between">
@@ -553,46 +548,19 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                 {/* View Controls */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <TextField
+                    <Input
                       label="Search Employees"
                       placeholder="Search by name, email, or employee ID..."
                       value={filters.search}
                       onChange={(e) => handleSearchChange(e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MagnifyingGlassIcon className="w-4 h-4" />
-                          </InputAdornment>
-                        ),
-                      }}
-                      fullWidth
-                      size={isMobile ? "small" : "medium"}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          backdropFilter: 'blur(10px)',
-                          borderRadius: '12px',
-                          color: 'white',
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: 'var(--primary-color)',
-                          },
-                          '& input::placeholder': {
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            opacity: 1,
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          '&.Mui-focused': {
-                            color: 'var(--primary-color)',
-                          },
-                        },
+                      startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-500" />}
+                      size={isMobile ? "sm" : "md"}
+                      classNames={{
+                        base: "max-w-full",
+                        mainWrapper: "h-full",
+                        input: "text-small",
+                        inputWrapper: "h-full bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 group-data-[focus=true]:border-primary",
+                        label: "text-white/70 group-data-[focus=true]:text-primary"
                       }}
                     />
                   </div>
@@ -635,183 +603,107 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
 
                 {/* Filters Section */}
                 {showFilters && (
-                  <Fade in timeout={300}>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <FormControl size="small">
-                          <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Department
-                          </InputLabel>
-                          <Select
-                            value={filters.department}
-                            onChange={(e) => handleDepartmentFilterChange(e.target.value)}
-                            label="Department"
-                            sx={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              backdropFilter: 'blur(16px)',
-                              borderRadius: '12px',
-                              '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(255, 255, 255, 0.2)',
-                              },
-                              '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(255, 255, 255, 0.3)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                              },
-                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(59, 130, 246, 0.5)',
-                              },
-                              '& .MuiSelect-select': {
-                                color: 'rgba(255, 255, 255, 0.9)',
-                              },
-                              '& .MuiSelect-icon': {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                              },
-                            }}
-                            MenuProps={{
-                              PaperProps: {
-                                sx: {
-                                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                  backdropFilter: 'blur(16px)',
-                                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                                  borderRadius: '12px',
-                                  '& .MuiMenuItem-root': {
-                                    color: 'rgba(255, 255, 255, 0.9)',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                    },
-                                    '&.Mui-selected': {
-                                      backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                                    },
-                                  },
-                                },
-                              },
-                            }}
-                          >
-                            <MenuItem value="all">All Departments</MenuItem>
-                            {departments?.map(dept => (
-                              <MenuItem key={dept.id.toString()} value={dept.id.toString()}>
-                                {dept.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                        <Select
+                          label="Department"
+                          placeholder="Select Department"
+                          selectedKeys={filters.department === 'all' ? [] : [filters.department]}
+                          onSelectionChange={(keys) => {
+                            const selectedValue = Array.from(keys)[0] || 'all';
+                            handleDepartmentFilterChange(selectedValue);
+                          }}
+                          size="sm"
+                          classNames={{
+                            base: "max-w-full",
+                            trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
+                            label: "text-white/70 group-data-[filled=true]:text-primary",
+                            value: "text-white/90",
+                            selectorIcon: "text-white/70"
+                          }}
+                          popoverProps={{
+                            classNames: {
+                              base: "bg-white/10 backdrop-blur-md border border-white/20",
+                              content: "bg-transparent"
+                            }
+                          }}
+                        >
+                          <SelectItem key="all" value="all">All Departments</SelectItem>
+                          {departments?.map(dept => (
+                            <SelectItem key={dept.id.toString()} value={dept.id.toString()}>
+                              {dept.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
 
-                        <FormControl size="small">
-                          <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Designation
-                          </InputLabel>
-                          <Select
-                            value={filters.designation}
-                            onChange={(e) => handleDesignationFilterChange(e.target.value)}
-                            label="Designation"
-                            sx={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              backdropFilter: 'blur(16px)',
-                              borderRadius: '12px',
-                              '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(255, 255, 255, 0.2)',
-                              },
-                              '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(255, 255, 255, 0.3)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                              },
-                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'rgba(59, 130, 246, 0.5)',
-                              },
-                              '& .MuiSelect-select': {
-                                color: 'rgba(255, 255, 255, 0.9)',
-                              },
-                              '& .MuiSelect-icon': {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                              },
-                            }}
-                            MenuProps={{
-                              PaperProps: {
-                                sx: {
-                                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                  backdropFilter: 'blur(16px)',
-                                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                                  borderRadius: '12px',
-                                  '& .MuiMenuItem-root': {
-                                    color: 'rgba(255, 255, 255, 0.9)',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                    },
-                                    '&.Mui-selected': {
-                                      backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                                    },
-                                  },
-                                },
-                              },
-                            }}
-                          >
-                            <MenuItem value="all">All Designations</MenuItem>
-                            {filteredDesignations?.map(desig => (
-                              <MenuItem key={desig.id.toString()} value={desig.id.toString()}>
-                                {desig.title}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                        <Select
+                          label="Designation"
+                          placeholder="Select Designation"
+                          selectedKeys={filters.designation === 'all' ? [] : [filters.designation]}
+                          onSelectionChange={(keys) => {
+                            const selectedValue = Array.from(keys)[0] || 'all';
+                            handleDesignationFilterChange(selectedValue);
+                          }}
+                          size="sm"
+                          classNames={{
+                            base: "max-w-full",
+                            trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
+                            label: "text-white/70 group-data-[filled=true]:text-primary",
+                            value: "text-white/90",
+                            selectorIcon: "text-white/70"
+                          }}
+                          popoverProps={{
+                            classNames: {
+                              base: "bg-white/10 backdrop-blur-md border border-white/20",
+                              content: "bg-transparent"
+                            }
+                          }}
+                        >
+                          <SelectItem key="all" value="all">All Designations</SelectItem>
+                          {filteredDesignations?.map(desig => (
+                            <SelectItem key={desig.id.toString()} value={desig.id.toString()}>
+                              {desig.title}
+                            </SelectItem>
+                          ))}
+                        </Select>
 
                         {!isMobile && (
-                          <FormControl size="small">
-                            <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                              Attendance Type
-                            </InputLabel>
-                            <Select
-                              value={filters.attendanceType}
-                              onChange={(e) => handleAttendanceTypeFilterChange(e.target.value)}
-                              label="Attendance Type"
-                              sx={{
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(16px)',
-                                borderRadius: '12px',
-                                '& .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: 'rgba(59, 130, 246, 0.5)',
-                                },
-                                '& .MuiSelect-select': {
-                                  color: 'rgba(255, 255, 255, 0.9)',
-                                },
-                                '& .MuiSelect-icon': {
-                                  color: 'rgba(255, 255, 255, 0.7)',
-                                },
-                              }}
-                              MenuProps={{
-                                PaperProps: {
-                                  sx: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    backdropFilter: 'blur(16px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '12px',
-                                    '& .MuiMenuItem-root': {
-                                      color: 'rgba(255, 255, 255, 0.9)',
-                                      '&:hover': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                      },
-                                      '&.Mui-selected': {
-                                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                                      },
-                                    },
-                                  },
-                                },
-                              }}
-                            >
-                              <MenuItem value="all">All Attendance Types</MenuItem>
-                              {attendanceTypes?.map(type => (
-                                <MenuItem key={type.id.toString()} value={type.id.toString()}>
-                                  {type.name}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Select
+                            label="Attendance Type"
+                            placeholder="Select Attendance Type"
+                            selectedKeys={filters.attendanceType === 'all' ? [] : [filters.attendanceType]}
+                            onSelectionChange={(keys) => {
+                              const selectedValue = Array.from(keys)[0] || 'all';
+                              handleAttendanceTypeFilterChange(selectedValue);
+                            }}
+                            size="sm"
+                            classNames={{
+                              base: "max-w-full",
+                              trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
+                              label: "text-white/70 group-data-[filled=true]:text-primary",
+                              value: "text-white/90",
+                              selectorIcon: "text-white/70"
+                            }}
+                            popoverProps={{
+                              classNames: {
+                                base: "bg-white/10 backdrop-blur-md border border-white/20",
+                                content: "bg-transparent"
+                              }
+                            }}
+                          >
+                            <SelectItem key="all" value="all">All Attendance Types</SelectItem>
+                            {attendanceTypes?.map(type => (
+                              <SelectItem key={type.id.toString()} value={type.id.toString()}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
                         )}
                       </div>
 
@@ -861,26 +753,26 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                         </div>
                       )}
                     </div>
-                  </Fade>
+                  </motion.div>
                 )}
 
                 {/* Content Area */}
                 <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 overflow-hidden">
                   <div className="p-4 border-b border-white/10">
-                    <Typography variant="h6" className="font-semibold text-foreground">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {viewMode === 'table' ? 'Employee Table' : 'Employee Grid'} 
                       <span className="text-sm text-default-500 ml-2">
                         ({totalRows} {totalRows === 1 ? 'employee' : 'employees'})
                       </span>
-                    </Typography>
+                    </h3>
                   </div>
                   
                   {loading ? (
                     <div className="text-center py-8">
-                      <CircularProgress size={40} />
-                      <Typography className="mt-4" color="textSecondary">
+                      <Spinner size="lg" color="primary" />
+                      <p className="mt-4 text-default-500">
                         Loading employees data...
-                      </Typography>
+                      </p>
                     </div>
                   ) : viewMode === 'table' ? (
                     <EmployeeTable 
@@ -916,12 +808,12 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                       ) : (
                         <div className="text-center py-8">
                           <UsersIcon className="w-12 h-12 mx-auto text-default-300 mb-2" />
-                          <Typography variant="body1" color="textSecondary">
+                          <p className="text-base text-default-500">
                             No employees found
-                          </Typography>
-                          <Typography variant="caption" color="textSecondary">
+                          </p>
+                          <p className="text-sm text-default-500">
                             Try adjusting your search or filters
-                          </Typography>
+                          </p>
                         </div>
                       )}
                       
@@ -949,8 +841,8 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
               </div>
             </PageHeader>
           </GlassCard>
-        </Grow>
-      </Box>
+        </motion.div>
+      </div>
     </>
   );
 };

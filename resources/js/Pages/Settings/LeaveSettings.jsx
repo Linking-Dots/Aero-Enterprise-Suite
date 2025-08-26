@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
 import {Head, usePage} from "@inertiajs/react";
 import { toast } from 'react-toastify';
-import CircularProgress from '@mui/material/CircularProgress';
+import { motion } from 'framer-motion';
 import {
     Button,
-    TextField,
+    Input,
     Table,
     TableBody,
     TableCell,
-    TableContainer,
-    TableHead,
+    TableHeader,
     TableRow,
-    Paper,
-    Typography,
-    Grid, CardHeader, Box, CardContent, Grow, FormControl, Select, MenuItem, InputLabel, Radio
-} from '@mui/material';
+    Card,
+    CardBody,
+    CardHeader,
+    Select,
+    SelectItem,
+    Radio,
+    Spinner,
+    Divider
+} from '@heroui/react';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import App from "@/Layouts/App.jsx";
-import {Add} from "@mui/icons-material";
 import GlassCard from '@/Components/GlassCard.jsx';
-import { useTheme } from '@mui/material/styles';
+import useTheme from '@/theme';
 
 // Initial structure of leave type
 
@@ -76,7 +80,7 @@ const LeaveSettings = ({title}) => {
                     render() {
                         return (
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
+                                <Spinner size="sm" />
                                 <span style={{ marginLeft: '8px' }}>Adding leave type...</span>
                             </div>
                         );
@@ -84,9 +88,9 @@ const LeaveSettings = ({title}) => {
                     icon: false,
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: 'white',
                     },
                 },
                 success: {
@@ -102,9 +106,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
                 error: {
@@ -118,9 +122,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
             }
@@ -166,7 +170,7 @@ const LeaveSettings = ({title}) => {
                     render() {
                         return (
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
+                                <Spinner size="sm" />
                                 <span style={{ marginLeft: '8px' }}>Updating leave type...</span>
                             </div>
                         );
@@ -174,9 +178,9 @@ const LeaveSettings = ({title}) => {
                     icon: false,
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: 'white',
                     },
                 },
                 success: {
@@ -192,9 +196,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
                 error: {
@@ -208,9 +212,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
             }
@@ -245,7 +249,7 @@ const LeaveSettings = ({title}) => {
                     render() {
                         return (
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
+                                <Spinner size="sm" />
                                 <span style={{ marginLeft: '8px' }}>Deleting leave type...</span>
                             </div>
                         );
@@ -253,9 +257,9 @@ const LeaveSettings = ({title}) => {
                     icon: false,
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: 'white',
                     },
                 },
                 success: {
@@ -271,9 +275,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
                 error: {
@@ -287,9 +291,9 @@ const LeaveSettings = ({title}) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "white",
                     },
                 },
             }
@@ -300,126 +304,95 @@ const LeaveSettings = ({title}) => {
     return (
         <>
             <Head title={title} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
+            <div className="flex justify-center p-2">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <GlassCard>
-                        <CardHeader
-                            title="Leave Settings"
-                            sx={{padding: '24px'}}
-                        />
-                        <CardContent>
-                            <Grid container spacing={1} alignItems="center">
-                                <Grid item xs={6} sm={3} md={3}>
-                                    <TextField
-                                        fullWidth
+                        <CardHeader className="p-6">
+                            <h2 className="text-xl font-semibold text-white">Leave Settings</h2>
+                        </CardHeader>
+                        <CardBody className="px-6 pb-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                                <div>
+                                    <Input
                                         label="Leave Type"
                                         name="type"
                                         value={newLeaveType.type}
                                         onChange={handleInputChange}
                                     />
-                                </Grid>
-                                <Grid item xs={6} sm={3} md={3}>
-                                    <TextField
-                                        fullWidth
+                                </div>
+                                <div>
+                                    <Input
                                         label="Number of Days"
                                         name="days"
                                         type="number"
                                         value={newLeaveType.days}
                                         onChange={handleInputChange}
                                     />
-                                </Grid>
-                                <Grid item xs={6} sm={3} md={3}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="carry-forward-label">Carry Forward</InputLabel>
-                                        <Select
-                                            variant="outlined"
-                                            labelId="carry-forward-label"
-                                            label="Carry Forward"
-                                            name="carry_forward"
-                                            value={newLeaveType.carry_forward}
-                                            onChange={handleInputChange}
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    sx: {
-                                                        backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
-                                                        borderRadius: 2,
-                                                        boxShadow:
-                                                            'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-                                                    },
-                                                },
-                                            }}
-                                        >
-                                            <MenuItem value={true}>Yes</MenuItem>
-                                            <MenuItem value={false}>No</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={6} sm={3} md={3}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="earned-leave-label">Earned Leave</InputLabel>
-                                        <Select
-                                            variant="outlined"
-                                            labelId="earned-leave-label"
-                                            label="Earned Leave"
-                                            name="earned_leave"
-                                            value={newLeaveType.earned_leave}
-                                            onChange={handleInputChange}
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    sx: {
-                                                        backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
-                                                        borderRadius: 2,
-                                                        boxShadow:
-                                                            'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-                                                    },
-                                                },
-                                            }}
-                                        >
-                                            <MenuItem value={true}>Yes</MenuItem>
-                                            <MenuItem value={false}>No</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <TextField
-                                        fullWidth
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Carry Forward"
+                                        name="carry_forward"
+                                        selectedKeys={newLeaveType.carry_forward ? [String(newLeaveType.carry_forward)] : []}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleInputChange({ target: { name: 'carry_forward', value: value === 'true' } });
+                                        }}
+                                    >
+                                        <SelectItem key="true" value="true">Yes</SelectItem>
+                                        <SelectItem key="false" value="false">No</SelectItem>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Earned Leave"
+                                        name="earned_leave"
+                                        selectedKeys={newLeaveType.earned_leave ? [String(newLeaveType.earned_leave)] : []}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleInputChange({ target: { name: 'earned_leave', value: value === 'true' } });
+                                        }}
+                                    >
+                                        <SelectItem key="true" value="true">Yes</SelectItem>
+                                        <SelectItem key="false" value="false">No</SelectItem>
+                                    </Select>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <Input
                                         label="Eligibility Criteria"
                                         name="eligibility"
                                         value={newLeaveType.eligibility}
                                         onChange={handleInputChange}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <TextField
-                                        fullWidth
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <Input
                                         label="Special Conditions"
                                         name="special_conditions"
                                         value={newLeaveType.special_conditions}
                                         onChange={handleInputChange}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                                </div>
+                                <div className="col-span-full flex justify-center">
                                     <Button
-                                        sx={{
-                                            height: '100%'
-                                        }}
-                                        variant="outlined"
+                                        variant="bordered"
                                         color="primary"
-                                        onClick={isEditing ? updateLeaveType : addLeaveType}
+                                        onPress={isEditing ? updateLeaveType : addLeaveType}
+                                        startContent={<PlusIcon className="w-4 h-4" />}
                                     >
                                         {isEditing ? 'Update Leave Type' : 'Add Leave Type'}
                                     </Button>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                        <CardContent>
-                            <TableContainer style={{ maxHeight: '84vh', overflowY: 'auto' }}>
-                                <Table>
-                                    <TableHead>
+                                </div>
+                            </div>
+                        </CardBody>
+                        <CardBody>
+                            <div className="overflow-auto max-h-[84vh]">
+                                <Table aria-label="Leave types table">
+                                    <TableHeader>
                                         <TableRow>
                                             <TableCell>Type</TableCell>
                                             <TableCell>Days</TableCell>
@@ -429,7 +402,7 @@ const LeaveSettings = ({title}) => {
                                             <TableCell>Special Conditions</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
-                                    </TableHead>
+                                    </TableHeader>
                                     <TableBody>
                                         {leaveTypes.length > 0 ? (
                                             leaveTypes.map((leave) => (
@@ -438,69 +411,66 @@ const LeaveSettings = ({title}) => {
                                                     <TableCell>{leave.days}</TableCell>
                                                     <TableCell>{leave.eligibility}</TableCell>
                                                     <TableCell>
-                                                        <Typography>
+                                                        <div className="flex items-center gap-2">
                                                             <Radio
-                                                                checked
-                                                                sx={{
-                                                                    color: leave.carry_forward ? 'green' : 'red',
-                                                                    '&.Mui-checked': {
-                                                                        color: leave.carry_forward ? 'green' : 'red',
-                                                                    },
-                                                                }}
-                                                                disabled // Disable as it's for display only
+                                                                isSelected={true}
+                                                                color={leave.carry_forward ? 'success' : 'danger'}
+                                                                isDisabled
                                                             />
-                                                            {leave.carry_forward ? "Yes" : "No"}
-                                                        </Typography>
+                                                            <span className={leave.carry_forward ? 'text-success' : 'text-danger'}>
+                                                                {leave.carry_forward ? "Yes" : "No"}
+                                                            </span>
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Typography>
+                                                        <div className="flex items-center gap-2">
                                                             <Radio
-                                                                checked
-                                                                sx={{
-                                                                    color: leave.earned_leave ? 'green' : 'red',
-                                                                    '&.Mui-checked': {
-                                                                        color: leave.earned_leave ? 'green' : 'red',
-                                                                    },
-                                                                }}
-                                                                disabled // Disable as it's for display only
+                                                                isSelected={true}
+                                                                color={leave.earned_leave ? 'success' : 'danger'}
+                                                                isDisabled
                                                             />
-                                                            {leave.earned_leave ? "Yes" : "No"}
-                                                        </Typography>
+                                                            <span className={leave.earned_leave ? 'text-success' : 'text-danger'}>
+                                                                {leave.earned_leave ? "Yes" : "No"}
+                                                            </span>
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell>{leave.special_conditions ? leave.special_conditions : "N/A"}</TableCell>
                                                     <TableCell>
-                                                        <Button
-                                                            variant="outlined"
-                                                            color="primary"
-                                                            onClick={() => editLeaveType(leave.id)}
-                                                            sx={{marginRight: 1}}
-                                                        >
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            onClick={() => deleteLeaveType(leave.id)}
-                                                        >
-                                                            Delete
-                                                        </Button>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="bordered"
+                                                                color="primary"
+                                                                size="sm"
+                                                                onPress={() => editLeaveType(leave.id)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                variant="bordered"
+                                                                color="danger"
+                                                                size="sm"
+                                                                onPress={() => deleteLeaveType(leave.id)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell colSpan={7} align="center">
+                                                <TableCell colSpan={7} className="text-center">
                                                     No leave types available.
                                                 </TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
                                 </Table>
-                            </TableContainer>
-                        </CardContent>
+                            </div>
+                        </CardBody>
                     </GlassCard>
-                </Grow>
-            </Box>
+                </motion.div>
+            </div>
         </>
 
 

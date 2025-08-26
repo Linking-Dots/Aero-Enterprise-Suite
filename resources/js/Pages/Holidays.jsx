@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import { Box, Typography, useMediaQuery, useTheme, Grow } from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
     CalendarIcon, 
     PlusIcon,
@@ -10,7 +10,7 @@ import {
 import GlassCard from '@/Components/GlassCard.jsx';
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
-import { GRADIENT_PRESETS } from '@/utils/gradientUtils.js';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import App from "@/Layouts/App.jsx";
 import HolidayTable from '@/Tables/HolidayTable.jsx';
 import HolidayForm from "@/Forms/HolidayForm.jsx";
@@ -19,7 +19,7 @@ import DeleteHolidayForm from "@/Forms/DeleteHolidayForm.jsx";
 const Holidays = ({ title, stats }) => {
     const { auth, holidays: initialHolidays } = usePage().props;
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isMobile] = useState(window.innerWidth < 640);
     
     // Filter initial data to current year (matching HolidayTable default)
     const currentYearHolidays = useMemo(() => {
@@ -162,8 +162,12 @@ const Holidays = ({ title, stats }) => {
                 />
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
+            <div className="flex justify-center p-2">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <GlassCard>
                         <PageHeader
                             title="Company Holidays"
@@ -186,8 +190,8 @@ const Holidays = ({ title, stats }) => {
                             </div>
                         </PageHeader>
                     </GlassCard>
-                </Grow>
-            </Box>
+                </motion.div>
+            </div>
         </>
     );
 };

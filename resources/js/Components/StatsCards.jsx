@@ -1,6 +1,22 @@
 import React from 'react';
-import { Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Card, CardHeader, CardBody } from "@heroui/react";
+
+// Custom hook to replicate MUI's useMediaQuery functionality
+const useMediaQuery = (query) => {
+    const [matches, setMatches] = React.useState(false);
+    
+    React.useEffect(() => {
+        const mediaQuery = window.matchMedia(query);
+        setMatches(mediaQuery.matches);
+        
+        const handler = (event) => setMatches(event.matches);
+        mediaQuery.addEventListener('change', handler);
+        
+        return () => mediaQuery.removeEventListener('change', handler);
+    }, [query]);
+    
+    return matches;
+};
 
 /**
  * Shared statistics cards component with enhanced responsive design for any number of cards
@@ -13,10 +29,9 @@ import { Card, CardHeader, CardBody } from "@heroui/react";
  * @param {boolean} props.compact - Use compact layout for smaller cards (default: false)
  */
 const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, compact = false }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-    const isLargeTablet = useMediaQuery(theme.breakpoints.down('lg'));
+    const isMobile = useMediaQuery('(max-width: 640px)');
+    const isTablet = useMediaQuery('(max-width: 768px)');
+    const isLargeTablet = useMediaQuery('(max-width: 1024px)');
 
     // Enhanced grid layout calculation that scales with any number of cards
     const getGridCols = () => {
@@ -133,18 +148,12 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <Typography 
-                                                variant="caption" 
-                                                className={`font-medium ${color} text-xs leading-tight`}
-                                            >
+                                            <p className={`font-medium ${color} text-xs leading-tight`}>
                                                 {title}
-                                            </Typography>
-                                            <Typography 
-                                                variant="body2" 
-                                                className={`font-bold ${valueColor || color} text-sm leading-tight`}
-                                            >
+                                            </p>
+                                            <p className={`font-bold ${valueColor || color} text-sm leading-tight`}>
                                                 {value}
-                                            </Typography>
+                                            </p>
                                         </div>
                                     </div>
                                 </CardBody>
@@ -167,34 +176,26 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                                     )}
                                                 </div>
                                             )}
-                                            <Typography 
-                                                variant={isMobile ? "subtitle2" : "h6"} 
-                                                className={`font-semibold ${color} ${isMobile ? 'text-sm' : ''}`}
-                                            >
+                                            <h6 className={`font-semibold ${color} ${isMobile ? 'text-sm' : 'text-lg'}`}>
                                                 {title}
-                                            </Typography>
+                                            </h6>
                                         </div>
                                     </CardHeader>
                                     
                                     <CardBody className={`pt-0 ${isMobile ? 'p-3' : 'p-4'}`}>
-                                        <Typography 
-                                            variant={isMobile ? "h5" : "h4"} 
-                                            className={`font-bold ${valueColor || color}`}
+                                        <div 
+                                            className={`font-bold ${valueColor || color} ${isMobile ? 'text-xl' : 'text-2xl'}`}
                                             style={typeof value === 'string' && value.length > 10 ? {
                                                 fontSize: isMobile ? '1rem' : '1.25rem',
                                                 lineHeight: '1.2'
                                             } : {}}
                                         >
                                             {value}
-                                        </Typography>
+                                        </div>
                                         {description && (
-                                            <Typography 
-                                                variant="caption" 
-                                                color="textSecondary"
-                                                className={isMobile ? 'text-xs' : 'text-sm'}
-                                            >
+                                            <p className={`text-foreground-600 ${isMobile ? 'text-xs' : 'text-sm'} mt-1`}>
                                                 {description}
-                                            </Typography>
+                                            </p>
                                         )}
                                     </CardBody>
                                 </>

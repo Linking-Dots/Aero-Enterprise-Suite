@@ -1,12 +1,12 @@
-import {Button, CircularProgress, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
+import { Button, Spinner } from "@heroui/react";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 import React from "react";
-import {toast} from "react-toastify";
-import {useTheme} from "@mui/material/styles";
+import { toast } from "react-toastify";
 
 
 const DeleteDailyWorkForm = ({ open, handleClose, handleDelete }) => {
-    const theme = useTheme();
+
+
 
     return(
         <GlassDialog

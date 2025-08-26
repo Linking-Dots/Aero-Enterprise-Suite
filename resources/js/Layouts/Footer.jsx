@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, useMediaQuery } from '@mui/material';
 import { Button, Divider, Link } from "@heroui/react";
 import { 
   HeartIcon, 
@@ -7,15 +6,14 @@ import {
   EnvelopeIcon,
   PhoneIcon 
 } from '@heroicons/react/24/outline';
-import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import GlassCard from '@/Components/GlassCard.jsx';
-import { GRADIENT_PRESETS } from '@/utils/gradientUtils.js';
+// Remove gradientUtils import - using HeroUI semantic colors instead
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const isMobile = useMediaQuery('(max-width: 640px)');
+    const isTablet = useMediaQuery('(max-width: 768px)');
 
     const quickLinks = [
         { label: 'Dashboard', href: '/dashboard' },
@@ -50,71 +48,55 @@ const Footer = () => {
     ];
 
     return (
-        <Box 
-            component="footer" 
+        <footer 
             role="contentinfo"
-            sx={{ 
-                py: { xs: 3, md: 4 },
-                mt: 'auto',
-                borderTop: `1px solid ${theme.palette.divider}`
-            }}
+            className="py-12 md:py-16 mt-auto border-t border-divider"
         >
-            <Container maxWidth="xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <GlassCard className="overflow-hidden">
-                    <Box sx={{ p: { xs: 3, md: 4 } }}>
+                    <div className="p-12 md:p-16">
                         {/* Main Footer Content */}
-                        <Grid container spacing={{ xs: 3, md: 4 }}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
                             {/* Brand Section */}
-                            <Grid item xs={12} md={4}>
-                                <Box className="space-y-4">
+                            <div className="md:col-span-1">
+                                <div className="space-y-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${GRADIENT_PRESETS.iconContainer}`}>
-                                            <Typography 
-                                                variant="h5" 
-                                                className="font-bold text-white"
+                                            <span 
+                                                className="font-bold text-white text-xl"
                                                 style={{ fontFamily: 'Inter, sans-serif' }}
                                             >
                                                 A
-                                            </Typography>
+                                            </span>
                                         </div>
                                         <div>
-                                            <Typography 
-                                                variant="h5" 
-                                                className={`font-bold ${GRADIENT_PRESETS.gradientText}`}
-                                            >
+                                            <h3 className={`font-bold text-xl ${GRADIENT_PRESETS.gradientText}`}>
                                                 aeos365
-                                            </Typography>
-                                            <Typography variant="caption" className="text-default-500">
+                                            </h3>
+                                            <p className="text-default-500 text-sm">
                                                 Enterprise Solution
-                                            </Typography>
+                                            </p>
                                         </div>
                                     </div>
-                                    <Typography 
-                                        variant="body2" 
-                                        color="text.secondary"
-                                        className="leading-relaxed mt-3"
-                                    >
+                                    <p className="text-default-500 leading-relaxed mt-3 text-sm">
                                         Advanced Human Resource Management system designed for modern enterprises. 
                                         Streamline your HR operations with our comprehensive, cloud-based solution 
                                         featuring employee management, attendance tracking, leave management, and more.
-                                    </Typography>
+                                    </p>
                                     <div className="flex items-center gap-2 text-sm text-default-500 mt-4">
                                         <span>Crafted with</span>
                                         <HeartIcon className="w-4 h-4 text-red-500 animate-pulse" />
                                         <span>by the Aero Team</span>
                                     </div>
-                                </Box>
-                            </Grid>
+                                </div>
+                            </div>
 
                             {/* Quick Links */}
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Box className="space-y-4">
-                                    <Typography 
-                                        variant="subtitle1" 
-                                        className="font-semibold text-foreground"
-                                    >
+                            <div className="md:col-span-1">
+                                <div className="space-y-4">
+                                    <h4 className="font-semibold text-foreground text-lg">
                                         Quick Links
-                                    </Typography>
+                                    </h4>
                                     <div className="grid grid-cols-2 gap-2">
                                         {quickLinks.map((link, index) => (
                                             <Link
@@ -128,18 +110,15 @@ const Footer = () => {
                                             </Link>
                                         ))}
                                     </div>
-                                </Box>
-                            </Grid>
+                                </div>
+                            </div>
 
                             {/* Contact Information */}
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Box className="space-y-4">
-                                    <Typography 
-                                        variant="subtitle1" 
-                                        className="font-semibold text-foreground"
-                                    >
+                            <div className="md:col-span-1">
+                                <div className="space-y-4">
+                                    <h4 className="font-semibold text-foreground text-lg">
                                         Contact Info
-                                    </Typography>
+                                    </h4>
                                     <div className="space-y-3">
                                         {contactInfo.map((contact, index) => {
                                             const IconComponent = contact.icon;
@@ -162,24 +141,20 @@ const Footer = () => {
                                             );
                                         })}
                                     </div>
-                                </Box>
-                            </Grid>
-                        </Grid>
+                                </div>
+                            </div>
+                        </div>
 
                         <Divider className="my-6 bg-white/20" />
 
                         {/* Bottom Section */}
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item xs={12} md={6}>
-                                <Typography 
-                                    variant="body2" 
-                                    color="text.secondary"
-                                    className="text-center md:text-left"
-                                >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div className="md:col-span-1">
+                                <p className="text-default-500 text-center md:text-left text-sm">
                                     &copy; {currentYear} Aero HR Enterprise Solution. All rights reserved.
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
+                                </p>
+                            </div>
+                            <div className="md:col-span-1">
                                 <div className="flex justify-center md:justify-end gap-4">
                                     <Link
                                         href="/privacy"
@@ -206,12 +181,12 @@ const Footer = () => {
                                         Support
                                     </Link>
                                 </div>
-                            </Grid>
-                        </Grid>
-                    </Box>
+                            </div>
+                        </div>
+                    </div>
                 </GlassCard>
-            </Container>
-        </Box>
+            </div>
+        </footer>
     );
 };
 

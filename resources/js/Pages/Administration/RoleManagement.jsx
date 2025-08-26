@@ -1,26 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Head, usePage, router } from "@inertiajs/react";
-import { 
-  Box, 
-  Typography, 
-  useMediaQuery, 
-  Grow, 
-  Fade,
-  useTheme,
-  Grid,
-  CircularProgress,
-  Tooltip,
-  Snackbar,
-  Alert,
-  Divider,
-  Tabs,
-  Tab,
-  FormControlLabel,
-  Checkbox,
-  TextField,
-  InputAdornment
-} from '@mui/material';
-import LoadingButton from "@mui/lab/LoadingButton";
+import { motion } from 'framer-motion';
 import { 
   Button,
   Chip,
@@ -29,9 +9,16 @@ import {
   CardHeader,
   Select,
   SelectItem,
+  Input,
+  Checkbox,
+  Divider,
+  Tabs,
+  Tab,
+  Spinner,
+  Tooltip,
+  Progress,
   Textarea,
   Spacer,
-  Progress,
   Modal,
   ModalContent,
   ModalHeader,
@@ -40,6 +27,7 @@ import {
   useDisclosure,
   Switch
 } from "@heroui/react";
+import useTheme from '@/theme';
 import { 
   UserGroupIcon, 
   KeyIcon,

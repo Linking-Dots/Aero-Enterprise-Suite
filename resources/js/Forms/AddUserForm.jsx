@@ -18,7 +18,7 @@ import React, {useEffect, useState} from "react";
 import ClearIcon from '@mui/icons-material/Clear';
 import GlassDialog from "@/Components/GlassDialog.jsx";
 import {PhotoCamera} from "@mui/icons-material";
-import {useTheme} from "@mui/material/styles";
+
 import LoadingButton from "@mui/lab/LoadingButton";
 import {toast} from "react-toastify";
 import {TextField, SelectItem, Select} from "@mui/material";
@@ -63,7 +63,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
     const [allDesignations, setAllDesignations] = useState(designations);
     const [allReportTo, setAllReportTo] = useState(allUsers);
 
-    const theme = useTheme();
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();

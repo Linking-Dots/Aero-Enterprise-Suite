@@ -1,12 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
-    Box,
-    useTheme,
-    useMediaQuery,
-    TextField,
-    InputAdornment
-} from '@mui/material';
-import {
     ButtonGroup,
     Button,
     Chip,
@@ -14,14 +7,12 @@ import {
     Tab,
     Card,
     CardBody,
-    Spinner
-} from "@heroui/react";
-import {
-    FormControl,
-    InputLabel,
+    Spinner,
+    Input,
     Select,
-    MenuItem,
-} from '@mui/material';
+    SelectItem
+} from "@heroui/react";
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import { getTextFieldStyles } from '@/utils/glassyStyles.js';
 import {
     UserIcon,
@@ -97,9 +88,23 @@ const projects = [
 
 const UserProfile = ({ title, allUsers, report_to, departments, designations }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
+    
+    // Custom media queries
+    const [isMobile, setIsMobile] = useState(false);
+    const [isTablet, setIsTablet] = useState(false);
+    
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setIsTablet(window.innerWidth < 768);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
     
     const [user, setUser] = useState(usePage().props.user);
     const [selectedTab, setSelectedTab] = useState("overview");

@@ -1,22 +1,13 @@
 import React, {useState} from 'react';
 import {
-    Box,
     Button,
-    CardContent,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    TextField,
-    Typography
-} from '@mui/material';
-import {Add, Clear as ClearIcon} from '@mui/icons-material';
-import {LoadingButton} from '@mui/lab';
+    Input,
+    Spinner
+} from '@heroui/react';
+import { Plus, X } from 'lucide-react';
 import GlassCard from '@/Components/GlassCard'; // Make sure this component is correctly imported
 import GlassDialog from '@/Components/GlassDialog.jsx'; // Make sure this component is correctly imported
-import {useTheme} from '@mui/material/styles';
+import useTheme from '@/theme';
 import {toast} from 'react-toastify';
 
 const EducationInformationDialog = ({ user, open, closeModal, setUser }) => {
@@ -121,9 +112,9 @@ const EducationInformationDialog = ({ user, open, closeModal, setUser }) => {
                     pending: {
                         render() {
                             return (
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <CircularProgress />
-                                    <span style={{ marginLeft: '8px' }}>Deleting education record ...</span>
+                                <div className="flex items-center">
+                                    <Spinner size="sm" />
+                                    <span className="ml-2">Deleting education record ...</span>
                                 </div>
                             );
                         },
@@ -210,9 +201,9 @@ const EducationInformationDialog = ({ user, open, closeModal, setUser }) => {
                 pending: {
                     render() {
                         return (
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
-                                <span style={{ marginLeft: '8px' }}>Updating education records ...</span>
+                            <div className="flex items-center">
+                                <Spinner size="sm" />
+                                <span className="ml-2">Updating education records ...</span>
                             </div>
                         );
                     },
@@ -266,133 +257,124 @@ const EducationInformationDialog = ({ user, open, closeModal, setUser }) => {
 
     return (
         <GlassDialog open={open} onClose={closeModal} maxWidth="md" fullWidth>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Education Information</Typography>
-                <IconButton
-                    onClick={closeModal}
-                    sx={{ position: "absolute", top: 8, right: 16 }}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Education Information</h3>
+                <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={closeModal}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+                    <X size={20} />
+                </Button>
+            </div>
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Box>
-                        <Grid container spacing={2}>
-                            {educationList.map((education, index) => (
-                                <Grid item xs={12} key={index}>
-                                    <GlassCard>
-                                        <CardContent>
-                                            <Typography variant="h6" gutterBottom>
-                                                {'Education #' + (index + 1)}
-                                                <IconButton
-                                                    onClick={() => handleEducationRemove(index)}
-                                                    sx={{ position: "absolute", top: 8, right: 16 }}
-                                                >
-                                                    <ClearIcon />
-                                                </IconButton>
-                                            </Typography>
-                                            <Grid container spacing={2}>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Institution"
-                                                        fullWidth
-                                                        value={education.institution || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.institution`])}
-                                                        helperText={errors[`educations.${index}.institution`] ? errors[`educations.${index}.institution`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Degree"
-                                                        fullWidth
-                                                        value={education.degree || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.degree`])}
-                                                        helperText={errors[`educations.${index}.degree`] ? errors[`educations.${index}.degree`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Subject"
-                                                        fullWidth
-                                                        value={education.subject || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'subject', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.subject`])}
-                                                        helperText={errors[`educations.${index}.subject`] ? errors[`educations.${index}.subject`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Started in"
-                                                        type="month"
-                                                        fullWidth
-                                                        InputLabelProps={{ shrink: true }}
-                                                        value={education.starting_date || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'starting_date', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.starting_date`])}
-                                                        helperText={errors[`educations.${index}.starting_date`] ? errors[`educations.${index}.starting_date`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Completed in"
-                                                        type="month"
-                                                        fullWidth
-                                                        InputLabelProps={{ shrink: true }}
-                                                        value={education.complete_date || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'complete_date', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.complete_date`])}
-                                                        helperText={errors[`educations.${index}.complete_date`] ? errors[`educations.${index}.complete_date`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Grade"
-                                                        fullWidth
-                                                        value={education.grade || ''}
-                                                        onChange={(e) => handleEducationChange(index, 'grade', e.target.value)}
-                                                        error={Boolean(errors[`educations.${index}.grade`])}
-                                                        helperText={errors[`educations.${index}.grade`] ? errors[`educations.${index}.grade`][0] : ''}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        </CardContent>
-                                    </GlassCard>
-                                </Grid>
-                            ))}
-                        </Grid>
-                        <Box mt={2}>
-                            <Button size="small" color="error" sx={{ mt: 2 }} onClick={handleAddMore}>
-                                <Add/> Add More
+                <div className="p-6">
+                    <div className="space-y-4">
+                        {educationList.map((education, index) => (
+                            <div key={index}>
+                                <GlassCard>
+                                    <div className="p-4 relative">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                                                Education #{index + 1}
+                                            </h4>
+                                            <Button
+                                                isIconOnly
+                                                variant="light"
+                                                onPress={() => handleEducationRemove(index)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X size={16} />
+                                            </Button>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Input
+                                                    label="Institution"
+                                                    value={education.institution || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.institution`])}
+                                                    errorMessage={errors[`educations.${index}.institution`] ? errors[`educations.${index}.institution`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Degree"
+                                                    value={education.degree || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.degree`])}
+                                                    errorMessage={errors[`educations.${index}.degree`] ? errors[`educations.${index}.degree`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Subject"
+                                                    value={education.subject || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'subject', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.subject`])}
+                                                    errorMessage={errors[`educations.${index}.subject`] ? errors[`educations.${index}.subject`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Started in"
+                                                    type="month"
+                                                    value={education.starting_date || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'starting_date', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.starting_date`])}
+                                                    errorMessage={errors[`educations.${index}.starting_date`] ? errors[`educations.${index}.starting_date`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Completed in"
+                                                    type="month"
+                                                    value={education.complete_date || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'complete_date', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.complete_date`])}
+                                                    errorMessage={errors[`educations.${index}.complete_date`] ? errors[`educations.${index}.complete_date`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Grade"
+                                                    value={education.grade || ''}
+                                                    onChange={(e) => handleEducationChange(index, 'grade', e.target.value)}
+                                                    isInvalid={Boolean(errors[`educations.${index}.grade`])}
+                                                    errorMessage={errors[`educations.${index}.grade`] ? errors[`educations.${index}.grade`][0] : ''}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            </div>
+                        ))}
+                        <div className="mt-4">
+                            <Button 
+                                size="sm" 
+                                color="danger" 
+                                variant="bordered"
+                                onPress={handleAddMore}
+                                startContent={<Plus size={16} />}
+                            >
+                                Add More
                             </Button>
-                        </Box>
-                    </Box>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '16px',
-                    }}
-                >
-                    <LoadingButton
-                        disabled={!dataChanged}
-                        sx={{
-                            borderRadius: '50px',
-                            padding: '6px 16px',
-                        }}
-                        size="large"
-                        variant="outlined"
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                        isDisabled={!dataChanged}
+                        className="rounded-full px-8"
+                        variant="bordered"
                         color="primary"
                         type="submit"
-                        loading={processing}
+                        isLoading={processing}
                     >
                         Submit
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </div>
             </form>
         </GlassDialog>
     );

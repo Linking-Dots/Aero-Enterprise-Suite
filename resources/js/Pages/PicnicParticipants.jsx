@@ -1,24 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Head, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import {
-    Box,
-    Button,
-    CardContent,
+    Card,
+    CardBody,
     CardHeader,
-    Grid, 
-    Typography,
-    TextField,
+    Button,
+    Input,
     Pagination,
     Table,
+    TableHeader,
+    TableColumn,
     TableBody,
-    TableCell,
-    TableHead,
     TableRow,
-    InputAdornment
-} from '@mui/material';
-import { Add } from '@mui/icons-material';
-import Grow from '@mui/material/Grow';
-import SearchIcon from '@mui/icons-material/Search';
+    TableCell
+} from '@heroui/react';
+import { Plus, Search } from 'lucide-react';
 import GlassCard from '@/Components/GlassCard.jsx';
 import App from '@/Layouts/App.jsx';
 import PicnicParticipantForm from '@/Forms/PicnicParticipantForm.jsx';

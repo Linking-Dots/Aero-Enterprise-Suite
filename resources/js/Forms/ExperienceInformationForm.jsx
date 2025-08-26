@@ -1,22 +1,13 @@
 import React, {useState} from 'react';
 import {
-    Box,
     Button,
-    CardContent,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    TextField,
-    Typography
-} from '@mui/material';
-import {Add, Clear as ClearIcon} from '@mui/icons-material';
-import {LoadingButton} from '@mui/lab';
+    Input,
+    Spinner
+} from '@heroui/react';
+import { Plus, X } from 'lucide-react';
 import GlassCard from '@/Components/GlassCard'; // Ensure this component is correctly imported
 import GlassDialog from '@/Components/GlassDialog.jsx'; // Ensure this component is correctly imported
-import {useTheme} from '@mui/material/styles';
+import useTheme from '@/theme';
 import {toast} from 'react-toastify';
 
 const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
@@ -117,9 +108,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                     pending: {
                         render() {
                             return (
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <CircularProgress />
-                                    <span style={{ marginLeft: '8px' }}>Deleting experience record ...</span>
+                                <div className="flex items-center">
+                                    <Spinner size="sm" />
+                                    <span className="ml-2">Deleting experience record ...</span>
                                 </div>
                             );
                         },
@@ -203,9 +194,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                 pending: {
                     render() {
                         return (
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress />
-                                <span style={{ marginLeft: '8px' }}>Updating experience records ...</span>
+                            <div className="flex items-center">
+                                <Spinner size="sm" />
+                                <span className="ml-2">Updating experience records ...</span>
                             </div>
                         );
                     },
@@ -257,133 +248,122 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
 
     return (
         <GlassDialog open={open} onClose={closeModal} maxWidth="md" fullWidth>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Experience Information</Typography>
-                <IconButton
-                    onClick={closeModal}
-                    sx={{ position: "absolute", top: 8, right: 16 }}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Experience Information</h3>
+                <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={closeModal}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+                    <X size={20} />
+                </Button>
+            </div>
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Box>
-                        <Grid container spacing={2}>
-                            {experienceList.map((experience, index) => (
-                                <Grid item xs={12} key={index}>
-                                    <GlassCard>
-                                        <CardContent>
-                                            <Typography variant="h6" gutterBottom>
-                                                {'Experience #' + (index + 1)}
-                                                <IconButton
-                                                    onClick={() => handleExperienceRemove(index)}
-                                                    sx={{ position: "absolute", top: 8, right: 16 }}
-                                                >
-                                                    <ClearIcon />
-                                                </IconButton>
-                                            </Typography>
-                                            <Grid container spacing={2}>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Company"
-                                                        fullWidth
-                                                        value={experience.company_name || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'company_name', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.company_name`])}
-                                                        helperText={errors[`experiences.${index}.company_name`] ? errors[`experiences.${index}.company_name`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Location"
-                                                        fullWidth
-                                                        value={experience.location || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'location', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.location`])}
-                                                        helperText={errors[`experiences.${index}.location`] ? errors[`experiences.${index}.location`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Role"
-                                                        fullWidth
-                                                        value={experience.job_position || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'job_position', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.job_position`])}
-                                                        helperText={errors[`experiences.${index}.job_position`] ? errors[`experiences.${index}.job_position`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Started From"
-                                                        type="date"
-                                                        fullWidth
-                                                        InputLabelProps={{ shrink: true }}
-                                                        value={experience.period_from || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'period_from', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.period_from`])}
-                                                        helperText={errors[`experiences.${index}.period_from`] ? errors[`experiences.${index}.period_from`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        label="Ended On"
-                                                        type="date"
-                                                        fullWidth
-                                                        InputLabelProps={{ shrink: true }}
-                                                        value={experience.period_to || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'period_to', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.period_to`])}
-                                                        helperText={errors[`experiences.${index}.period_to`] ? errors[`experiences.${index}.period_to`][0] : ''}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <TextField
-                                                        label="Responsibilities"
-                                                        fullWidth
-                                                        multiline
-                                                        rows={3}
-                                                        value={experience.description || ''}
-                                                        onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
-                                                        error={Boolean(errors[`experiences.${index}.description`])}
-                                                        helperText={errors[`experiences.${index}.description`] ? errors[`experiences.${index}.description`][0] : ''}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        </CardContent>
-                                    </GlassCard>
-                                </Grid>
-                            ))}
-                        </Grid>
-                        <Button size="small" color="error" sx={{ mt: 2 }} onClick={handleAddMore}>
-                            <Add/> Add More
+                <div className="p-6">
+                    <div className="space-y-4">
+                        {experienceList.map((experience, index) => (
+                            <div key={index}>
+                                <GlassCard>
+                                    <div className="p-4 relative">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                                                Experience #{index + 1}
+                                            </h4>
+                                            <Button
+                                                isIconOnly
+                                                variant="light"
+                                                onPress={() => handleExperienceRemove(index)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X size={16} />
+                                            </Button>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Input
+                                                    label="Company"
+                                                    value={experience.company_name || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'company_name', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.company_name`])}
+                                                    errorMessage={errors[`experiences.${index}.company_name`] ? errors[`experiences.${index}.company_name`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Location"
+                                                    value={experience.location || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'location', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.location`])}
+                                                    errorMessage={errors[`experiences.${index}.location`] ? errors[`experiences.${index}.location`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Role"
+                                                    value={experience.job_position || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'job_position', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.job_position`])}
+                                                    errorMessage={errors[`experiences.${index}.job_position`] ? errors[`experiences.${index}.job_position`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Started From"
+                                                    type="date"
+                                                    value={experience.period_from || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'period_from', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.period_from`])}
+                                                    errorMessage={errors[`experiences.${index}.period_from`] ? errors[`experiences.${index}.period_from`][0] : ''}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Input
+                                                    label="Ended On"
+                                                    type="date"
+                                                    value={experience.period_to || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'period_to', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.period_to`])}
+                                                    errorMessage={errors[`experiences.${index}.period_to`] ? errors[`experiences.${index}.period_to`][0] : ''}
+                                                />
+                                            </div>
+                                            <div className="col-span-full">
+                                                <Input
+                                                    label="Responsibilities"
+                                                    value={experience.description || ''}
+                                                    onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
+                                                    isInvalid={Boolean(errors[`experiences.${index}.description`])}
+                                                    errorMessage={errors[`experiences.${index}.description`] ? errors[`experiences.${index}.description`][0] : ''}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            </div>
+                        ))}
+                        <Button 
+                            size="sm" 
+                            color="danger" 
+                            variant="bordered"
+                            onPress={handleAddMore}
+                            startContent={<Plus size={16} />}
+                        >
+                            Add More
                         </Button>
-                    </Box>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '16px',
-                    }}
-                >
-                    <LoadingButton
-                        disabled={!dataChanged}
-                        sx={{
-                            borderRadius: '50px',
-                            padding: '6px 16px',
-                        }}
-                        size="large"
-                        variant="outlined"
+                    </div>
+                </div>
+                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                        isDisabled={!dataChanged}
+                        className="rounded-full px-8"
+                        variant="bordered"
                         color="primary"
                         type="submit"
-                        loading={processing}
+                        isLoading={processing}
                     >
                         Submit
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </div>
             </form>
         </GlassDialog>
     );

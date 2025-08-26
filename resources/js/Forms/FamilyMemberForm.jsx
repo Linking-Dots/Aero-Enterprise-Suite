@@ -1,17 +1,16 @@
 import React, {useEffect, useState} from "react";
 import {
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    TextField,
-    Typography
-} from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
-import ClearIcon from "@mui/icons-material/Clear";
-import {useTheme} from "@mui/material/styles";
+    Button,
+    Input,
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+} from "@heroui/react";
+import { X } from "lucide-react";
+import useTheme from "@/theme";
 import {toast} from "react-toastify";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 
@@ -158,87 +157,78 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
 
     return (
         <GlassDialog open={open} onClose={closeModal}>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Family Member</Typography>
-                <IconButton
-                    variant="outlined"
-                    color="primary"
-                    onClick={closeModal}
-                    sx={{ position: 'absolute', top: 8, right: 16 }}
-                >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+            <ModalContent>
+                <ModalHeader className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold">Family Member</h2>
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        onPress={closeModal}
+                        className="absolute top-2 right-2"
+                    >
+                        <X size={20} />
+                    </Button>
+                </ModalHeader>
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                <ModalBody>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="col-span-1">
+                            <Input
                                 label="Name"
-                                fullWidth
+                                variant="bordered"
                                 value={changedUserData.family_member_name || initialUserData.family_member_name || ""}
                                 onChange={(e) => handleChange('family_member_name', e.target.value)}
-                                error={Boolean(errors.family_member_name)}
-                                helperText={errors.family_member_name}
+                                isInvalid={Boolean(errors.family_member_name)}
+                                errorMessage={errors.family_member_name}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div className="col-span-1">
+                            <Input
                                 label="Relationship"
-                                fullWidth
+                                variant="bordered"
                                 value={changedUserData.family_member_relationship || initialUserData.family_member_relationship || ""}
                                 onChange={(e) => handleChange('family_member_relationship', e.target.value)}
-                                error={Boolean(errors.family_member_relationship)}
-                                helperText={errors.family_member_relationship}
+                                isInvalid={Boolean(errors.family_member_relationship)}
+                                errorMessage={errors.family_member_relationship}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div className="col-span-1">
+                            <Input
                                 label="Date of Birth"
-                                fullWidth
+                                variant="bordered"
                                 type="date"
                                 value={changedUserData.family_member_dob || initialUserData.family_member_dob || ""}
                                 onChange={(e) => handleChange('family_member_dob', e.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                error={Boolean(errors.family_member_dob)}
-                                helperText={errors.family_member_dob}
+                                isInvalid={Boolean(errors.family_member_dob)}
+                                errorMessage={errors.family_member_dob}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div className="col-span-1">
+                            <Input
                                 label="Phone"
-                                fullWidth
+                                variant="bordered"
                                 value={changedUserData.family_member_phone || initialUserData.family_member_phone || ""}
                                 onChange={(e) => handleChange('family_member_phone', e.target.value)}
-                                error={Boolean(errors.family_member_phone)}
-                                helperText={errors.family_member_phone}
+                                isInvalid={Boolean(errors.family_member_phone)}
+                                errorMessage={errors.family_member_phone}
                             />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '16px',
-                    }}
-                >
-                    <LoadingButton
-                        disabled={!dataChanged}
-                        sx={{
-                            borderRadius: '50px',
-                            padding: '6px 16px',
-                        }}
-                        variant="outlined"
+                        </div>
+                    </div>
+                </ModalBody>
+                <ModalFooter className="flex justify-end gap-2">
+                    <Button
+                        isDisabled={!dataChanged}
+                        variant="bordered"
                         color="primary"
                         type="submit"
-                        loading={processing}
+                        isLoading={processing}
+                        className="rounded-full px-4 py-2"
                     >
                         Submit
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </ModalFooter>
             </form>
+            </ModalContent>
         </GlassDialog>
     );
 };

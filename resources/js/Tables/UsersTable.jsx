@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from '@inertiajs/react';
-import { useTheme } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import { 
   Table, 
@@ -67,7 +66,17 @@ const UsersTable = ({
   deviceActions = {},
 }) => {
   const [loadingStates, setLoadingStates] = useState({});
-  const theme = useTheme();
+  
+  // Custom theme for glassmorphism styling
+  const glassTheme = {
+    palette: {
+      primary: { main: '#3b82f6' },
+      secondary: { main: '#64748b' },
+      background: { paper: 'rgba(15, 20, 25, 0.15)' },
+      text: { primary: '#ffffff', secondary: '#94a3b8' }
+    },
+    spacing: (factor) => `${0.25 * factor}rem`
+  };
 
   // Device detection functions (copied from UserDeviceManagement)
   const getDeviceIcon = (userAgent, className = "w-5 h-5") => {

@@ -1,20 +1,13 @@
 import {
-    CardContent,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    IconButton,
-    TextField,
-    Typography
-} from "@mui/material";
+    Button,
+    Input,
+    Spinner
+} from "@heroui/react";
 import React, {useEffect, useState} from "react";
 import GlassCard from "@/Components/GlassCard.jsx";
-import ClearIcon from '@mui/icons-material/Clear';
+import { X } from 'lucide-react';
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
+import useTheme from '@/theme';
 import {toast} from "react-toastify";
 
 const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
@@ -167,132 +160,116 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
 
     return (
         <GlassDialog open={open} onClose={closeModal}>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Personal Information</Typography>
-                <IconButton
-                    variant="outlined"
-                    color="primary"
-                    onClick={closeModal}
-                    sx={{ position: "absolute", top: 8, right: 16 }}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Emergency Contact Information</h3>
+                <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={closeModal}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+                    <X size={20} />
+                </Button>
+            </div>
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Grid container spacing={2}>
+                <div className="p-6">
+                    <div className="space-y-6">
                         {/* Primary Contact Section */}
-                        <Grid item xs={12}>
+                        <div>
                             <GlassCard>
-                                <CardContent>
-                                    <Typography variant="h5" gutterBottom>
+                                <div className="p-4">
+                                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                         Primary Contact
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Input
                                                 label="Name"
-                                                required
-                                                fullWidth
+                                                isRequired
                                                 value={changedUserData.emergency_contact_primary_name || initialUserData.emergency_contact_primary_name || ""}
                                                 onChange={(e) => handleChange("emergency_contact_primary_name", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_primary_name)}
+                                                errorMessage={errors.emergency_contact_primary_name}
                                             />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                        </div>
+                                        <div>
+                                            <Input
                                                 label="Relationship"
-                                                required
-                                                fullWidth
+                                                isRequired
                                                 value={changedUserData.emergency_contact_primary_relationship || initialUserData.emergency_contact_primary_relationship || ""}
                                                 onChange={(e) => handleChange("emergency_contact_primary_relationship", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_primary_relationship)}
+                                                errorMessage={errors.emergency_contact_primary_relationship}
                                             />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                        </div>
+                                        <div>
+                                            <Input
                                                 label="Phone"
-                                                required
-                                                fullWidth
+                                                isRequired
                                                 value={changedUserData.emergency_contact_primary_phone || initialUserData.emergency_contact_primary_phone || ""}
                                                 onChange={(e) => handleChange("emergency_contact_primary_phone", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_primary_phone)}
+                                                errorMessage={errors.emergency_contact_primary_phone}
                                             />
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
+                                        </div>
+                                    </div>
+                                </div>
                             </GlassCard>
-                        </Grid>
+                        </div>
 
                         {/* Secondary Contact Section */}
-                        <Grid item xs={12}>
+                        <div>
                             <GlassCard>
-                                <CardContent>
-                                    <Typography variant="h5" gutterBottom>
+                                <div className="p-4">
+                                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                         Secondary Contact
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Input
                                                 label="Name"
-                                                fullWidth
                                                 value={changedUserData.emergency_contact_secondary_name || initialUserData.emergency_contact_secondary_name || ""}
                                                 onChange={(e) => handleChange("emergency_contact_secondary_name", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_secondary_name)}
+                                                errorMessage={errors.emergency_contact_secondary_name}
                                             />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                        </div>
+                                        <div>
+                                            <Input
                                                 label="Relationship"
-                                                fullWidth
                                                 value={changedUserData.emergency_contact_secondary_relationship || initialUserData.emergency_contact_secondary_relationship || ""}
                                                 onChange={(e) => handleChange("emergency_contact_secondary_relationship", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_secondary_relationship)}
+                                                errorMessage={errors.emergency_contact_secondary_relationship}
                                             />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
+                                        </div>
+                                        <div>
+                                            <Input
                                                 label="Phone"
-                                                fullWidth
                                                 value={changedUserData.emergency_contact_secondary_phone || initialUserData.emergency_contact_secondary_phone || ""}
                                                 onChange={(e) => handleChange("emergency_contact_secondary_phone", e.target.value)}
-                                                error={Boolean(errors.bank_name)}
-                                                helperText={errors.bank_name}
+                                                isInvalid={Boolean(errors.emergency_contact_secondary_phone)}
+                                                errorMessage={errors.emergency_contact_secondary_phone}
                                             />
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
+                                        </div>
+                                    </div>
+                                </div>
                             </GlassCard>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "16px",
-                    }}
-                >
-                    <LoadingButton
-                        disabled={!dataChanged}
-                        sx={{
-                            borderRadius: "50px",
-                            padding: "6px 16px",
-                        }}
-                        variant="outlined"
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                        isDisabled={!dataChanged}
+                        className="rounded-full px-6"
+                        variant="bordered"
                         color="primary"
                         type="submit"
-                        loading={processing}
+                        isLoading={processing}
                     >
                         Submit
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </div>
             </form>
         </GlassDialog>
     );

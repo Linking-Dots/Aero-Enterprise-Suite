@@ -8,10 +8,10 @@ import {
     EyeIcon,
     EyeSlashIcon
 } from '@heroicons/react/24/outline';
-import { TextField, Button as HeroButton, Checkbox as HeroCheckbox } from '@mui/material';
+import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
 import AuthLayout from '@/Components/AuthLayout';
 import Button from '@/Components/Button';
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from '@/Contexts/ThemeContext';
 
 export default function ResetPassword({ token, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -120,49 +120,19 @@ export default function ResetPassword({ token, email }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <TextField
+                    <Input
                         type="text"
                         label="Verification code"
                         placeholder="Enter 6-digit code from email"
                         value={data.verification_code}
                         onChange={(e) => setData('verification_code', e.target.value)}
-                        error={!!errors.verification_code}
-                        helperText={errors.verification_code}
+                        isInvalid={!!errors.verification_code}
+                        errorMessage={errors.verification_code}
                         autoComplete="one-time-code"
                         autoFocus
-                        inputProps={{ maxLength: 6 }}
-                        required
-                        variant="outlined"
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <KeyIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                            ),
-                            sx: {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '12px',
-                                '&:hover': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                                '&.Mui-focused': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                            }
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'primary.main',
-                                },
-                            },
-                        }}
+                        maxLength={6}
+                        isRequired
+                        startContent={<KeyIcon className="w-4 h-4 text-default-400" />}
                     />
                     <motion.p
                         className="text-xs mt-2"
@@ -181,46 +151,30 @@ export default function ResetPassword({ token, email }) {
                     transition={{ delay: 0.3 }}
                 >
                     <div>
-                        <TextField
+                        <Input
                             type={isPasswordVisible ? "text" : "password"}
                             label="New password"
                             placeholder="Create a strong password"
                             value={data.password}
                             onChange={handlePasswordChange}
-                            error={!!errors.password}
-                            helperText={errors.password}
+                            isInvalid={!!errors.password}
+                            errorMessage={errors.password}
                             autoComplete="new-password"
-                            required
-                            fullWidth
-                            variant="outlined"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <button
-                                            className="focus:outline-hidden"
-                                            type="button"
-                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                        >
-                                            {isPasswordVisible ? (
-                                                <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                            ) : (
-                                                <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                            )}
-                                        </button>
-                                    </InputAdornment>
-                                ),
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '12px',
-                                }
-                            }}
+                            isRequired
+                            startContent={<LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />}
+                            endContent={
+                                <button
+                                    className="focus:outline-hidden"
+                                    type="button"
+                                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                >
+                                    {isPasswordVisible ? (
+                                        <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                    ) : (
+                                        <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                    )}
+                                </button>
+                            }
                         />
                         
                         {/* Password Strength Indicator */}
@@ -272,46 +226,30 @@ export default function ResetPassword({ token, email }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
-                    <TextField
+                    <Input
                         type={isConfirmPasswordVisible ? "text" : "password"}
                         label="Confirm new password"
                         placeholder="Confirm your new password"
                         value={data.password_confirmation}
                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                        error={!!errors.password_confirmation}
-                        helperText={errors.password_confirmation}
+                        isInvalid={!!errors.password_confirmation}
+                        errorMessage={errors.password_confirmation}
                         autoComplete="new-password"
-                        required
-                        fullWidth
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />
-                                </InputAdornment>
-                            ),
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <button
-                                        className="focus:outline-hidden"
-                                        type="button"
-                                        onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                                    >
-                                        {isConfirmPasswordVisible ? (
-                                            <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                        ) : (
-                                            <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                        )}
-                                    </button>
-                                </InputAdornment>
-                            ),
-                            style: {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: '12px',
-                            }
-                        }}
+                        isRequired
+                        startContent={<LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0" />}
+                        endContent={
+                            <button
+                                className="focus:outline-hidden"
+                                type="button"
+                                onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                            >
+                                {isConfirmPasswordVisible ? (
+                                    <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                ) : (
+                                    <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
+                                )}
+                            </button>
+                        }
                     />
                 </motion.div>
 

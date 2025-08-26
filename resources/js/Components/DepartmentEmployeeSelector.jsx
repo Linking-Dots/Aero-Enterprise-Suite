@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-    FormControl,
-    InputLabel,
     Select,
-    MenuItem,
-    TextField,
-    Box,
+    SelectItem,
+    Input,
     Avatar,
-    Typography,
-    InputAdornment,
     Chip
-} from '@mui/material';
+} from '@heroui/react';
 import { 
     MagnifyingGlassIcon,
     BuildingOfficeIcon,
@@ -94,296 +89,138 @@ const DepartmentEmployeeSelector = ({
         }
     }, [selectedDepartmentId, selectedEmployeeId, departmentEmployees, onEmployeeChange]);
 
-    const handleDepartmentChange = useCallback((event) => {
-        const deptId = event.target.value;
-        // Convert string back to number for callback, or pass empty string
-        onDepartmentChange(deptId === '' ? '' : parseInt(deptId));
-        // Clear employee selection when department changes
-        if (selectedEmployeeId) {
-            onEmployeeChange('');
-        }
-        // Clear search terms
-        setDepartmentSearchTerm('');
-        setEmployeeSearchTerm('');
-    }, [onDepartmentChange, onEmployeeChange, selectedEmployeeId]);
-
-    const handleEmployeeChange = useCallback((event) => {
-        const empId = event.target.value;
-        // Convert string back to number for callback, or pass empty string
-        onEmployeeChange(empId === '' ? '' : parseInt(empId));
-        setEmployeeSearchTerm('');
-    }, [onEmployeeChange]);
-
     return (
-        <Box className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
             {/* Department Selector */}
-            <FormControl 
-                variant={variant} 
-                size={size} 
-                error={Boolean(error.department_id)}
-                disabled={disabled}
-                required={required}
-                fullWidth
-            >
-                <InputLabel id="department-select-label">
-                    <Box className="flex items-center gap-2">
-                        <BuildingOfficeIcon className="w-4 h-4" />
-                        {label.department}
-                    </Box>
-                </InputLabel>
+            <div>
                 <Select
-                    labelId="department-select-label"
-                    value={selectedDepartmentId ? String(selectedDepartmentId) : ''}
-                    onChange={handleDepartmentChange}
-                    label={label.department}
-                    MenuProps={{
-                        PaperProps: {
-                            sx: {
-                                backdropFilter: 'blur(16px) saturate(200%)',
-                                background: theme?.glassCard?.background || 'rgba(255, 255, 255, 0.1)',
-                                border: theme?.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: 2,
-                                maxHeight: 400,
-                            },
-                        },
-                        disableAutoFocusItem: true,
+                    label={
+                        <div className="flex items-center gap-2">
+                            <BuildingOfficeIcon className="w-4 h-4" />
+                            {label.department}
+                        </div>
+                    }
+                    selectedKeys={selectedDepartmentId ? [String(selectedDepartmentId)] : []}
+                    onSelectionChange={(keys) => {
+                        const deptId = Array.from(keys)[0];
+                        onDepartmentChange(deptId === '' ? '' : parseInt(deptId));
+                        if (selectedEmployeeId) {
+                            onEmployeeChange('');
+                        }
+                        setDepartmentSearchTerm('');
+                        setEmployeeSearchTerm('');
                     }}
+                    isDisabled={disabled}
+                    isRequired={required}
+                    isInvalid={Boolean(error.department_id)}
+                    errorMessage={error.department_id}
+                    variant={variant}
                 >
-                    {showSearch && (
-                        <MenuItem 
-                            disableRipple
-                            sx={{ 
-                                py: 1,
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                                '&:hover': { backgroundColor: 'transparent' },
-                                cursor: 'default'
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                        >
-                            <TextField
-                                placeholder="Search departments..."
-                                value={departmentSearchTerm}
-                                onChange={(e) => {
-                                    e.stopPropagation();
-                                    setDepartmentSearchTerm(e.target.value);
-                                }}
-                                size="small"
-                                fullWidth
-                                variant="outlined"
-                                autoFocus={false}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        '& fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                                        },
-                                    },
-                                }}
-                            />
-                        </MenuItem>
-                    )}
-                    
                     {showAllOption && (
-                        <MenuItem value="">
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <SelectItem key="" value="">
+                            <div className="flex items-center gap-2">
                                 <BuildingOfficeIcon className="w-4 h-4" />
-                                <Typography>All Departments</Typography>
-                            </Box>
-                        </MenuItem>
+                                <span>All Departments</span>
+                            </div>
+                        </SelectItem>
                     )}
                     
                     {filteredDepartments.map((department) => (
-                        <MenuItem key={department.id} value={String(department.id)}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <BuildingOfficeIcon className="w-4 h-4" />
-                                <Typography>{department.name}</Typography>
+                        <SelectItem key={String(department.id)} value={String(department.id)}>
+                            <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <BuildingOfficeIcon className="w-4 h-4" />
+                                    <span>{department.name}</span>
+                                </div>
                                 <Chip 
-                                    label={allUsers.filter(u => u.department_id === department.id).length}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ ml: 'auto', fontSize: '0.7rem' }}
-                                />
-                            </Box>
-                        </MenuItem>
+                                    size="sm" 
+                                    variant="bordered"
+                                    className="ml-auto text-xs"
+                                >
+                                    {allUsers.filter(u => u.department_id === department.id).length}
+                                </Chip>
+                            </div>
+                        </SelectItem>
                     ))}
-                    
-                    {filteredDepartments.length === 0 && departmentSearchTerm && (
-                        <MenuItem disabled>
-                            <Typography variant="body2" color="text.secondary">
-                                No departments found matching "{departmentSearchTerm}"
-                            </Typography>
-                        </MenuItem>
-                    )}
                 </Select>
-                {error.department_id && (
-                    <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                        {error.department_id}
-                    </Typography>
-                )}
-            </FormControl>
+            </div>
 
             {/* Employee Selector */}
-            <FormControl 
-                variant={variant} 
-                size={size} 
-                error={Boolean(error.user_id)}
-                disabled={disabled || loadingEmployees || (!selectedDepartmentId && !showAllOption)}
-                required={required}
-                fullWidth
-            >
-                <InputLabel id="employee-select-label">
-                    <Box className="flex items-center gap-2">
-                        <UserIcon className="w-4 h-4" />
-                        {label.employee}
-                        {(!selectedDepartmentId && !showAllOption) && (
-                            <Typography variant="caption" color="text.secondary">
-                                (Select department first)
-                            </Typography>
-                        )}
-                    </Box>
-                </InputLabel>
+            <div>
                 <Select
-                    labelId="employee-select-label"
-                    value={selectedEmployeeId ? String(selectedEmployeeId) : ''}
-                    onChange={handleEmployeeChange}
-                    label={label.employee}
-                    MenuProps={{
-                        PaperProps: {
-                            sx: {
-                                backdropFilter: 'blur(16px) saturate(200%)',
-                                background: theme?.glassCard?.background || 'rgba(255, 255, 255, 0.1)',
-                                border: theme?.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: 2,
-                                maxHeight: 400,
-                            },
-                        },
-                        disableAutoFocusItem: true,
+                    label={
+                        <div className="flex items-center gap-2">
+                            <UserIcon className="w-4 h-4" />
+                            {label.employee}
+                            {(!selectedDepartmentId && !showAllOption) && (
+                                <span className="text-xs text-gray-500">(Select department first)</span>
+                            )}
+                        </div>
+                    }
+                    selectedKeys={selectedEmployeeId ? [String(selectedEmployeeId)] : []}
+                    onSelectionChange={(keys) => {
+                        const empId = Array.from(keys)[0];
+                        onEmployeeChange(empId === '' ? '' : parseInt(empId));
+                        setEmployeeSearchTerm('');
                     }}
+                    isDisabled={disabled || loadingEmployees || (!selectedDepartmentId && !showAllOption)}
+                    isRequired={required}
+                    isInvalid={Boolean(error.user_id)}
+                    errorMessage={error.user_id}
+                    variant={variant}
                 >
-                    {showSearch && (
-                        <MenuItem 
-                            disableRipple
-                            sx={{ 
-                                py: 1,
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                                '&:hover': { backgroundColor: 'transparent' },
-                                cursor: 'default'
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                        >
-                            <TextField
-                                placeholder="Search employees..."
-                                value={employeeSearchTerm}
-                                onChange={(e) => {
-                                    e.stopPropagation();
-                                    setEmployeeSearchTerm(e.target.value);
-                                }}
-                                size="small"
-                                fullWidth
-                                variant="outlined"
-                                autoFocus={false}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        '& fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                                        },
-                                    },
-                                }}
-                            />
-                        </MenuItem>
-                    )}
-                    
                     {showAllOption && (
-                        <MenuItem value="">
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <SelectItem key="" value="">
+                            <div className="flex items-center gap-2">
                                 <UserIcon className="w-4 h-4" />
-                                <Typography>
+                                <span>
                                     {selectedDepartmentId ? 'All Employees in Department' : 'Select Department First'}
-                                </Typography>
-                            </Box>
-                        </MenuItem>
+                                </span>
+                            </div>
+                        </SelectItem>
                     )}
                     
                     {filteredEmployees.map((user) => (
-                        <MenuItem key={user.id} value={String(user.id)}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        <SelectItem key={String(user.id)} value={String(user.id)}>
+                            <div className="flex items-center gap-2 w-full">
                                 <Avatar
                                     src={user.profile_image_url || user.profile_image}
-                                    sx={{ width: 24, height: 24 }}
-                                >
-                                    {user.name?.charAt(0)?.toUpperCase()}
-                                </Avatar>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                        {user.name}
-                                    </Typography>
+                                    size="sm"
+                                    name={user.name}
+                                    showFallback
+                                />
+                                <div className="flex flex-col flex-1">
+                                    <span className="text-sm font-medium">{user.name}</span>
                                     {user.designation && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            {user.designation}
-                                        </Typography>
+                                        <span className="text-xs text-gray-500">{user.designation}</span>
                                     )}
-                                </Box>
+                                </div>
                                 {user.department && (
                                     <Chip 
-                                        label={user.department}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{ fontSize: '0.6rem', height: '20px' }}
-                                    />
+                                        size="sm"
+                                        variant="bordered"
+                                        className="text-xs h-5"
+                                    >
+                                        {user.department}
+                                    </Chip>
                                 )}
-                            </Box>
-                        </MenuItem>
+                            </div>
+                        </SelectItem>
                     ))}
                     
                     {filteredEmployees.length === 0 && (
-                        <MenuItem disabled>
-                            <Typography variant="body2" color="text.secondary">
+                        <SelectItem key="no-employees" isDisabled>
+                            <span className="text-sm text-gray-500">
                                 {selectedDepartmentId 
                                     ? 'No employees found in selected department'
                                     : 'No employees found'
                                 }
-                            </Typography>
-                        </MenuItem>
+                            </span>
+                        </SelectItem>
                     )}
                 </Select>
-                {error.user_id && (
-                    <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                        {error.user_id}
-                    </Typography>
-                )}
-            </FormControl>
-        </Box>
+            </div>
+        </div>
     );
 };
 

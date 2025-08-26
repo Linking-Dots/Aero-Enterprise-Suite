@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@heroui/react";
-import { useMediaQuery, useTheme } from '@mui/material';
 import { 
     DocumentArrowDownIcon,
     PlusIcon,
@@ -16,8 +15,24 @@ import {
  * @param {boolean} props.loading - Loading state for buttons
  */
 const ActionButtons = ({ buttons = [], loading = false }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // Custom responsive hook
+    const useResponsive = () => {
+        const [isMobile, setIsMobile] = useState(false);
+        
+        useEffect(() => {
+            const checkDevice = () => {
+                setIsMobile(window.innerWidth < 640);
+            };
+            
+            checkDevice();
+            window.addEventListener('resize', checkDevice);
+            return () => window.removeEventListener('resize', checkDevice);
+        }, []);
+        
+        return { isMobile };
+    };
+    
+    const { isMobile } = useResponsive();
 
     // Predefined button styles matching timesheet table
     const buttonStyles = {

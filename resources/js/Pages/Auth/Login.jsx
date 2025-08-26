@@ -9,11 +9,10 @@ import {
     EyeIcon,
     EyeSlashIcon
 } from '@heroicons/react/24/outline';
-import { TextField, Button as HeroButton, Checkbox as HeroCheckbox } from '@mui/material';
+import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
 import AuthLayout from '@/Components/AuthLayout';
 import Button from '@/Components/Button';
 import Checkbox from '@/Components/Checkbox';
-import { Typography } from '@mui/material';
 
 export default function Login({ status, canResetPassword, deviceBlocked, deviceMessage, blockedDeviceInfo }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -162,20 +161,19 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <TextField
+                    <Input
                         type="email"
                         label="Email address"
                         placeholder="Enter your email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        error={!!errors.email}
-                        helperText={errors.email}
+                        isInvalid={!!errors.email}
+                        errorMessage={errors.email}
                         autoComplete="username"
                         autoFocus
-                        required
-                        variant="outlined"
-                        color={errors.email ? "error" : "primary"}
-                        fullWidth
+                        isRequired
+                        color={errors.email ? "danger" : "primary"}
+                        startContent={<EnvelopeIcon className="w-4 h-4 text-default-400" />}
                         InputProps={{
                             startAdornment: (
                                 <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
@@ -213,64 +211,34 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <TextField
+                    <Input
                         type={isPasswordVisible ? "text" : "password"}
                         label="Password"
                         placeholder="Enter your password"
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
-                        error={!!errors.password}
-                        helperText={errors.password}
+                        isInvalid={!!errors.password}
+                        errorMessage={errors.password}
                         autoComplete="current-password"
-                        required
-                        variant="outlined"
-                        color={errors.password ? "error" : "primary"}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                            ),
-                            endAdornment: (
-                                <button
-                                    className="focus:outline-hidden"
-                                    type="button"
-                                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
-                                >
-                                    {isPasswordVisible ? (
-                                        <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    ) : (
-                                        <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    )}
-                                </button>
-                            ),
-                            sx: {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '12px',
-                                '&:hover': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                                '&.Mui-focused': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                            }
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'primary.main',
-                                },
-                            },
-                        }}
+                        isRequired
+                        color={errors.password ? "danger" : "primary"}
+                        startContent={<LockClosedIcon className="w-4 h-4 text-default-400" />}
+                        endContent={
+                            <button
+                                className="focus:outline-none"
+                                type="button"
+                                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                            >
+                                {isPasswordVisible ? (
+                                    <EyeSlashIcon className="w-4 h-4 text-default-400" />
+                                ) : (
+                                    <EyeIcon className="w-4 h-4 text-default-400" />
+                                )}
+                            </button>
+                        }
                     />
-                </motion.div>
+                    </motion.div>
 
                 <motion.div
                     className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
@@ -344,15 +312,9 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
                             transition={{ duration: 0.6, delay: 1.2 }}
                             className="mt-3"
                         >
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                textAlign="center"
-                                display="block"
-                                sx={{ opacity: 0.6, fontSize: { xs: '0.65rem', sm: '0.7rem' } }}
-                            >
+                            <p className="text-xs text-default-500 text-center opacity-60">
                                 © 2025 Emam Hosen. All rights reserved.
-                            </Typography>
+                            </p>
                         </motion.div>
                 
             </form>

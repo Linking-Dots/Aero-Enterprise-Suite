@@ -1,23 +1,14 @@
 import {
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
+    Button,
+    Input,
     Select,
-    TextField,
-    Typography
-} from "@mui/material";
+    SelectItem,
+    Spinner
+} from "@heroui/react";
 import React, {useEffect, useState} from "react";
-import ClearIcon from '@mui/icons-material/Clear';
+import { X } from 'lucide-react';
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
+import useTheme from "@/theme";
 import {toast} from "react-toastify";
 
 const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
@@ -183,148 +174,114 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
 
     return (
         <GlassDialog open={open} onClose={closeModal}>
-            <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                <Typography>Personal Information</Typography>
-                <IconButton
-                    variant="outlined"
-                    color="primary"
-                    onClick={closeModal}
-                    sx={{ position: 'absolute', top: 8, right: 16 }}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h3>
+                <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={closeModal}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
+                    <X size={20} />
+                </Button>
+            </div>
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Input
                                 label="Passport No"
-                                fullWidth
                                 value={changedUserData.passport_no || initialUserData.passport_no || ''}
                                 onChange={(e) => handleChange('passport_no', e.target.value)}
-                                error={Boolean(errors.passport_no)}
-                                helperText={errors.passport_no}
+                                isInvalid={Boolean(errors.passport_no)}
+                                errorMessage={errors.passport_no}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Input
                                 label="Passport Expiry Date"
-                                fullWidth
                                 type="date"
                                 value={changedUserData.passport_exp_date || initialUserData.passport_exp_date || ''}
                                 onChange={(e) => handleChange('passport_exp_date', e.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                error={Boolean(errors.passport_exp_date)}
-                                helperText={errors.passport_exp_date}
+                                isInvalid={Boolean(errors.passport_exp_date)}
+                                errorMessage={errors.passport_exp_date}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Input
                                 label="NID No"
-                                fullWidth
                                 value={changedUserData.nid || initialUserData.nid || ''}
                                 onChange={(e) => handleChange('nid', e.target.value)}
-                                error={Boolean(errors.nid)}
-                                helperText={errors.nid}
+                                isInvalid={Boolean(errors.nid)}
+                                errorMessage={errors.nid}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Input
                                 label="Nationality"
-                                fullWidth
                                 value={changedUserData.nationality || initialUserData.nationality || ''}
                                 onChange={(e) => handleChange('nationality', e.target.value)}
-                                error={Boolean(errors.nationality)}
-                                helperText={errors.nationality}
+                                isInvalid={Boolean(errors.nationality)}
+                                errorMessage={errors.nationality}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Input
                                 label="Religion"
-                                fullWidth
                                 value={changedUserData.religion || initialUserData.religion || ''}
                                 onChange={(e) => handleChange('religion', e.target.value)}
-                                error={Boolean(errors.religion)}
-                                helperText={errors.religion}
+                                isInvalid={Boolean(errors.religion)}
+                                errorMessage={errors.religion}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth>
-                                <InputLabel id="marital-status-label">Marital status</InputLabel>
-                                <Select
-                                    labelId="marital-status-label"
-                                    value={changedUserData.marital_status || initialUserData.marital_status || "na"}
-                                    onChange={(e) => handleChange('marital_status', e.target.value)}
-                                    label="Marital status"
-                                    error={Boolean(errors.marital_status)}
-                                    MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                backdropFilter: 'blur(16px) saturate(200%)',
-                                                background: theme.glassCard.background,
-                                                border: theme.glassCard.border,
-                                                borderRadius: 2,
-                                                boxShadow:
-                                                    'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <MenuItem value="na">-</MenuItem>
-                                    <MenuItem value="Single">Single</MenuItem>
-                                    <MenuItem value="Married">Married</MenuItem>
-                                </Select>
-                                <FormHelperText>{errors.marital_status}</FormHelperText>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Select
+                                label="Marital Status"
+                                selectedKeys={changedUserData.marital_status || initialUserData.marital_status ? [changedUserData.marital_status || initialUserData.marital_status] : []}
+                                onSelectionChange={(keys) => handleChange('marital_status', Array.from(keys)[0])}
+                                isInvalid={Boolean(errors.marital_status)}
+                                errorMessage={errors.marital_status}
+                            >
+                                <SelectItem key="na" value="na">-</SelectItem>
+                                <SelectItem key="Single" value="Single">Single</SelectItem>
+                                <SelectItem key="Married" value="Married">Married</SelectItem>
+                            </Select>
+                        </div>
+                        <div>
+                            <Input
                                 label="Employment of spouse"
-                                fullWidth
                                 value={changedUserData.marital_status === 'Single' ? '' : changedUserData.employment_of_spouse || initialUserData.employment_of_spouse}
                                 onChange={(e) => handleChange('employment_of_spouse', e.target.value)}
-                                error={Boolean(errors.employment_of_spouse)}
-                                helperText={errors.employment_of_spouse}
-                                disabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
+                                isInvalid={Boolean(errors.employment_of_spouse)}
+                                errorMessage={errors.employment_of_spouse}
+                                isDisabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
+                        </div>
+                        <div>
+                            <Input
                                 label="No. of children"
-                                fullWidth
                                 type="number"
                                 value={changedUserData.marital_status === 'Single' ? '' : changedUserData.number_of_children || initialUserData.number_of_children}
                                 onChange={(e) => handleChange('number_of_children', e.target.value)}
-                                error={Boolean(errors.number_of_children)}
-                                helperText={errors.number_of_children}
-                                disabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
+                                isInvalid={Boolean(errors.number_of_children)}
+                                errorMessage={errors.number_of_children}
+                                isDisabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
                             />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '16px',
-                    }}
-                >
-                    <LoadingButton
-                        disabled={!dataChanged}
-                        sx={{
-                            borderRadius: '50px',
-                            padding: '6px 16px',
-                        }}
-                        variant="outlined"
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                        isDisabled={!dataChanged}
+                        className="rounded-full px-6"
+                        variant="bordered"
                         color="primary"
                         type="submit"
-                        loading={processing}
+                        isLoading={processing}
                     >
                         Submit
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </div>
             </form>
         </GlassDialog>
 

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useCallback, useEffect } from 'react';
-import { Box, Typography, Container, Tooltip, Grow, Collapse, Grid, Slide, useScrollTrigger } from '@mui/material';
 import {
   Navbar,
   NavbarBrand,
@@ -16,10 +15,13 @@ import {
   Input,
   Badge,
   Kbd,
-
+  Tooltip,
+  Card
 } from "@heroui/react";
 import GlassDropdown from '@/Components/GlassDropdown';
 import ProfileAvatar from '@/Components/ProfileAvatar';
+import { useScrollTrigger } from '@/Hooks/useScrollTrigger.js';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bars3Icon,
   ChevronDownIcon,
@@ -38,9 +40,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import logo from '../../../public/assets/images/logo.png';
-import GlassCard from '@/Components/GlassCard.jsx';
-import useTheme, { getThemePrimaryColor, hexToRgba } from '@/theme.jsx';
-import { GRADIENT_PRESETS, getTextGradientClasses, getIconGradientClasses, getCardGradientClasses } from '@/utils/gradientUtils.js';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
 
 const useDeviceType = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -77,16 +77,12 @@ const useDeviceType = () => {
 };
 
 const Header = React.memo(({ 
-  darkMode, 
-  toggleDarkMode, 
-  themeDrawerOpen, 
-  toggleThemeDrawer, 
   sideBarOpen, 
   toggleSideBar, 
   url, 
   pages 
 }) => {
-  const theme = useTheme(darkMode);
+    const { themeSettings, heroUIThemes, toggleMode } = useTheme();
   
   const { auth, app } = usePage().props;
   const [activePage, setActivePage] = useState(url);
@@ -106,48 +102,52 @@ const Header = React.memo(({
   };
   // Mobile Header Component
   const MobileHeader = () => (
-  <Box sx={{ p: 1.5 }}>
-    <Grow in>
-      <GlassCard>
-        <Navbar
-          shouldHideOnScroll
-          maxWidth="full"
-          height="60px"
-          classNames={{
-            base: "bg-transparent border-none shadow-none",
-            wrapper: "px-2 sm:px-3 max-w-full",
-            content: "gap-2"
-          }}
-        >
-          {/* Left: Sidebar Toggle + Logo */}
-          <NavbarContent justify="start" className="flex items-center gap-3">
-            <Button
-              isIconOnly
-              variant="light"
-              onPress={toggleSideBar}
-              className="text-foreground hover:bg-white/10 transition-all duration-300"
-              size="sm"
-              aria-label={sideBarOpen ? "Close sidebar" : "Open sidebar"}
-            >
-              <Bars3Icon className="w-5 h-5" />
-            </Button>
+    <div className="p-4 bg-transparent">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card>
+          <Navbar
+            shouldHideOnScroll
+            maxWidth="full"
+            height="60px"
+            classNames={{
+              base: "bg-transparent border-none shadow-none",
+              wrapper: "px-4 max-w-full",
+              content: "gap-2"
+            }}
+          >
+            {/* Left: Sidebar Toggle + Logo */}
+            <NavbarContent justify="start" className="flex items-center gap-3">
+              <Button
+                isIconOnly
+                variant="light"
+                onPress={toggleSideBar}
+                className="text-foreground hover:bg-white/10 transition-all duration-300"
+                size="sm"
+                aria-label={sideBarOpen ? "Close sidebar" : "Open sidebar"}
+              >
+                <Bars3Icon className="w-5 h-5" />
+              </Button>
 
-            {/* Logo & Name - Only show when sidebar is closed */}
-            {!sideBarOpen && (
-              <NavbarBrand className="flex items-center gap-3 min-w-0">
-                <div className="relative">
-                  <div className={`rounded-xl flex items-center justify-center shadow-xl overflow-hidden ${GRADIENT_PRESETS.iconContainer}`}
-                       style={{ 
-                         width: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
-                         height: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
-                         aspectRatio: '1'
-                       }}>
-                    <img 
-                      src={logo} 
-                      alt={`${app?.name || 'Company'} Logo`} 
-                      className="object-contain"
-                      style={{ 
-                        width: 'calc(100% - 6px)', // Dynamic: container size minus internal padding
+              {/* Logo & Name - Only show when sidebar is closed */}
+              {!sideBarOpen && (
+                <NavbarBrand className="flex items-center gap-3 min-w-0">
+                  <div className="relative">
+                    <div className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden bg-primary/10 border border-primary/20"
+                         style={{ 
+                           width: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
+                           height: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
+                           aspectRatio: '1'
+                         }}>
+                      <img 
+                        src={logo} 
+                        alt={`${app?.name || 'Company'} Logo`} 
+                        className="object-contain"
+                        style={{ 
+                          width: 'calc(100% - 6px)', // Dynamic: container size minus internal padding
                         height: 'calc(100% - 6px)', // Dynamic: container size minus internal padding
                         maxWidth: '100%',
                         maxHeight: '100%'
@@ -234,12 +234,12 @@ const Header = React.memo(({
                 <DropdownItem key="header" className="cursor-default hover:bg-transparent" textValue="Notifications Header">
                   <div className="p-4 border-b border-divider">
                     <div className="flex items-center justify-between">
-                      <Typography variant="h6" className="font-semibold">Notifications</Typography>
+                      <h6 className="text-lg font-semibold">Notifications</h6>
                       <Button size="sm" variant="light" className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                         Mark all read
                       </Button>
                     </div>
-                    <Typography variant="caption" className="text-default-500">You have 12 unread notifications</Typography>
+                    <p className="text-sm text-default-500">You have 12 unread notifications</p>
                   </div>
                 </DropdownItem>
                 <DropdownItem key="notification-1" className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50" textValue="New message notification">
@@ -290,34 +290,35 @@ const Header = React.memo(({
             </GlassDropdown>
           </NavbarContent>
         </Navbar>
-      </GlassCard>
-    </Grow>
-  </Box>
-);
+      </Card>
+      </motion.div>
+    </div>
+  );
 
 
 
   // Desktop Header Component
   const DesktopHeader = () => (
-    <Slide appear={false} direction="down" in={!trigger}>
-      <Box sx={{ p: 1.5 }}>
-        <Grow in>
-          <GlassCard>
-            <Container maxWidth="xl">
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                py: 2, // Increased from 1.5 for better logo space
-                gap: 1.5,
-                minHeight: '72px' // Explicit min height for calculations
-              }}>
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ 
+        opacity: !trigger ? 1 : 0, 
+        y: !trigger ? 0 : -20 
+      }}
+      transition={{ duration: 0.3 }}
+      style={{ display: !trigger ? 'block' : 'none' }}
+    >
+      <div className="p-4 bg-transparent">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center justify-between py-4 gap-6 min-h-[72px]">
                 {/* Logo and Menu Toggle */}
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  flexShrink: 0
-                }}>
+                <div className="flex items-center gap-6 flex-shrink-0">
                   <Button
                     isIconOnly
                     variant="light"
@@ -331,9 +332,9 @@ const Header = React.memo(({
 
                   {/* Only show logo when sidebar is closed */}
                   {!sideBarOpen && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <div className="flex items-center gap-8">
                       <div className="relative">
-                        <div className={`rounded-xl flex items-center justify-center shadow-xl overflow-hidden ${GRADIENT_PRESETS.iconContainer}`}
+                        <div className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden bg-primary/10 border border-primary/20"
                              style={{ 
                                width: 'calc(72px - 16px)', // Dynamic: container min-height minus padding
                                height: 'calc(72px - 16px)', // Dynamic: container min-height minus padding
@@ -359,13 +360,21 @@ const Header = React.memo(({
                         </div>
                        
                       </div>
-                    </Box>
+                    </div>
                   )}
-                </Box>
+                </div>
 
                 {/* Navigation Menu */}
-                <Collapse in={!sideBarOpen} timeout="auto" unmountOnExit>
-                  <Box sx={{ flexGrow: 1, mx: 2 }}>
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{
+                    opacity: !sideBarOpen ? 1 : 0,
+                    height: !sideBarOpen ? 'auto' : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div className="flex-grow mx-8">
                     <div className={`grid gap-2 ${
                       isTablet ? 'grid-cols-2' : 'grid-cols-4'
                     }`}>
@@ -388,7 +397,11 @@ const Header = React.memo(({
                           const num = parseInt(c, 16);
                           return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
                         }
-                        const themeColor = getThemePrimaryColor(theme);
+                        
+                        // Get primary color from current theme
+                        const currentTheme = heroUIThemes[themeSettings.activeTheme] || heroUIThemes.heroui;
+                        const themeColor = currentTheme.colors.primary.DEFAULT || currentTheme.colors.primary || '#006FEE';
+                        
                         // Convert hex themeColor to rgba with 0.5 opacity
                         const themeColorRgba = hexToRgba(themeColor, 0.5);
                         const activeGradientStyle = {
@@ -568,11 +581,11 @@ const Header = React.memo(({
                         );
                       })}
                     </div>
-                  </Box>
-                </Collapse>
+                  </div>
+                </motion.div>
 
                 {/* Right-aligned Button Group and Profile Menu */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: 'auto' }}>
+                <div className="flex items-center gap-4 ml-auto">
                   {/* Search button */}
                   <Button
                     isIconOnly
@@ -620,12 +633,12 @@ const Header = React.memo(({
                       <DropdownItem key="header" className="cursor-default hover:bg-transparent" textValue="Notifications Header">
                         <div className="p-4 border-b border-divider">
                           <div className="flex items-center justify-between">
-                            <Typography variant="h6" className="font-semibold">Notifications</Typography>
+                            <h6 className="text-lg font-semibold">Notifications</h6>
                             <Button size="sm" variant="light" className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                               Mark all read
                             </Button>
                           </div>
-                          <Typography variant="caption" className="text-default-500">You have 12 unread notifications</Typography>
+                          <p className="text-sm text-default-500">You have 12 unread notifications</p>
                         </div>
                       </DropdownItem>
                       <DropdownItem key="notification-1" className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50" textValue="New message notification">
@@ -673,13 +686,13 @@ const Header = React.memo(({
                     {/* Shared Profile Menu for both Mobile and Desktop */}
                     <ProfileMenu />
                   </GlassDropdown>
-                </Box>
-              </Box>
-            </Container>
-          </GlassCard>
-        </Grow>
-      </Box>
-    </Slide>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 
   // Enhanced Profile Button with improved accessibility and styling
@@ -936,23 +949,6 @@ const Header = React.memo(({
           </div>
         </DropdownItem>
 
-        <DropdownItem
-          key="themes"
-          startContent={
-            <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <SwatchIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            </div>
-          }
-          onPress={toggleThemeDrawer}
-          className="data-[hover=true]:bg-purple-50 data-[focus=true]:bg-purple-50 dark:data-[hover=true]:bg-purple-900/20 dark:data-[focus=true]:bg-purple-900/20 rounded-none px-3 py-2 transition-colors duration-200"
-          textValue="Customize Appearance"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">Customize Appearance</span>
-            <span className="text-xs text-default-400">Themes, colors, and layout</span>
-          </div>
-        </DropdownItem>
-
         <DropdownItem 
           key="theme-toggle" 
           className="p-0 cursor-default" 
@@ -961,7 +957,7 @@ const Header = React.memo(({
           <div className="flex items-center justify-between w-full px-3 py-2 data-[hover=true]:bg-gray-50 data-[focus=true]:bg-gray-50 dark:data-[hover=true]:bg-gray-800/50 dark:data-[focus=true]:bg-gray-800/50 transition-colors duration-200">
             <div className="flex items-center gap-3">
               <div className="w-7 h-7 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                {darkMode ? 
+                {themeSettings.mode === 'dark' ? 
                   <MoonIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" /> : 
                   <SunIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                 }
@@ -969,14 +965,14 @@ const Header = React.memo(({
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">Dark Mode</span>
                 <span className="text-xs text-default-400">
-                  {darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
+                  {themeSettings.mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
                 </span>
               </div>
             </div>
             <Switch
               size="sm"
-              isSelected={darkMode}
-              onValueChange={toggleDarkMode}
+              isSelected={themeSettings.mode === 'dark'}
+              onValueChange={toggleMode}
               classNames={{
                 wrapper: "group-data-[selected=true]:bg-blue-500",
                 thumb: "bg-white shadow-md"

@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { TextField, InputAdornment } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Input } from '@heroui/react';
+
 
 const GlassInput = forwardRef(({
   variant = 'default',
@@ -11,7 +11,7 @@ const GlassInput = forwardRef(({
   endIcon,
   ...props
 }, ref) => {
-  const theme = useTheme();
+
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -45,77 +45,47 @@ const GlassInput = forwardRef(({
     }
   };
 
+  const getHeroUIVariant = () => {
+    switch (variant) {
+      case 'primary':
+      case 'success':
+      case 'danger':
+        return 'bordered';
+      default:
+        return 'bordered';
+    }
+  };
+
+  const getHeroUIColor = () => {
+    switch (variant) {
+      case 'primary':
+        return 'primary';
+      case 'success':
+        return 'success';
+      case 'danger':
+        return 'danger';
+      default:
+        return 'default';
+    }
+  };
+
   return (
-    <TextField
+    <Input
       ref={ref}
-      variant={floatingLabel ? "outlined" : "filled"}
+      variant={getHeroUIVariant()}
+      color={getHeroUIColor()}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
-      InputProps={{
-        startAdornment: startIcon && (
-          <InputAdornment position="start">
-            {startIcon}
-          </InputAdornment>
-        ),
-        endAdornment: endIcon && (
-          <InputAdornment position="end">
-            {endIcon}
-          </InputAdornment>
-        ),
-      }}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          borderRadius: '16px',
-          backdropFilter: 'blur(12px) saturate(180%)',
-          transition: 'all 0.3s ease-out',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'transparent',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: darkMode 
-              ? 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
-              : 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
-            borderRadius: 'inherit',
-            pointerEvents: 'none',
-            zIndex: 1
-          },
-          '& fieldset': {
-            borderColor: darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.4)',
-            borderWidth: '1px',
-          },
-          '&:hover fieldset': {
-            boxShadow: darkMode 
-              ? '0 8px 32px rgba(0, 0, 0, 0.2)' 
-              : '0 8px 32px rgba(31, 38, 135, 0.1)',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: darkMode ? 'rgba(59,130,246,0.6)' : 'rgba(59,130,246,0.8)',
-            borderWidth: '2px',
-            boxShadow: glowOnFocus 
-              ? `0 0 20px ${darkMode ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.2)'}`
-              : 'none',
-          },
-          '& input': {
-            position: 'relative',
-            zIndex: 2,
-            color: darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)',
-            '&::placeholder': {
-              color: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-            }
-          }
-        },
-        '& .MuiInputLabel-root': {
-          color: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-          '&.Mui-focused': {
-            color: darkMode ? 'rgba(59,130,246,0.9)' : 'rgba(59,130,246,1)',
-          }
-        }
+      startContent={startIcon}
+      endContent={endIcon}
+      classNames={{
+        input: "bg-transparent",
+        inputWrapper: `
+          ${getVariantStyles()}
+          backdrop-blur-md 
+          transition-all duration-300 ease-out
+          ${glowOnFocus && isFocused ? 'shadow-lg' : 'shadow-sm'}
+        `
       }}
       className={`glass-input ${className}`}
       {...props}

@@ -1,20 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, router, Link } from "@inertiajs/react";
-import { 
-  Box, 
-  Typography, 
-  useMediaQuery, 
-  useTheme,
-  CircularProgress,
-  Fade,
-  Grow,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  TextField,
-  InputAdornment
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
   Button,
   Card,
@@ -34,7 +20,15 @@ import {
   DropdownItem,
   ButtonGroup,
   User as UserAvatar,
-  Pagination
+  Pagination,
+  Spinner,
+  Input,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
 } from "@heroui/react";
 import { 
   DevicePhoneMobileIcon,
@@ -78,9 +72,38 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevices }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  // Custom responsive hooks
+  const useResponsive = () => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [isTablet, setIsTablet] = useState(false);
+    
+    useEffect(() => {
+      const checkDevice = () => {
+        setIsMobile(window.innerWidth < 640);
+        setIsTablet(window.innerWidth < 768);
+      };
+      
+      checkDevice();
+      window.addEventListener('resize', checkDevice);
+      return () => window.removeEventListener('resize', checkDevice);
+    }, []);
+    
+    return { isMobile, isTablet };
+  };
+  
+  const { isMobile, isTablet } = useResponsive();
+  
+  // Custom theme
+  const glassTheme = {
+    palette: {
+      primary: { main: '#3b82f6' },
+      secondary: { main: '#64748b' },
+      background: { paper: 'rgba(15, 20, 25, 0.15)' },
+      text: { primary: '#ffffff', secondary: '#94a3b8' }
+    },
+    spacing: (factor) => `${0.25 * factor}rem`,
+    borderRadius: '12px'
+  };
   
   // State management
   const [user, setUser] = useState(initialUser);
@@ -612,14 +635,18 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
     <>
       <Head title={title} />
       
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-        <Grow in>
-          <GlassCard>
-            <PageHeader
-              title={`Device Management - ${user.name}`}
-              subtitle={`Manage ${user.name}'s device access, restrictions and session history`}
-              icon={<DevicePhoneMobileIcon className="w-8 h-8" />}
-              actionButtons={actionButtons}
+      <motion.div 
+        className="flex justify-center p-4"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <GlassCard>
+          <PageHeader
+            title={`Device Management - ${user.name}`}
+            subtitle={`Manage ${user.name}'s device access, restrictions and session history`}
+            icon={<DevicePhoneMobileIcon className="w-8 h-8" />}
+            actionButtons={actionButtons}
             >
               <div className="p-4 sm:p-6">
                 {/* Statistics Cards */}
@@ -627,7 +654,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                 
                 {/* User Overview Section - Enhanced */}
                 <div className="mb-6">
-                  <GlassCard variant="glass" className="overflow-hidden">
+                  <GlassCard>
                     <div className="flex flex-col lg:flex-row">
                       {/* Enhanced User Profile Section */}
                       <div className="lg:w-2/5 bg-linear-to-br from-white/5 to-white/10 p-6 border-r border-white/10">
@@ -1269,8 +1296,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
               </div>
             </PageHeader>
           </GlassCard>
-        </Grow>
-      </Box>
+        </motion.div>
 
       {/* Device Details Modal */}
       <GlassDialog 
@@ -1279,49 +1305,49 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          <div className="flex items-center gap-3">
-            {selectedDevice && getDeviceIcon(selectedDevice.user_agent, "w-6 h-6")}
-            <div>
-              <Typography variant="h6" className="font-semibold text-foreground">
-                Device Information
-              </Typography>
-              <Typography variant="body2" className="text-default-500">
-                {selectedDevice?.device_name || 'Unknown Device'}
-              </Typography>
+        <div className="relative">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              {selectedDevice && getDeviceIcon(selectedDevice.user_agent, "w-6 h-6")}
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">
+                  Device Information
+                </h2>
+                <p className="text-sm text-default-500">
+                  {selectedDevice?.device_name || 'Unknown Device'}
+                </p>
+              </div>
             </div>
+            <Button
+              isIconOnly
+              variant="light"
+              onPress={handleCloseDeviceModal}
+              className="text-default-400 hover:text-foreground"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </Button>
           </div>
-          <IconButton
-            onClick={handleCloseDeviceModal}
-            sx={{ 
-              position: 'absolute', 
-              right: 8, 
-              top: 8,
-              color: 'text.secondary'
-            }}
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </IconButton>
-        </DialogTitle>
         
-        <DialogContent dividers>
+        {/* Modal Content */}
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
           {selectedDevice && (
             <div className="space-y-6">
               {/* Device Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <GlassCard variant="glass">
-                  <Box p={3}>
+                <GlassCard>
+                  <div className="p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 bg-primary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-primary/30">
                         {getDeviceIcon(selectedDevice.user_agent, "w-5 h-5")}
                       </div>
                       <div>
-                        <Typography variant="subtitle1" className="font-semibold text-foreground">
+                        <h3 className="font-semibold text-foreground">
                           Device Type
-                        </Typography>
-                        <Typography variant="body2" className="text-default-500">
+                        </h3>
+                        <p className="text-default-500 text-sm">
                           {getDeviceType(selectedDevice.user_agent)}
-                        </Typography>
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2 text-sm">
@@ -1334,11 +1360,11 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                         <span className="text-foreground">{getOSInfo(selectedDevice.user_agent)}</span>
                       </div>
                     </div>
-                  </Box>
+                  </div>
                 </GlassCard>
 
                 <GlassCard variant="glass">
-                  <Box p={3}>
+                  <div className="p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 bg-secondary/20 backdrop-blur-xs rounded-lg flex items-center justify-center border border-secondary/30">
                         <WifiIcon className="w-5 h-5 text-secondary" />
@@ -1362,7 +1388,7 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
                         <span className="text-foreground">{selectedDevice.location || 'Unknown'}</span>
                       </div>
                     </div>
-                  </Box>
+                  </div>
                 </GlassCard>
               </div>
 
@@ -1481,9 +1507,10 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
               )}
             </div>
           )}
-        </DialogContent>
+        </div>
         
-        <DialogActions>
+        {/* Modal Footer */}
+        <div className="flex justify-end gap-3 p-6 border-t border-white/10">
           <Button 
             variant="flat" 
             onPress={handleCloseDeviceModal}
@@ -1491,7 +1518,8 @@ const UserDeviceManagement = ({ title, user: initialUser, devices: initialDevice
           >
             Close
           </Button>
-        </DialogActions>
+        </div>
+        </div>
       </GlassDialog>
     </>
   );

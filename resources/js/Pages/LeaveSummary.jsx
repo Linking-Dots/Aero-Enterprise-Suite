@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import { Box, Typography, useMediaQuery, useTheme, Grow, Fade, TextField, InputAdornment } from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
     CalendarIcon, 
     PlusIcon,
@@ -33,18 +33,20 @@ import {
     CardBody,
     Progress,
     Tabs,
-    Tab
+    Tab,
+    Input
 } from "@heroui/react";
 import GlassCard from '@/Components/GlassCard.jsx';
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
-import { GRADIENT_PRESETS } from '@/utils/gradientUtils.js';
+// Remove gradientUtils import - using HeroUI semantic colors instead
+import useTheme from '@/theme';
 import App from "@/Layouts/App.jsx";
 import { Inertia } from '@inertiajs/inertia';
 
 const LeaveSummary = ({ title, summaryData }) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isMobile] = useState(window.innerWidth < 640);
     
     // Destructure summary data
     const {
@@ -252,8 +254,12 @@ const LeaveSummary = ({ title, summaryData }) => {
         <>
             <Head title={title} />
             
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
+            <div className="flex justify-center p-2">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <GlassCard>
                         <PageHeader
                             title="Leave Summary"
@@ -270,46 +276,12 @@ const LeaveSummary = ({ title, summaryData }) => {
                                 <div className="flex flex-col gap-4 mb-6">
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <div className="flex-1">
-                                            <TextField
+                                            <Input
                                                 label="Search Employees"
                                                 placeholder="Search by name or department..."
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <MagnifyingGlassIcon className="w-4 h-4" />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
+                                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                                                 value={searchValue}
                                                 onChange={(e) => setSearchValue(e.target.value)}
-                                                fullWidth
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                        backdropFilter: 'blur(10px)',
-                                                        borderRadius: '12px',
-                                                        color: 'white',
-                                                        '& fieldset': {
-                                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                        },
-                                                        '&:hover fieldset': {
-                                                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                                                        },
-                                                        '&.Mui-focused fieldset': {
-                                                            borderColor: 'var(--primary-color)',
-                                                        },
-                                                        '& input::placeholder': {
-                                                            color: 'rgba(255, 255, 255, 0.5)',
-                                                            opacity: 1,
-                                                        },
-                                                    },
-                                                    '& .MuiInputLabel-root': {
-                                                        color: 'rgba(255, 255, 255, 0.7)',
-                                                        '&.Mui-focused': {
-                                                            color: 'var(--primary-color)',
-                                                        },
-                                                    },
-                                                }}
                                             />
                                         </div>
                                         <div className="flex gap-2 items-end">
@@ -329,8 +301,12 @@ const LeaveSummary = ({ title, summaryData }) => {
 
                                     {/* Advanced Filters Panel */}
                                     {showFilters && (
-                                        <Fade in={true} timeout={300}>
-                                            <div className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10"
+                                        >
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                                     <Select
                                                         label="Year"
@@ -407,9 +383,8 @@ const LeaveSummary = ({ title, summaryData }) => {
                                                         </Button>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </Fade>
-                                    )}
+                                            </motion.div>
+                                        )}
                                 </div>
 
                                 {/* Tab Navigation */}
@@ -539,15 +514,15 @@ const LeaveSummary = ({ title, summaryData }) => {
                                             <Card className="bg-white/5 backdrop-blur-md border-white/10">
                                                 <CardBody className="text-center py-12">
                                                     <PresentationChartLineIcon className="w-16 h-16 mx-auto mb-4 text-default-300" />
-                                                    <Typography variant="h6" className="mb-2 text-white">
+                                                    <h3 className="text-xl font-semibold mb-2 text-white">
                                                         No Leave Data Found
-                                                    </Typography>
-                                                    <Typography variant="body2" className="text-gray-400">
+                                                    </h3>
+                                                    <p className="text-gray-400">
                                                         {searchValue 
                                                             ? `No employees found matching "${searchValue}"`
                                                             : `No leave summary data available for ${currentFilters.year || year}.`
                                                         }
-                                                    </Typography>
+                                                    </p>
                                                 </CardBody>
                                             </Card>
                                         )}
@@ -555,9 +530,9 @@ const LeaveSummary = ({ title, summaryData }) => {
                                 ) : (
                                     /* Department Summary Tab */
                                     <div className="space-y-4">
-                                        <Typography variant="h6" className="mb-4 text-white">
+                                        <h3 className="text-xl font-semibold mb-4 text-white">
                                             Department-wise Leave Summary
-                                        </Typography>
+                                        </h3>
                                         
                                         {department_summary.length > 0 ? (
                                             <Table
@@ -612,9 +587,9 @@ const LeaveSummary = ({ title, summaryData }) => {
                                             <Card className="bg-white/5 backdrop-blur-md border-white/10">
                                                 <CardBody className="text-center py-8">
                                                     <BuildingOfficeIcon className="w-12 h-12 mx-auto mb-4 text-default-300" />
-                                                    <Typography variant="body1" className="text-white">
+                                                    <p className="text-white">
                                                         No department data available
-                                                    </Typography>
+                                                    </p>
                                                 </CardBody>
                                             </Card>
                                         )}
@@ -623,8 +598,8 @@ const LeaveSummary = ({ title, summaryData }) => {
                             </div>
                         </PageHeader>
                     </GlassCard>
-                </Grow>
-            </Box>
+                </motion.div>
+            </div>
         </>
     );
 };

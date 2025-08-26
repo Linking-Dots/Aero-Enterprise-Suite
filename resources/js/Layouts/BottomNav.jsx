@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Box } from '@mui/material';
 import { Button, Badge } from "@heroui/react";
 import { 
   HomeIcon, 
@@ -8,18 +7,14 @@ import {
   Bars3Icon 
 } from '@heroicons/react/24/outline';
 import { Link, usePage } from "@inertiajs/react";
-import { useTheme } from "@mui/material/styles";
-import { GRADIENT_PRESETS } from '@/utils/gradientUtils.js';
 import GlassCard from '@/Components/GlassCard';
-import { getThemePrimaryColor, hexToRgba } from '@/theme.jsx';
+import { useTheme } from '@/Contexts/ThemeContext';
 
 const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBarOpen }) => {
-    const theme = useTheme();
     const { url } = usePage().props;
     const [activeTab, setActiveTab] = useState('dashboard');
     const bottomNavRef = useRef(null);
-    const themeColor = getThemePrimaryColor(theme);
-    const themeColorRgba = hexToRgba(themeColor, 0.5);
+    const { themeSettings } = useTheme();
     
 
     // Navigation items configuration
@@ -96,23 +91,11 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
     }, [calculatePadding]);
 
     return (
-        <Box
+        <nav
             ref={bottomNavRef}
-            component="nav"
             role="navigation"
             aria-label="Bottom navigation"
-            sx={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1200,
-                display: { xs: 'flex', md: 'none' },
-                
-                py: 1.5,
-                px: 2,
-                minHeight: 72
-            }}
+            className="fixed bottom-0 left-0 right-0 z-[1200] flex md:hidden py-6 px-8 min-h-[72px]"
         >
             <GlassCard>
             <div className="flex items-center justify-around w-full max-w-md mx-auto">
@@ -120,8 +103,7 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
                     const isActive = activeTab === item.id;
                     const IconComponent = item.icon;
                     const activeStyle = isActive ? {
-                        color: themeColor,
-                        borderBottom: `3px solid ${themeColor}`,
+                        borderBottom: `3px solid rgb(var(--primary))`,
                     } : {};
 
                     if (item.action === 'sidebar') {
@@ -134,7 +116,7 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
                                 className={`
                                     h-12 w-12 transition-all duration-200 hover:scale-105
                                     ${sideBarOpen 
-                                        ? GRADIENT_PRESETS.accentCard 
+                                        ? 'bg-primary/20 border border-primary/30' 
                                         : 'bg-transparent hover:bg-white/10'
                                     }
                                 `}
@@ -150,8 +132,7 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
                         <div className="flex flex-col items-center justify-center gap-1.5 py-1.5">
                             <div className="relative">
                                 <IconComponent 
-                                    className={`transition-all duration-200 ${isActive ? 'w-6 h-6 font-bold' : 'w-5 h-5'}`}
-                                    style={isActive ? { color: themeColor, fontWeight: 700 } : { color: '' }}
+                                    className={`transition-all duration-200 ${isActive ? 'w-6 h-6 font-bold text-primary' : 'w-5 h-5'}`}
                                 />
                                 {item.badge && (
                                     <Badge
@@ -162,8 +143,7 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
                                     />
                                 )}
                             </div>
-                            <span className={`text-xs transition-all duration-200 ${isActive ? 'font-bold' : 'font-semibold'}`}
-                                  style={isActive ? { color: themeColor } : {}}>
+                            <span className={`text-xs transition-all duration-200 ${isActive ? 'font-bold text-primary' : 'font-semibold'}`}>
                                 {item.label}
                             </span>
                         </div>
@@ -189,7 +169,7 @@ const BottomNav = ({ auth, contentRef, setBottomNavHeight, toggleSideBar, sideBa
                 })}
             </div>
             </GlassCard>
-        </Box>
+        </nav>
     );
 };
 

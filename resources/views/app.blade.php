@@ -123,15 +123,16 @@
 
         /* Enhanced Background System - Theme-based patterns load immediately */
         body {
-            /* Default fallback - will be overridden by theme patterns */
-            background: rgba(248, 250, 252, 1);
+            /* Base background - will be overridden by dynamic theme system */
+            background: var(--background, #ffffff);
             min-height: 100vh;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, background-color 0.3s ease;
+            /* Remove any fixed background patterns to allow theme system control */
         }
 
-        /* Dark mode fallback */
+        /* Dark mode fallback - also will be overridden by theme system */
         [data-theme-mode="dark"] body {
-            background: rgba(15, 20, 25, 1);
+            background: var(--background, #0a0a0a);
         }
 
         /* Enhanced Loading Screen - Optimized Performance & UX */

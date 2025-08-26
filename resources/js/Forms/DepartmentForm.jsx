@@ -1,34 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Grid,
-    FormControl,
-    FormHelperText,
-    InputLabel,
+    Input,
     Select,
-    MenuItem,
-    FormControlLabel,
+    SelectItem,
     Switch,
-    Box,
-    Typography,
-    Divider,
-    IconButton,
     Button,
-    useTheme,
-    useMediaQuery,
-} from '@mui/material';
+    Divider
+} from '@heroui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import GlassDialog from '@/Components/GlassDialog';
 
 const DepartmentForm = ({ open, onClose, onSuccess, department = null, managers = [], parentDepartments = [] }) => {
-    const theme = useTheme();
+
+    const { theme, getCurrentColors } = useTheme();
+    const currentColors = getCurrentColors();
+    const primaryColor = typeof currentColors.primary === 'object' ? currentColors.primary.DEFAULT : currentColors.primary;
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});

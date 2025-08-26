@@ -1,34 +1,45 @@
 import React from 'react';
-import {styled} from '@mui/material/styles';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Chip from '@mui/material/Chip';
-import HomeIcon from '@mui/icons-material/Home';
-import {Link, usePage} from '@inertiajs/react';
-import {Box, Grid} from '@mui/material';
-import Grow from '@mui/material/Grow';
+import { Chip, Breadcrumbs } from '@heroui/react';
+import { HomeIcon } from '@heroicons/react/24/outline';
+import { Link, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 
-const StyledBreadcrumb = styled(Chip)(({ theme }) => {
-    const backgroundColor =
-        theme.palette.mode === 'light'
-            ? theme.palette.grey[100]
-            : theme.palette.grey[800];
-    return {
-        backdropFilter: 'blur(16px) saturate(200%)',
-        background: theme.glassCard.background,
-        border: theme.glassCard.color,
-        height: theme.spacing(3),
-        color: theme.palette.text.primary,
-        fontWeight: theme.typography.fontWeightRegular,
-        '&:hover, &:focus': {
-            cursor: 'pointer',
-            backgroundColor: 'rgba(17, 25, 40, 0.7)',
-        },
-        '&:active': {
-            boxShadow: theme.shadows[1],
-            backgroundColor: 'rgba(17, 25, 40, 0.7)',
-        },
-    };
-});
+// Custom Breadcrumb Item Component with glassmorphism styling
+const StyledBreadcrumb = ({ label, icon, onClick, href, isActive, ...props }) => {
+  const baseClasses = `
+    backdrop-blur-md bg-white/10 dark:bg-black/10
+    border border-white/20 dark:border-white/10
+    h-8 px-3 py-1
+    text-sm font-medium text-foreground
+    rounded-lg
+    transition-all duration-300
+    hover:bg-white/20 dark:hover:bg-black/20
+    hover:cursor-pointer
+    active:shadow-md active:bg-white/20 dark:active:bg-black/20
+    ${isActive ? 'bg-primary/20 text-primary' : ''}
+  `;
+
+  const content = (
+    <>
+      {icon && <span className="mr-2">{icon}</span>}
+      {label}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={baseClasses} {...props}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={baseClasses} onClick={onClick} {...props}>
+      {content}
+    </div>
+  );
+};
 
 
 const Breadcrumb = ({ }) => {
@@ -44,7 +55,7 @@ const Breadcrumb = ({ }) => {
         try {
             breadcrumbs.push({
                 label: "Home",
-                icon: <HomeIcon fontSize="small" />,
+                icon: <HomeIcon className="w-4 h-4" />,
                 href: route('dashboard'),
                 component: "a"
             });
@@ -52,7 +63,7 @@ const Breadcrumb = ({ }) => {
             // Fallback if dashboard route doesn't exist
             breadcrumbs.push({
                 label: "Home",
-                icon: <HomeIcon fontSize="small" />,
+                icon: <HomeIcon className="w-4 h-4" />,
                 href: "/",
                 component: "a"
             });
@@ -137,35 +148,40 @@ const Breadcrumb = ({ }) => {
     const breadcrumbs = generateBreadcrumbs();
 
     return (
-        <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            p: 1.5,
-        }}>
-            <Grow in>
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right' }}>
-                            <Box>
-                                <Breadcrumbs aria-label="breadcrumb">
-                                    {breadcrumbs.map((breadcrumb, index) => (
-                                        <StyledBreadcrumb
-                                            key={index}
-                                            component={breadcrumb.component}
-                                            href={breadcrumb.href}
-                                            label={breadcrumb.label}
-                                            icon={breadcrumb.icon}
-                                            onClick={breadcrumb.href ? undefined : (e) => e.preventDefault()}
-                                            style={breadcrumb.href ? {} : { cursor: 'default', opacity: 0.8 }}
-                                        />
-                                    ))}
-                                </Breadcrumbs>
-                            </Box>
-                        </Box>
-                    </Grid>
-                </Grid>
-            </Grow>
-        </Box>
+        <div className="flex justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full"
+            >
+                <div className="w-full">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <Breadcrumbs
+                                separator="/"
+                                classNames={{
+                                    list: "flex flex-wrap items-center gap-1",
+                                    separator: "text-default-400 mx-1"
+                                }}
+                            >
+                                {breadcrumbs.map((breadcrumb, index) => (
+                                    <StyledBreadcrumb
+                                        key={index}
+                                        href={breadcrumb.href}
+                                        label={breadcrumb.label}
+                                        icon={breadcrumb.icon}
+                                        isActive={index === breadcrumbs.length - 1}
+                                        onClick={breadcrumb.href ? undefined : (e) => e.preventDefault()}
+                                        style={breadcrumb.href ? {} : { cursor: 'default', opacity: 0.8 }}
+                                    />
+                                ))}
+                            </Breadcrumbs>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
     );
 };
 

@@ -1,29 +1,16 @@
 import {
     Avatar,
-    Box,
-    CircularProgress,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Typography
-} from "@mui/material";
-import React, {useEffect, useState} from "react";
-import ClearIcon from '@mui/icons-material/Clear';
+    Button,
+    Spinner,
+    Select,
+    SelectItem,
+    Input
+} from "@heroui/react";
+import React, { useEffect, useState } from "react";
+import { X, Camera, Eye, EyeOff, Lock } from 'lucide-react';
 import GlassDialog from "@/Components/GlassDialog.jsx";
-import {PhotoCamera} from "@mui/icons-material";
-import {useTheme} from "@mui/material/styles";
-import LoadingButton from "@mui/lab/LoadingButton";
-import {toast} from "react-toastify";
-import {TextField, Select} from "@mui/material";
-import PasswordIcon from "@mui/icons-material/Password";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Visibility from "@mui/icons-material/Visibility";
+
+import { toast } from "react-toastify";
 
 const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
     
@@ -54,7 +41,8 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [allReportTo, setAllReportTo] = useState(allUsers);
 
-    const theme = useTheme();
+
+
 
     // Initialize selected image if user has profile image
     useEffect(() => {

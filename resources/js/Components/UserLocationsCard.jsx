@@ -1,43 +1,34 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StatsCards from '@/Components/StatsCards';
+import { motion } from 'framer-motion';
 
 import {
-    Box,
-    CardContent,
-    CardHeader,
-    CircularProgress,
-    Typography,
+    Button,
+    Spinner,
     Chip,
     Avatar,
-    Stack,
-    Paper,
-    IconButton,
-    Tooltip,
-    Alert,
-    Fade,
-    Zoom,
-    Skeleton,
+    Card,
+    CardBody,
+    CardHeader,
     Divider,
-    useMediaQuery
-} from '@mui/material';
+} from '@heroui/react';
 import {
-    LocationOn,
-    Schedule,
-    Person,
-    Business,
-    MyLocation,
+    MapPin,
+    Clock,
+    User,
+    Building,
+    Navigation,
     ZoomIn,
     ZoomOut,
-    Refresh,
+    RefreshCw,
     Map as MapIcon,
-    Timeline,
-    Groups,
-    AccessTime,
-    Place,
-    Navigation
-} from '@mui/icons-material';
-import { useTheme, alpha } from '@mui/material/styles';
+    Users,
+    Clock4,
+    MapPin as Place,
+    Navigation as NavigationIcon
+} from 'lucide-react';
+
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import 'leaflet-fullscreen/dist/Leaflet.fullscreen.js';
@@ -45,8 +36,21 @@ import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
 import L from 'leaflet';
 import { usePage } from "@inertiajs/react";
 import GlassCard from "@/Components/GlassCard.jsx";
-import { Card, CardBody, CardHeader as HeroCardHeader, Button } from "@heroui/react";
 import PageHeader  from './PageHeader';
+
+// Utility function to replace MUI's alpha function
+const alpha = (color, opacity) => {
+    // Convert hex to rgba or add opacity to existing color
+    if (color.startsWith('#')) {
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    // For existing rgba/rgb colors, just use the opacity
+    return color.replace(/[\d.]+\)$/, `${opacity})`);
+};
 
 
 // Constants following ISO standards
@@ -86,7 +90,7 @@ const RoutingMachine = React.memo(({ startLocation, endLocation, theme }) => {
             createMarker: () => null, // Hide default markers
             lineOptions: {
                 styles: [{
-                    color: theme.palette.primary.main,
+                    color: theme.primary || '#3b82f6',
                     weight: 4,
                     opacity: 0.8
                 }]
@@ -262,14 +266,17 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
     }, [selectedDate]);
 
     const createUserIcon = useCallback((user) => {
+        const primaryColor = theme.primary || '#3b82f6';
+        const secondaryColor = theme.secondary || '#8b5cf6';
+        
         const iconHtml = `
             <div style="
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main});
+                background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
                 border: 3px solid white;
-                box-shadow: 0 4px 12px ${alpha(theme.palette.primary.main, 0.4)};
+                box-shadow: 0 4px 12px ${alpha(primaryColor, 0.4)};
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -295,17 +302,20 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
     }, [theme]);
 
     const createPopupContent = useCallback((user) => {
-        const statusColor = user.punchout_time ? 
-            theme.palette.success.main : 
-            theme.palette.warning.main;
+        const statusColor = user.punchout_time ? '#10b981' : '#f59e0b'; // green : amber
+        const primaryColor = theme.primary || '#3b82f6';
+        const secondaryColor = theme.secondary || '#8b5cf6';
+        const backgroundColor = '#ffffff';
+        const textPrimary = '#1f2937';
+        const textSecondary = '#6b7280';
 
         return `
             <div style="
                 min-width: 250px;
                 padding: 16px;
-                background: linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.95)}, ${alpha(theme.palette.primary.main, 0.05)});
+                background: linear-gradient(135deg, ${alpha(backgroundColor, 0.95)}, ${alpha(primaryColor, 0.05)});
                 border-radius: 12px;
-                border: 1px solid ${alpha(theme.palette.primary.main, 0.2)};
+                border: 1px solid ${alpha(primaryColor, 0.2)};
                 backdrop-filter: blur(20px);
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             ">
@@ -314,7 +324,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         width: 32px;
                         height: 32px;
                         border-radius: 50%;
-                        background: linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main});
+                        background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -328,10 +338,10 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         }
                     </div>
                     <div>
-                        <div style="font-weight: 600; color: ${theme.palette.text.primary}; font-size: 16px;">
+                        <div style="font-weight: 600; color: ${textPrimary}; font-size: 16px;">
                             ${user.name || 'Unknown User'}
                         </div>
-                        <div style="color: ${theme.palette.text.secondary}; font-size: 12px;">
+                        <div style="color: ${textSecondary}; font-size: 12px;">
                             ${user.designation || 'No designation'}
                         </div>
                     </div>
@@ -353,15 +363,15 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 
                 <div style="space-y: 8px;">
                     <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                        <span style="color: ${theme.palette.success.main}; margin-right: 8px;">📍</span>
-                        <span style="color: ${theme.palette.text.secondary}; font-size: 13px;">
+                        <span style="color: #10b981; margin-right: 8px;">📍</span>
+                        <span style="color: ${textSecondary}; font-size: 13px;">
                             Check In: ${formatTime(user.punchin_time)}
                         </span>
                     </div>
                     
                     <div style="display: flex; align-items: center;">
-                        <span style="color: ${theme.palette.error.main}; margin-right: 8px;">📍</span>
-                        <span style="color: ${theme.palette.text.secondary}; font-size: 13px;">
+                        <span style="color: #ef4444; margin-right: 8px;">📍</span>
+                        <span style="color: ${textSecondary}; font-size: 13px;">
                             Check Out: ${formatTime(user.punchout_time)}
                         </span>
                     </div>
@@ -466,7 +476,7 @@ const useUserStats = (users) => {
 
 // Main Component
 const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
-    const theme = useTheme();
+
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -475,8 +485,8 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
     const [lastUpdate, setLastUpdate] = useState(null);
     const [isPolling, setIsPolling] = useState(true);
     const [mapKey, setMapKey] = useState(0);
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const isMobile = window.innerWidth < 640;
+    const isTablet = window.innerWidth < 768;
     const [lastChecked, setLastChecked] = useState(new Date());
     const prevUsersRef = useRef([]);
     const prevUpdateRef = useRef(null);
@@ -649,9 +659,14 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
    
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-            <Fade in timeout={800}>
-                <GlassCard sx={{ width: '100%', maxWidth: '100%' }}>
+        <div className="flex justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                className="w-full max-w-full"
+            >
+                <GlassCard className="w-full">
                     <PageHeader
                         title="Team Locations"
                         subtitle={formattedDate}
@@ -660,15 +675,10 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                         actions={
                             <div className="flex items-center gap-2">
                                 {lastCheckedText && (
-                                    <Typography 
-                                        variant="caption" 
-                                        color="textSecondary"
-                                        className=" sm:block text-xs"
-                                    >
+                                    <span className="text-xs text-gray-500 hidden sm:block">
                                         Updated: {lastCheckedText}
-                                    </Typography>
+                                    </span>
                                 )}
-                                
                             </div>
                         }
                     >
@@ -682,7 +692,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                     {
                                         title: 'Total',
                                         value: userStats.total,
-                                        icon: <Groups className="w-5 h-5" />,
+                                        icon: <Users className="w-5 h-5" />,
                                         color: 'text-blue-400',
                                         description: 'Total users tracked',
                                         iconBg: 'bg-blue-500/20',
@@ -691,7 +701,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                     {
                                         title: 'Active',
                                         value: userStats.checkedIn,
-                                        icon: <AccessTime className="w-5 h-5" />,
+                                        icon: <Clock4 className="w-5 h-5" />,
                                         color: 'text-orange-400',
                                         description: 'Currently working',
                                         iconBg: 'bg-orange-500/20',
@@ -711,43 +721,17 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                 compact={isMobile}
                             />
                         </div>
-                        {/* Stats Cards END */}
                         
-                        <CardContent sx={{ p: 3, pt: 0 }}>
+                        <div className="p-6 pt-0">
                             {users.length > 0 ? (
-                                <Box 
-                                    sx={{ 
-                                        height: '70vh', 
-                                        borderRadius: 4,
-                                        overflow: 'hidden',
-                                        border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                                        boxShadow: `0 10px 30px ${alpha(theme.palette.primary.main, 0.2)}`,
-                                        position: 'relative'
-                                    }}
-                                >
+                                <div className="relative h-[70vh] rounded-2xl overflow-hidden border-2 border-primary/10 shadow-2xl">
                                     {loading && (
-                                        <Box
-                                            sx={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                right: 0,
-                                                bottom: 0,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                background: alpha(theme.palette.background.paper, 0.8),
-                                                backdropFilter: 'blur(10px)',
-                                                zIndex: 1000
-                                            }}
-                                        >
-                                            <Box sx={{ textAlign: 'center' }}>
-                                                <CircularProgress size={40} thickness={4} />
-                                                <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                                                    Loading locations...
-                                                </Typography>
-                                            </Box>
-                                        </Box>
+                                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-xl z-50">
+                                            <div className="text-center">
+                                                <Spinner size="lg" />
+                                                <p className="mt-4 text-gray-600">Loading locations...</p>
+                                            </div>
+                                        </div>
                                     )}
 
                                     <MapContainer
@@ -788,78 +772,40 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                             theme={theme}
                                         />
                                     </MapContainer>
-                                </Box>
+                                </div>
                             ) : loading ? (
-                                <Box 
-                                    sx={{ 
-                                        height: '70vh', 
-                                        borderRadius: 4,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                                        boxShadow: `0 10px 30px ${alpha(theme.palette.primary.main, 0.2)}`,
-                                        background: alpha(theme.palette.background.paper, 0.5),
-                                        backdropFilter: 'blur(10px)',
-                                    }}
-                                >
-                                    <Box sx={{ textAlign: 'center' }}>
-                                        <CircularProgress size={40} thickness={4} />
-                                        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                                            Loading locations...
-                                        </Typography>
-                                    </Box>
-                                </Box>
+                                <div className="h-[70vh] rounded-2xl flex items-center justify-center border-2 border-primary/10 shadow-2xl bg-white/50 backdrop-blur-xl">
+                                    <div className="text-center">
+                                        <Spinner size="lg" />
+                                        <p className="mt-4 text-gray-600">Loading locations...</p>
+                                    </div>
+                                </div>
                             ) : (
-                                <Box 
-                                    sx={{ 
-                                        height: '70vh', 
-                                        borderRadius: 4,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: alpha(theme.palette.background.paper, 0.5),
-                                        backdropFilter: 'blur(10px)',
-                                        border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                                        boxShadow: `0 10px 30px ${alpha(theme.palette.primary.main, 0.2)}`,
-                                        p: 6
-                                    }}
-                                >
-                                    <MapIcon 
-                                        style={{ 
-                                            width: '64px', 
-                                            height: '64px', 
-                                            color: theme.palette.text.disabled,
-                                            margin: '0 auto 24px auto'
-                                        }} 
-                                    />
-                                    <Typography variant="h5" sx={{ mb: 2 }}>
-                                        No Location Data Available
-                                    </Typography>
-                                    <Typography color="textSecondary" sx={{ mb: 3, maxWidth: '600px', textAlign: 'center' }}>
+                                <div className="h-[70vh] rounded-2xl flex flex-col items-center justify-center bg-white/50 backdrop-blur-xl border-2 border-primary/10 shadow-2xl p-12">
+                                    <MapIcon className="w-16 h-16 text-gray-400 mb-6" />
+                                    <h3 className="text-xl font-semibold mb-4">No Location Data Available</h3>
+                                    <p className="text-gray-500 mb-6 max-w-md text-center">
                                         No team location data found for {formattedDate}. 
                                         {selectedDate && new Date(selectedDate) > new Date() ? 
                                             " This date is in the future." : 
                                             " Try selecting a different date or refreshing the data."}
-                                    </Typography>
+                                    </p>
                                     <Button 
-                                        variant="outlined"
+                                        variant="bordered"
                                         color="primary"
-                                        size="medium"
-                                        onClick={handleRefresh}
-                                        startIcon={<Refresh />}
-                                        sx={{ mt: 2 }}
+                                        size="md"
+                                        onPress={handleRefresh}
+                                        startContent={<RefreshCw className="w-4 h-4" />}
                                     >
                                         Refresh Data
                                     </Button>
-                                </Box>
+                                </div>
                             )}
-                        </CardContent>
+                        </div>
                     </PageHeader>
                 </GlassCard>
-            </Fade>
-        </Box>
+            </motion.div>
+        </div>
     );
 });
 

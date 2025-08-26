@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Box, CardContent, CardHeader, IconButton, Stack, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import { RefreshCcw } from 'lucide-react';
 import {
     Chip,
     Divider,
@@ -12,10 +12,23 @@ import {
     TableHeader,
     TableRow,
     Tooltip as HeroTooltip,
-    User
-} from "@heroui/react"; // Make sure Tooltip is imported
-import {alpha, useTheme} from '@mui/material/styles';
-import {Refresh} from '@mui/icons-material';
+    User,
+    Button,
+    Card,
+    CardBody,
+    CardHeader
+} from "@heroui/react";
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+
+// Alpha utility function for creating transparent colors
+const alpha = (color, opacity) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 import {CalendarDaysIcon, DocumentChartBarIcon, UserIcon} from '@heroicons/react/24/outline';
 import {
     CheckCircleIcon as CheckSolid,
@@ -38,7 +51,7 @@ const AttendanceAdminTable = ({
                               }) => {
     
 
-    const theme = useTheme();
+    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -100,9 +113,9 @@ const AttendanceAdminTable = ({
                                   }) => {
         return (
             <GlassCard className="mb-4" shadow="sm">
-                <CardContent>
+                <CardBody>
                     {/* User Info */}
-                    <Box className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3 mb-4">
                         <User
                             avatarProps={{
                                 radius: "lg",
@@ -111,22 +124,22 @@ const AttendanceAdminTable = ({
                                 fallback: <UserIcon className="w-6 h-6"/>
                             }}
                             name={
-                                <Typography variant="body1" fontWeight="medium">
+                                <span className="text-sm font-medium">
                                     {data.name || 'Unknown'}
-                                </Typography>
+                                </span>
                             }
                             description={
-                                <Typography variant="caption" color="textSecondary">
+                                <span className="text-xs text-default-500">
                                     Employee #{index + 1}
-                                </Typography>
+                                </span>
                             }
                         />
-                    </Box>
+                    </div>
 
                     <Divider className="my-3"/>
 
                     {/* Attendance Grid */}
-                    <Box className="grid grid-cols-7 sm:grid-cols-7 xs:grid-cols-4 grid-cols-3 gap-1 mb-4">
+                    <div className="grid grid-cols-7 sm:grid-cols-7 xs:grid-cols-4 grid-cols-3 gap-1 mb-4">
                         {Array.from({ length: daysInMonth }, (_, i) => {
                             const day = i + 1;
                             const dateKey = dayjs(`${currentYear}-${currentMonth}-${day}`).format('YYYY-MM-DD');
@@ -152,7 +165,7 @@ const AttendanceAdminTable = ({
                                     }
                                     className="z-99999"
                                 >
-                                    <Box
+                                    <div
                                         className={`
                                         flex flex-col items-center justify-center p-1 rounded text-xs cursor-pointer
                                         ${isWeekend ? 'bg-default-100' : 'bg-default-50'}
@@ -167,15 +180,15 @@ const AttendanceAdminTable = ({
                                             <span className={statusInfo.color}>{status}</span>
                                         )}
                                     </span>
-                                    </Box>
+                                    </div>
                                 </HeroTooltip>
                             );
                         })}
-                    </Box>
+                    </div>
 
                     {/* Leave Summary */}
                     {leaveTypes?.length > 0 && (
-                        <Box className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                             {leaveTypes.map((type) => {
                                 const leaveCount = leaveCounts?.[data.user_id]?.[type.type] || 0;
                                 return (
@@ -190,9 +203,9 @@ const AttendanceAdminTable = ({
                                     </Chip>
                                 );
                             })}
-                        </Box>
+                        </div>
                     )}
-                </CardContent>
+                </CardBody>
             </GlassCard>
         );
     };

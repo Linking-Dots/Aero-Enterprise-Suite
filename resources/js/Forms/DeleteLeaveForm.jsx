@@ -1,14 +1,13 @@
-import { Button, CircularProgress, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
+import { Button, Spinner } from "@heroui/react";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 import React, { useState } from "react";
-import {toast} from "react-toastify";
-import {useTheme} from "@mui/material/styles";
+import { toast } from "react-toastify";
+
 import axios from 'axios'; // Add missing axios import
 
-
-
 const DeleteLeaveForm = ({ open, closeModal, leaveId, setLeavesData, setLeaves, setTotalRows, setLastPage, setError, deleteLeaveOptimized, fetchLeavesStats }) => {
-    const theme = useTheme();
+    
+    const primaryColor = getThemePrimaryColor();
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = () => {

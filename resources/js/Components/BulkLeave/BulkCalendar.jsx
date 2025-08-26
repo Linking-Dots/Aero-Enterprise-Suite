@@ -1,23 +1,20 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
-    Box, 
     Card, 
-    CardContent, 
+    CardBody, 
     CardHeader, 
     Button, 
     Chip, 
-    IconButton, 
-    Typography,
-    CircularProgress
-} from '@mui/material';
+    Spinner
+} from '@heroui/react';
 import { 
     ChevronLeftIcon, 
     ChevronRightIcon,
     CalendarDaysIcon 
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@mui/material/styles';
+
 import GlassCard from '@/Components/GlassCard';
-import CalendarIcon from '@mui/icons-material/CalendarToday';
+import { Calendar } from 'lucide-react';
 import axios from 'axios';
 
 const BulkCalendar = ({ 
@@ -30,7 +27,7 @@ const BulkCalendar = ({
     userId = null,
     fetchFromAPI = false // Flag to determine if we should fetch data from API
 }) => {
-    const theme = useTheme();
+
     const [currentDate, setCurrentDate] = useState(new Date());
     const [apiCalendarData, setApiCalendarData] = useState({
         existingLeaves: existingLeaves,
@@ -242,97 +239,10 @@ const BulkCalendar = ({
         };
     }, [selectedDates, finalExistingLeaves, finalPublicHolidays, minDate, maxDate, loading]);
 
-    // Get date cell classes with consistent theming and loading state
+    // Get date cell classes - simplified since we're using Tailwind classes directly
     const getDateCellClasses = useCallback((dayData, status) => {
-        if (!dayData.isCurrentMonth) {
-            return {
-                color: theme.palette.text.disabled,
-                cursor: 'not-allowed',
-                opacity: 0.3
-            };
-        }
-        
-        // Apply loading state styling
-        if (loading) {
-            return {
-                color: theme.palette.text.disabled,
-                cursor: 'not-allowed',
-                backgroundColor: theme.palette.action.disabledBackground,
-                opacity: 0.5,
-                pointerEvents: 'none'
-            };
-        }
-        
-        // Priority order: Selected > Existing Leave > Holiday > Today > Weekend > Default
-        if (status.isSelected) {
-            return {
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                fontWeight: 'bold',
-                border: `2px solid ${theme.palette.primary.dark}`,
-                boxShadow: `0 0 0 3px ${theme.palette.primary.main}30`,
-                transform: 'scale(1.05)',
-                zIndex: 10
-            };
-        } else if (status.hasExistingLeave) {
-            return {
-                backgroundColor: theme.palette.error.main,
-                color: theme.palette.error.contrastText,
-                border: `2px solid ${theme.palette.error.dark}`,
-                fontWeight: 500,
-                cursor: 'not-allowed'
-            };
-        } else if (status.isPublicHoliday) {
-            return {
-                backgroundColor: theme.palette.warning.main,
-                color: theme.palette.warning.contrastText,
-                border: `2px solid ${theme.palette.warning.dark}`,
-                fontWeight: 500,
-                cursor: 'not-allowed'
-            };
-        } else if (status.isToday) {
-            return {
-                backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.secondary.contrastText,
-                fontWeight: 600,
-                border: `2px solid ${theme.palette.secondary.main}`,
-                boxShadow: `0 0 0 2px ${theme.palette.secondary.main}40`,
-                '&:hover': {
-                    backgroundColor: theme.palette.secondary.main,
-                    transform: 'scale(1.02)'
-                }
-            };
-        } else if (status.isWeekend) {
-            return {
-                color: theme.palette.text.secondary,
-                backgroundColor: theme.palette.action.hover,
-                border: `1px solid ${theme.palette.divider}`,
-                opacity: 0.7,
-                '&:hover': {
-                    backgroundColor: theme.palette.action.selected,
-                    opacity: 0.9
-                }
-            };
-        } else if (!status.selectable) {
-            // Only apply disabled styling for other non-selectable dates (not holidays/existing leaves)
-            return {
-                color: theme.palette.text.disabled,
-                cursor: 'not-allowed',
-                backgroundColor: theme.palette.action.disabledBackground,
-                opacity: 0.6
-            };
-        } else {
-            return {
-                color: theme.palette.text.primary,
-                border: `1px solid transparent`,
-                '&:hover': {
-                    backgroundColor: theme.palette.primary.main + '15',
-                    color: theme.palette.primary.main,
-                    border: `1px solid ${theme.palette.primary.main}30`,
-                    transform: 'scale(1.02)'
-                }
-            };
-        }
+        // This function is kept for compatibility but classes are now applied directly in JSX
+        return {};
     }, [theme, loading]);
 
     const monthYear = currentDate.toLocaleDateString('en-US', { 
@@ -343,162 +253,143 @@ const BulkCalendar = ({
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
-        <GlassCard variant="outlined" sx={{ width: '100%' }}>
-            <CardHeader
-                title={
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <CalendarDaysIcon style={{ width: 20, height: 20, color: theme.palette.primary.main }} />
-                            <Typography variant="h6" component="h3">
-                                {monthYear}
-                            </Typography>
-                            {fetchFromAPI && loadedYear && (
-                                <Chip 
-                                    size="small" 
-                                    variant="outlined" 
-                                    color="primary" 
-                                    label={`Data: ${loadedYear}`}
-                                    sx={{ ml: 1, fontSize: '0.7rem' }}
-                                />
-                            )}
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <IconButton
-                                size="small"
-                                onClick={goToPreviousMonth}
-                                sx={{ color: 'text.secondary' }}
-                                disabled={loading}
+        <GlassCard className="w-full">
+            <CardHeader className="pb-4">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        <h3 className="text-lg font-semibold">
+                            {monthYear}
+                        </h3>
+                        {fetchFromAPI && loadedYear && (
+                            <Chip 
+                                size="sm" 
+                                variant="bordered" 
+                                color="primary" 
+                                className="ml-2 text-xs"
                             >
-                                <ChevronLeftIcon style={{ width: 16, height: 16 }} />
-                            </IconButton>
-                            <Button
-                                variant="text"
-                                size="small"
-                                onClick={goToToday}
-                                sx={{ 
-                                    minWidth: 'auto', 
-                                    px: 1.5, 
-                                    py: 0.5, 
-                                    fontSize: '0.75rem',
-                                    textTransform: 'none'
-                                }}
-                                disabled={loading}
-                            >
-                                Today
-                            </Button>
-                            <IconButton
-                                size="small"
-                                onClick={goToNextMonth}
-                                sx={{ color: 'text.secondary' }}
-                                disabled={loading}
-                            >
-                                <ChevronRightIcon style={{ width: 16, height: 16 }} />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                }
-                sx={{ pb: 2 }}
-            />
-            <CardContent sx={{ pt: 0 }}>
+                                Data: {loadedYear}
+                            </Chip>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            onClick={goToPreviousMonth}
+                            isDisabled={loading}
+                        >
+                            <ChevronLeftIcon className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="light"
+                            onClick={goToToday}
+                            isDisabled={loading}
+                            className="px-3 py-1 text-xs"
+                        >
+                            Today
+                        </Button>
+                        <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            onClick={goToNextMonth}
+                            isDisabled={loading}
+                        >
+                            <ChevronRightIcon className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardBody className="pt-0">
                 {loading && (
-                    <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        py: 3,
-                        backgroundColor: theme.palette.action.hover,
-                        borderRadius: 2,
-                        mb: 3
-                    }}>
-                        <CircularProgress size={24} />
-                        <Typography variant="body2" sx={{ ml: 2 }}>
+                    <div className="flex justify-center items-center py-6 bg-default-100 rounded-lg mb-6">
+                        <Spinner size="sm" />
+                        <span className="ml-2 text-sm text-default-600">
                             Loading calendar data for {currentDate.getFullYear()}...
-                        </Typography>
-                    </Box>
+                        </span>
+                    </div>
                 )}
                 
-                {/* Legend with consistent chip colors */}
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+                {/* Legend */}
+                <div className="flex flex-wrap gap-2 mb-6">
                     <Chip 
-                        size="small" 
-                        variant="filled" 
+                        size="sm" 
                         color="primary" 
-                        label="Selected" 
-                        sx={{ fontWeight: 600 }}
-                    />
+                        variant="solid"
+                        className="font-medium"
+                    >
+                        Selected
+                    </Chip>
                     <Chip 
-                        size="small" 
-                        variant="filled" 
-                        color="error" 
-                        label="Existing Leave" 
-                        sx={{ opacity: 0.9 }}
-                    />
+                        size="sm" 
+                        color="danger" 
+                        variant="solid"
+                    >
+                        Existing Leave
+                    </Chip>
                     <Chip 
-                        size="small" 
-                        variant="filled" 
+                        size="sm" 
                         color="warning" 
-                        label="Holiday" 
-                        sx={{ opacity: 0.9 }}
-                    />
+                        variant="solid"
+                    >
+                        Holiday
+                    </Chip>
                     <Chip 
-                        size="small" 
-                        variant="filled" 
+                        size="sm" 
                         color="secondary" 
-                        label="Today" 
-                        sx={{ fontWeight: 600 }}
-                    />
+                        variant="solid"
+                        className="font-medium"
+                    >
+                        Today
+                    </Chip>
                     <Chip 
-                        size="small" 
-                        variant="outlined" 
+                        size="sm" 
                         color="default" 
-                        label="Weekend" 
-                        sx={{ opacity: 0.7 }}
-                    />
-                </Box>
+                        variant="bordered"
+                    >
+                        Weekend
+                    </Chip>
+                </div>
                 
                 {/* Week days header */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, mb: 1 }}>
+                <div className="grid grid-cols-7 gap-1 mb-2">
                     {weekDays.map(day => (
-                        <Box 
+                        <div 
                             key={day} 
-                            sx={{ 
-                                textAlign: 'center', 
-                                py: 1,
-                                fontSize: '0.875rem',
-                                fontWeight: 'medium',
-                                color: 'text.secondary'
-                            }}
+                            className="text-center py-2 text-sm font-medium text-default-600"
                         >
                             {day}
-                        </Box>
+                        </div>
                     ))}
-                </Box>
+                </div>
                 
                 {/* Calendar grid */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
+                <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((dayData, index) => {
                         const status = getDateStatus(dayData);
                         const cellStyles = getDateCellClasses(dayData, status);
                         
                         return (
-                            <Box
+                            <div
                                 key={index}
                                 onClick={() => handleDateClick(dayData)}
-                                sx={{
-                                    position: 'relative',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: 40,
-                                    height: 40,
-                                    minHeight: 40,
-                                    cursor: status.selectable ? 'pointer' : 'not-allowed',
-                                    borderRadius: 1.5,
-                                    transition: 'all 0.2s ease-in-out',
-                                    fontSize: '0.875rem',
-                                    userSelect: 'none',
-                                    ...cellStyles
-                                }}
+                                className={`
+                                    relative flex items-center justify-center w-10 h-10 min-h-10
+                                    rounded-lg transition-all duration-200 text-sm select-none
+                                    ${status.selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
+                                    ${!dayData.isCurrentMonth ? 'opacity-30 text-default-400' : ''}
+                                    ${loading ? 'opacity-50 pointer-events-none bg-default-100' : ''}
+                                    ${status.isSelected ? 'bg-primary text-primary-foreground font-bold border-2 border-primary-600 shadow-lg scale-105 z-10' : ''}
+                                    ${status.hasExistingLeave && !status.isSelected ? 'bg-danger text-danger-foreground border-2 border-danger-600 font-medium cursor-not-allowed' : ''}
+                                    ${status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave ? 'bg-warning text-warning-foreground border-2 border-warning-600 font-medium cursor-not-allowed' : ''}
+                                    ${status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday ? 'bg-secondary-200 text-secondary-800 font-semibold border-2 border-secondary-500 shadow-md' : ''}
+                                    ${status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday ? 'text-default-500 bg-default-50 border border-default-200 opacity-70' : ''}
+                                    ${!status.selectable && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'text-default-400 cursor-not-allowed bg-default-100 opacity-60' : ''}
+                                    ${status.selectable && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'text-default-900 border border-transparent hover:bg-primary-50 hover:text-primary hover:border-primary-200 hover:scale-105' : ''}
+                                `}
                                 role="button"
                                 tabIndex={status.selectable ? 0 : -1}
                                 title={status.hasExistingLeave ? 'Existing leave - cannot select' : 
@@ -514,89 +405,55 @@ const BulkCalendar = ({
                             >
                                 {dayData.date}
                                 
-                                {/* Only weekend indicator for clean visual hierarchy */}
+                                {/* Weekend indicator */}
                                 {status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && (
-                                    <Box 
-                                        sx={{ 
-                                            position: 'absolute', 
-                                            top: 2, 
-                                            right: 2, 
-                                            width: 4, 
-                                            height: 4, 
-                                            borderRadius: '50%', 
-                                            bgcolor: 'text.secondary',
-                                            opacity: 0.5
-                                        }} 
-                                    />
+                                    <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-default-500 opacity-50" />
                                 )}
-                            </Box>
+                            </div>
                         );
                     })}
-                </Box>
+                </div>
                 
-                {/* Enhanced selection summary */}
+                {/* Selection summary */}
                 {selectedDates.length > 0 && (
-                    <Box 
-                        sx={{ 
-                            mt: 3, 
-                            p: 2.5, 
-                            borderRadius: 2, 
-                            background: `linear-gradient(135deg, ${theme.palette.primary.light}20, ${theme.palette.primary.main}10)`,
-                            border: `1px solid ${theme.palette.primary.main}30`,
-                            backdropFilter: 'blur(8px)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}
-                    >
-                        <Box sx={{ position: 'relative', zIndex: 1 }}>
-                            <Typography variant="body2" color="primary.main" fontWeight="600" sx={{ mb: 1 }}>
+                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 relative overflow-hidden">
+                        <div className="relative z-10">
+                            <p className="text-sm font-semibold text-primary-700 mb-2">
                                 📅 {selectedDates.length} date{selectedDates.length !== 1 ? 's' : ''} selected
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            </p>
+                            <div className="flex flex-wrap gap-1">
                                 {selectedDates.slice(0, 12).map(date => (
                                     <Chip 
                                         key={date} 
-                                        size="small" 
-                                        variant="filled" 
+                                        size="sm" 
                                         color="primary"
-                                        label={new Date(date).toLocaleDateString('en-US', { 
+                                        variant="solid"
+                                        className="font-medium text-xs"
+                                    >
+                                        {new Date(date).toLocaleDateString('en-US', { 
                                             month: 'short', 
                                             day: 'numeric' 
                                         })}
-                                        sx={{ 
-                                            fontWeight: 500,
-                                            fontSize: '0.75rem'
-                                        }}
-                                    />
+                                    </Chip>
                                 ))}
                                 {selectedDates.length > 12 && (
                                     <Chip 
-                                        size="small" 
-                                        variant="outlined"
+                                        size="sm" 
                                         color="primary"
-                                        label={`+${selectedDates.length - 12} more`}
-                                        sx={{ fontWeight: 500 }}
-                                    />
+                                        variant="bordered"
+                                        className="font-medium"
+                                    >
+                                        +{selectedDates.length - 12} more
+                                    </Chip>
                                 )}
-                            </Box>
-                        </Box>
+                            </div>
+                        </div>
                         
-                        {/* Subtle background pattern */}
-                        <Box 
-                            sx={{
-                                position: 'absolute',
-                                top: -10,
-                                right: -10,
-                                width: 60,
-                                height: 60,
-                                borderRadius: '50%',
-                                background: `linear-gradient(45deg, ${theme.palette.primary.main}15, transparent)`,
-                                opacity: 0.3
-                            }}
-                        />
-                    </Box>
+                        {/* Background decoration */}
+                        <div className="absolute -top-2 -right-2 w-15 h-15 rounded-full bg-primary-200 opacity-30" />
+                    </div>
                 )}
-            </CardContent>
+            </CardBody>
         </GlassCard>
     );
 };

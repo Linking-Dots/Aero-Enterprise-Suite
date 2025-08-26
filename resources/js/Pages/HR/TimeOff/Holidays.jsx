@@ -1,15 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import { 
-  Box, 
-  Typography, 
-  useTheme, 
-  useMediaQuery, 
-  Grow, 
-  Fade,
-  TextField,
-  InputAdornment
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
   Button, 
   Chip, 
@@ -31,18 +22,11 @@ import {
   ModalFooter,
   DateInput,
   Textarea,
-  useDisclosure
-} from "@heroui/react";
-import {
-  FormControl,
-  InputLabel,
+  useDisclosure,
+  Input,
   Select,
-  MenuItem,
-} from '@mui/material';
-import { 
-  getFormControlStyles,
-  getTextFieldStyles 
-} from '@/utils/glassyStyles.js';
+  SelectItem
+} from "@heroui/react";
 
 import { 
   CalendarDaysIcon,
@@ -62,13 +46,14 @@ import App from "@/Layouts/App.jsx";
 import GlassCard from "@/Components/GlassCard.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
+import useTheme from '@/theme';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const { theme } = useTheme();
+  const [isMobile] = useState(window.innerWidth < 640);
+  const [isTablet] = useState(window.innerWidth < 768);
   
   const [holidays, setHolidays] = useState(initialHolidays);
   const [searchTerm, setSearchTerm] = useState('');
@@ -345,8 +330,12 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
     <>
       <Head title={title} />
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-        <Grow in timeout={800}>
+      <div className="flex justify-center p-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           <GlassCard>
             <PageHeader
               title="Company Holidays"
@@ -369,43 +358,29 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <TextField
+                    <Input
                       label="Search Holidays"
                       placeholder="Search by holiday name..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MagnifyingGlassIcon className="w-4 h-4" />
-                          </InputAdornment>
-                        ),
-                      }}
-                      fullWidth
-                      size={isMobile ? "small" : "medium"}
-                      sx={getTextFieldStyles('search')}
+                      startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                     />
                   </div>
 
                   <div className="flex gap-2 items-end">
-                    <FormControl 
-                      variant="outlined"
-                      sx={getFormControlStyles('default', 128)}
+                    <Select
+                      label="Year"
+                      selectedKeys={[selectedYear]}
+                      onSelectionChange={(keys) => setSelectedYear(Array.from(keys)[0])}
+                      className="w-32"
                     >
-                      <InputLabel>Year</InputLabel>
-                      <Select
-                        value={selectedYear}
-                        label="Year"
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                      >
-                        <MenuItem value="all">All Years</MenuItem>
-                        {availableYears.map(year => (
-                          <MenuItem key={year.toString()} value={year.toString()}>
-                            {year}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                      <SelectItem key="all" value="all">All Years</SelectItem>
+                      {availableYears.map(year => (
+                        <SelectItem key={year.toString()} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </Select>
                     
                     <Button
                       isIconOnly={isMobile}
@@ -421,8 +396,12 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
 
                 {/* Active Filters */}
                 {(searchTerm || selectedYear !== new Date().getFullYear().toString()) && (
-                  <Fade in timeout={300}>
-                    <div className="mb-4 flex flex-wrap gap-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mb-4 flex flex-wrap gap-2"
+                  >
                       {searchTerm && (
                         <Chip
                           variant="flat"
@@ -443,19 +422,18 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
                           Year: {selectedYear === 'all' ? 'All Years' : selectedYear}
                         </Chip>
                       )}
-                    </div>
-                  </Fade>
+                    </motion.div>
                 )}
 
                 {/* Holidays Table */}
                 <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 overflow-hidden">
                   <div className="p-4 border-b border-white/10">
-                    <Typography variant="h6" className="font-semibold text-foreground">
+                    <h3 className="text-lg font-semibold text-foreground">
                       Company Holidays
                       <span className="text-sm text-default-500 ml-2">
                         ({filteredHolidays.length} {filteredHolidays.length === 1 ? 'holiday' : 'holidays'})
                       </span>
-                    </Typography>
+                    </h3>
                   </div>
                   
                   <Table
@@ -489,8 +467,8 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
               </div>
             </PageHeader>
           </GlassCard>
-        </Grow>
-      </Box>
+        </motion.div>
+      </div>
 
       {/* Add/Edit Holiday Modal */}
       <Modal 
@@ -511,34 +489,25 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
           </ModalHeader>
           <ModalBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <TextField
+              <Input
                 label="Holiday Title"
                 placeholder="Enter holiday name"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({...prev, title: e.target.value}))}
-                required
-                fullWidth
-                sx={getTextFieldStyles()}
+                isRequired
               />
               
-              <FormControl 
-                fullWidth
-                variant="outlined"
-                sx={getFormControlStyles()}
+              <Select
+                label="Holiday Type"
+                selectedKeys={[formData.type]}
+                onSelectionChange={(keys) => setFormData(prev => ({...prev, type: Array.from(keys)[0]}))}
               >
-                <InputLabel>Holiday Type</InputLabel>
-                <Select
-                  value={formData.type}
-                  label="Holiday Type"
-                  onChange={(e) => setFormData(prev => ({...prev, type: e.target.value}))}
-                >
-                  {holidayCategories.map(category => (
-                    <MenuItem key={category.key} value={category.key}>
-                      {category.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                {holidayCategories.map(category => (
+                  <SelectItem key={category.key} value={category.key}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </Select>
               
               <DateInput
                 label="From Date"

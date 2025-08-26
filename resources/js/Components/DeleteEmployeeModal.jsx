@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Typography,
-    Box,
-    Alert,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Button,
     Chip
-} from '@mui/material';
+} from '@heroui/react';
 import { 
     ExclamationTriangleIcon,
     BuildingOfficeIcon,
     BriefcaseIcon,
     TrashIcon
 } from '@heroicons/react/24/outline';
-import { Button } from '@heroui/react';
-import { useTheme } from '@mui/material/styles';
+
 import GlassDialog from './GlassDialog';
 import ProfileAvatar from './ProfileAvatar';
 
@@ -27,7 +25,7 @@ const DeleteEmployeeModal = ({
     onConfirm,
     loading = false 
 }) => {
-    const theme = useTheme();
+
     
     if (!employee) return null;
 
@@ -36,265 +34,162 @@ const DeleteEmployeeModal = ({
                          employee.active_trainings_count > 0;
 
     return (
-        <GlassDialog
-            open={open}
+        <Modal
+            isOpen={open}
             onClose={onClose}
-            maxWidth="sm"
-            fullWidth
+            size="2xl"
+            classNames={{
+                backdrop: "bg-black/50 backdrop-blur-sm",
+                base: "border border-white/20 bg-white/90 backdrop-blur-md",
+                header: "border-b border-danger/30 bg-gradient-to-r from-danger-50/50 to-danger-100/30",
+                body: "py-0",
+                footer: "border-t border-white/10 bg-white/5"
+            }}
         >
-            <DialogTitle sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 2,
-                pb: 2,
-                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05))',
-                borderBottom: `1px solid ${theme.palette.error.main}30`
-            }}>
-                <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 2,
-                    color: theme.palette.error.main 
-                }}>
-                    <Box sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '12px',
-                        background: `linear-gradient(135deg, ${theme.palette.error.main}20, ${theme.palette.error.main}10)`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: `1px solid ${theme.palette.error.main}30`
-                    }}>
-                        <ExclamationTriangleIcon className="w-5 h-5" />
-                    </Box>
-                    <Typography variant="h6" component="h2" fontWeight="600">
-                        Delete Employee
-                    </Typography>
-                </Box>
-            </DialogTitle>
+            <ModalContent>
+                <ModalHeader className="flex items-center gap-4 pb-4">
+                    <div className="flex items-center gap-4 text-danger">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-danger/20 to-danger/10 flex items-center justify-center border border-danger/30">
+                            <ExclamationTriangleIcon className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-lg font-semibold">Delete Employee</h2>
+                    </div>
+                </ModalHeader>
 
-            <DialogContent sx={{ py: 0 }}>
-                {/* Employee Information */}
-                <Box sx={{ 
-                    p: 3, 
-                    borderRadius: 3, 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    mb: 3,
-                    transition: 'all 0.3s ease'
-                }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-                        <ProfileAvatar
-                            src={employee.profile_image_url || employee.profile_image}
-                            name={employee.name}
-                            size="lg"
-                            className="ring-2 ring-white/20 shadow-lg"
-                        />
-                        <Box sx={{ flex: 1 }}>
-                            <Typography variant="h6" fontWeight="600" sx={{ mb: 0.5 }}>
+                <ModalBody>
+                    {/* Employee Information */}
+                    <div className="p-6 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 mb-6 transition-all duration-300">
+                        <div className="flex items-center gap-6 mb-6">
+                            <ProfileAvatar
+                                src={employee.profile_image_url || employee.profile_image}
+                                name={employee.name}
+                                size="lg"
+                                className="ring-2 ring-white/20 shadow-lg"
+                            />
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold mb-1">{employee.name}</h3>
+                                <p className="text-sm text-default-500">{employee.email}</p>
+                                {employee.employee_id && (
+                                    <span className="inline-block mt-1 px-3 py-1 text-xs rounded-lg bg-white/10 border border-white/10">
+                                        ID: {employee.employee_id}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <BuildingOfficeIcon className="w-4 h-4 text-blue-400" />
+                                    <span className="text-xs text-default-500 font-medium">Department</span>
+                                </div>
+                                <p className="text-sm font-medium">{employee.department_name || 'Not assigned'}</p>
+                            </div>
+                            
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <BriefcaseIcon className="w-4 h-4 text-purple-400" />
+                                    <span className="text-xs text-default-500 font-medium">Designation</span>
+                                </div>
+                                <p className="text-sm font-medium">{employee.designation_name || 'Not assigned'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Warning Section */}
+                    <div className="mb-6 p-4 rounded-2xl bg-danger-50/50 backdrop-blur-2xl border border-danger/30">
+                        <div className="flex items-center gap-3 text-danger">
+                            <ExclamationTriangleIcon className="w-5 h-5" />
+                            <p className="text-sm font-medium">
+                                This action will permanently delete the employee record and cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Active Data Warning */}
+                    {hasActiveData && (
+                        <div className="p-6 rounded-2xl bg-warning-50/50 backdrop-blur-2xl border border-warning/30 mb-6">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center">
+                                    <ExclamationTriangleIcon className="w-4 h-4 text-warning" />
+                                </div>
+                                <h4 className="text-sm font-semibold text-warning">Employee Has Active Data</h4>
+                            </div>
+                            
+                            <p className="text-sm text-default-500 mb-4">
+                                This employee has the following active records that will also be affected:
+                            </p>
+                            
+                            <div className="flex flex-wrap gap-2">
+                                {employee.active_projects_count > 0 && (
+                                    <Chip 
+                                        size="sm" 
+                                        variant="flat"
+                                        color="warning"
+                                        className="bg-warning/20 text-warning border border-warning/30"
+                                    >
+                                        {employee.active_projects_count} Active Projects
+                                    </Chip>
+                                )}
+                                {employee.pending_leaves_count > 0 && (
+                                    <Chip 
+                                        size="sm" 
+                                        variant="flat"
+                                        color="warning"
+                                        className="bg-warning/20 text-warning border border-warning/30"
+                                    >
+                                        {employee.pending_leaves_count} Pending Leaves
+                                    </Chip>
+                                )}
+                                {employee.active_trainings_count > 0 && (
+                                    <Chip 
+                                        size="sm" 
+                                        variant="flat"
+                                        color="warning"
+                                        className="bg-warning/20 text-warning border border-warning/30"
+                                    >
+                                        {employee.active_trainings_count} Active Trainings
+                                    </Chip>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirmation Text */}
+                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 mb-4">
+                        <p className="text-sm mb-2 font-medium">
+                            Are you sure you want to delete <span className="text-danger font-semibold">
                                 {employee.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {employee.email}
-                            </Typography>
-                            {employee.employee_id && (
-                                <Typography variant="caption" color="text.secondary" sx={{ 
-                                    display: 'block',
-                                    mt: 0.5,
-                                    px: 1.5,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    width: 'fit-content'
-                                }}>
-                                    ID: {employee.employee_id}
-                                </Typography>
-                            )}
-                        </Box>
-                    </Box>
-                    
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                        <Box sx={{ 
-                            p: 2, 
-                            borderRadius: 2, 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <BuildingOfficeIcon className="w-4 h-4 text-blue-400" />
-                                <Typography variant="caption" color="text.secondary" fontWeight="500">
-                                    Department
-                                </Typography>
-                            </Box>
-                            <Typography variant="body2" fontWeight="500">
-                                {employee.department_name || 'Not assigned'}
-                            </Typography>
-                        </Box>
-                        
-                        <Box sx={{ 
-                            p: 2, 
-                            borderRadius: 2, 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <BriefcaseIcon className="w-4 h-4 text-purple-400" />
-                                <Typography variant="caption" color="text.secondary" fontWeight="500">
-                                    Designation
-                                </Typography>
-                            </Box>
-                            <Typography variant="body2" fontWeight="500">
-                                {employee.designation_name || 'Not assigned'}
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Box>
+                            </span>?
+                        </p>
+                        <p className="text-xs text-default-500">
+                            Type the employee's name below to confirm this permanent deletion:
+                        </p>
+                    </div>
+                </ModalBody>
 
-                {/* Warning Section */}
-                <Alert 
-                    severity="error" 
-                    sx={{ 
-                        mb: 3,
-                        borderRadius: 3,
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        '& .MuiAlert-icon': {
-                            color: theme.palette.error.main
-                        },
-                        '& .MuiAlert-message': {
-                            color: theme.palette.error.main
-                        }
-                    }}
-                >
-                    <Typography variant="body2" fontWeight="500">
-                        This action will permanently delete the employee record and cannot be undone.
-                    </Typography>
-                </Alert>
-
-                {/* Active Data Warning */}
-                {hasActiveData && (
-                    <Box sx={{ 
-                        p: 3, 
-                        borderRadius: 3, 
-                        background: 'rgba(251, 146, 60, 0.1)',
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        border: '1px solid rgba(251, 146, 60, 0.3)',
-                        mb: 3
-                    }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                            <Box sx={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: '8px',
-                                background: 'rgba(251, 146, 60, 0.2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <ExclamationTriangleIcon className="w-4 h-4 text-orange-400" />
-                            </Box>
-                            <Typography variant="subtitle2" color="warning.main" fontWeight="600">
-                                Employee Has Active Data
-                            </Typography>
-                        </Box>
-                        
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            This employee has the following active records that will also be affected:
-                        </Typography>
-                        
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            {employee.active_projects_count > 0 && (
-                                <Chip 
-                                    size="small" 
-                                    label={`${employee.active_projects_count} Active Projects`}
-                                    sx={{
-                                        background: 'rgba(251, 146, 60, 0.2)',
-                                        color: 'orange',
-                                        border: '1px solid rgba(251, 146, 60, 0.3)',
-                                        backdropFilter: 'blur(10px)'
-                                    }}
-                                />
-                            )}
-                            {employee.pending_leaves_count > 0 && (
-                                <Chip 
-                                    size="small" 
-                                    label={`${employee.pending_leaves_count} Pending Leaves`}
-                                    sx={{
-                                        background: 'rgba(251, 146, 60, 0.2)',
-                                        color: 'orange',
-                                        border: '1px solid rgba(251, 146, 60, 0.3)',
-                                        backdropFilter: 'blur(10px)'
-                                    }}
-                                />
-                            )}
-                            {employee.active_trainings_count > 0 && (
-                                <Chip 
-                                    size="small" 
-                                    label={`${employee.active_trainings_count} Active Trainings`}
-                                    sx={{
-                                        background: 'rgba(251, 146, 60, 0.2)',
-                                        color: 'orange',
-                                        border: '1px solid rgba(251, 146, 60, 0.3)',
-                                        backdropFilter: 'blur(10px)'
-                                    }}
-                                />
-                            )}
-                        </Box>
-                    </Box>
-                )}
-
-                {/* Confirmation Text */}
-                <Box sx={{ 
-                    p: 3, 
-                    borderRadius: 3, 
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    mb: 2
-                }}>
-                    <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
-                        Are you sure you want to delete <Box component="span" sx={{ 
-                            color: theme.palette.error.main, 
-                            fontWeight: 600 
-                        }}>
-                            {employee.name}
-                        </Box>?
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Type the employee's name below to confirm this permanent deletion:
-                    </Typography>
-                </Box>
-            </DialogContent>
-
-            <DialogActions sx={{ 
-                px: 3, 
-                py: 3, 
-                justifyContent: 'space-between',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                background: 'rgba(255, 255, 255, 0.02)'
-            }}>
-                <Button 
-                    variant="light" 
-                    onPress={onClose}
-                    disabled={loading}
-                    className="hover:bg-white/10"
-                >
-                    Cancel
-                </Button>
-                <Button
-                    color="danger"
-                    variant="solid"
-                    onPress={onConfirm}
-                    isLoading={loading}
-                    startContent={!loading && <TrashIcon className="w-4 h-4" />}
-                    className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg"
-                >
-                    {loading ? 'Deleting...' : 'Delete Employee'}
-                </Button>
-            </DialogActions>
-        </GlassDialog>
+                <ModalFooter className="flex justify-between px-6 py-6 bg-white/5">
+                    <Button 
+                        variant="light" 
+                        onPress={onClose}
+                        isDisabled={loading}
+                        className="hover:bg-white/10"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color="danger"
+                        variant="solid"
+                        onPress={onConfirm}
+                        isLoading={loading}
+                        startContent={!loading && <TrashIcon className="w-4 h-4" />}
+                        className="bg-gradient-to-r from-danger to-danger-600 hover:from-danger-600 hover:to-danger-700 shadow-lg"
+                    >
+                        {loading ? 'Deleting...' : 'Delete Employee'}
+                    </Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
     );
 };
 

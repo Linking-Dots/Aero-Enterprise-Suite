@@ -1,19 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Grow,
-  useTheme,
-  useMediaQuery,
-  Grid,
-  IconButton,
-  Stack,
-  Tooltip,
-  CardHeader as MuiCardHeader,
-  CardContent as MuiCardContent
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { 
   Card, 
@@ -22,10 +9,12 @@ import {
   Divider,
   Button,
   Input,
-  Pagination
+  Pagination,
+  CircularProgress,
+  Spinner
 } from "@heroui/react";
-import { useTheme as useHeroTheme, alpha } from '@mui/material/styles';
-import { Refresh, FileDownload, PictureAsPdf } from '@mui/icons-material';
+import { useTheme } from '@/Contexts/ThemeContext';
+import { RefreshCcw, Download, FileText } from 'lucide-react';
 import App from "@/Layouts/App.jsx";
 import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
@@ -47,9 +36,23 @@ import {
 
 const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, absentDays, lateArrivals }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
+    
+    // Custom media query logic
+    const [isMobile, setIsMobile] = useState(false);
+    const [isTablet, setIsTablet] = useState(false);
+    
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setIsTablet(window.innerWidth < 768);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
     
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [updateTimeSheet, setUpdateTimeSheet] = useState(false);

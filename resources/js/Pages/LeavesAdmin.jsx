@@ -1,16 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import {
-    Box,
-    Typography,
-    CircularProgress,
-    Grow,
-    useTheme,
-    useMediaQuery,
-    Grid,
-    TextField,
-    InputAdornment
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
     Card, 
     CardBody, 
@@ -21,14 +11,13 @@ import {
     Tabs,
     Tab,
     Spacer,
-    ButtonGroup
-} from "@heroui/react";
-import {
-    FormControl,
-    InputLabel,
+    ButtonGroup,
+    Input,
     Select,
-    MenuItem,
-} from '@mui/material';
+    SelectItem,
+    Spinner
+} from "@heroui/react";
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import { 
     glassyFormControlStyles, 
     glassyMenuStyles,
@@ -67,14 +56,27 @@ import BulkDeleteModal from '@/Components/BulkDelete/BulkDeleteModal.jsx';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Fade from '@mui/material/Fade';
 
 
 const LeavesAdmin = ({ title, allUsers }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const { isDark } = useTheme();
+    const primaryColor = getThemePrimaryColor();
+    
+    // Custom media queries
+    const [isMobile, setIsMobile] = useState(false);
+    const [isTablet, setIsTablet] = useState(false);
+    
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setIsTablet(window.innerWidth < 768);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     // State management - Enhanced for admin view
     const [loading, setLoading] = useState(false);
@@ -957,7 +959,12 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                     </div>
                                 </div>
                                 {showFilters && (
-                                    <Fade in={true} timeout={300}>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
                                         <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 <FormControl 
@@ -1094,7 +1101,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                                                 </div>
                                             )}
                                         </div>
-                                    </Fade>
+                                    </motion.div>
                                 )}
                                 {/* Table Section */}
                                 <div className="min-h-96">

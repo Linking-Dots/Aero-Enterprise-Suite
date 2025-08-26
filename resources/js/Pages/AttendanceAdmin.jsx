@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Head} from '@inertiajs/react';
-import {Box, Grow, useMediaQuery, useTheme,} from '@mui/material';
-import {TextField, Pagination, InputAdornment} from "@mui/material";
+import { Input, Pagination } from "@heroui/react";
 import {
     CalendarIcon,
     ChartBarIcon,
@@ -20,14 +19,21 @@ import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import App from "@/Layouts/App.jsx";
 import AttendanceAdminTable from '@/Tables/AttendanceAdminTable.jsx';
+import { motion } from 'framer-motion';
 import axios from "axios";
 import {toast} from "react-toastify";
 import dayjs from "dayjs";
 
 
 const AttendanceAdmin = React.memo(({title}) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // Add responsive handling
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const [loading, setLoading] = useState(false);
 
@@ -300,10 +306,14 @@ const AttendanceAdmin = React.memo(({title}) => {
 
 
     return (
-        <Box>
+        <div>
             <Head title={title}/>
-            <Box sx={{display: 'flex', justifyContent: 'center', p: 2}}>
-                <Grow in>
+            <div className="flex justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
                     <GlassCard>
                         <PageHeader
                             title="Attendance Management"
@@ -342,55 +352,32 @@ const AttendanceAdmin = React.memo(({title}) => {
                                 <div className="mb-6">
                                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
                                         <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                            <TextField
+                                            <Input
                                                 label="Search Employee"
                                                 type="text"
                                                 value={employee}
-                                                onChange={handleSearch}
+                                                onValueChange={handleSearch}
                                                 placeholder="Enter employee name..."
-                                                variant="outlined"
-                                                fullWidth
-                                                size={isMobile ? "small" : "medium"}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <MagnifyingGlassIcon className="w-4 h-4"/>
-                                                        </InputAdornment>
-                                                    ),
-                                                    style: {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                        backdropFilter: 'blur(10px)',
-                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                        borderRadius: '12px',
-                                                    }
+                                                variant="bordered"
+                                                size={isMobile ? "sm" : "md"}
+                                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                                classNames={{
+                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
                                                 }}
                                             />
                                         </div>
 
                                         <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                            <TextField
+                                            <Input
                                                 label="Month/Year"
                                                 type="month"
                                                 value={filterData.currentMonth}
-                                                onChange={(e) => handleFilterChange('currentMonth', e.target.value)}
-                                                variant="outlined"
-                                                fullWidth
-                                                size={isMobile ? "small" : "medium"}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <CalendarIcon className="w-4 h-4"/>
-                                                        </InputAdornment>
-                                                    ),
-                                                    style: {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                        backdropFilter: 'blur(10px)',
-                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                        borderRadius: '12px',
-                                                    }
+                                                onValueChange={(value) => handleFilterChange('currentMonth', value)}
+                                                variant="bordered"
+                                                size={isMobile ? "sm" : "md"}
+                                                startContent={<CalendarIcon className="w-4 h-4 text-default-400" />}
+                                                classNames={{
+                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
                                                 }}
                                             />
                                         </div>
@@ -398,7 +385,7 @@ const AttendanceAdmin = React.memo(({title}) => {
                                 </div>
 
                                 {/* Attendance Table */}
-                                <Box>
+                                <div>
                                     <AttendanceAdminTable
                                         attendanceData={attendanceData}
                                         currentYear={filterData.currentYear}
@@ -429,13 +416,13 @@ const AttendanceAdmin = React.memo(({title}) => {
                                             />
                                         </div>
                                     )}
-                                </Box>
+                                </div>
                             </div>
                         </PageHeader>
                     </GlassCard>
-                </Grow>
-            </Box>
-        </Box>
+                </motion.div>
+            </div>
+        </div>
     );
 });
 AttendanceAdmin.layout = (page) => <App>{page}</App>;

@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import {
-    Box, Typography, CircularProgress, Grow, Fade, useTheme, useMediaQuery, TextField, InputAdornment
-} from '@mui/material';
-import {
-    Select, SelectItem, Card, CardBody, Button, ButtonGroup, Chip, Pagination
+    Select, SelectItem, Card, CardBody, Button, ButtonGroup, Chip, Pagination, Input, Spinner
 } from "@heroui/react";
 import {
     BuildingOffice2Icon, PlusIcon, FunnelIcon, MagnifyingGlassIcon,
@@ -24,9 +22,6 @@ import { toast } from 'react-toastify';
 
 const Designations = ({ title, initialDesignations, departments, managers, parentDesignations, stats: initialStats, filters: initialFilters }) => {
     const { auth } = usePage().props;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
     const [designationsData, setDesignationsData] = useState(initialDesignations || { data: [] });
     const [loading, setLoading] = useState(false);
@@ -45,6 +40,15 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
     const [stats, setStats] = useState(initialStats || {
         total: 0, active: 0, inactive: 0, parent_designations: 0
     });
+
+    // Add responsive handling
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const canCreateDesignation = auth.permissions?.includes('designations.create') || false;
     const canEditDesignation = auth.permissions?.includes('designations.update') || false;
@@ -187,8 +191,12 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
     return (
         <App>
             <Head title={title} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in={true} timeout={800}>
+            <div className="flex justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <GlassCard>
                         <PageHeader
                             title="Designation Management"
@@ -200,53 +208,34 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                             <div className="p-4 sm:p-6">
                                 <StatsCards stats={statsCards} className="mb-6" />
                                 <div className="mb-6">
-                                    <TextField
+                                    <Input
                                         label="Search"
                                         placeholder="Search designations..."
                                         value={filters.search}
-                                        onChange={(e) => handleFilterChange('search', e.target.value)}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <MagnifyingGlassIcon className="w-4 h-4" />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        fullWidth
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                                backdropFilter: 'blur(10px)',
-                                                borderRadius: '12px',
-                                                color: 'white',
-                                                '& fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--primary-color)',
-                                                },
-                                                '& input::placeholder': {
-                                                    color: 'rgba(255, 255, 255, 0.5)',
-                                                    opacity: 1,
-                                                },
-                                            },
-                                            '& .MuiInputLabel-root': {
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                '&.Mui-focused': {
-                                                    color: 'var(--primary-color)',
-                                                },
-                                            },
+                                        onValueChange={(value) => handleFilterChange('search', value)}
+                                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                        variant="bordered"
+                                        classNames={{
+                                            base: "w-full",
+                                            input: "bg-transparent",
+                                            inputWrapper: [
+                                                "backdrop-blur-xl",
+                                                "backdrop-saturate-200",
+                                                "bg-white/10",
+                                                "border",
+                                                "border-white/20",
+                                                "hover:bg-white/20",
+                                                "focus-within:!bg-white/20",
+                                                "!cursor-text",
+                                            ],
                                         }}
                                     />
                                 </div>
                                 <div>
                                     {loading ? (
                                         <div className="text-center py-6">
-                                            <CircularProgress size={40} />
-                                            <Typography className="mt-4">Loading...</Typography>
+                                            <Spinner size="lg" />
+                                            <p className="mt-4 text-default-500">Loading...</p>
                                         </div>
                                     ) : (
                                         <DesignationTable
@@ -266,8 +255,8 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                             </div>
                         </PageHeader>
                     </GlassCard>
-                </Grow>
-            </Box>
+                </motion.div>
+            </div>
 
             {(modalState.type === 'add_designation' || modalState.type === 'edit_designation') && (
                 <DesignationForm

@@ -1,19 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Box,
-
-    Typography,
-    Button,
-
-    Collapse,
-
-} from '@mui/material';
-import {
-
     Avatar,
     Input,
-
+    Button
 } from "@heroui/react";
+import { motion, AnimatePresence } from 'framer-motion';
 
 import dayjs from "dayjs";
 import { 
@@ -80,7 +71,7 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
     const totalRows = filteredAbsentUsers.length;
     if (absentUsers.length === 0) {
         return (
-            <Box className="h-full">
+            <div className="h-full">
                 <PageHeader
                     title="Perfect Attendance!"
                     subtitle={`No employees are absent on ${dayjs(selectedDate).format('MMMM D, YYYY')}`}
@@ -96,41 +87,38 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                         }
                     ]}
                 />
-                <Box 
+                <div 
                     role="region"
                     aria-label="No absent employees today"
                     className="text-center py-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg h-96 flex flex-col items-center justify-center"
                 >
                     <CheckCircleIcon className="w-12 h-12 text-success mx-auto mb-4" />
-                    <Typography variant="body2" color="success" className="mb-2 text-sm font-medium">
+                    <p className="text-success mb-2 text-sm font-medium">
                         Perfect Attendance!
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary" className="text-xs">
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">
                         No employees are absent today.
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary" className="mt-1 block text-xs">
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1 block text-xs">
                         All employees are either present or on approved leave.
-                    </Typography>
-                </Box>
-            </Box>
+                    </p>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Box className="h-full">
-            <Box className="mb-4 flex items-center justify-between">
-                <Box className="mb-4">
-                    <Typography 
-                        variant="h6" 
-                        className="font-semibold text-red-600 flex items-center gap-2"
-                    >
+        <div className="h-full">
+            <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4">
+                    <h3 className="font-semibold text-red-600 flex items-center gap-2 text-lg">
                         <XCircleIcon className="w-5 h-5" />
                         Absent Employees ({totalRows})
-                    </Typography>
-                </Box>
-            </Box>
+                    </h3>
+                </div>
+            </div>
             {/* Search Input */}
-            <Box className="mb-3 m-2">
+            <div className="mb-3 m-2">
                 <Input
                     type="text"
                     placeholder="Search absent employees..."
@@ -144,135 +132,119 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                         input: "text-sm"
                     }}
                 />
-            </Box>
+            </div>
 
             {/* Show search results count */}
             {searchTerm && (
-                <Box className="mb-2 ">
-                    <Typography variant="caption" color="textSecondary" className="text-xs">
+                <div className="mb-2">
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">
                         {filteredAbsentUsers.length} of {absentUsers.length} employees found
-                    </Typography>
-                </Box>
+                    </p>
+                </div>
             )}
 
             {/* Show message if no results found */}
             {searchTerm && filteredAbsentUsers.length === 0 && (
-                <Box className="text-center py-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg">
+                <div className="text-center py-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg">
                     <MagnifyingGlassIcon className="w-8 h-8 text-default-300 mx-auto mb-2" />
-                    <Typography variant="body2" color="textSecondary" className="text-sm">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
                         No employees found matching "{searchTerm}"
-                    </Typography>
-                </Box>
+                    </p>
+                </div>
             )}
 
-            <Box 
+            <div 
                 role="region"
                 aria-label="Absent employees list"
                 className="overflow-y-auto max-h-[520px]"
             >
-                {filteredAbsentUsers.slice(0, visibleUsersCount).map((user) => {
-                    const userLeave = getUserLeave(user.id);
-                    
-                    return (
-                        <Collapse in={true} key={user.id} timeout="auto">
-                            <div className="p-3 m-2 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-200 rounded-lg">
-                                <Box className="flex items-start justify-between">
-                                    <Box className="flex items-center gap-2 flex-1">
+                <AnimatePresence>
+                    {filteredAbsentUsers.slice(0, visibleUsersCount).map((user) => {
+                        const userLeave = getUserLeave(user.id);
+                        
+                        return (
+                            <motion.div
+                                key={user.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.2 }}
+                                className="p-3 m-2 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-200 rounded-lg"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-2 flex-1">
                                         <Avatar 
                                             src={user.profile_image_url || user.profile_image} 
                                             name={user.name}
                                             isBordered
                                             size="sm"
-                                            
                                             showFallback
                                         />
-                                        <Box className="flex-1 min-w-0">                                            <Typography 
-                                                variant="body2" 
-                                                fontWeight="medium"
-                                                className="truncate text-sm"
-                                            >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                                                 {user.name}
-                                            </Typography>
+                                            </p>
                                             {user.employee_id && (
-                                                <Typography 
-                                                    variant="caption" 
-                                                    color="textSecondary"
-                                                    className="block text-xs"
-                                                >
+                                                <p className="block text-xs text-gray-500 dark:text-gray-400">
                                                     ID: {user.employee_id}
-                                                </Typography>
+                                                </p>
                                             )}
                                             {userLeave ? (
-                                                <Box className="flex flex-col gap-1 mt-1">
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        color="textSecondary"
-                                                        className="flex items-center gap-1 text-xs"
-                                                    >
+                                                <div className="flex flex-col gap-1 mt-1">
+                                                    <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                                         <CalendarDaysIcon className="w-3 h-3" />
                                                         {userLeave.from_date === userLeave.to_date 
                                                             ? userLeave.from_date 
                                                             : `${userLeave.from_date} - ${userLeave.to_date}`
                                                         }
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        color="primary"
-                                                        className="flex items-center gap-1 text-xs"
-                                                    >
+                                                    </p>
+                                                    <p className="flex items-center gap-1 text-xs text-primary">
                                                         {getLeaveStatusIcon(userLeave.status)}
                                                         {userLeave.leave_type} Leave
-                                                    </Typography>
-                                                </Box>
+                                                    </p>
+                                                </div>
                                             ) : (
-                                                <Typography 
-                                                    variant="caption" 
-                                                    color="error"
-                                                    className="flex items-center gap-1 mt-1 text-xs"
-                                                >
+                                                <p className="flex items-center gap-1 mt-1 text-xs text-red-600">
                                                     <ExclamationTriangleIcon className="w-3 h-3" />
                                                     Absent without leave
-                                                </Typography>
+                                                </p>
                                             )}
-                                        </Box>
-                                    </Box>
+                                        </div>
+                                    </div>
                                     {userLeave && (
                                         <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-md px-1.5 py-0.5 ml-2">
                                             <div className="flex items-center gap-1">
                                                 {getLeaveStatusIcon(userLeave.status)}
-                                                <Typography 
-                                                    variant="caption" 
-                                                    className={`font-semibold text-xs ${
-                                                        userLeave.status?.toLowerCase() === 'approved' ? 'text-green-600' :
-                                                        userLeave.status?.toLowerCase() === 'rejected' ? 'text-red-600' :
-                                                        'text-orange-600'
-                                                    }`}
-                                                >
+                                                <span className={`font-semibold text-xs ${
+                                                    userLeave.status?.toLowerCase() === 'approved' ? 'text-green-600' :
+                                                    userLeave.status?.toLowerCase() === 'rejected' ? 'text-red-600' :
+                                                    'text-orange-600'
+                                                }`}>
                                                     {userLeave.status}
-                                                </Typography>
+                                                </span>
                                             </div>
                                         </div>
                                     )}
-                                </Box>
-                            </div>
-                        </Collapse>
-                    );
-                })}                
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
                 {visibleUsersCount < filteredAbsentUsers.length && (
-                    <Box className="text-center mt-4 pb-4">
+                    <div className="text-center mt-4 pb-4">
                         <Button 
-                            variant="outlined" 
-                            onClick={handleLoadMore}
-                            startIcon={<ChevronDownIcon className="w-4 h-4" />}
-                            size="small"
+                            variant="bordered" 
+                            onPress={handleLoadMore}
+                            startContent={<ChevronDownIcon className="w-4 h-4" />}
+                            size="sm"
                             color="warning"
                             fullWidth
                         >
                             Show More ({filteredAbsentUsers.length - visibleUsersCount} remaining)
                         </Button>
-                    </Box>
+                    </div>
                 )}
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 });

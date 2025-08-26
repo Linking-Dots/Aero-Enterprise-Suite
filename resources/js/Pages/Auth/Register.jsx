@@ -9,12 +9,10 @@ import {
     EyeIcon,
     EyeSlashIcon
 } from '@heroicons/react/24/outline';
-import { TextField, Button as HeroButton, Checkbox as HeroCheckbox } from '@mui/material';
+import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
 import AuthLayout from '@/Components/AuthLayout';
 import Button from '@/Components/Button';
 import Checkbox from '@/Components/Checkbox';
-import { useTheme } from '@mui/material/styles';
-import { Typography } from '@mui/material';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -28,7 +26,6 @@ export default function Register() {
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-    const theme = useTheme();
 
     const calculatePasswordStrength = (password) => {
         let strength = 0;
@@ -103,19 +100,18 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <TextField
+                    <Input
                         type="text"
                         label="Full name"
                         placeholder="Enter your full name"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
-                        error={!!errors.name}
-                        helperText={errors.name}
+                        isInvalid={!!errors.name}
+                        errorMessage={errors.name}
                         autoComplete="name"
                         autoFocus
-                        required
-                        variant="outlined"
-                        fullWidth
+                        isRequired
+                        startContent={<UserIcon className="w-4 h-4 text-default-400" />}
                         InputProps={{
                             startAdornment: (
                                 <UserIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
@@ -153,47 +149,17 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <TextField
+                    <Input
                         type="email"
                         label="Email address"
                         placeholder="Enter your email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        error={!!errors.email}
-                        helperText={errors.email}
+                        isInvalid={!!errors.email}
+                        errorMessage={errors.email}
                         autoComplete="username"
-                        required
-                        variant="outlined"
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                            ),
-                            sx: {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '12px',
-                                '&:hover': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                                '&.Mui-focused': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                            }
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'primary.main',
-                                },
-                            },
-                        }}
+                        isRequired
+                        startContent={<EnvelopeIcon className="w-4 h-4 text-default-400" />}
                     />
                 </motion.div>
 
@@ -203,60 +169,31 @@ export default function Register() {
                     transition={{ delay: 0.3 }}
                 >
                     <div>
-                        <TextField
+                        <Input
                             type={isPasswordVisible ? "text" : "password"}
                             label="Password"
                             placeholder="Create a strong password"
                             value={data.password}
                             onChange={handlePasswordChange}
-                            error={!!errors.password}
-                            helperText={errors.password}
+                            isInvalid={!!errors.password}
+                            errorMessage={errors.password}
                             autoComplete="new-password"
-                            required
-                            variant="outlined"
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                                ),
-                                endAdornment: (
-                                    <button
-                                        className="focus:outline-hidden"
-                                        type="button"
-                                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                    >
-                                        {isPasswordVisible ? (
-                                            <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                        ) : (
-                                            <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                        )}
-                                    </button>
-                                ),
-                                sx: {
-                                    background: 'rgba(255, 255, 255, 0.05)',
-                                    backdropFilter: 'blur(12px)',
-                                    borderRadius: '12px',
-                                    '&:hover': {
-                                        background: 'rgba(255, 255, 255, 0.08)',
-                                    },
-                                    '&.Mui-focused': {
-                                        background: 'rgba(255, 255, 255, 0.08)',
-                                    },
-                                }
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: 'primary.main',
-                                    },
-                                },
-                            }}
+                            isRequired
+                            startContent={<LockClosedIcon className="w-4 h-4 text-default-400" />}
+                            endContent={
+                                <button
+                                    className="focus:outline-none"
+                                    type="button"
+                                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                                >
+                                    {isPasswordVisible ? (
+                                        <EyeSlashIcon className="w-4 h-4 text-default-400" />
+                                    ) : (
+                                        <EyeIcon className="w-4 h-4 text-default-400" />
+                                    )}
+                                </button>
+                            }
                         />
                         
                         {/* Password Strength Indicator */}
@@ -308,60 +245,31 @@ export default function Register() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
-                    <TextField
+                    <Input
                         type={isConfirmPasswordVisible ? "text" : "password"}
                         label="Confirm password"
                         placeholder="Confirm your password"
                         value={data.password_confirmation}
                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                        error={!!errors.password_confirmation}
-                        helperText={errors.password_confirmation}
+                        isInvalid={!!errors.password_confirmation}
+                        errorMessage={errors.password_confirmation}
                         autoComplete="new-password"
-                        required
-                        variant="outlined"
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <LockClosedIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                            ),
-                            endAdornment: (
-                                <button
-                                    className="focus:outline-hidden"
-                                    type="button"
-                                    onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                                >
-                                    {isConfirmPasswordVisible ? (
-                                        <EyeSlashIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    ) : (
-                                        <EyeIcon className="w-4 h-4 text-default-400 pointer-events-none" />
-                                    )}
-                                </button>
-                            ),
-                            sx: {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '12px',
-                                '&:hover': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                                '&.Mui-focused': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                            }
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'primary.main',
-                                },
-                            },
-                        }}
+                        isRequired
+                        startContent={<LockClosedIcon className="w-4 h-4 text-default-400" />}
+                        endContent={
+                            <button
+                                className="focus:outline-none"
+                                type="button"
+                                onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                                aria-label={isConfirmPasswordVisible ? "Hide password" : "Show password"}
+                            >
+                                {isConfirmPasswordVisible ? (
+                                    <EyeSlashIcon className="w-4 h-4 text-default-400" />
+                                ) : (
+                                    <EyeIcon className="w-4 h-4 text-default-400" />
+                                )}
+                            </button>
+                        }
                     />
                 </motion.div>
 
@@ -444,15 +352,9 @@ export default function Register() {
                             transition={{ duration: 0.6, delay: 1.2 }}
                             className="mt-3"
                         >
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                textAlign="center"
-                                display="block"
-                                sx={{ opacity: 0.6, fontSize: { xs: '0.65rem', sm: '0.7rem' } }}
-                            >
+                            <p className="text-xs text-default-500 text-center opacity-60">
                                 © 2025 Emam Hosen. All rights reserved.
-                            </Typography>
+                            </p>
                         </motion.div>
             </form>
 

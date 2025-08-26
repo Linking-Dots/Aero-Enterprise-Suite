@@ -1,22 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, usePage, router } from "@inertiajs/react";
-import { 
-  Box, 
-  Typography, 
-  useMediaQuery, 
-  Grow, 
-  Fade,
-  useTheme,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Menu,
-  IconButton
-} from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
   Button,
   Chip,
@@ -26,8 +10,17 @@ import {
   User,
   Divider,
   Switch,
-  Pagination
+  Pagination,
+  Input,
+  Select,
+  SelectItem,
+  Spinner,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
 } from "@heroui/react";
+import useTheme, { getThemePrimaryColor } from '@/theme';
 import { getFormControlStyles, getTextFieldStyles } from '@/utils/glassyStyles.js';
 import { 
   UserPlusIcon,
@@ -69,9 +62,23 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const UsersList = ({ title, roles }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const { isDark } = useTheme();
+  const primaryColor = getThemePrimaryColor();
+  
+  // Custom media queries
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsTablet(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   // State for users data with server-side pagination
   const [users, setUsers] = useState([]);

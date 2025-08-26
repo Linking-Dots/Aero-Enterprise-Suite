@@ -1,16 +1,14 @@
 import React from 'react';
 import { 
-    Box, 
     Card, 
-    CardContent, 
+    CardBody, 
     CardHeader, 
     Chip, 
-    CircularProgress, 
+    Spinner, 
     Divider, 
-    LinearProgress, 
-    Typography 
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+    Progress 
+} from '@heroui/react';
+
 import { 
     CheckCircleIcon, 
     ExclamationTriangleIcon, 
@@ -23,7 +21,7 @@ const BulkValidationPreview = ({
     balanceImpact = null,
     isValidating = false 
 }) => {
-    const theme = useTheme();
+
     
     if (validationResults.length === 0 && !isValidating) {
         return null;
@@ -37,16 +35,16 @@ const BulkValidationPreview = ({
 
     // Get status icon and color
     const getStatusIcon = (status) => {
-        const iconProps = { style: { width: 16, height: 16 } };
+        const iconProps = { className: "w-4 h-4" };
         switch (status) {
             case 'valid':
-                return <CheckCircleIcon {...iconProps} style={{ ...iconProps.style, color: theme.palette.success.main }} />;
+                return <CheckCircleIcon {...iconProps} className="w-4 h-4 text-success" />;
             case 'warning':
-                return <ExclamationTriangleIcon {...iconProps} style={{ ...iconProps.style, color: theme.palette.warning.main }} />;
+                return <ExclamationTriangleIcon {...iconProps} className="w-4 h-4 text-warning" />;
             case 'conflict':
-                return <XCircleIcon {...iconProps} style={{ ...iconProps.style, color: theme.palette.error.main }} />;
+                return <XCircleIcon {...iconProps} className="w-4 h-4 text-danger" />;
             default:
-                return <InformationCircleIcon {...iconProps} style={{ ...iconProps.style, color: theme.palette.text.disabled }} />;
+                return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-default-400" />;
         }
     };
 
@@ -57,7 +55,7 @@ const BulkValidationPreview = ({
             case 'warning':
                 return 'warning';
             case 'conflict':
-                return 'error';
+                return 'danger';
             default:
                 return 'default';
         }
@@ -72,213 +70,170 @@ const BulkValidationPreview = ({
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="flex flex-col gap-4">
             {/* Summary Card */}
-            <Card variant="outlined">
-                <CardHeader
-                    title={
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Typography variant="h6">Validation Results</Typography>
-                            {isValidating && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <CircularProgress size={16} />
-                                    <Typography variant="body2" color="text.secondary">
-                                        Validating...
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Box>
-                    }
-                />
-                <CardContent sx={{ pt: 0 }}>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2 }}>
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h4" color="success.main" fontWeight="bold">
+            <Card>
+                <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between w-full">
+                        <h3 className="text-lg font-semibold">Validation Results</h3>
+                        {isValidating && (
+                            <div className="flex items-center gap-2">
+                                <Spinner size="sm" />
+                                <span className="text-sm text-default-600">
+                                    Validating...
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardBody className="pt-0">
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center">
+                            <h4 className="text-2xl font-bold text-success">
                                 {validCount}
-                            </Typography>
-                            <Typography variant="body2" color="success.main">
+                            </h4>
+                            <p className="text-sm text-success">
                                 Valid
-                            </Typography>
-                        </Box>
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h4" color="warning.main" fontWeight="bold">
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-2xl font-bold text-warning">
                                 {warningCount}
-                            </Typography>
-                            <Typography variant="body2" color="warning.main">
+                            </h4>
+                            <p className="text-sm text-warning">
                                 Warnings
-                            </Typography>
-                        </Box>
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h4" color="error.main" fontWeight="bold">
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-2xl font-bold text-danger">
                                 {conflictCount}
-                            </Typography>
-                            <Typography variant="body2" color="error.main">
+                            </h4>
+                            <p className="text-sm text-danger">
                                 Conflicts
-                            </Typography>
-                        </Box>
-                    </Box>
+                            </p>
+                        </div>
+                    </div>
 
                     {/* Balance Impact */}
                     {balanceImpact && (
-                        <Box 
-                            sx={{ 
-                                p: 2, 
-                                borderRadius: 2, 
-                                background: theme.palette.background.paper,
-                                border: `1px solid ${theme.palette.divider}` 
-                            }}
-                        >
-                            <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <InformationCircleIcon style={{ width: 16, height: 16, color: theme.palette.primary.main }} />
+                        <div className="p-4 rounded-lg bg-default-50 border border-default-200">
+                            <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
+                                <InformationCircleIcon className="w-4 h-4 text-primary" />
                                 Leave Balance Impact
-                            </Typography>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary" component="span">
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span className="text-sm text-default-600">
                                         Leave Type:
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight="medium" component="span" sx={{ ml: 1 }}>
+                                    </span>
+                                    <span className="text-sm font-medium ml-2">
                                         {balanceImpact.leave_type}
-                                    </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary" component="span">
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-default-600">
                                         Current Balance:
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight="medium" component="span" sx={{ ml: 1 }}>
+                                    </span>
+                                    <span className="text-sm font-medium ml-2">
                                         {balanceImpact.current_balance} days
-                                    </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary" component="span">
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-default-600">
                                         Requested Days:
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight="medium" component="span" sx={{ ml: 1 }}>
+                                    </span>
+                                    <span className="text-sm font-medium ml-2">
                                         {balanceImpact.requested_days} days
-                                    </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary" component="span">
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-default-600">
                                         Remaining Balance:
-                                    </Typography>
-                                    <Typography 
-                                        variant="body2" 
-                                        fontWeight="medium" 
-                                        component="span" 
-                                        sx={{ 
-                                            ml: 1,
-                                            color: balanceImpact.remaining_balance < 0 ? 'error.main' : 'success.main'
-                                        }}
-                                    >
+                                    </span>
+                                    <span className={`text-sm font-medium ml-2 ${
+                                        balanceImpact.remaining_balance < 0 ? 'text-danger' : 'text-success'
+                                    }`}>
                                         {balanceImpact.remaining_balance} days
-                                    </Typography>
-                                </Box>
-                            </Box>
+                                    </span>
+                                </div>
+                            </div>
                             
                             {balanceImpact.remaining_balance < 0 && (
-                                <Box 
-                                    sx={{ 
-                                        mt: 2, 
-                                        p: 1.5, 
-                                        borderRadius: 1, 
-                                        bgcolor: 'error.light',
-                                        border: 1,
-                                        borderColor: 'error.main'
-                                    }}
-                                >
-                                    <Typography variant="body2" color="error.main">
+                                <div className="mt-4 p-3 rounded-md bg-danger-50 border border-danger-200">
+                                    <p className="text-sm text-danger">
                                         ⚠️ This request exceeds your available leave balance by {Math.abs(balanceImpact.remaining_balance)} days.
-                                    </Typography>
-                                </Box>
+                                    </p>
+                                </div>
                             )}
-                        </Box>
+                        </div>
                     )}
-                </CardContent>
+                </CardBody>
             </Card>
 
             {/* Detailed Results */}
             {validationResults.length > 0 && (
-                <Card variant="outlined">
-                    <CardHeader
-                        title={<Typography variant="h6">Date-by-Date Results</Typography>}
-                    />
-                    <CardContent>
-                        <Box 
-                            sx={{ 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                gap: 1, 
-                                maxHeight: 240, 
-                                overflowY: 'auto' 
-                            }}
-                        >
+                <Card>
+                    <CardHeader>
+                        <h3 className="text-lg font-semibold">Date-by-Date Results</h3>
+                    </CardHeader>
+                    <CardBody>
+                        <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
                             {validationResults.map((result, index) => (
-                                <Box 
+                                <div 
                                     key={index}
-                                    sx={{ 
-                                        display: 'flex', 
-                                        alignItems: 'flex-start', 
-                                        justifyContent: 'space-between', 
-                                        p: 2, 
-                                        borderRadius: 2, 
-                                        border: 1,
-                                        borderColor: 'divider',
-                                        '&:hover': {
-                                            borderColor: 'text.secondary'
-                                        },
-                                        transition: 'border-color 0.2s'
-                                    }}
+                                    className="flex items-start justify-between p-4 rounded-lg border border-default-200 hover:border-default-300 transition-colors"
                                 >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <div className="flex items-center gap-3">
                                         {getStatusIcon(result.status)}
-                                        <Box>
-                                            <Typography variant="body2" fontWeight="medium">
+                                        <div>
+                                            <p className="text-sm font-medium">
                                                 {formatDate(result.date)}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
+                                            </p>
+                                            <p className="text-xs text-default-500">
                                                 {result.date}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
+                                            </p>
+                                        </div>
+                                    </div>
                                     
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+                                    <div className="flex flex-col items-end gap-1">
                                         <Chip 
-                                            size="small" 
-                                            variant="outlined" 
+                                            size="sm" 
+                                            variant="bordered" 
                                             color={getStatusColor(result.status)}
-                                            label={result.status}
-                                            sx={{ textTransform: 'capitalize' }}
-                                        />
+                                            className="capitalize"
+                                        >
+                                            {result.status}
+                                        </Chip>
                                         
                                         {/* Errors */}
                                         {result.errors && result.errors.length > 0 && (
-                                            <Box sx={{ textAlign: 'right' }}>
+                                            <div className="text-right">
                                                 {result.errors.map((error, errorIndex) => (
-                                                    <Typography key={errorIndex} variant="caption" color="error.main">
+                                                    <p key={errorIndex} className="text-xs text-danger">
                                                         {error}
-                                                    </Typography>
+                                                    </p>
                                                 ))}
-                                            </Box>
+                                            </div>
                                         )}
                                         
                                         {/* Warnings */}
                                         {result.warnings && result.warnings.length > 0 && (
-                                            <Box sx={{ textAlign: 'right' }}>
+                                            <div className="text-right">
                                                 {result.warnings.map((warning, warningIndex) => (
-                                                    <Typography key={warningIndex} variant="caption" color="warning.main">
+                                                    <p key={warningIndex} className="text-xs text-warning">
                                                         {warning}
-                                                    </Typography>
+                                                    </p>
                                                 ))}
-                                            </Box>
+                                            </div>
                                         )}
-                                    </Box>
-                                </Box>
+                                    </div>
+                                </div>
                             ))}
-                        </Box>
-                    </CardContent>
+                        </div>
+                    </CardBody>
                 </Card>
             )}
-        </Box>
+        </div>
     );
 };
 

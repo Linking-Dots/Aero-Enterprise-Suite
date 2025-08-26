@@ -1,34 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Grid,
-    FormControl,
-    FormHelperText,
-    InputLabel,
-    Select,
-    MenuItem,
-    FormControlLabel,
-    Switch,
-    Box,
-    Typography,
-    Divider,
-    IconButton,
     Button,
-    useTheme,
-    useMediaQuery,
-} from '@mui/material';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+    Input,
+    Select,
+    SelectItem,
+    Switch,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Divider,
+} from '@heroui/react';
+import { X } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import GlassDialog from '@/Components/GlassDialog';
+import useTheme from '@/theme';
 
 const DesignationForm = ({ open, onClose, onSuccess, designation = null, departments = [], }) => {
 
     const theme = useTheme();
+    const isMobile = window.innerWidth < 640;
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
@@ -113,7 +106,7 @@ const DesignationForm = ({ open, onClose, onSuccess, designation = null, departm
                     {designation ? 'Edit Designation' : 'Create New Designation'}
                 </Typography>
                 <IconButton edge="end" color="inherit" onClick={onClose} disabled={loading} aria-label="close">
-                    <XMarkIcon className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                 </IconButton>
             </DialogTitle>
             <Divider />

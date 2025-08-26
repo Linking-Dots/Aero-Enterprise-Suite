@@ -1,25 +1,20 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    Typography,
-    useTheme,
-    useMediaQuery,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Grid,
-    TextField,
-    FormControl,
-    InputLabel,
+    Button,
+    Input,
+    Textarea,
     Select,
-    MenuItem,
-    FormControlLabel,
+    SelectItem,
     Switch,
-    IconButton,
-    Box,
     Chip,
-    Button
-} from "@mui/material";
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Spinner
+} from "@heroui/react";
 import {
     CalendarDaysIcon,
     XMarkIcon,
@@ -27,12 +22,11 @@ import {
     ClockIcon,
     CheckIcon
 } from "@heroicons/react/24/outline";
-import ClearIcon from '@mui/icons-material/Clear';
-import LoadingButton from "@mui/lab/LoadingButton";
 import { toast } from "react-toastify";
 import { format, differenceInDays, addDays } from 'date-fns';
 import axios from 'axios';
 import GlassDialog from "@/Components/GlassDialog.jsx";
+import useTheme from '@/theme';
 
 const HolidayForm = ({ 
     open, 
@@ -42,7 +36,7 @@ const HolidayForm = ({
     currentHoliday 
 }) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobile = window.innerWidth < 640;
     
     // Form state
     const [formData, setFormData] = useState({
@@ -172,43 +166,28 @@ const HolidayForm = ({
 
     return (
         <GlassDialog open={open} onClose={closeModal} fullWidth maxWidth="md">
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarDaysIcon className="w-6 h-6 text-primary" />
-                    <Typography variant="h6">
-                        {currentHoliday ? 'Edit Holiday' : 'Add New Holiday'}
-                    </Typography>
-                </Box>
-                <IconButton
-                    onClick={closeModal}
-                    sx={{ position: 'absolute', top: 8, right: 16 }}
-                >
-                    <ClearIcon />
-                </IconButton>
-            </DialogTitle>
-            
+            <ModalContent>
+                <ModalHeader className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <CalendarDaysIcon className="w-6 h-6 text-primary" />
+                        <h2 className="text-lg font-semibold">
+                            {currentHoliday ? 'Edit Holiday' : 'Add New Holiday'}
+                        </h2>
+                    </div>
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        onPress={closeModal}
+                        className="absolute top-2 right-2"
+                    >
+                        <X className="w-5 h-5" />
+                    </Button>
+                </ModalHeader>
+                
             <form onSubmit={handleSubmit}>
-                <DialogContent 
-                    sx={{ 
-                        maxHeight: '70vh', 
-                        overflowY: 'auto',
-                        '&::-webkit-scrollbar': {
-                            width: '6px',
-                        },
-                        '&::-webkit-scrollbar-track': {
-                            background: 'rgba(255,255,255,0.1)',
-                            borderRadius: '3px',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            background: 'rgba(255,255,255,0.3)',
-                            borderRadius: '3px',
-                            '&:hover': {
-                                background: 'rgba(255,255,255,0.5)',
-                            },
-                        },
-                    }}
+                <ModalBody className="max-h-[70vh] overflow-y-auto space-y-6"
                 >
-                    <Grid container spacing={3}>
+                    <div className="grid grid-cols-1 gap-6">
                         {/* Basic Information */}
                         <Grid item xs={12}>
                             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
@@ -387,120 +366,79 @@ const HolidayForm = ({
                         )}
 
                         {/* Settings */}
-                        <Grid item xs={12}>
-                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                        <div className="col-span-full">
+                            <h3 className="text-base font-semibold mb-4">
                                 Settings
-                            </Typography>
-                        </Grid>
+                            </h3>
+                        </div>
                         
-                        <Grid item xs={12} md={6}>
-                            <Box 
-                                sx={{ 
-                                    p: 2, 
-                                    backgroundColor: 'rgba(255,255,255,0.05)', 
-                                    borderRadius: 1,
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between'
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <div className="col-span-1 md:col-span-1">
+                            <div className="p-4 bg-white/5 rounded-lg border border-white/10 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
                                     <ClockIcon className="w-5 h-5 text-default-400" />
-                                    <Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    <div>
+                                        <p className="text-sm font-medium">
                                             Recurring Holiday
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
+                                        </p>
+                                        <p className="text-xs text-gray-500">
                                             Repeat this holiday annually
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={formData.is_recurring}
-                                            onChange={(e) => handleFieldChange('is_recurring', e.target.checked)}
-                                            color="primary"
-                                        />
-                                    }
-                                    label=""
+                                        </p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    isSelected={formData.is_recurring}
+                                    onValueChange={(checked) => handleFieldChange('is_recurring', checked)}
+                                    color="primary"
                                 />
-                            </Box>
-                        </Grid>
+                            </div>
+                        </div>
 
-                        <Grid item xs={12} md={6}>
-                            <Box 
-                                sx={{ 
-                                    p: 2, 
-                                    backgroundColor: 'rgba(255,255,255,0.05)', 
-                                    borderRadius: 1,
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between'
-                                }}
+                        <div className="col-span-1">
+                            <div className="p-4 bg-white/5 rounded-lg border border-white/10 flex items-center justify-between"
                             >
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <div className="flex items-center gap-2">
                                     <CheckIcon className="w-5 h-5 text-default-400" />
-                                    <Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    <div>
+                                        <p className="text-sm font-medium">
                                             Active Holiday
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
+                                        </p>
+                                        <p className="text-xs text-gray-500">
                                             Include in holiday calculations
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={formData.is_active}
-                                            onChange={(e) => handleFieldChange('is_active', e.target.checked)}
-                                            color="success"
-                                        />
-                                    }
-                                    label=""
+                                        </p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    isSelected={formData.is_active}
+                                    onValueChange={(checked) => handleFieldChange('is_active', checked)}
+                                    color="success"
                                 />
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
+                            </div>
+                        </div>
+                    </div>
+                </ModalBody>
                 
-                <DialogActions sx={{ padding: '16px 24px', justifyContent: 'flex-end', gap: 1 }}>
+                <ModalFooter className="flex justify-end gap-2">
                     <Button
-                        variant="outlined"
-                        onClick={closeModal}
-                        disabled={processing}
-                        sx={{
-                            color: 'rgba(239, 68, 68, 0.9)',
-                            borderColor: 'rgba(239, 68, 68, 0.3)',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            backdropFilter: 'blur(16px)',
-                            '&:hover': {
-                                borderColor: 'rgba(239, 68, 68, 0.5)',
-                                backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                            },
-                            '&:disabled': {
-                                color: 'rgba(239, 68, 68, 0.3)',
-                                borderColor: 'rgba(239, 68, 68, 0.1)',
-                            },
-                            borderRadius: '8px',
-                        }}
+                        variant="bordered"
+                        onPress={closeModal}
+                        isDisabled={processing}
+                        color="danger"
+                        className="rounded-lg"
                     >
                         Cancel
                     </Button>
-                    <LoadingButton
+                    <Button
                         type="submit"
-                        variant="contained"
-                        loading={processing}
-                        startIcon={!processing && <CheckIcon className="w-4 h-4" />}
-                        sx={{ borderRadius: '8px' }}
+                        variant="solid"
+                        color="primary"
+                        isLoading={processing}
+                        className="rounded-lg"
                     >
                         {processing ? 'Saving...' : (currentHoliday ? 'Update Holiday' : 'Create Holiday')}
-                    </LoadingButton>
-                </DialogActions>
+                    </Button>
+                </ModalFooter>
             </form>
+            </ModalContent>
         </GlassDialog>
     );
 };

@@ -1,22 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {
-    CardActions,
-    CardContent,
-    CardHeader,
-    FormControl,
-    Grid,
-    InputLabel,
-    MenuItem,
+    Button,
+    Input,
+    Textarea,
     Select,
-    TextField,
-    Typography,
-    Grow,
-    Box, FormHelperText
-} from '@mui/material';
-import LoadingButton from "@mui/lab/LoadingButton";
+    SelectItem,
+    Card,
+    CardBody,
+    CardHeader,
+    CardFooter,
+} from '@heroui/react';
+import { motion } from 'framer-motion';
 import GlassCard from '@/Components/GlassCard'; // Assuming GlassCard is a custom component
 import {toast} from "react-toastify";
-import {useTheme} from "@mui/material/styles";
+
 import {getCountries} from '@/Props/countries.jsx'
 const CompanyInformationForm = ({settings, setSettings}) => {
 
@@ -25,7 +22,7 @@ const CompanyInformationForm = ({settings, setSettings}) => {
 
     const [states, setStates] = useState([]);
 
-    const theme = useTheme();
+
     const [formData, setFormData] = useState({
         companyName: settings.companyName || '',
         contactPerson: settings.contactPerson || '',

@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Box, Container, Typography, useTheme } from '@mui/material';
 import { 
     ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import GlassCard from '@/Components/GlassCard';
-import { useAuthThemeSync } from '@/Hooks/useThemeSync';
-// Import theme CSS files to ensure background patterns work on auth pages
-import '../../css/theme-transitions.css';
-import '../../css/smooth-animations.css';
+
+
 import logo from '../../../public/assets/images/logo.png';
 
+// Custom theme object for styling
+const theme = {
+    primary: '#3b82f6',
+    secondary: '#8b5cf6',
+    spacing: (factor) => `${factor * 0.5}rem`,
+    palette: {
+        text: {
+            primary: 'hsl(var(--foreground))',
+            secondary: 'hsl(var(--foreground) / 0.7)'
+        }
+    }
+};
+
 const AuthLayout = ({ children, title, subtitle }) => {
-    const theme = useTheme();
     const [isDesktop, setIsDesktop] = useState(false);
-    
-    // Use the enhanced theme sync hook for authentication pages
-    useAuthThemeSync();
 
     // Check if screen is desktop for showing floating elements
     useEffect(() => {
@@ -31,19 +37,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
     }, []);
 
     return (
-        <Box
-            sx={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: { xs: 1, sm: 2 },
-                position: 'relative',
-                overflow: 'hidden',
-                // Let the document/body handle the themed background
-                // No background override - preserves theme background patterns
-            }}
-        >
+        <div className="min-h-screen flex items-center justify-center p-1 sm:p-2 relative overflow-hidden">
             {/* Floating Background Elements - Responsive positioning */}
             {isDesktop && (
                 <>
@@ -52,7 +46,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
                         style={{
                             top: '10%',
                             left: '8%',
-                            background: `linear-gradient(135deg, ${theme.palette.primary.main}15, ${theme.palette.secondary.main}15)`,
+                            background: `linear-gradient(135deg, ${theme.primary}15, ${theme.secondary}15)`,
                             backdropFilter: 'blur(8px)'
                         }}
                         animate={{ 
@@ -70,7 +64,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
                         style={{
                             bottom: '15%',
                             right: '10%',
-                            background: `linear-gradient(135deg, ${theme.palette.secondary.main}20, ${theme.palette.primary.main}20)`,
+                            background: `linear-gradient(135deg, ${theme.secondary}20, ${theme.primary}20)`,
                             backdropFilter: 'blur(6px)'
                         }}
                         animate={{ 
@@ -87,105 +81,68 @@ const AuthLayout = ({ children, title, subtitle }) => {
                 </>
             )}
 
-            <Container maxWidth="sm" sx={{ px: { xs: 1, sm: 2 } }}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: { xs: '100vh', sm: '80vh' },
-                        py: { xs: 2, sm: 4 }
-                    }}
-                >
+            <div className="w-full max-w-md px-1 sm:px-2">
+                <div className="flex flex-col items-center justify-center min-h-screen sm:min-h-[80vh] py-2 sm:py-4">
                     {/* Auth Form Card */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="w-full"
-                        style={{ maxWidth: '420px' }}
+                        className="w-full max-w-[420px]"
                     >
-                        <GlassCard
-                            sx={{
-                                p: { xs: 2.5, sm: 3, md: 4 },
-                                position: 'relative',
-                                overflow: 'visible',
-                                width: '100%',
-                                borderRadius: { xs: 3, sm: 4 }
-                            }}
-                        >
+                        <GlassCard className="p-3 sm:p-4 md:p-6 relative overflow-visible w-full rounded-2xl sm:rounded-3xl">
                             {/* Logo at top of form card */}
                             <motion.div
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}
-                                style={{ textAlign: 'center', marginBottom: theme.spacing(3) }}
+                                className="text-center mb-3 sm:mb-4"
                             >
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: { xs: 1.5, sm: 2 } }}>
+                                <div className="flex justify-center mb-2 sm:mb-3">
                                     <motion.div
                                         className="inline-flex items-center justify-center rounded-xl"
-                                       
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                     >
                                         <img 
                                             src={logo} 
                                             alt="Logo" 
-                                            style={{
-                                                width: '160px',
-                                                height: '160px',
-                                                objectFit: 'contain'
-                                            }}
+                                            className="w-40 h-40 object-contain"
                                             onError={(e) => {
                                                 // Fallback to text logo if image fails to load
                                                 e.target.style.display = 'none';
                                                 e.target.nextSibling.style.display = 'block';
                                             }}
                                         />
-                                       
                                     </motion.div>
-                                </Box>
+                                </div>
                             </motion.div>
 
                             {/* Header */}
-                            <Box sx={{ mb: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                            <div className="mb-3 sm:mb-4 text-center">
                                 <motion.div
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.4 }}
                                 >
-                                    <Typography
-                                        variant="h4"
-                                        component="h1"
-                                        fontWeight="600"
-                                        gutterBottom
-                                        sx={{
-                                            background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.palette.primary.main})`,
+                                    <h1
+                                        className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-1 sm:mb-2"
+                                        style={{
+                                            background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.primary})`,
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             WebkitTextFillColor: 'transparent',
-                                            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
-                                            mb: { xs: 1, sm: 1.5 }
                                         }}
                                     >
                                         {title}
-                                    </Typography>
+                                    </h1>
                                     {subtitle && (
-                                        <Typography
-                                            variant="body1"
-                                            color="text.secondary"
-                                            sx={{ 
-                                                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-                                                lineHeight: 1.4,
-                                                px: { xs: 1, sm: 0 }
-                                            }}
-                                        >
+                                        <p className="text-foreground-600 text-sm sm:text-base leading-relaxed px-1 sm:px-0">
                                             {subtitle}
-                                        </Typography>
+                                        </p>
                                     )}
                                 </motion.div>
-                            </Box>
+                            </div>
 
                             {/* Form Content */}
                             <motion.div
@@ -198,32 +155,26 @@ const AuthLayout = ({ children, title, subtitle }) => {
 
                             {/* Decorative Elements - Minimized */}
                             <motion.div
-                                className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+                                className="absolute -top-1 -right-1 w-3 h-3 rounded-full opacity-40"
                                 style={{
-                                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                                    opacity: 0.4
+                                    background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`
                                 }}
                                 animate={{ scale: [1, 1.2, 1] }}
                                 transition={{ duration: 3, repeat: Infinity }}
                             />
                             <motion.div
-                                className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full"
+                                className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full opacity-40"
                                 style={{
-                                    background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-                                    opacity: 0.4
+                                    background: `linear-gradient(135deg, ${theme.secondary}, ${theme.primary})`
                                 }}
                                 animate={{ scale: [1, 1.3, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}
                             />
                         </GlassCard>
-
-                       
-
-                        
                     </motion.div>
-                </Box>
-            </Container>
-        </Box>
+                </div>
+            </div>
+        </div>
     );
 };
 
