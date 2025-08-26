@@ -1,19 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
     EnvelopeIcon, 
     LockClosedIcon,
     ExclamationTriangleIcon,
     CheckCircleIcon,
     EyeIcon,
-    EyeSlashIcon
+    EyeSlashIcon,
+    ShieldCheckIcon,
+    CommandLineIcon,
+    ComputerDesktopIcon,
+    DevicePhoneMobileIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
-import { Input, Button as HeroButton, Checkbox as HeroCheckbox } from '@heroui/react';
-import AuthLayout from '@/Components/AuthLayout';
-import Button from '@/Components/Button';
-import Checkbox from '@/Components/Checkbox';
+import { 
+    Input, 
+    Button, 
+    Checkbox, 
+    Card, 
+    Chip, 
+    Divider, 
+    Tooltip
+} from '@heroui/react';
+import { toast } from 'react-toastify';
 
+/**
+ * Enhanced Login Page - Enterprise ERP System
+ * Consistent with Header/Sidebar theming and HeroUI design language
+ * 
+ * @author Enterprise ERP Team  
+ * @version 3.0.0 - Complete HeroUI integration with consistent theming
+ */
 export default function Login({ status, canResetPassword, deviceBlocked, deviceMessage, blockedDeviceInfo }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -21,13 +39,21 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
         remember: false,
     });
 
+    // ===== STATE MANAGEMENT =====
     const [showAlert, setShowAlert] = useState(false);
     const [showDeviceAlert, setShowDeviceAlert] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // ===== EFFECTS =====
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
 
     useEffect(() => {
         if (status) {
             setShowAlert(true);
+            toast.success(status);
             const timer = setTimeout(() => setShowAlert(false), 8000);
             return () => clearTimeout(timer);
         }
@@ -36,290 +62,509 @@ export default function Login({ status, canResetPassword, deviceBlocked, deviceM
     useEffect(() => {
         if (deviceBlocked) {
             setShowDeviceAlert(true);
+            toast.error('Device access blocked');
             const timer = setTimeout(() => setShowDeviceAlert(false), 12000);
             return () => clearTimeout(timer);
         }
     }, [deviceBlocked]);
 
-    const submit = (e) => {
+    // ===== HANDLERS =====
+    const handleSubmit = useCallback((e) => {
         e.preventDefault();
         
-        post(route('login'), {
+        // Create a clean data object to avoid circular references
+        const formData = {
+            email: data.email,
+            password: data.password,
+            remember: data.remember
+        };
+        
+        post(route('login'), formData, {
             onFinish: () => reset('password'),
+            onError: (errors) => {
+                if (errors && typeof errors === 'object') {
+                    Object.values(errors).forEach(error => {
+                        if (typeof error === 'string') {
+                            toast.error(error);
+                        }
+                    });
+                }
+            }
         });
+    }, [data.email, data.password, data.remember, post, reset]);
+
+    const togglePasswordVisibility = useCallback(() => {
+        setIsPasswordVisible(prev => !prev);
+    }, []);
+
+    // ===== ANIMATION VARIANTS =====
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                duration: 0.6,
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }
+        }
     };
 
     return (
-        <AuthLayout
-            title="Welcome back"
-         
-        >
-            <Head title="Log in" />
+        <>
+            <Head title="Sign In - Enterprise ERP" />
+            
+            {/* Main Login Container */}
+            <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute inset-0 -z-10">
+                    <div 
+                        className="absolute inset-0"
+                        style={{
+                            background: `
+                                radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--theme-primary, #006FEE) 10%, transparent) 0%, transparent 50%),
+                                radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--theme-secondary, #7C3AED) 8%, transparent) 0%, transparent 50%),
+                                radial-gradient(circle at 40% 80%, color-mix(in srgb, var(--theme-primary, #006FEE) 6%, transparent) 0%, transparent 50%)
+                            `
+                        }}
+                    />
+                </div>
 
-            {/* Status Alert */}
-            {status && showAlert && (
+                {/* Floating Elements */}
                 <motion.div
-                    className="mb-6 p-4 rounded-xl border"
+                    className="absolute top-20 left-20 w-20 h-20 rounded-full hidden lg:block"
                     style={{
-                        background: 'rgba(34, 197, 94, 0.1)',
-                        borderColor: 'rgba(34, 197, 94, 0.3)',
-                        backdropFilter: 'blur(10px)'
+                        background: `linear-gradient(135deg, 
+                            color-mix(in srgb, var(--theme-primary, #006FEE) 15%, transparent),
+                            color-mix(in srgb, var(--theme-secondary, #7C3AED) 10%, transparent)
+                        )`,
+                        backdropFilter: 'blur(20px)'
                     }}
-                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    transition={{ duration: 0.4, type: "spring" }}
-                >
-                    <div className="flex items-center">
-                        <motion.div
-                            className="shrink-0"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
-                        >
-                            <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                        </motion.div>
-                        <div className="ml-3">
-                            <motion.p
-                                className="text-sm font-medium text-green-800"
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                {status}
-                            </motion.p>
-                        </div>
-                    </div>
-                </motion.div>
-            )}
+                    animate={{ 
+                        y: [-10, 10, -10],
+                        rotate: [0, 180, 360] 
+                    }}
+                    transition={{ 
+                        duration: 20, 
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
 
-            {/* Device Blocked Alert */}
-            {deviceBlocked && showDeviceAlert && (
                 <motion.div
-                    className="mb-6 p-5 rounded-xl border"
+                    className="absolute bottom-20 right-20 w-16 h-16 rounded-full hidden lg:block"
                     style={{
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        borderColor: 'rgba(239, 68, 68, 0.3)',
-                        backdropFilter: 'blur(10px)'
+                        background: `linear-gradient(135deg,
+                            color-mix(in srgb, var(--theme-secondary, #7C3AED) 12%, transparent),
+                            color-mix(in srgb, var(--theme-primary, #006FEE) 8%, transparent)
+                        )`,
+                        backdropFilter: 'blur(20px)'
                     }}
-                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    transition={{ duration: 0.4, type: "spring" }}
+                    animate={{ 
+                        x: [-8, 8, -8],
+                        scale: [1, 1.1, 1]
+                    }}
+                    transition={{ 
+                        duration: 15, 
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 5
+                    }}
+                />
+
+                {/* Login Form Card */}
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate={isLoaded ? "visible" : "hidden"}
+                    className="w-full max-w-md"
                 >
-                    <div className="flex items-start">
-                        <motion.div
-                            className="shrink-0"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
-                        >
-                            <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
-                        </motion.div>
-                        <div className="ml-3 flex-1">
-                            <motion.h3
-                                className="text-sm font-semibold text-red-800 mb-1"
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
+                    <Card
+                        className="backdrop-blur-xl border-none shadow-2xl"
+                        style={{
+                            background: `linear-gradient(to bottom right, 
+                                color-mix(in srgb, var(--theme-content1, #FAFAFA) 95%, transparent), 
+                                color-mix(in srgb, var(--theme-content2, #F4F4F5) 90%, transparent)
+                            )`,
+                            borderColor: 'color-mix(in srgb, var(--theme-divider, #E4E4E7) 40%, transparent)',
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderRadius: '24px',
+                            boxShadow: `
+                                0 20px 40px color-mix(in srgb, var(--theme-shadow, #000000) 15%, transparent),
+                                0 8px 16px color-mix(in srgb, var(--theme-shadow, #000000) 10%, transparent),
+                                inset 0 1px 0 color-mix(in srgb, var(--theme-background, #FFFFFF) 40%, transparent)
+                            `
+                        }}
+                    >
+                        <div className="p-8">
+                            {/* Header Section */}
+                            <motion.div
+                                variants={itemVariants}
+                                className="text-center mb-8"
                             >
-                                Device Access Blocked
-                            </motion.h3>
-                            <motion.p
-                                className="text-sm text-red-700 mb-3"
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 }}
-                            >
-                                {deviceMessage || 'You can only be logged in from one device at a time.'}
-                            </motion.p>
-                            {blockedDeviceInfo && (
+                                {/* Logo */}
                                 <motion.div
-                                    className="text-xs text-red-600 bg-red-50 p-3 rounded-lg"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5 }}
+                                    className="flex justify-center mb-6"
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 >
-                                    <p className="font-medium mb-1">Currently active device:</p>
-                                    <p>• <span className="font-medium">Device:</span> {blockedDeviceInfo.device_name}</p>
-                                    <p>• <span className="font-medium">Browser:</span> {blockedDeviceInfo.browser} {blockedDeviceInfo.browser_version}</p>
-                                    <p>• <span className="font-medium">Platform:</span> {blockedDeviceInfo.platform}</p>
-                                    <p>• <span className="font-medium">Last active:</span> {blockedDeviceInfo.last_activity}</p>
-                                    {blockedDeviceInfo.location && (
-                                        <p>• <span className="font-medium">Location:</span> {blockedDeviceInfo.location}</p>
+                                    <div 
+                                        className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden"
+                                        style={{
+                                            backgroundColor: `var(--theme-primary, #006FEE)10`,
+                                            borderColor: `var(--theme-primary, #006FEE)20`,
+                                            border: '1px solid',
+                                            boxShadow: `0 8px 24px color-mix(in srgb, var(--theme-primary, #006FEE) 30%, transparent)`
+                                        }}
+                                    >
+                                        <img 
+                                            src="/assets/images/logo.png" 
+                                            alt="Enterprise ERP Logo" 
+                                            className="w-12 h-12 object-contain"
+                                            onError={(e) => {
+                                                // Fallback to text logo if image fails to load
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'flex';
+                                            }}
+                                        />
+                                        <div 
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-xl absolute inset-0"
+                                            style={{ 
+                                                display: 'none',
+                                                background: `linear-gradient(135deg, 
+                                                    var(--theme-primary, #006FEE), 
+                                                    color-mix(in srgb, var(--theme-primary, #006FEE) 80%, var(--theme-secondary, #7C3AED))
+                                                )`
+                                            }}
+                                        >
+                                            A
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Title */}
+                                <h1 
+                                    className="text-3xl font-bold mb-2"
+                                    style={{ color: 'var(--theme-foreground, #11181C)' }}
+                                >
+                                    Welcome Back
+                                </h1>
+                                <p 
+                                    className="text-sm"
+                                    style={{ color: 'var(--theme-foreground, #11181C)70' }}
+                                >
+                                    Sign in to your Enterprise ERP account
+                                </p>
+                            </motion.div>
+
+                            {/* Status Alerts */}
+                            <AnimatePresence>
+                                {status && showAlert && (
+                                    <motion.div
+                                        variants={itemVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="hidden"
+                                        className="mb-6"
+                                    >
+                                        <Card
+                                            className="border-none"
+                                            style={{
+                                                background: 'color-mix(in srgb, #22C55E 10%, transparent)',
+                                                borderColor: 'color-mix(in srgb, #22C55E 30%, transparent)',
+                                                borderWidth: '1px',
+                                                borderStyle: 'solid'
+                                            }}
+                                        >
+                                            <div className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                                    <p className="text-sm font-medium text-green-800">{status}</p>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    </motion.div>
+                                )}
+
+                                {deviceBlocked && showDeviceAlert && (
+                                    <motion.div
+                                        variants={itemVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="hidden"
+                                        className="mb-6"
+                                    >
+                                        <Card
+                                            className="border-none"
+                                            style={{
+                                                background: 'color-mix(in srgb, #EF4444 10%, transparent)',
+                                                borderColor: 'color-mix(in srgb, #EF4444 30%, transparent)',
+                                                borderWidth: '1px',
+                                                borderStyle: 'solid'
+                                            }}
+                                        >
+                                            <div className="p-4">
+                                                <div className="flex items-start gap-3">
+                                                    <ExclamationTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                                    <div className="flex-1">
+                                                        <h3 className="text-sm font-semibold text-red-800 mb-1">
+                                                            Device Access Blocked
+                                                        </h3>
+                                                        <p className="text-sm text-red-700 mb-3">
+                                                            {deviceMessage || 'You can only be logged in from one device at a time.'}
+                                                        </p>
+                                                        {blockedDeviceInfo && (
+                                                            <Card className="bg-red-50 border-red-200">
+                                                                <div className="p-3">
+                                                                    <p className="text-xs font-medium text-red-800 mb-2">Currently active device:</p>
+                                                                    <div className="space-y-1 text-xs text-red-700">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <ComputerDesktopIcon className="w-3 h-3" />
+                                                                            <span>{blockedDeviceInfo.device_name}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <CommandLineIcon className="w-3 h-3" />
+                                                                            <span>{blockedDeviceInfo.browser} {blockedDeviceInfo.browser_version}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <DevicePhoneMobileIcon className="w-3 h-3" />
+                                                                            <span>{blockedDeviceInfo.platform}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </Card>
+                                                        )}
+                                                    </div>
+                                                    <Button
+                                                        isIconOnly
+                                                        size="sm"
+                                                        variant="light"
+                                                        onPress={() => setShowDeviceAlert(false)}
+                                                    >
+                                                        <XMarkIcon className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Login Form */}
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Email Field */}
+                                <motion.div variants={itemVariants}>
+                                    <Input
+                                        type="email"
+                                        label="Email Address"
+                                        placeholder="Enter your email"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        isInvalid={!!errors.email}
+                                        errorMessage={errors.email}
+                                        autoComplete="username"
+                                        autoFocus
+                                        isRequired
+                                        size="lg"
+                                        variant="bordered"
+                                        color={errors.email ? "danger" : "primary"}
+                                        startContent={
+                                            <EnvelopeIcon 
+                                                className="w-4 h-4"
+                                                style={{ color: 'var(--theme-foreground, #11181C)60' }}
+                                            />
+                                        }
+                                        classNames={{
+                                            input: [
+                                                "bg-transparent",
+                                                "text-foreground",
+                                                "placeholder:text-foreground/60"
+                                            ],
+                                            inputWrapper: [
+                                                "backdrop-blur-sm",
+                                                "border-divider/50",
+                                                "hover:border-primary/50",
+                                                "focus-within:!border-primary",
+                                                "!cursor-text"
+                                            ]
+                                        }}
+                                        style={{
+                                            '--input-bg': 'color-mix(in srgb, var(--theme-content2, #F4F4F5) 50%, transparent)'
+                                        }}
+                                    />
+                                </motion.div>
+
+                                {/* Password Field */}
+                                <motion.div variants={itemVariants}>
+                                    <Input
+                                        type={isPasswordVisible ? "text" : "password"}
+                                        label="Password"
+                                        placeholder="Enter your password"
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
+                                        isInvalid={!!errors.password}
+                                        errorMessage={errors.password}
+                                        autoComplete="current-password"
+                                        isRequired
+                                        size="lg"
+                                        variant="bordered"
+                                        color={errors.password ? "danger" : "primary"}
+                                        startContent={
+                                            <LockClosedIcon 
+                                                className="w-4 h-4"
+                                                style={{ color: 'var(--theme-foreground, #11181C)60' }}
+                                            />
+                                        }
+                                        endContent={
+                                            <Tooltip content={isPasswordVisible ? "Hide password" : "Show password"}>
+                                                <Button
+                                                    isIconOnly
+                                                    variant="light"
+                                                    size="sm"
+                                                    onPress={togglePasswordVisibility}
+                                                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                                                >
+                                                    {isPasswordVisible ? (
+                                                        <EyeSlashIcon className="w-4 h-4 text-foreground/60" />
+                                                    ) : (
+                                                        <EyeIcon className="w-4 h-4 text-foreground/60" />
+                                                    )}
+                                                </Button>
+                                            </Tooltip>
+                                        }
+                                        classNames={{
+                                            input: [
+                                                "bg-transparent",
+                                                "text-foreground",
+                                                "placeholder:text-foreground/60"
+                                            ],
+                                            inputWrapper: [
+                                                "backdrop-blur-sm",
+                                                "border-divider/50",
+                                                "hover:border-primary/50",
+                                                "focus-within:!border-primary",
+                                                "!cursor-text"
+                                            ]
+                                        }}
+                                        style={{
+                                            '--input-bg': 'color-mix(in srgb, var(--theme-content2, #F4F4F5) 50%, transparent)'
+                                        }}
+                                    />
+                                </motion.div>
+
+                                {/* Remember Me & Forgot Password */}
+                                <motion.div 
+                                    variants={itemVariants}
+                                    className="flex items-center justify-between"
+                                >
+                                    <Checkbox
+                                        checked={data.remember}
+                                        onChange={(checked) => setData('remember', checked)}
+                                        size="sm"
+                                        color="primary"
+                                    >
+                                        <span 
+                                            className="text-sm"
+                                            style={{ color: 'var(--theme-foreground, #11181C)80' }}
+                                        >
+                                            Remember me
+                                        </span>
+                                    </Checkbox>
+
+                                    {canResetPassword && (
+                                        <Link
+                                            href={route('password.request')}
+                                            className="text-sm font-medium transition-colors duration-200 hover:underline"
+                                            style={{ color: 'var(--theme-primary, #006FEE)' }}
+                                        >
+                                            Forgot password?
+                                        </Link>
                                     )}
                                 </motion.div>
-                            )}
+
+                                {/* Sign In Button */}
+                                <motion.div variants={itemVariants}>
+                                    <Button
+                                        type="submit"
+                                        color="primary"
+                                        size="lg"
+                                        className="w-full font-semibold"
+                                        isLoading={processing}
+                                        disabled={processing}
+                                        style={{
+                                            background: processing 
+                                                ? 'var(--theme-primary, #006FEE)70' 
+                                                : `linear-gradient(135deg, 
+                                                    var(--theme-primary, #006FEE), 
+                                                    color-mix(in srgb, var(--theme-primary, #006FEE) 90%, var(--theme-secondary, #7C3AED))
+                                                  )`,
+                                            boxShadow: processing 
+                                                ? 'none' 
+                                                : `0 8px 24px color-mix(in srgb, var(--theme-primary, #006FEE) 30%, transparent)`
+                                        }}
+                                    >
+                                        {processing ? 'Signing in...' : 'Sign In'}
+                                    </Button>
+                                </motion.div>
+
+                                <Divider className="my-6" />
+
+                                {/* Sign Up Link */}
+                                <motion.div 
+                                    variants={itemVariants}
+                                    className="text-center"
+                                >
+                                    <p 
+                                        className="text-sm"
+                                        style={{ color: 'var(--theme-foreground, #11181C)70' }}
+                                    >
+                                        Don't have an account?{' '}
+                                        <Link
+                                            href={route('register')}
+                                            className="font-semibold transition-colors duration-200 hover:underline"
+                                            style={{ color: 'var(--theme-primary, #006FEE)' }}
+                                        >
+                                            Sign up here
+                                        </Link>
+                                    </p>
+                                </motion.div>
+
+                                {/* Footer */}
+                                <motion.div 
+                                    variants={itemVariants}
+                                    className="pt-4 border-t border-divider/50"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Chip
+                                            size="sm"
+                                            variant="flat"
+                                            color="primary"
+                                            startContent={<ShieldCheckIcon className="w-3 h-3" />}
+                                        >
+                                            Secure Login
+                                        </Chip>
+                                    </div>
+                                    <p 
+                                        className="text-xs text-center mt-3 opacity-60"
+                                        style={{ color: 'var(--theme-foreground, #11181C)' }}
+                                    >
+                                        © 2025 Emam Hosen. All rights reserved.
+                                    </p>
+                                </motion.div>
+                            </form>
                         </div>
-                    </div>
+                    </Card>
                 </motion.div>
-            )}
-
-            <form onSubmit={submit} className="auth-form-spacing">{/* Using responsive spacing class */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                >
-                    <Input
-                        type="email"
-                        label="Email address"
-                        placeholder="Enter your email"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                        isInvalid={!!errors.email}
-                        errorMessage={errors.email}
-                        autoComplete="username"
-                        autoFocus
-                        isRequired
-                        color={errors.email ? "danger" : "primary"}
-                        startContent={<EnvelopeIcon className="w-4 h-4 text-default-400" />}
-                        InputProps={{
-                            startAdornment: (
-                                <EnvelopeIcon className="w-4 h-4 text-default-400 pointer-events-none shrink-0 mr-2" />
-                            ),
-                            sx: {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '12px',
-                                '&:hover': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                                '&.Mui-focused': {
-                                    background: 'rgba(255, 255, 255, 0.08)',
-                                },
-                            }
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'primary.main',
-                                },
-                            },
-                        }}
-                    />
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <Input
-                        type={isPasswordVisible ? "text" : "password"}
-                        label="Password"
-                        placeholder="Enter your password"
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                        isInvalid={!!errors.password}
-                        errorMessage={errors.password}
-                        autoComplete="current-password"
-                        isRequired
-                        color={errors.password ? "danger" : "primary"}
-                        startContent={<LockClosedIcon className="w-4 h-4 text-default-400" />}
-                        endContent={
-                            <button
-                                className="focus:outline-none"
-                                type="button"
-                                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
-                            >
-                                {isPasswordVisible ? (
-                                    <EyeSlashIcon className="w-4 h-4 text-default-400" />
-                                ) : (
-                                    <EyeIcon className="w-4 h-4 text-default-400" />
-                                )}
-                            </button>
-                        }
-                    />
-                    </motion.div>
-
-                <motion.div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                >
-                    <Checkbox
-                        checked={data.remember}
-                        onChange={(e) => setData('remember', e.target.checked)}
-                        label="Remember me"
-                        description="Keep me signed in for 30 days"
-                    />
-
-                    {canResetPassword && (
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <Link
-                                href={route('password.request')}
-                                className="text-sm font-medium transition-colors duration-200 hover:underline"
-                                style={{ color: 'var(--theme-primary)' }}
-                            >
-                                Forgot password?
-                            </Link>
-                        </motion.div>
-                    )}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    <HeroButton
-                        type="submit"
-                        color="primary"
-                        size="lg"
-                        className="w-full"
-                        isLoading={processing}
-                        disabled={processing}
-                    >
-                        {processing ? 'Signing in...' : 'Sign in'}
-                    </HeroButton>
-                </motion.div>
-
-                <motion.div
-                    className="text-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                >
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        Don't have an account?{' '}
-                        <motion.span whileHover={{ scale: 1.05 }} className="inline-block">
-                            <Link
-                                href={route('register')}
-                                className="font-medium transition-colors duration-200 hover:underline"
-                                style={{ color: 'var(--theme-primary)' }}
-                            >
-                                Sign up here
-                            </Link>
-                        </motion.span>
-                    </p>
-                </motion.div>
-                {/* Footer */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6, delay: 1.2 }}
-                            className="mt-3"
-                        >
-                            <p className="text-xs text-default-500 text-center opacity-60">
-                                © 2025 Emam Hosen. All rights reserved.
-                            </p>
-                        </motion.div>
-                
-            </form>
-
-           
-        </AuthLayout>
+            </div>
+        </>
     );
 }

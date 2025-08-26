@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Divider, Link } from "@heroui/react";
+import { usePage } from '@inertiajs/react';
 import { 
   HeartIcon, 
   GlobeAltIcon,
@@ -7,13 +8,16 @@ import {
   PhoneIcon 
 } from '@heroicons/react/24/outline';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import GlassCard from '@/Components/GlassCard.jsx';
-// Remove gradientUtils import - using HeroUI semantic colors instead
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 768px)');
+    const { theme } = useTheme();
+    const { url } = usePage();
+    const activePage = url;
 
     const quickLinks = [
         { label: 'Dashboard', href: '/dashboard' },
@@ -98,17 +102,41 @@ const Footer = () => {
                                         Quick Links
                                     </h4>
                                     <div className="grid grid-cols-2 gap-2">
-                                        {quickLinks.map((link, index) => (
-                                            <Link
-                                                key={index}
-                                                href={link.href}
-                                                color="foreground"
-                                                className="text-sm hover:text-primary transition-colors duration-200"
-                                                underline="hover"
-                                            >
-                                                {link.label}
-                                            </Link>
-                                        ))}
+                                        {quickLinks.map((link, index) => {
+                                            const isActive = activePage === link.href;
+                                            return (
+                                                <Link
+                                                    key={index}
+                                                    href={link.href}
+                                                    className="text-sm transition-all duration-200 p-2 rounded-lg"
+                                                    underline="hover"
+                                                    style={isActive ? {
+                                                        backgroundColor: `color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`,
+                                                        border: `var(--borderWidth, 2px) solid var(--theme-primary, #006FEE)`,
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                        color: `#FFFFFF`
+                                                    } : {
+                                                        border: `var(--borderWidth, 2px) solid transparent`,
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                        color: `var(--theme-foreground, #11181C)`
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isActive) {
+                                                            e.target.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`;
+                                                            e.target.style.color = `var(--theme-primary, #006FEE)`;
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (!isActive) {
+                                                            e.target.style.border = `var(--borderWidth, 2px) solid transparent`;
+                                                            e.target.style.color = `var(--theme-foreground, #11181C)`;
+                                                        }
+                                                    }}
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -126,16 +154,42 @@ const Footer = () => {
                                                 <Link
                                                     key={index}
                                                     href={contact.href}
-                                                    color="foreground"
-                                                    className="flex items-center gap-3 text-sm hover:text-primary transition-colors duration-200"
+                                                    className="flex items-center gap-3 text-sm transition-all duration-200 p-2 rounded-lg"
                                                     underline="none"
+                                                    style={{
+                                                        border: `var(--borderWidth, 2px) solid transparent`,
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                        color: `var(--theme-foreground, #11181C)`
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`;
+                                                        e.target.style.color = `var(--theme-primary, #006FEE)`;
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.border = `var(--borderWidth, 2px) solid transparent`;
+                                                        e.target.style.color = `var(--theme-foreground, #11181C)`;
+                                                    }}
                                                 >
-                                                    <div className="shrink-0 w-8 h-8 rounded-lg bg-default-100 flex items-center justify-center">
-                                                        <IconComponent className="w-4 h-4" />
+                                                    <div 
+                                                        className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                                                        style={{
+                                                            backgroundColor: `var(--theme-content1, #FAFAFA)`,
+                                                            borderRadius: `var(--borderRadius, 8px)`
+                                                        }}
+                                                    >
+                                                        <IconComponent 
+                                                            className="w-4 h-4" 
+                                                            style={{ color: `var(--theme-foreground, #11181C)` }}
+                                                        />
                                                     </div>
                                                     <div>
                                                         <div className="font-medium">{contact.label}</div>
-                                                        <div className="text-default-500 text-xs">{contact.value}</div>
+                                                        <div 
+                                                            className="text-xs"
+                                                            style={{ color: `var(--theme-foreground-500, #71717A)` }}
+                                                        >
+                                                            {contact.value}
+                                                        </div>
                                                     </div>
                                                 </Link>
                                             );

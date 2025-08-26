@@ -93,6 +93,28 @@ const ThemeSettingDrawer = ({
         }
     }, [themeSettings?.background]);
 
+    // Cleanup overlay when drawer is closed
+    useEffect(() => {
+        return () => {
+            if (!isOpen) {
+                // Clean up any remaining overlays when drawer is closed
+                const overlay = document.getElementById('background-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+                
+                // Reset any remaining pointer-events issues
+                const body = document.body;
+                const elements = body.querySelectorAll('[style*="pointer-events"]');
+                elements.forEach(el => {
+                    if (el.id === 'background-overlay') {
+                        el.remove();
+                    }
+                });
+            }
+        };
+    }, [isOpen]);
+
     // Handle color updates
     const handleCustomColorChange = (colorKey, newColor) => {
         const updatedColors = {
@@ -413,6 +435,7 @@ const ThemeSettingDrawer = ({
             size="lg"
             placement="center"
             hideCloseButton
+            backdrop='blur'
         
       
             scrollBehavior="inside"
