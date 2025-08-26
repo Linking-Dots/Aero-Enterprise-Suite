@@ -120,7 +120,7 @@ export default function Dashboard({ auth }) {
                     <motion.div key="main-grid" variants={itemVariants}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Punch Status Card - for employees and self-service users */}
-                            {hasEveryPermission(['attendance.own.punch', 'attendance.own.view']) &&
+                            {/* {hasEveryPermission(['attendance.own.punch', 'attendance.own.view']) &&
                                 <div key="punch-status-grid" className="flex">
                                     <motion.div
                                         key="punch-status-card"
@@ -135,7 +135,7 @@ export default function Dashboard({ auth }) {
                                         <PunchStatusCard handlePunchSuccess={handlePunchSuccess} />
                                     </motion.div>
                                 </div>
-                            }
+                            } */}
                             {/* Statistics Card - for users with dashboard access
                             {hasPermission('core.dashboard.view') &&
                                 <div key="statistics-grid" className="flex">

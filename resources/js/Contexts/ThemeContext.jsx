@@ -15,6 +15,20 @@ export const ThemeProvider = ({ children }) => {
   const [themeSettings, setThemeSettings] = useState({
     mode: 'light', // 'light' or 'dark'
     activeTheme: 'heroui', // Current prebuilt theme
+    customColors: {
+      primary: '#006FEE',
+      secondary: '#17C964',
+      success: '#17C964',
+      warning: '#F5A524',
+      danger: '#F31260',
+      content1: '#FFFFFF',
+      content2: '#F4F4F5',
+      content3: '#E4E4E7',
+      content4: '#D4D4D8',
+      background: '#FFFFFF',
+      foreground: '#000000',
+      divider: '#E4E4E7'
+    },
     layout: {
       fontFamily: 'Inter',
       borderRadius: '8px',
@@ -79,6 +93,20 @@ export const ThemeProvider = ({ children }) => {
     setThemeSettings({
       mode: 'light',
       activeTheme: 'heroui',
+      customColors: {
+        primary: '#006FEE',
+        secondary: '#17C964',
+        success: '#17C964',
+        warning: '#F5A524',
+        danger: '#F31260',
+        content1: '#FFFFFF',
+        content2: '#F4F4F5',
+        content3: '#E4E4E7',
+        content4: '#D4D4D8',
+        background: '#FFFFFF',
+        foreground: '#000000',
+        divider: '#E4E4E7'
+      },
       layout: {
         fontFamily: 'Inter',
         borderRadius: '8px',

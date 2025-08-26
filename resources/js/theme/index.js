@@ -345,9 +345,14 @@ export const applyThemeToDocument = (theme) => {
   root.setAttribute('data-theme', theme.mode);
   root.setAttribute('data-active-theme', theme.activeTheme);
   
-  // Get theme colors
-  const baseTheme = getTheme(theme.activeTheme);
-  const themeColors = isDark ? { ...baseTheme.colors, ...darkModeColors } : baseTheme.colors;
+  // Get theme colors - use custom colors if activeTheme is 'custom'
+  let themeColors;
+  if (theme.activeTheme === 'custom' && theme.customColors) {
+    themeColors = theme.customColors;
+  } else {
+    const baseTheme = getTheme(theme.activeTheme);
+    themeColors = isDark ? { ...baseTheme.colors, ...darkModeColors } : baseTheme.colors;
+  }
   
   // Apply CSS custom properties for semantic colors
   root.style.setProperty('--background', themeColors.background);
@@ -358,6 +363,22 @@ export const applyThemeToDocument = (theme) => {
   root.style.setProperty('--warning', typeof themeColors.warning === 'object' ? themeColors.warning.DEFAULT : themeColors.warning);
   root.style.setProperty('--danger', typeof themeColors.danger === 'object' ? themeColors.danger.DEFAULT : themeColors.danger);
   root.style.setProperty('--default', typeof themeColors.default === 'object' ? themeColors.default.DEFAULT : themeColors.default);
+  
+  // Apply theme variables with --theme- prefix for consistency
+  root.style.setProperty('--theme-primary', typeof themeColors.primary === 'object' ? themeColors.primary.DEFAULT : themeColors.primary);
+  root.style.setProperty('--theme-secondary', typeof themeColors.secondary === 'object' ? themeColors.secondary.DEFAULT : themeColors.secondary);
+  root.style.setProperty('--theme-success', typeof themeColors.success === 'object' ? themeColors.success.DEFAULT : themeColors.success);
+  root.style.setProperty('--theme-warning', typeof themeColors.warning === 'object' ? themeColors.warning.DEFAULT : themeColors.warning);
+  root.style.setProperty('--theme-danger', typeof themeColors.danger === 'object' ? themeColors.danger.DEFAULT : themeColors.danger);
+  root.style.setProperty('--theme-background', themeColors.background || '#FFFFFF');
+  root.style.setProperty('--theme-foreground', themeColors.foreground || '#000000');
+  root.style.setProperty('--theme-divider', themeColors.divider || '#E4E4E7');
+  
+  // Apply content colors
+  if (themeColors.content1) root.style.setProperty('--theme-content1', themeColors.content1);
+  if (themeColors.content2) root.style.setProperty('--theme-content2', themeColors.content2);
+  if (themeColors.content3) root.style.setProperty('--theme-content3', themeColors.content3);
+  if (themeColors.content4) root.style.setProperty('--theme-content4', themeColors.content4);
   
   // Apply layout properties
   if (theme.layout) {

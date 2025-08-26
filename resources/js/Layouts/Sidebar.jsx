@@ -24,7 +24,8 @@ import {
   HomeIcon,
   StarIcon,
   ClockIcon
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/outline"; 
+  
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../../public/assets/images/logo.png';
 
@@ -255,7 +256,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             variant="light"
             color={hasActiveSubPage ? "primary" : "default"}
             startContent={
-              <div style={hasActiveSubPage ? { color: 'white' } : {}}>
+              <div style={hasActiveSubPage ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}>
                 {React.cloneElement(page.icon, { className: iconSize })}
               </div>
             }
@@ -269,13 +270,22 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 />
               </motion.div>
             }
-            className={`w-full justify-start ${height} ${paddingLeft} bg-transparent hover:bg-white/10 transition-all duration-200 rounded-xl mb-0.5`}
+            className={`w-full justify-start ${height} ${paddingLeft} bg-transparent transition-all duration-200 rounded-xl mb-0.5`}
             style={activeStyle}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = `var(--theme-content2, #F4F4F5)`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
             onPress={() => handleSubMenuToggle(page.name)}
             size="sm"
           >
             <div className="flex items-center justify-between w-full">
-              <span className={`${textSize} font-medium`} style={hasActiveSubPage ? { color: 'white' } : {}}>
+              <span 
+                className={`${textSize} font-medium`} 
+                style={hasActiveSubPage ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}
+              >
                 {highlightSearchMatch(page.name, searchTerm)}
               </span>
               <motion.div
@@ -304,7 +314,12 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className={`${level === 0 ? (isMobile ? 'ml-8' : 'ml-6') : (isMobile ? 'ml-6' : 'ml-4')} mt-1 space-y-0.5 border-l-2 border-primary/20 pl-3`}>
+                <div 
+                  className={`${level === 0 ? (isMobile ? 'ml-8' : 'ml-6') : (isMobile ? 'ml-6' : 'ml-4')} mt-1 space-y-0.5 pl-3`}
+                  style={{ 
+                    borderLeft: `2px solid var(--theme-primary, #006FEE)20`
+                  }}
+                >
                   {page.subMenu.map((subPage, index) => (
                     <motion.div
                       key={`subitem-${page.name}-${subPage.name}-${level}-${index}`}
@@ -341,18 +356,36 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             variant="light"
             startContent={
               <motion.div 
-                style={isActive ? { color: 'white' } : {}}
+                style={isActive ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.2 }}
               >
                 {React.cloneElement(page.icon, { className: iconSize })}
               </motion.div>
             }
-            className={`w-full justify-start ${height} ${paddingLeft} bg-transparent hover:bg-white/10 transition-all duration-200 rounded-xl mb-0.5 ${isActive ? 'bg-primary/20 border-l-3 border-primary text-white' : ''}`}
+            className={`w-full justify-start ${height} ${paddingLeft} bg-transparent transition-all duration-200 rounded-xl mb-0.5`}
+            style={isActive ? {
+              backgroundColor: `var(--theme-primary, #006FEE)20`,
+              borderLeft: `3px solid var(--theme-primary, #006FEE)`,
+              color: `var(--theme-primary-foreground, #FFFFFF)`
+            } : {}}
+            onMouseEnter={(e) => {
+              if (!isActive) {
+                e.target.style.backgroundColor = `var(--theme-content2, #F4F4F5)`;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
             onPress={() => handlePageClick(page.name)}
             size="sm"
           >
-            <span className={`${textSize} font-medium ${isActive ? 'text-white' : ''}`}>
+            <span 
+              className={`${textSize} font-medium`}
+              style={isActive ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}
+            >
               {highlightSearchMatch(page.name, searchTerm)}
             </span>
           </Button>
@@ -372,7 +405,7 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
           variant="light"
           color={hasActiveSubPage ? "primary" : "default"}
           startContent={
-            <div style={hasActiveSubPage ? { color: 'white' } : {}}>
+            <div style={hasActiveSubPage ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}>
               {React.cloneElement(page.icon, { className: iconSize })}
             </div>
           }
@@ -383,17 +416,26 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             >
               <ChevronRightIcon 
                 className="w-3 h-3"
-                style={isExpanded ? { color: 'white' } : {}}
+                style={isExpanded ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}
               />
             </motion.div>
           }
-          className={`w-full justify-start ${height} ${paddingLeft} bg-transparent hover:bg-white/10 transition-all duration-200 rounded-xl mb-0.5`}
+          className={`w-full justify-start ${height} ${paddingLeft} bg-transparent transition-all duration-200 rounded-xl mb-0.5`}
           style={activeStyle}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = `var(--theme-content2, #F4F4F5)`;
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'transparent';
+          }}
           onPress={() => handleSubMenuToggle(page.name)}
           size="sm"
         >
           <div className="flex items-center justify-between w-full">
-            <span className={`${textSize} font-medium`} style={hasActiveSubPage ? { color: 'white' } : {}}>
+            <span 
+              className={`${textSize} font-medium`} 
+              style={hasActiveSubPage ? { color: `var(--theme-primary-foreground, #FFFFFF)` } : {}}
+            >
               {highlightSearchMatch(page.name, searchTerm)}
             </span>
             <motion.div
@@ -422,7 +464,12 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <div className={`${level === 0 ? (isMobile ? 'ml-8' : 'ml-6') : (isMobile ? 'ml-6' : 'ml-4')} mt-1 space-y-0.5 border-l-2 border-primary/20 pl-3`}>
+              <div 
+                className={`${level === 0 ? (isMobile ? 'ml-8' : 'ml-6') : (isMobile ? 'ml-6' : 'ml-4')} mt-1 space-y-0.5 pl-3`}
+                style={{ 
+                  borderLeft: `2px solid var(--theme-primary, #006FEE)20`
+                }}
+              >
                 {page.subMenu?.map((subPage, index) => (
                   <motion.div
                     key={`category-subitem-${page.name}-${subPage.name}-${level}-${index}`}
@@ -503,7 +550,12 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
           <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
             isExpanded ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
           }`}>
-            <div className={`${marginLeft} mt-2 space-y-1 border-l-2 border-primary/20 pl-4 relative`}>
+            <div 
+              className={`${marginLeft} mt-2 space-y-1 pl-4 relative`}
+              style={{ 
+                borderLeft: `2px solid var(--theme-primary, #006FEE)20`
+              }}
+            >
               {page.subMenu.map((subPage, index) => (
                 <div
                   key={`full-submenu-${page.name}-${subPage.name}-${level}-${index}`}
@@ -569,18 +621,29 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
   const SidebarContent = (
     <motion.div 
       className="flex flex-col h-full w-full overflow-hidden"
+      style={{ 
+        background: `linear-gradient(to bottom right, 
+          var(--theme-content1, #FAFAFA) 20%, 
+          var(--theme-content2, #F4F4F5) 10%, 
+          var(--theme-content3, #F1F3F4) 20%)`
+      }}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       {/* Fixed Header - Using PageHeader theming */}
       <motion.div 
-        className="bg-primary/10 border border-primary/20 shrink-0"
+        className="shrink-0"
+        style={{ 
+          backgroundColor: `var(--theme-primary, #006FEE)10`,
+          borderColor: `var(--theme-primary, #006FEE)20`,
+          border: '1px solid'
+        }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <div className="p-3 border-b border-white/10">
+        <div className="p-3" style={{ borderBottom: '1px solid var(--theme-divider, #E4E4E7)' }}>
           <div className="flex items-center justify-between mb-3">
             <motion.div 
               className="flex items-center gap-3"
@@ -590,7 +653,14 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             >
               {/* Enhanced Logo Display */}
               <div className="relative">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xl overflow-hidden bg-primary/10 border border-primary/20">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xl overflow-hidden"
+                  style={{ 
+                    backgroundColor: `var(--theme-primary, #006FEE)10`,
+                    borderColor: `var(--theme-primary, #006FEE)20`,
+                    border: '1px solid'
+                  }}
+                >
                   <img 
                     src={logo} 
                     alt={`${app?.name || 'Company'} Logo`} 
@@ -602,22 +672,37 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                     }}
                   />
                   <div 
-                    className="font-black text-white text-sm absolute inset-0 flex items-center justify-center"
-                    style={{ display: 'none' }}
+                    className="font-black text-sm absolute inset-0 flex items-center justify-center"
+                    style={{ 
+                      display: 'none',
+                      color: 'var(--theme-foreground, #11181C)'
+                    }}
                   >
                     A
                   </div>
                 </div>
                 {/* Status Indicator */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse shadow-lg"></div>
+                <div 
+                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 animate-pulse shadow-lg"
+                  style={{ 
+                    backgroundColor: 'var(--theme-success, #17C964)',
+                    borderColor: 'var(--theme-background, #FFFFFF)'
+                  }}
+                ></div>
               </div>
               
               {/* Brand Information */}
               <div className="flex flex-col leading-tight">
-                <h1 className="font-bold text-base text-primary">
+                <h1 
+                  className="font-bold text-base"
+                  style={{ color: `var(--theme-primary, #006FEE)` }}
+                >
                   {app?.name || 'Company Name'}
                 </h1>
-                <p className="text-default-400 text-xs font-medium">
+                <p 
+                  className="text-xs font-medium"
+                  style={{ color: `var(--theme-foreground-500, #71717A)` }}
+                >
                   aeos365
                 </p>
               </div>
@@ -631,7 +716,17 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 variant="light"
                 size="sm"
                 onPress={toggleSideBar}
-                className="text-foreground hover:bg-white/10 transition-all duration-200 min-w-6 w-6 h-6"
+                className="min-w-6 w-6 h-6 transition-all duration-200"
+                style={{ 
+                  color: `var(--theme-foreground, #11181C)`,
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = `var(--theme-content2, #F4F4F5)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
               >
                 <XMarkIcon className="w-3 h-3" />
               </Button>
@@ -664,13 +759,24 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 placeholder="Search navigation..."
                 value={searchTerm}
                 onValueChange={setSearchTerm}
-                startContent={<MagnifyingGlassIcon className="w-3 h-3 text-default-400" />}
+                startContent={
+                  <MagnifyingGlassIcon 
+                    className="w-3 h-3" 
+                    style={{ color: `var(--theme-foreground-400, #A1A1AA)` }}
+                  />
+                }
                 isClearable
                 variant="bordered"
                 className="text-xs"
                 classNames={{
                   input: "text-xs",
-                  inputWrapper: "h-8 min-h-8 bg-white/5 border-white/10 hover:border-white/20 focus-within:border-primary/50"
+                  inputWrapper: "h-8 min-h-8"
+                }}
+                style={{
+                  '--input-bg': `var(--theme-content2, #F4F4F5)`,
+                  '--input-border': `var(--theme-divider, #E4E4E7)`,
+                  '--input-border-hover': `var(--theme-primary, #006FEE)20`,
+                  '--input-border-focus': `var(--theme-primary, #006FEE)50`,
                 }}
               />
             </motion.div>
@@ -684,8 +790,14 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 transition={{ duration: 0.3, delay: 0.6 }}
               >
                 <div className="flex items-center gap-2 px-2 py-1">
-                  <HomeIcon className="w-3 h-3 text-primary" />
-                  <span className="text-primary font-bold text-xs uppercase tracking-wide">
+                  <HomeIcon 
+                    className="w-3 h-3" 
+                    style={{ color: `var(--theme-primary, #006FEE)` }}
+                  />
+                  <span 
+                    className="font-bold text-xs uppercase tracking-wide"
+                    style={{ color: `var(--theme-primary, #006FEE)` }}
+                  >
                     Main
                   </span>
                   <Divider className="flex-1" />
@@ -712,11 +824,20 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 transition={{ duration: 0.3, delay: 0.8 }}
               >
                 <div className="flex items-center gap-2 px-2 py-1">
-                  <ShieldCheckIcon className="w-3 h-3 text-warning" />
-                  <span className="text-warning font-bold text-xs uppercase tracking-wide">
+                  <ShieldCheckIcon 
+                    className="w-3 h-3" 
+                    style={{ color: `var(--theme-warning, #F5A524)` }}
+                  />
+                  <span 
+                    className="font-bold text-xs uppercase tracking-wide"
+                    style={{ color: `var(--theme-warning, #F5A524)` }}
+                  >
                     Admin
                   </span>
-                  <div className="flex-1 h-px bg-warning/20"></div>
+                  <div 
+                    className="flex-1 h-px"
+                    style={{ backgroundColor: `var(--theme-warning, #F5A524)20` }}
+                  ></div>
                 </div>
                 {groupedPages.settingsPages.map((page, index) => (
                   <motion.div
@@ -767,11 +888,20 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <MagnifyingGlassIcon className="w-8 h-8 text-default-300 mb-3" />
-                <p className="text-default-400 text-center text-sm font-medium mb-1">
+                <MagnifyingGlassIcon 
+                  className="w-8 h-8 mb-3" 
+                  style={{ color: `var(--theme-foreground-300, #D4D4D8)` }}
+                />
+                <p 
+                  className="text-center text-sm font-medium mb-1"
+                  style={{ color: `var(--theme-foreground-400, #A1A1AA)` }}
+                >
                   No results found
                 </p>
-                <p className="text-default-300 text-center text-xs">
+                <p 
+                  className="text-center text-xs"
+                  style={{ color: `var(--theme-foreground-300, #D4D4D8)` }}
+                >
                   Try searching with different keywords
                 </p>
               </motion.div>
@@ -780,17 +910,27 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
             {/* Quick Actions - New Feature */}
             {!searchTerm.trim() && (
               <motion.div 
-                className="space-y-1 mt-6 pt-4 border-t border-white/10"
+                className="space-y-1 mt-6 pt-4"
+                style={{ borderTop: `1px solid var(--theme-divider, #E4E4E7)` }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 1.0 }}
               >
                 <div className="flex items-center gap-2 px-2 py-1">
-                  <ClockIcon className="w-3 h-3 text-success" />
-                  <span className="text-success font-bold text-xs uppercase tracking-wide">
+                  <ClockIcon 
+                    className="w-3 h-3" 
+                    style={{ color: `var(--theme-success, #17C964)` }}
+                  />
+                  <span 
+                    className="font-bold text-xs uppercase tracking-wide"
+                    style={{ color: `var(--theme-success, #17C964)` }}
+                  >
                     Quick Actions
                   </span>
-                  <div className="flex-1 h-px bg-success/20"></div>
+                  <div 
+                    className="flex-1 h-px"
+                    style={{ backgroundColor: `var(--theme-success, #17C964)20` }}
+                  ></div>
                 </div>
                 
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -798,7 +938,16 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                     variant="light"
                     size="sm"
                     startContent={<ClockIcon className="w-3 h-3" />}
-                    className="w-full justify-start h-8 px-4 bg-transparent hover:bg-success/10 transition-all duration-200 rounded-xl text-xs"
+                    className="w-full justify-start h-8 px-4 bg-transparent transition-all duration-200 rounded-xl text-xs"
+                    style={{
+                      '--button-hover': `var(--theme-success, #17C964)10`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = `var(--theme-success, #17C964)10`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
                   >
                     Recent Activities
                   </Button>
@@ -809,7 +958,16 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
                     variant="light"
                     size="sm"
                     startContent={<StarIcon className="w-3 h-3" />}
-                    className="w-full justify-start h-8 px-4 bg-transparent hover:bg-warning/10 transition-all duration-200 rounded-xl text-xs"
+                    className="w-full justify-start h-8 px-4 bg-transparent transition-all duration-200 rounded-xl text-xs"
+                    style={{
+                      '--button-hover': `var(--theme-warning, #F5A524)10`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = `var(--theme-warning, #F5A524)10`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
                   >
                     Favorites
                   </Button>
@@ -822,21 +980,36 @@ const Sidebar = React.memo(({ toggleSideBar, pages, url, sideBarOpen }) => {
 
       {/* Fixed Footer - Using PageHeader theming */}
       <motion.div 
-        className="p-2 border-t border-white/10 shrink-0"
+        className="p-2 shrink-0"
+        style={{ borderTop: `1px solid var(--theme-divider, #E4E4E7)` }}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 1.1 }}
       >
-        <Card className="flex items-center justify-between p-2 transition-all duration-300" radius="md" shadow="sm">
+        <Card 
+          className="flex items-center justify-between p-2 transition-all duration-300" 
+          radius="md" 
+          shadow="sm"
+          style={{ backgroundColor: `var(--theme-content1, #FAFAFA)` }}
+        >
           <div className="flex items-center gap-1">
             <motion.div 
-              className="w-1.5 h-1.5 bg-green-400 rounded-full"
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: `var(--theme-success, #17C964)` }}
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <span className="text-xs font-medium text-foreground">Online</span>
+            <span 
+              className="text-xs font-medium"
+              style={{ color: `var(--theme-foreground, #11181C)` }}
+            >
+              Online
+            </span>
           </div>
-          <span className="text-default-500 text-xs">
+          <span 
+            className="text-xs"
+            style={{ color: `var(--theme-foreground-500, #71717A)` }}
+          >
             v2.1.0
           </span>
         </Card>

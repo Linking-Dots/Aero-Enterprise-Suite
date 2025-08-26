@@ -42,8 +42,48 @@ const ThemeSettingDrawer = ({
     const [backgroundOpacity, setBackgroundOpacity] = useState(themeSettings?.background?.opacity || 100);
     const [backgroundBlur, setBackgroundBlur] = useState(themeSettings?.background?.blur || 0);
 
+    // Color customization state
+    const [customColors, setCustomColors] = useState({
+        primary: themeSettings?.customColors?.primary || '#006FEE',
+        secondary: themeSettings?.customColors?.secondary || '#17C964', 
+        success: themeSettings?.customColors?.success || '#17C964',
+        warning: themeSettings?.customColors?.warning || '#F5A524',
+        danger: themeSettings?.customColors?.danger || '#F31260',
+        content1: themeSettings?.customColors?.content1 || '#FFFFFF',
+        content2: themeSettings?.customColors?.content2 || '#F4F4F5',
+        content3: themeSettings?.customColors?.content3 || '#E4E4E7',
+        content4: themeSettings?.customColors?.content4 || '#D4D4D8',
+        background: themeSettings?.customColors?.background || '#FFFFFF',
+        foreground: themeSettings?.customColors?.foreground || '#000000',
+        divider: themeSettings?.customColors?.divider || '#E4E4E7'
+    });
+
     // Ensure prebuiltThemes is an array
     const themeOptions = Array.isArray(prebuiltThemes) ? prebuiltThemes : [];
+
+    // Base colors for custom theming (updated with better colors)
+    const baseColors = [
+        { name: 'Blue', value: '#3B82F6', key: 'primary' },
+        { name: 'Purple', value: '#8B5CF6', key: 'secondary' },
+        { name: 'Green', value: '#10B981', key: 'success' },
+        { name: 'Orange', value: '#F59E0B', key: 'warning' },
+        { name: 'Red', value: '#EF4444', key: 'danger' }
+    ];
+
+    // Content colors (semantic colors)
+    const contentColors = [
+        { name: 'Content 1', value: '#FFFFFF', key: 'content1' },
+        { name: 'Content 2', value: '#F4F4F5', key: 'content2' },
+        { name: 'Content 3', value: '#E4E4E7', key: 'content3' },
+        { name: 'Content 4', value: '#D4D4D8', key: 'content4' }
+    ];
+
+    // Layout colors
+    const layoutColors = [
+        { name: 'Background', value: '#FFFFFF', key: 'background' },
+        { name: 'Foreground', value: '#000000', key: 'foreground' },
+        { name: 'Divider', value: '#E4E4E7', key: 'divider' }
+    ];
 
     // Apply current background settings on mount
     useEffect(() => {
@@ -53,29 +93,37 @@ const ThemeSettingDrawer = ({
         }
     }, [themeSettings?.background]);
 
-    // Base colors for custom theming (these can remain hardcoded as they're UI choices)
-    const baseColors = [
-        { name: 'Black', value: '#000000' },
-        { name: 'Purple', value: '#9353D3' },
-        { name: 'Green', value: '#17C964' },
-        { name: 'Orange', value: '#F5A524' },
-        { name: 'Pink', value: '#F31260' }
-    ];
+    // Handle color updates
+    const handleCustomColorChange = (colorKey, newColor) => {
+        const updatedColors = {
+            ...customColors,
+            [colorKey]: newColor
+        };
+        setCustomColors(updatedColors);
+        
+        // Update theme with custom colors
+        updateTheme({
+            customColors: updatedColors,
+            activeTheme: 'custom' // Switch to custom theme when colors are changed
+        });
+    };
 
-    // Content colors (semantic colors)
-    const contentColors = [
-        { name: 'content-1', value: '#F4F4F5' },
-        { name: 'content-2', value: '#E4E4E7' },
-        { name: 'content-3', value: '#D4D4D8' },
-        { name: 'content-4', value: '#A1A1AA' }
-    ];
+    // Handle preset color selection
+    const handlePresetColorSelect = (colorKey, presetColor) => {
+        handleCustomColorChange(colorKey, presetColor);
+    };
 
-    // Layout colors
-    const layoutColors = [
-        { name: 'background', value: '#FFFFFF' },
-        { name: 'orange', value: '#F97316' },
-        { name: 'black', value: '#000000' }
-    ];
+    // Handle prebuilt theme selection
+    const handlePrebuiltThemeSelect = (themeId) => {
+        updateTheme({
+            activeTheme: themeId
+        });
+    };
+
+    // Simple native color picker handler
+    const handleNativeColorChange = (colorKey, color) => {
+        handleCustomColorChange(colorKey, color);
+    };
 
     // Convert theme file options to format expected by UI
     const fontOptions = fontFamilies.map(font => ({
@@ -126,13 +174,6 @@ const ThemeSettingDrawer = ({
         { value: 'space', label: 'Space' },
         { value: 'round', label: 'Round' }
     ];
-
-    const handlePrebuiltThemeSelect = (themeId) => {
-        updateTheme({
-            ...themeSettings,
-            activeTheme: themeId
-        });
-    };
 
     const handleColorChange = (property, value) => {
         // Color changes are handled automatically by the HeroUI theme system
@@ -461,36 +502,117 @@ const ThemeSettingDrawer = ({
                                             </SelectItem>
                                         ))}
                                     </Select>
+                                </div>
 
-                                    {/* Theme Preview List */}
-                                    <div className="space-y-2">
-                                        {themeOptions.slice(0, 5).map((themeOption) => (
-                                            <div
-                                                key={themeOption.id}
-                                                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-default-50 ${
-                                                    (themeSettings?.activeTheme || 'heroui') === themeOption.id 
-                                                        ? 'border-primary bg-primary/5' 
-                                                        : 'border-default-200 bg-white'
-                                                }`}
-                                                onClick={() => handlePrebuiltThemeSelect(themeOption.id)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex gap-1">
-                                                        {themeOption.colors.slice(0, 4).map((color, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className="w-3 h-3 rounded-sm border border-default-200"
-                                                                style={{ backgroundColor: color }}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-sm font-medium text-default-700">{themeOption.name}</span>
+                                {/* Default Color Section */}
+                                <div>
+                                    <SectionHeader 
+                                        icon={
+                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                                            </svg>
+                                        } 
+                                        title="Default Color" 
+                                    />
+                                    
+                                    <div className="flex gap-3">
+                                        <div className="relative group">
+                                            <input
+                                                type="color"
+                                                value={customColors.primary}
+                                                onChange={(e) => handleNativeColorChange('primary', e.target.value)}
+                                                className="w-12 h-12 rounded-lg border-2 border-default-200 cursor-pointer hover:scale-105 transition-transform"
+                                                style={{ backgroundColor: customColors.primary }}
+                                            />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                Primary Color
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Base Colors Section */}
+                                <div>
+                                    <SectionHeader 
+                                        icon={
+                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                            </svg>
+                                        } 
+                                        title="Base colors" 
+                                    />
+                                    
+                                    <div className="grid grid-cols-5 gap-3">
+                                        {baseColors.map((color, index) => (
+                                            <div key={color.key} className="relative group">
+                                                <input
+                                                    type="color"
+                                                    value={customColors[color.key] || color.value}
+                                                    onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
+                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
+                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    {color.name}
                                                 </div>
-                                                {(themeSettings?.activeTheme || 'heroui') === themeOption.id && (
-                                                    <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Content Colors Section */}
+                                <div>
+                                    <SectionHeader 
+                                        icon={
+                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        } 
+                                        title="Content colors" 
+                                    />
+                                    
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {contentColors.map((color, index) => (
+                                            <div key={color.key} className="relative group">
+                                                <input
+                                                    type="color"
+                                                    value={customColors[color.key] || color.value}
+                                                    onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
+                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
+                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    {color.name}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Layout Colors Section */}
+                                <div>
+                                    <SectionHeader 
+                                        icon={
+                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                                            </svg>
+                                        } 
+                                        title="Layout colors" 
+                                    />
+                                    
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {layoutColors.map((color, index) => (
+                                            <div key={color.key} className="relative group">
+                                                <input
+                                                    type="color"
+                                                    value={customColors[color.key] || color.value}
+                                                    onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
+                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
+                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    {color.name}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

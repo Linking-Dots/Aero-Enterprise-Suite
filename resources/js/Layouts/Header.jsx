@@ -125,7 +125,11 @@ const Header = React.memo(({
                 isIconOnly
                 variant="light"
                 onPress={toggleSideBar}
-                className="text-foreground hover:bg-white/10 transition-all duration-300"
+                className="text-foreground hover:bg-primary/10 transition-all duration-300"
+                style={{
+                  color: 'var(--theme-foreground, inherit)',
+                  '--hover-bg': 'var(--theme-primary, #006FEE)15'
+                }}
                 size="sm"
                 aria-label={sideBarOpen ? "Close sidebar" : "Open sidebar"}
               >
@@ -136,12 +140,16 @@ const Header = React.memo(({
               {!sideBarOpen && (
                 <NavbarBrand className="flex items-center gap-3 min-w-0">
                   <div className="relative">
-                    <div className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden bg-primary/10 border border-primary/20"
-                         style={{ 
-                           width: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
-                           height: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
-                           aspectRatio: '1'
-                         }}>
+                    <div 
+                      className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden border"
+                      style={{ 
+                        width: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
+                        height: 'calc(60px - 20px)', // Dynamic: navbar height minus padding
+                        aspectRatio: '1',
+                        backgroundColor: 'var(--theme-primary, #006FEE)15',
+                        borderColor: 'var(--theme-primary, #006FEE)30'
+                      }}
+                    >
                       <img 
                         src={logo} 
                         alt={`${app?.name || 'Company'} Logo`} 
@@ -172,11 +180,16 @@ const Header = React.memo(({
           <NavbarContent justify="center" className="hidden md:flex flex-1 max-w-md">
             <Input
               placeholder="Search..."
-              startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+              startContent={<MagnifyingGlassIcon className="w-4 h-4" style={{ color: 'var(--theme-foreground, #666)60' }} />}
               endContent={<Kbd className="hidden lg:inline-block" keys={["command"]}>K</Kbd>}
               classNames={{
-                inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
+                inputWrapper: "backdrop-blur-md border hover:bg-opacity-20",
                 input: "text-sm"
+              }}
+              style={{
+                '--input-bg': 'var(--theme-background, #FFFFFF)10',
+                '--input-border': 'var(--theme-divider, #E4E4E7)',
+                '--input-hover-bg': 'var(--theme-background, #FFFFFF)15'
               }}
               size="sm"
             />
@@ -188,7 +201,11 @@ const Header = React.memo(({
             <Button
               isIconOnly
               variant="light"
-              className="md:hidden text-foreground hover:bg-white/10"
+              className="md:hidden text-foreground"
+              style={{
+                color: 'var(--theme-foreground, inherit)',
+                '--hover-bg': 'var(--theme-primary, #006FEE)10'
+              }}
               size="sm"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
@@ -308,13 +325,20 @@ const Header = React.memo(({
       transition={{ duration: 0.3 }}
       style={{ display: !trigger ? 'block' : 'none' }}
     >
-      <div className="p-4 bg-transparent">
+      <div className="p-4" style={{ backgroundColor: 'var(--theme-background, transparent)05' }}>
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card>
+          <Card 
+            className="backdrop-blur-md border"
+            style={{
+              backgroundColor: 'var(--theme-background, #FFFFFF)80',
+              borderColor: 'var(--theme-divider, #E4E4E7)',
+              '--card-shadow': '0 8px 32px var(--theme-primary, #006FEE)10'
+            }}
+          >
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center justify-between py-4 gap-6 min-h-[72px]">
                 {/* Logo and Menu Toggle */}
@@ -323,7 +347,11 @@ const Header = React.memo(({
                     isIconOnly
                     variant="light"
                     onPress={toggleSideBar}
-                    className="text-foreground hover:bg-white/10 transition-all duration-300"
+                    className="text-foreground hover:bg-primary/10 transition-all duration-300"
+                    style={{
+                      color: 'var(--theme-foreground, inherit)',
+                      '--hover-bg': 'var(--theme-primary, #006FEE)10'
+                    }}
                     size="sm"
                     aria-label={sideBarOpen ? "Close sidebar" : "Open sidebar"}
                   >
@@ -956,15 +984,23 @@ const Header = React.memo(({
         >
           <div className="flex items-center justify-between w-full px-3 py-2 data-[hover=true]:bg-gray-50 data-[focus=true]:bg-gray-50 dark:data-[hover=true]:bg-gray-800/50 dark:data-[focus=true]:bg-gray-800/50 transition-colors duration-200">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+              <div 
+                className="w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: 'var(--theme-warning, #F5A524)20',
+                  color: 'var(--theme-warning, #F5A524)'
+                }}
+              >
                 {themeSettings.mode === 'dark' ? 
-                  <MoonIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" /> : 
-                  <SunIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                  <MoonIcon className="w-4 h-4" /> : 
+                  <SunIcon className="w-4 h-4" />
                 }
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">Dark Mode</span>
-                <span className="text-xs text-default-400">
+                <span className="text-sm font-medium" style={{ color: 'var(--theme-foreground, inherit)' }}>
+                  Dark Mode
+                </span>
+                <span className="text-xs" style={{ color: 'var(--theme-foreground, inherit)60' }}>
                   {themeSettings.mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
                 </span>
               </div>
