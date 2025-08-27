@@ -38,11 +38,12 @@ class AttendanceSettingController extends Controller
         ]);
 
         $settings = AttendanceSetting::first();
-        if (!$settings) {
+        if (! $settings) {
             $settings = AttendanceSetting::create($data);
         } else {
             $settings->update($data);
         }
+
         return response()->json([
             'message' => 'Attendance settings updated successfully.',
             'attendanceSettings' => $settings,
@@ -64,6 +65,7 @@ class AttendanceSettingController extends Controller
         $data['config'] = $data['config'] ?? [];
         $data['required_permissions'] = $data['required_permissions'] ?? [];
         $type = AttendanceType::create($data);
+
         return response()->json([
             'message' => 'Attendance type created.',
             'attendanceType' => $type,
@@ -86,7 +88,7 @@ class AttendanceSettingController extends Controller
             ]);
 
             $type->update([
-                'config' => $data['config']
+                'config' => $data['config'],
             ]);
 
             return response()->json([
@@ -98,7 +100,7 @@ class AttendanceSettingController extends Controller
         // Full update for all fields
         $data = $request->validate([
             'name' => 'sometimes|required|string',
-            'slug' => 'sometimes|required|string|unique:attendance_types,slug,' . $id,
+            'slug' => 'sometimes|required|string|unique:attendance_types,slug,'.$id,
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'config' => 'nullable|array',

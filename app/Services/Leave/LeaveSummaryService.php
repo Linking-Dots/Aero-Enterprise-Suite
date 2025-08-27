@@ -2,12 +2,11 @@
 
 namespace App\Services\Leave;
 
+use App\Models\HRM\Department;
 use App\Models\HRM\Leave;
 use App\Models\HRM\LeaveSetting;
 use App\Models\User;
-use App\Models\HRM\Department;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class LeaveSummaryService
 {
@@ -25,26 +24,26 @@ class LeaveSummaryService
         // Get filtered users with department and designation info
         $usersQuery = User::with(['department', 'designation'])
             ->whereHas('department') // Only users with departments
-            ->when($departmentId, fn($q) => $q->where('department_id', $departmentId))
-            ->when($employeeId, fn($q) => $q->where('id', $employeeId))
+            ->when($departmentId, fn ($q) => $q->where('department_id', $departmentId))
+            ->when($employeeId, fn ($q) => $q->where('id', $employeeId))
             ->orderBy('name');
 
         $users = $usersQuery->get();
 
         // Get leave types (exclude Weekend)
         $leaveTypes = LeaveSetting::where('type', '!=', 'Weekend')
-            ->when($leaveTypeFilter, fn($q) => $q->where('id', $leaveTypeFilter))
+            ->when($leaveTypeFilter, fn ($q) => $q->where('id', $leaveTypeFilter))
             ->orderBy('type')
             ->get();
 
         // Get leaves with optimized query
         $leavesQuery = Leave::with(['leaveSetting', 'employee.department'])
             ->whereYear('from_date', $year)
-            ->whereHas('leaveSetting', fn($q) => $q->where('type', '!=', 'Weekend'))
-            ->when($departmentId, fn($q) => $q->whereHas('employee', fn($eq) => $eq->where('department_id', $departmentId)))
-            ->when($employeeId, fn($q) => $q->where('user_id', $employeeId))
-            ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
-            ->when($leaveTypeFilter, fn($q) => $q->where('leave_type', $leaveTypeFilter));
+            ->whereHas('leaveSetting', fn ($q) => $q->where('type', '!=', 'Weekend'))
+            ->when($departmentId, fn ($q) => $q->whereHas('employee', fn ($eq) => $eq->where('department_id', $departmentId)))
+            ->when($employeeId, fn ($q) => $q->where('user_id', $employeeId))
+            ->when($statusFilter, fn ($q) => $q->where('status', $statusFilter))
+            ->when($leaveTypeFilter, fn ($q) => $q->where('leave_type', $leaveTypeFilter));
 
         $leaves = $leavesQuery->get();
 
@@ -52,7 +51,7 @@ class LeaveSummaryService
         $months = [
             1 => 'JAN', 2 => 'FEB', 3 => 'MAR', 4 => 'APR',
             5 => 'MAY', 6 => 'JUN', 7 => 'JUL', 8 => 'AUG',
-            9 => 'SEP', 10 => 'OCT', 11 => 'NOV', 12 => 'DEC'
+            9 => 'SEP', 10 => 'OCT', 11 => 'NOV', 12 => 'DEC',
         ];
 
         $leaveTypeColumns = $leaveTypes->pluck('type')->toArray();
@@ -72,7 +71,7 @@ class LeaveSummaryService
 
         foreach ($users as $user) {
             $userLeaves = $leaves->where('user_id', $user->id);
-            
+
             $row = [
                 'id' => $user->id,
                 'SL NO' => $sl_no++,
@@ -90,7 +89,7 @@ class LeaveSummaryService
             // Calculate monthly leave days (only approved)
             foreach ($months as $num => $label) {
                 $monthLeaves = $userLeaves->filter(
-                    fn($leave) => Carbon::parse($leave->from_date)->month == $num
+                    fn ($leave) => Carbon::parse($leave->from_date)->month == $num
                 );
 
                 $approvedDays = $monthLeaves->where('status', 'Approved')->sum('no_of_days');
@@ -98,8 +97,8 @@ class LeaveSummaryService
                 $rejectedDays = $monthLeaves->where('status', 'Declined')->sum('no_of_days');
 
                 $row[$label] = $approvedDays > 0 ? $approvedDays : '';
-                $row[$label . '_pending'] = $pendingDays > 0 ? $pendingDays : '';
-                
+                $row[$label.'_pending'] = $pendingDays > 0 ? $pendingDays : '';
+
                 $total += $approvedDays;
                 $totalApproved += $approvedDays;
                 $totalPending += $pendingDays;
@@ -130,8 +129,8 @@ class LeaveSummaryService
             }
 
             // Calculate usage percentage
-            $row['usage_percentage'] = $balanceInfo['total_allocated'] > 0 
-                ? round(($total / $balanceInfo['total_allocated']) * 100, 1) 
+            $row['usage_percentage'] = $balanceInfo['total_allocated'] > 0
+                ? round(($total / $balanceInfo['total_allocated']) * 100, 1)
                 : 0;
 
             $result[] = $row;
@@ -178,10 +177,10 @@ class LeaveSummaryService
 
         foreach ($leaveTypes as $leaveType) {
             $used = $userLeaves->where('leave_type', $leaveType->id)
-                              ->where('status', 'Approved')
-                              ->sum('no_of_days');
+                ->where('status', 'Approved')
+                ->sum('no_of_days');
             $allocated = $leaveType->days ?? 0;
-            
+
             $totalAllocated += $allocated;
             $totalUsed += $used;
         }
@@ -199,10 +198,10 @@ class LeaveSummaryService
     private function generateDepartmentSummary(array $data): array
     {
         $departments = [];
-        
+
         foreach ($data as $row) {
             $dept = $row['department'];
-            if (!isset($departments[$dept])) {
+            if (! isset($departments[$dept])) {
                 $departments[$dept] = [
                     'department' => $dept,
                     'employee_count' => 0,
@@ -213,7 +212,7 @@ class LeaveSummaryService
                     'avg_usage_percentage' => 0,
                 ];
             }
-            
+
             $departments[$dept]['employee_count']++;
             $departments[$dept]['total_leaves'] += $row['total_used'];
             $departments[$dept]['total_approved'] += $row['total_approved'];
@@ -238,7 +237,7 @@ class LeaveSummaryService
     {
         // Implementation for CSV/Excel export
         return [
-            'filename' => "leave_summary_" . now()->format('Y-m-d') . ".$format",
+            'filename' => 'leave_summary_'.now()->format('Y-m-d').".$format",
             'data' => $data,
             'headers' => array_keys($data[0] ?? []),
         ];

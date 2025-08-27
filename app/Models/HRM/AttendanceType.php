@@ -18,13 +18,13 @@ class AttendanceType extends Model
         'config',
         'is_active',
         'priority',
-        'required_permissions'
+        'required_permissions',
     ];
 
     protected $casts = [
         'config' => 'array',
         'required_permissions' => 'array',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     // Relationship with users

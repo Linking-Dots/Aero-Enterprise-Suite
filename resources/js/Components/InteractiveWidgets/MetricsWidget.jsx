@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@nextui-org/react';
-import { TrendingUpIcon, TrendingDownIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import GlassCard from '../GlassCard.jsx';
 
 
@@ -111,9 +111,9 @@ const MetricsWidget = ({
         {previousValue && (
           <div className="flex items-center gap-2 mb-4">
             {isPositive ? (
-              <TrendingUpIcon className="w-4 h-4 text-success" />
+              <ArrowTrendingUpIcon className="w-4 h-4 text-success" />
             ) : (
-              <TrendingDownIcon className="w-4 h-4 text-danger" />
+              <ArrowTrendingDownIcon className="w-4 h-4 text-danger" />
             )}
             <span 
               className={`text-xs font-semibold ${isPositive ? 'text-success' : 'text-danger'}`}

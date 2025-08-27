@@ -11,25 +11,25 @@ class QrCodeValidator extends BaseAttendanceValidator
     {
         $validQrCodes = $this->attendanceType->config['qr_codes'] ?? [];
         $qrCode = $this->request->input('qr_code');
-        
-        if (!$qrCode) {
+
+        if (! $qrCode) {
             return $this->errorResponse('QR code is required for validation.');
         }
 
         if (empty($validQrCodes)) {
             return $this->errorResponse('No QR codes configured for this attendance type.');
         }
-        
+
         // Check if the provided QR code is valid and not expired
         $validCode = $this->findValidQrCode($qrCode, $validQrCodes);
-        
-        if (!$validCode) {
+
+        if (! $validCode) {
             return $this->errorResponse('Invalid or expired QR code.', 403);
         }
-        
+
         return $this->successResponse('QR code validated successfully.', [
             'qr_code_id' => $validCode['id'] ?? null,
-            'location' => $validCode['location'] ?? null
+            'location' => $validCode['location'] ?? null,
         ]);
     }
 
@@ -47,16 +47,16 @@ class QrCodeValidator extends BaseAttendanceValidator
                         continue; // Skip expired codes
                     }
                 }
-                
+
                 // Check if QR code is active
-                if (isset($code['is_active']) && !$code['is_active']) {
+                if (isset($code['is_active']) && ! $code['is_active']) {
                     continue; // Skip inactive codes
                 }
-                
+
                 return $code;
             }
         }
-        
+
         return null;
     }
 }

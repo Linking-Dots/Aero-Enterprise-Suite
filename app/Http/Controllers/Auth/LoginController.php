@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\ModernAuthenticationService;
-use App\Services\DeviceTrackingService;
 use App\Models\User;
+use App\Services\DeviceTrackingService;
+use App\Services\ModernAuthenticationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,6 +18,7 @@ use Inertia\Response;
 class LoginController extends Controller
 {
     protected ModernAuthenticationService $authService;
+
     protected DeviceTrackingService $deviceService;
 
     public function __construct(
@@ -58,7 +59,7 @@ class LoginController extends Controller
         $remember = $request->boolean('remember');
 
         // Check rate limiting
-        $key = 'login.' . $request->ip();
+        $key = 'login.'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
 
@@ -94,7 +95,7 @@ class LoginController extends Controller
         $user = User::where('email', $email)->first();
 
         // Validate credentials
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($password, $user->password)) {
             RateLimiter::hit($key, 60); // 1 minute decay
 
             $this->authService->recordFailedAttempt(
@@ -117,7 +118,7 @@ class LoginController extends Controller
         }
 
         // Check if user account is active
-        if (!$user->active) {
+        if (! $user->active) {
             $this->authService->logAuthenticationEvent(
                 $user,
                 'login_inactive_account',
@@ -133,8 +134,8 @@ class LoginController extends Controller
         // Check device restrictions if single device login is enabled
         if ($user->hasSingleDeviceLoginEnabled()) {
             $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
-            
-            if (!$deviceCheck['allowed']) {
+
+            if (! $deviceCheck['allowed']) {
                 $this->authService->logAuthenticationEvent(
                     $user,
                     'login_device_blocked',
@@ -148,7 +149,7 @@ class LoginController extends Controller
                 );
 
                 throw ValidationException::withMessages([
-                    'email' => $deviceCheck['message'] . '. Please contact your administrator to reset your device access.',
+                    'email' => $deviceCheck['message'].'. Please contact your administrator to reset your device access.',
                 ]);
             }
         }

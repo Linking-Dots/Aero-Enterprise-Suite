@@ -25,7 +25,7 @@ class UserFactory extends Factory
     {
         return [
             'user_name' => fake()->name(),
-            'name' => fake()->firstName()." ".fake()->lastName(),
+            'name' => fake()->firstName().' '.fake()->lastName(),
             'employee_id' => fake()->uuid(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->unique()->phoneNumber(),

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Ensure suppliers table exists to avoid foreign key constraint issues
-        if (!Schema::hasTable('suppliers')) {
+        if (! Schema::hasTable('suppliers')) {
             // Migrate the suppliers table first (from 2025_07_08_181530_create_suppliers_table.php)
             Schema::create('suppliers', function (Blueprint $table) {
                 $table->id();

@@ -53,7 +53,7 @@ class CombinedSeeder extends Seeder
         $this->command->info('Setting up roles and permissions...');
 
         // Use the ComprehensiveRolePermissionSeeder directly
-        $permissionSeeder = new ComprehensiveRolePermissionSeeder();
+        $permissionSeeder = new ComprehensiveRolePermissionSeeder;
         $permissionSeeder->setCommand($this->command);
         $permissionSeeder->run();
 
@@ -74,30 +74,30 @@ class CombinedSeeder extends Seeder
                 'slug' => 'geo_polygon',
                 'config' => [
                     'polygons' => [
-                        [[10.1, 123.5], [10.2, 123.5], [10.2, 123.6], [10.1, 123.6]]
-                    ]
-                ]
+                        [[10.1, 123.5], [10.2, 123.5], [10.2, 123.6], [10.1, 123.6]],
+                    ],
+                ],
             ]);
 
             AttendanceType::create([
                 'name' => 'Office Wi-Fi',
                 'slug' => 'wifi_ip',
                 'config' => [
-                    'allowed_ips' => ['192.168.0.100', '203.0.113.10']
-                ]
+                    'allowed_ips' => ['192.168.0.100', '203.0.113.10'],
+                ],
             ]);
 
             // Create rules for the first user (typically admin)
             AttendanceRule::create([
                 'attendance_type_id' => 1,
                 'applicable_to_type' => User::class,
-                'applicable_to_id' => 1
+                'applicable_to_id' => 1,
             ]);
 
             AttendanceRule::create([
                 'attendance_type_id' => 2,
                 'applicable_to_type' => User::class,
-                'applicable_to_id' => 1
+                'applicable_to_id' => 1,
             ]);
         }
     }
@@ -373,14 +373,14 @@ class CombinedSeeder extends Seeder
         // Check if any user exists
         $user = $userModel::first();
 
-        if (!$user) {
+        if (! $user) {
             // Create a default admin user
             $user = $userModel::create([
                 'name' => 'Test Administrator',
                 'email' => 'admin@example.com',
                 'password' => bcrypt('password'),
                 'user_name' => 'admin',
-                'employee_id' => 'EMP001'
+                'employee_id' => 'EMP001',
             ]);
             $this->command->info('Created admin user: admin@example.com / password');
         }
@@ -390,7 +390,7 @@ class CombinedSeeder extends Seeder
 
         if ($superAdminRole) {
             // Check if the user already has the role
-            if (!$user->hasRole('Super Administrator')) {
+            if (! $user->hasRole('Super Administrator')) {
                 $user->assignRole($superAdminRole);
                 $this->command->info("Assigned Super Administrator role to user: {$user->email}");
             } else {

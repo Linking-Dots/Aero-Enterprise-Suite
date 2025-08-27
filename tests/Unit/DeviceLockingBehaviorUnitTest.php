@@ -5,8 +5,8 @@ namespace Tests\Unit;
 use App\Models\User;
 use App\Services\DeviceTrackingService;
 use Illuminate\Http\Request;
-use Tests\TestCase;
 use Mockery;
+use Tests\TestCase;
 
 class DeviceLockingBehaviorUnitTest extends TestCase
 {
@@ -15,7 +15,7 @@ class DeviceLockingBehaviorUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->deviceService = new DeviceTrackingService();
+        $this->deviceService = new DeviceTrackingService;
     }
 
     /** @test */
@@ -24,11 +24,11 @@ class DeviceLockingBehaviorUnitTest extends TestCase
         // Mock user without single device login enabled
         $user = Mockery::mock(User::class);
         $user->shouldReceive('hasSingleDeviceLoginEnabled')->andReturn(false);
-        
+
         $request = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)');
-        
+
         $result = $this->deviceService->canUserLoginFromDevice($user, $request);
-        
+
         $this->assertTrue($result['allowed']);
         $this->assertEquals('Login allowed', $result['message']);
     }
@@ -39,19 +39,19 @@ class DeviceLockingBehaviorUnitTest extends TestCase
         // Mock user with single device login enabled but no active devices
         $user = Mockery::mock(User::class);
         $user->shouldReceive('hasSingleDeviceLoginEnabled')->andReturn(true);
-        
+
         // Mock the devices relationship
         $devicesRelation = Mockery::mock();
         $devicesRelation->shouldReceive('where->active->first')->andReturn(null); // No exact device match
         $devicesRelation->shouldReceive('where->active->first')->andReturn(null); // No compatible device match
         $devicesRelation->shouldReceive('first')->andReturn(null); // No active devices at all
-        
+
         $user->shouldReceive('devices')->andReturn($devicesRelation);
-        
+
         $request = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)');
-        
+
         $result = $this->deviceService->canUserLoginFromDevice($user, $request);
-        
+
         $this->assertTrue($result['allowed']);
         $this->assertEquals('Login allowed: No active devices found', $result['message']);
     }
@@ -61,10 +61,10 @@ class DeviceLockingBehaviorUnitTest extends TestCase
     {
         $iPhoneRequest = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15');
         $androidRequest = $this->createRequestWithUserAgent('Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36');
-        
+
         $iPhoneDeviceId = $this->deviceService->generateDeviceId($iPhoneRequest);
         $androidDeviceId = $this->deviceService->generateDeviceId($androidRequest);
-        
+
         $this->assertNotEquals($iPhoneDeviceId, $androidDeviceId, 'Different devices should have different device IDs');
     }
 
@@ -73,10 +73,10 @@ class DeviceLockingBehaviorUnitTest extends TestCase
     {
         $iPhone15Request = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15');
         $iPhone16Request = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15');
-        
+
         $iPhone15CompatibleId = $this->deviceService->generateCompatibleDeviceId($iPhone15Request);
         $iPhone16CompatibleId = $this->deviceService->generateCompatibleDeviceId($iPhone16Request);
-        
+
         $this->assertEquals($iPhone15CompatibleId, $iPhone16CompatibleId, 'Same device type with different OS versions should have same compatible ID');
     }
 
@@ -85,10 +85,10 @@ class DeviceLockingBehaviorUnitTest extends TestCase
     {
         $iPhoneRequest = $this->createRequestWithUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15');
         $androidRequest = $this->createRequestWithUserAgent('Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36');
-        
+
         $iPhoneCompatibleId = $this->deviceService->generateCompatibleDeviceId($iPhoneRequest);
         $androidCompatibleId = $this->deviceService->generateCompatibleDeviceId($androidRequest);
-        
+
         $this->assertNotEquals($iPhoneCompatibleId, $androidCompatibleId, 'Different device types should have different compatible IDs');
     }
 

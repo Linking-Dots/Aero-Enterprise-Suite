@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Direct imports - eager loading
-// import TimeSheetTable from '@/Tables/TimeSheetTable.jsx';
-// import UserLocationsCard from '@/Components/UserLocationsCard.jsx';
-// import UpdatesCards from '@/Components/UpdatesCards.jsx';
-// import StatisticCard from '@/Components/StatisticCard.jsx';
+import TimeSheetTable from '@/Tables/TimeSheetTable.jsx';
+import UserLocationsCard from '@/Components/UserLocationsCard.jsx';
+import UpdatesCards from '@/Components/UpdatesCards.jsx';
+import StatisticCard from '@/Components/StatisticCard.jsx';
 import PunchStatusCard from '@/Components/PunchStatusCard.jsx';
 import App from "@/Layouts/App.jsx";
 
@@ -118,46 +118,46 @@ export default function Dashboard({ auth }) {
                 <div className="w-full">
                     {/*<NoticeBoard/>*/}
                     <motion.div key="main-grid" variants={itemVariants}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2">
                             {/* Punch Status Card - for employees and self-service users */}
-                            {/* {hasEveryPermission(['attendance.own.punch', 'attendance.own.view']) &&
-                                <div key="punch-status-grid" className="flex">
+                            {hasEveryPermission(['attendance.own.punch', 'attendance.own.view']) &&
+                                <div key="punch-status-grid" className="h-full">
                                     <motion.div
                                         key="punch-status-card"
                                         variants={staggerItemVariants}
                                         custom={0}
                                         whileHover={{ 
-                                            scale: 1.02,
+                                            scale: 1.01,
                                             transition: { duration: 0.2 }
                                         }}
-                                        style={{ width: '100%', display: 'flex' }}
+                                        className="h-full"
                                     >
                                         <PunchStatusCard handlePunchSuccess={handlePunchSuccess} />
                                     </motion.div>
                                 </div>
-                            } */}
-                            {/* Statistics Card - for users with dashboard access
+                            }
+                            {/* Statistics Card - for users with dashboard access */}
                             {hasPermission('core.dashboard.view') &&
-                                <div key="statistics-grid" className="flex">
+                                <div key="statistics-grid" className="h-full">
                                     <motion.div
                                         key="statistics-card"
                                         variants={staggerItemVariants}
                                         custom={1}
                                         whileHover={{ 
-                                            scale: 1.02,
+                                            scale: 1.01,
                                             transition: { duration: 0.2 }
                                         }}
-                                        style={{ width: '100%', display: 'flex' }}
+                                        className="h-full"
                                     >
                                         <StatisticCard />
                                     </motion.div>
                                 </div>
-                            } */}
+                            }
                         </div>
                     </motion.div>
                     
                     {/* Admin/Manager level components */}
-                    {/* {hasAnyPermission(['attendance.view', 'employees.view']) && (
+                    {hasAnyPermission(['attendance.view', 'employees.view']) && (
                         <motion.div
                             variants={containerVariants}
                             initial="hidden"
@@ -185,10 +185,10 @@ export default function Dashboard({ auth }) {
                                 />
                             </motion.div>
                         </motion.div>
-                    )} */}
+                    )}
                     
                     {/* Updates and holidays - available to all authenticated users */}
-                    {/* {hasPermission('core.updates.view') && (
+                    {hasPermission('core.updates.view') && (
                         <motion.div
                             key="updates-section"
                             variants={staggerItemVariants}
@@ -198,7 +198,7 @@ export default function Dashboard({ auth }) {
                         >
                             <UpdatesCards />
                         </motion.div>
-                    )} */}
+                    )}
                     
                 
                 </div>

@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StatsCards from '@/Components/StatsCards';
 import { motion } from 'framer-motion';
@@ -35,12 +37,13 @@ import 'leaflet-fullscreen/dist/Leaflet.fullscreen.js';
 import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
 import L from 'leaflet';
 import { usePage } from "@inertiajs/react";
-import GlassCard from "@/Components/GlassCard.jsx";
-import PageHeader  from './PageHeader';
 
 // Utility function to replace MUI's alpha function
 const alpha = (color, opacity) => {
-    // Convert hex to rgba or add opacity to existing color
+    if (color.startsWith('var(')) {
+        // Use CSS variable with opacity via color-mix
+        return `color-mix(in srgb, ${color} ${opacity * 100}%, transparent)`;
+    }
     if (color.startsWith('#')) {
         const hex = color.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
@@ -48,8 +51,19 @@ const alpha = (color, opacity) => {
         const b = parseInt(hex.substr(4, 2), 16);
         return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
-    // For existing rgba/rgb colors, just use the opacity
-    return color.replace(/[\d.]+\)$/, `${opacity})`);
+    return color.replace(/[\d.]+\)$/g, `${opacity})`);
+};
+
+// Helper function to convert theme borderRadius to HeroUI radius values
+const getThemeRadius = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+    const radiusValue = parseInt(borderRadius);
+    if (radiusValue === 0) return 'none';
+    if (radiusValue <= 4) return 'sm';
+    if (radiusValue <= 8) return 'md';
+    if (radiusValue <= 16) return 'lg';
+    return 'full';
 };
 
 
@@ -90,7 +104,7 @@ const RoutingMachine = React.memo(({ startLocation, endLocation, theme }) => {
             createMarker: () => null, // Hide default markers
             lineOptions: {
                 styles: [{
-                    color: theme.primary || '#3b82f6',
+                    color: theme?.customColors?.primary || 'var(--theme-primary, #3b82f6)',
                     weight: 4,
                     opacity: 0.8
                 }]
@@ -266,9 +280,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
     }, [selectedDate]);
 
     const createUserIcon = useCallback((user) => {
-        const primaryColor = theme.primary || '#3b82f6';
-        const secondaryColor = theme.secondary || '#8b5cf6';
-        
+        const primaryColor = 'var(--theme-primary, #3b82f6)';
+        const secondaryColor = 'var(--theme-secondary, #8b5cf6)';
         const iconHtml = `
             <div style="
                 width: 40px;
@@ -291,7 +304,6 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 }
             </div>
         `;
-
         return L.divIcon({
             html: iconHtml,
             className: 'user-marker-icon',
@@ -299,16 +311,15 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
             iconAnchor: [20, 20],
             popupAnchor: [0, -20]
         });
-    }, [theme]);
+    }, []);
 
     const createPopupContent = useCallback((user) => {
-        const statusColor = user.punchout_time ? '#10b981' : '#f59e0b'; // green : amber
-        const primaryColor = theme.primary || '#3b82f6';
-        const secondaryColor = theme.secondary || '#8b5cf6';
-        const backgroundColor = '#ffffff';
-        const textPrimary = '#1f2937';
-        const textSecondary = '#6b7280';
-
+        const statusColor = user.punchout_time ? 'var(--theme-success, #17C964)' : 'var(--theme-warning, #F5A524)';
+        const primaryColor = 'var(--theme-primary, #3b82f6)';
+        const secondaryColor = 'var(--theme-secondary, #8b5cf6)';
+        const backgroundColor = 'var(--theme-content1, #ffffff)';
+        const textPrimary = 'var(--theme-foreground, #1f2937)';
+        const textSecondary = 'var(--theme-content3, #6b7280)';
         return `
             <div style="
                 min-width: 250px;
@@ -317,7 +328,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 border-radius: 12px;
                 border: 1px solid ${alpha(primaryColor, 0.2)};
                 backdrop-filter: blur(20px);
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: var(--fontFamily, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
             ">
                 <div style="display: flex; align-items: center; margin-bottom: 12px;">
                     <div style="
@@ -346,7 +357,6 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         </div>
                     </div>
                 </div>
-                
                 <div style="
                     display: inline-block;
                     padding: 4px 8px;
@@ -360,17 +370,15 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 ">
                     ${user.punchout_time ? '✓ Completed' : '⏱ Active'}
                 </div>
-                
                 <div style="space-y: 8px;">
                     <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                        <span style="color: #10b981; margin-right: 8px;">📍</span>
+                        <span style="color: var(--theme-success, #10b981); margin-right: 8px;">📍</span>
                         <span style="color: ${textSecondary}; font-size: 13px;">
                             Check In: ${formatTime(user.punchin_time)}
                         </span>
                     </div>
-                    
                     <div style="display: flex; align-items: center;">
-                        <span style="color: #ef4444; margin-right: 8px;">📍</span>
+                        <span style="color: var(--theme-danger, #ef4444); margin-right: 8px;">📍</span>
                         <span style="color: ${textSecondary}; font-size: 13px;">
                             Check Out: ${formatTime(user.punchout_time)}
                         </span>
@@ -378,7 +386,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 </div>
             </div>
         `;
-    }, [theme, formatTime]);
+    }, [formatTime]);
 
     useEffect(() => {
         if (!map || !users.length) return;
@@ -476,12 +484,15 @@ const useUserStats = (users) => {
 
 // Main Component
 const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
-
+    const { themeSettings } = useTheme();
+    
+    const isLargeScreen = useMediaQuery('(min-width: 1025px)');
+    const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
+    
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadingInitialized, setLoadingInitialized] = useState(false);
-    
     const [lastUpdate, setLastUpdate] = useState(null);
     const [isPolling, setIsPolling] = useState(true);
     const [mapKey, setMapKey] = useState(0);
@@ -490,18 +501,14 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
     const [lastChecked, setLastChecked] = useState(new Date());
     const prevUsersRef = useRef([]);
     const prevUpdateRef = useRef(null);
-     const handleRefresh = useCallback(async () => {
+    const handleRefresh = useCallback(async () => {
         setLoading(true);
-
         try {
-            // Force reload of user locations by triggering a new fetch
             const endpoint = route('getUserLocationsForDate', { 
                 date: selectedDate,
-                _t: Date.now() // Add cache busting parameter
+                _t: Date.now()
             });
-            
             if (!selectedDate) {
-                // Handle case when no date is selected
                 setUsers([]);
                 prevUsersRef.current = [];
                 setMapKey(prev => prev + 1);
@@ -509,32 +516,22 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                 setLastUpdate(new Date());
                 return;
             }
-            
             const response = await fetch(endpoint);
-            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: Failed to refresh user locations`);
             }
-            
             const data = await response.json();
             const locations = Array.isArray(data.locations) ? data.locations : [];
-            
-            // Update the users state and previous reference
             setUsers(locations);
             prevUsersRef.current = locations;
-            
-            // Update the map key to force re-render
             setMapKey(prev => prev + 1);
-            // Update the last checked time
             setLastChecked(new Date());
             setLastUpdate(new Date());
         } catch (error) {
             console.error('Error refreshing map:', error);
-            // Clear users in case of error
             setUsers([]);
             prevUsersRef.current = [];
         } finally {
-            // Always ensure loading is set to false
             setLoading(false);
         }
     }, [selectedDate]);
@@ -666,24 +663,108 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                 transition={{ duration: 0.8 }}
                 className="w-full max-w-full"
             >
-                <GlassCard className="w-full">
-                    <PageHeader
-                        title="Team Locations"
-                        subtitle={formattedDate}
-                        icon={<MapIcon className="w-6 h-6" />}
-                        variant="gradient"
-                        actions={
-                            <div className="flex items-center gap-2">
-                                {lastCheckedText && (
-                                    <span className="text-xs text-gray-500 hidden sm:block">
-                                        Updated: {lastCheckedText}
-                                    </span>
-                                )}
-                            </div>
-                        }
+                <Card 
+                    className="w-full transition-all duration-200"
+                    style={{
+                        border: `var(--borderWidth, 2px) solid transparent`,
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                        transform: `scale(var(--scale, 1))`,
+                        background: `linear-gradient(135deg, 
+                            var(--theme-content1, #FAFAFA) 20%, 
+                            var(--theme-content2, #F4F4F5) 10%, 
+                            var(--theme-content3, #F1F3F4) 20%)`,
+                    }}
+                >
+                    <CardHeader 
+                        className="border-b p-0"
+                        style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                            background: `linear-gradient(135deg, 
+                                color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                        }}
                     >
-                        <Divider />
-                        
+                        <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
+                            <div className="flex flex-col space-y-4">
+                                {/* Main Header Content */}
+                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                    {/* Title Section */}
+                                    <div className="flex items-center gap-3 lg:gap-4">
+                                        <div 
+                                            className={`
+                                                ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                rounded-xl flex items-center justify-center
+                                            `}
+                                            style={{
+                                                background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                borderWidth: `var(--borderWidth, 2px)`,
+                                                borderRadius: `var(--borderRadius, 12px)`,
+                                            }}
+                                        >
+                                            <MapIcon 
+                                                className={`
+                                                    ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                                                `}
+                                                style={{ color: 'var(--theme-primary)' }}
+                                            />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h4 
+                                                className={`
+                                                    ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                    font-bold text-foreground
+                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                `}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
+                                            >
+                                                Team Locations
+                                            </h4>
+                                            <p 
+                                                className={`
+                                                    ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                    text-default-500
+                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                `}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
+                                            >
+                                                {formattedDate}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-4">
+                                        {lastCheckedText && (
+                                            <span 
+                                                className="text-xs text-default-500"
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
+                                            >
+                                                Updated: {lastCheckedText}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <Divider 
+                        style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                        }}
+                    />
+                    <CardBody 
+                        className="p-0"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
                         {/* Stats Cards */}
                         <div className="p-6">
                             <StatsCards
@@ -693,47 +774,73 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                         title: 'Total',
                                         value: userStats.total,
                                         icon: <Users className="w-5 h-5" />,
-                                        color: 'text-blue-400',
+                                        color: 'text-primary',
                                         description: 'Total users tracked',
-                                        iconBg: 'bg-blue-500/20',
-                                        valueColor: 'text-blue-400',
+                                        iconBg: 'bg-primary/20',
+                                        valueColor: 'text-primary',
+                                        customStyle: {
+                                            color: 'var(--theme-primary)',
+                                        }
                                     },
                                     {
                                         title: 'Active',
                                         value: userStats.checkedIn,
                                         icon: <Clock4 className="w-5 h-5" />,
-                                        color: 'text-orange-400',
+                                        color: 'text-warning',
                                         description: 'Currently working',
-                                        iconBg: 'bg-orange-500/20',
-                                        valueColor: 'text-orange-400',
+                                        iconBg: 'bg-warning/20',
+                                        valueColor: 'text-warning',
+                                        customStyle: {
+                                            color: 'var(--theme-warning)',
+                                        }
                                     },
                                     {
                                         title: 'Completed',
                                         value: userStats.completed,
                                         icon: <Place className="w-5 h-5" />,
-                                        color: 'text-green-400',
+                                        color: 'text-success',
                                         description: 'Finished workday',
-                                        iconBg: 'bg-green-500/20',
-                                        valueColor: 'text-green-400',
+                                        iconBg: 'bg-success/20',
+                                        valueColor: 'text-success',
+                                        customStyle: {
+                                            color: 'var(--theme-success)',
+                                        }
                                     }
                                 ]}
-                            
                                 compact={isMobile}
                             />
                         </div>
-                        
                         <div className="p-6 pt-0">
                             {users.length > 0 ? (
-                                <div className="relative h-[70vh] rounded-2xl overflow-hidden border-2 border-primary/10 shadow-2xl">
+                                <div 
+                                    className="relative h-[70vh] rounded-2xl overflow-hidden border-2 shadow-2xl"
+                                    style={{
+                                        borderColor: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                        borderRadius: `var(--borderRadius, 12px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`
+                                    }}
+                                >
                                     {loading && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-xl z-50">
+                                        <div 
+                                            className="absolute inset-0 flex items-center justify-center backdrop-blur-xl z-50"
+                                            style={{
+                                                background: `color-mix(in srgb, var(--theme-content1) 80%, transparent)`,
+                                                fontFamily: `var(--fontFamily, "Inter")`
+                                            }}
+                                        >
                                             <div className="text-center">
-                                                <Spinner size="lg" />
-                                                <p className="mt-4 text-gray-600">Loading locations...</p>
+                                                <Spinner size="lg" color="primary" />
+                                                <p 
+                                                    className="mt-4 text-default-500"
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
+                                                    Loading locations...
+                                                </p>
                                             </div>
                                         </div>
                                     )}
-
                                     <MapContainer
                                         key={`${updateMap}-${mapKey}`}
                                         center={[PROJECT_LOCATIONS.primary.lat, PROJECT_LOCATIONS.primary.lng]}
@@ -754,13 +861,11 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                             maxZoom={MAP_CONFIG.MAX_ZOOM}
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                         />
-                                        
                                         <RoutingMachine 
                                             startLocation={PROJECT_LOCATIONS.route.start} 
                                             endLocation={PROJECT_LOCATIONS.route.end}
-                                            theme={theme}
+                                            theme={themeSettings}
                                         />
-                                        
                                         <UserMarkers 
                                             users={users}
                                             setUsers={setUsers}
@@ -769,22 +874,57 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                             lastUpdate={lastUpdate}
                                             selectedDate={selectedDate}
                                             onUsersLoad={handleUsersLoad}
-                                            theme={theme}
+                                            theme={themeSettings}
                                         />
                                     </MapContainer>
                                 </div>
                             ) : loading ? (
-                                <div className="h-[70vh] rounded-2xl flex items-center justify-center border-2 border-primary/10 shadow-2xl bg-white/50 backdrop-blur-xl">
+                                <div 
+                                    className="h-[70vh] rounded-2xl flex items-center justify-center border-2 shadow-2xl backdrop-blur-xl"
+                                    style={{
+                                        borderColor: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                        background: `color-mix(in srgb, var(--theme-content1) 80%, transparent)`,
+                                        borderRadius: `var(--borderRadius, 12px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`
+                                    }}
+                                >
                                     <div className="text-center">
-                                        <Spinner size="lg" />
-                                        <p className="mt-4 text-gray-600">Loading locations...</p>
+                                        <Spinner size="lg" color="primary" />
+                                        <p 
+                                            className="mt-4 text-default-500"
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`
+                                            }}
+                                        >
+                                            Loading locations...
+                                        </p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="h-[70vh] rounded-2xl flex flex-col items-center justify-center bg-white/50 backdrop-blur-xl border-2 border-primary/10 shadow-2xl p-12">
-                                    <MapIcon className="w-16 h-16 text-gray-400 mb-6" />
-                                    <h3 className="text-xl font-semibold mb-4">No Location Data Available</h3>
-                                    <p className="text-gray-500 mb-6 max-w-md text-center">
+                                <div 
+                                    className="h-[70vh] rounded-2xl flex flex-col items-center justify-center backdrop-blur-xl border-2 shadow-2xl p-12"
+                                    style={{
+                                        background: `color-mix(in srgb, var(--theme-content1) 80%, transparent)`,
+                                        borderColor: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                        borderRadius: `var(--borderRadius, 12px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`
+                                    }}
+                                >
+                                    <MapIcon className="w-16 h-16 text-default-300 mb-6" />
+                                    <h3 
+                                        className="text-xl font-semibold mb-4"
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`
+                                        }}
+                                    >
+                                        No Location Data Available
+                                    </h3>
+                                    <p 
+                                        className="text-default-500 mb-6 max-w-md text-center"
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`
+                                        }}
+                                    >
                                         No team location data found for {formattedDate}. 
                                         {selectedDate && new Date(selectedDate) > new Date() ? 
                                             " This date is in the future." : 
@@ -794,16 +934,20 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                         variant="bordered"
                                         color="primary"
                                         size="md"
+                                        radius={getThemeRadius()}
                                         onPress={handleRefresh}
                                         startContent={<RefreshCw className="w-4 h-4" />}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`
+                                        }}
                                     >
                                         Refresh Data
                                     </Button>
                                 </div>
                             )}
                         </div>
-                    </PageHeader>
-                </GlassCard>
+                    </CardBody>
+                </Card>
             </motion.div>
         </div>
     );

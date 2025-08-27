@@ -26,9 +26,9 @@ class DailyWorkValidationService
         $index = $sheetIndex + 1;
         $referenceDate = $importedDailyWorks[0][0] ?? null;
 
-        if (!$referenceDate) {
+        if (! $referenceDate) {
             throw ValidationException::withMessages([
-                'date' => "Sheet {$index} is missing a reference date."
+                'date' => "Sheet {$index} is missing a reference date.",
             ]);
         }
 
@@ -44,7 +44,7 @@ class DailyWorkValidationService
 
         return [
             'referenceDate' => $referenceDate,
-            'validated' => true
+            'validated' => true,
         ];
     }
 
@@ -78,7 +78,7 @@ class DailyWorkValidationService
             'side.required' => 'Road Type is required.',
             'qty_layer.required' => $request->input('type') === 'Embankment' ? 'Layer No. is required when the type is Embankment.' : '',
             'completion_time.required' => 'Completion time is required.',
-            'qty_layer.string' => 'Quantity/Layer No. is not string'
+            'qty_layer.string' => 'Quantity/Layer No. is not string',
         ]);
     }
 
@@ -124,7 +124,7 @@ class DailyWorkValidationService
     private function buildCustomAttributes(array $importedDailyWorks, int $sheetIndex): array
     {
         $customAttributes = [];
-        
+
         foreach ($importedDailyWorks as $rowIndex => $importedDailyWork) {
             $taskNumber = $importedDailyWork[1] ?? 'unknown';
             $date = $importedDailyWork[0] ?? 'unknown';
@@ -167,13 +167,13 @@ class DailyWorkValidationService
     private function getImportValidationMessages(): array
     {
         return [
-            '*.0.required' => ":attribute must have a valid date.",
-            '*.0.date_format' => ":attribute must be in the format Y-m-d.",
-            '*.1.required' => ":attribute must have a value.",
-            '*.2.required' => ":attribute must have a value.",
-            '*.2.in' => ":attribute must be either Embankment, Structure, or Pavement.",
-            '*.3.required' => ":attribute must have a value.",
-            '*.4.required' => ":attribute must have a value.",
+            '*.0.required' => ':attribute must have a valid date.',
+            '*.0.date_format' => ':attribute must be in the format Y-m-d.',
+            '*.1.required' => ':attribute must have a value.',
+            '*.2.required' => ':attribute must have a value.',
+            '*.2.in' => ':attribute must be either Embankment, Structure, or Pavement.',
+            '*.3.required' => ':attribute must have a value.',
+            '*.4.required' => ':attribute must have a value.',
         ];
     }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // First create supplier_categories
-        if (!Schema::hasTable('supplier_categories')) {
+        if (! Schema::hasTable('supplier_categories')) {
             Schema::create('supplier_categories', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -24,7 +24,7 @@ return new class extends Migration
         }
 
         // Then create suppliers table with proper foreign key to categories
-        if (!Schema::hasTable('suppliers')) {
+        if (! Schema::hasTable('suppliers')) {
             Schema::create('suppliers', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -49,7 +49,7 @@ return new class extends Migration
         }
 
         // Create SCM tables after suppliers is properly created
-        if (!Schema::hasTable('purchase_orders')) {
+        if (! Schema::hasTable('purchase_orders')) {
             Schema::create('purchase_orders', function (Blueprint $table) {
                 $table->id();
                 $table->string('po_number')->unique();
@@ -74,7 +74,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('purchase_order_items')) {
+        if (! Schema::hasTable('purchase_order_items')) {
             Schema::create('purchase_order_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('purchase_order_id')->constrained()->cascadeOnDelete();
@@ -90,7 +90,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('purchase_receipts')) {
+        if (! Schema::hasTable('purchase_receipts')) {
             Schema::create('purchase_receipts', function (Blueprint $table) {
                 $table->id();
                 $table->string('receipt_number')->unique();
@@ -106,7 +106,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('purchase_receipt_items')) {
+        if (! Schema::hasTable('purchase_receipt_items')) {
             Schema::create('purchase_receipt_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('purchase_receipt_id')->constrained()->cascadeOnDelete();
@@ -118,7 +118,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('logistics_carriers')) {
+        if (! Schema::hasTable('logistics_carriers')) {
             Schema::create('logistics_carriers', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -131,7 +131,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('logistics_shipments')) {
+        if (! Schema::hasTable('logistics_shipments')) {
             Schema::create('logistics_shipments', function (Blueprint $table) {
                 $table->id();
                 $table->string('shipment_number')->unique();

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Create inventory_locations table first if it doesn't exist
-        if (!Schema::hasTable('inventory_locations')) {
+        if (! Schema::hasTable('inventory_locations')) {
             Schema::create('inventory_locations', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -27,7 +27,7 @@ return new class extends Migration
         }
 
         // Create inventory_items table if it doesn't exist
-        if (!Schema::hasTable('inventory_items')) {
+        if (! Schema::hasTable('inventory_items')) {
             Schema::create('inventory_items', function (Blueprint $table) {
                 $table->id();
                 $table->string('item_code')->unique();
@@ -51,7 +51,7 @@ return new class extends Migration
         }
 
         // Create inventory_stocks table if it doesn't exist
-        if (!Schema::hasTable('inventory_stocks')) {
+        if (! Schema::hasTable('inventory_stocks')) {
             Schema::create('inventory_stocks', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('inventory_item_id')->constrained()->cascadeOnDelete();
@@ -60,14 +60,14 @@ return new class extends Migration
                 $table->decimal('allocated_quantity', 15, 2)->default(0); // reserved for orders
                 $table->decimal('available_quantity', 15, 2)->default(0); // quantity - allocated_quantity
                 $table->timestamps();
-                
+
                 // Unique constraint to ensure one record per item per location
                 $table->unique(['inventory_item_id', 'location_id']);
             });
         }
 
         // Create stock_movements table if it doesn't exist
-        if (!Schema::hasTable('stock_movements')) {
+        if (! Schema::hasTable('stock_movements')) {
             Schema::create('stock_movements', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('inventory_item_id')->constrained()->cascadeOnDelete();
@@ -83,7 +83,7 @@ return new class extends Migration
         }
 
         // Create inventory_adjustments table if it doesn't exist
-        if (!Schema::hasTable('inventory_adjustments')) {
+        if (! Schema::hasTable('inventory_adjustments')) {
             Schema::create('inventory_adjustments', function (Blueprint $table) {
                 $table->id();
                 $table->string('reference_number');
@@ -98,7 +98,7 @@ return new class extends Migration
         }
 
         // Create inventory_adjustment_items table if it doesn't exist
-        if (!Schema::hasTable('inventory_adjustment_items')) {
+        if (! Schema::hasTable('inventory_adjustment_items')) {
             Schema::create('inventory_adjustment_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('inventory_adjustment_id')->constrained()->cascadeOnDelete();
@@ -113,7 +113,7 @@ return new class extends Migration
         }
 
         // Create inventory_transfers table if it doesn't exist
-        if (!Schema::hasTable('inventory_transfers')) {
+        if (! Schema::hasTable('inventory_transfers')) {
             Schema::create('inventory_transfers', function (Blueprint $table) {
                 $table->id();
                 $table->string('reference_number');
@@ -129,7 +129,7 @@ return new class extends Migration
         }
 
         // Create inventory_transfer_items table if it doesn't exist
-        if (!Schema::hasTable('inventory_transfer_items')) {
+        if (! Schema::hasTable('inventory_transfer_items')) {
             Schema::create('inventory_transfer_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('inventory_transfer_id')->constrained()->cascadeOnDelete();

@@ -20,7 +20,8 @@ import {
   Chip
 } from "@heroui/react";
 
-import ProfileAvatar from '@/Components/ProfileAvatar';
+
+import ProfileMenu from '@/Components/ProfileMenu';
 import { useScrollTrigger } from '@/Hooks/useScrollTrigger.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -37,7 +38,7 @@ import {
   HomeIcon,
   ShieldCheckIcon
 } from "@heroicons/react/24/outline";
-import ProfileMenu from '@/Components/ProfileMenu.jsx';
+
 
 import logo from '../../../public/assets/images/logo.png';
 
@@ -113,7 +114,7 @@ const ProfileButton = React.memo(React.forwardRef(({ size = "sm", ...props }, re
     return "Good evening";
   }, []);
 
-  const buttonSize = size === "sm" ? "small" : "medium";
+
   const avatarSize = size === "sm" ? "sm" : "md";
   
   return (
@@ -213,7 +214,6 @@ const MobileHeader = React.memo(({
 }) => {
   // ===== STATE MANAGEMENT =====
   // Profile dropdown state management (same as desktop)
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [profileMenuState, setProfileMenuState] = useState({
     isLoading: false,
     hasUnreadNotifications: true,
@@ -225,61 +225,6 @@ const MobileHeader = React.memo(({
    * Mobile-optimized profile navigation handler
    * Same functionality as desktop but optimized for touch interactions
    */
-  const handleProfileNavigation = useCallback(async (action, route = null, method = 'get') => {
-    setProfileMenuState(prev => ({ ...prev, isLoading: true }));
-    
-    try {
-      switch (action) {
-        case 'profile':
-          if (route) {
-            await handleNavigation(route, method);
-          } else {
-            await handleNavigation('profile.show', 'get');
-          }
-          break;
-          
-        case 'settings':
-          await handleNavigation('user.settings', 'get');
-          break;
-          
-        case 'logout':
-          // Implement secure logout with proper session cleanup
-          if (confirm('Are you sure you want to sign out?')) {
-            await router.post(route('logout'), {}, {
-              onStart: () => console.log('[Auth] Starting logout process'),
-              onSuccess: () => {
-                console.log('[Auth] Logout successful');
-                // Clear any client-side storage
-                localStorage.removeItem('user_preferences');
-                sessionStorage.clear();
-              },
-              onError: (errors) => {
-                console.error('[Auth] Logout failed:', errors);
-                toast.error('Logout failed. Please try again.');
-              }
-            });
-          }
-          break;
-          
-        case 'switch_account':
-          // Handle account switching for multi-tenant scenarios
-          await handleNavigation('account.switch', 'get');
-          break;
-          
-        default:
-          console.warn(`[Profile] Unknown action: ${action}`);
-          if (route) {
-            await handleNavigation(route, method);
-          }
-      }
-    } catch (error) {
-      console.error('[Profile] Action failed:', error);
-      toast.error('Action failed. Please try again.');
-    } finally {
-      setProfileMenuState(prev => ({ ...prev, isLoading: false }));
-      setIsProfileDropdownOpen(false);
-    }
-  }, [auth.user.id, handleNavigation]);
 
   // ===== ENHANCED PROFILE BUTTON FOR MOBILE =====
   /**
@@ -319,15 +264,19 @@ const MobileHeader = React.memo(({
         className={`
           group relative flex items-center gap-2 cursor-pointer 
           hover:bg-white/10 active:bg-white/15 
-          rounded-xl transition-all duration-300 ease-out
+          transition-all duration-300 ease-out
           focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent
           p-1.5
           ${className}
         `}
+        style={{
+          borderRadius: 'var(--borderRadius, 12px)',
+          fontFamily: 'var(--fontFamily, inherit)',
+          transform: `scale(var(--scale, 1))`
+        }}
         tabIndex={0}
         role="button"
         aria-label={`User menu for ${auth.user.name}. Status: ${profileMenuState.userStatus}`}
-        aria-expanded={isProfileDropdownOpen}
         aria-haspopup="true"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -416,7 +365,10 @@ const MobileHeader = React.memo(({
               animate={{ scale: 2, opacity: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="absolute inset-0 bg-white/20 rounded-xl pointer-events-none"
+              className="absolute inset-0 bg-white/20 pointer-events-none"
+              style={{
+                borderRadius: 'var(--borderRadius, 12px)'
+              }}
             />
           )}
         </AnimatePresence>
@@ -648,28 +600,9 @@ const MobileHeader = React.memo(({
             </Button>
 
             {/* User Profile Menu */}
-            <Dropdown
-              closeDelay={100}
-              isOpen={isProfileDropdownOpen}
-              onOpenChange={setIsProfileDropdownOpen}
-              classNames={{
-                content: "bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden min-w-80"
-              }}
-              placement="bottom-end"
-              shouldCloseOnInteractOutside={(element) => {
-                return !element.closest('[role="switch"]') && !element.closest('[data-testid="dropdown-item"]');
-              }}
-            >
-              <DropdownTrigger>
-                <EnhancedProfileButton size="sm" />
-              </DropdownTrigger>
-              <ProfileMenu 
-                auth={auth} 
-                onNavigate={handleProfileNavigation}
-                userStatus={profileMenuState.userStatus}
-                isLoading={profileMenuState.isLoading}
-              />
-            </Dropdown>
+            <ProfileMenu>
+              <EnhancedProfileButton size="sm" />
+            </ProfileMenu>
           </NavbarContent>
         </Navbar>
       </Card>
@@ -725,7 +658,6 @@ const DesktopHeader = React.memo(({
 }) => {
   // ===== STATE MANAGEMENT =====
   // Using separation of concerns - UI state management isolated from business logic
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [profileMenuState, setProfileMenuState] = useState({
     isLoading: false,
     hasUnreadNotifications: true,
@@ -832,15 +764,19 @@ const DesktopHeader = React.memo(({
         className={`
           group relative flex items-center gap-3 cursor-pointer 
           hover:bg-white/10 active:bg-white/15 
-          rounded-xl transition-all duration-300 ease-out
+          transition-all duration-300 ease-out
           focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent
           ${size === "sm" ? "p-1.5" : size === "lg" ? "p-3" : "p-2"}
           ${className}
         `}
+        style={{
+          borderRadius: 'var(--borderRadius, 12px)',
+          fontFamily: 'var(--fontFamily, inherit)',
+          transform: `scale(var(--scale, 1))`
+        }}
         tabIndex={0}
         role="button"
         aria-label={`User menu for ${auth.user.name}. Status: ${profileMenuState.userStatus}`}
-        aria-expanded={isProfileDropdownOpen}
         aria-haspopup="true"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -946,7 +882,10 @@ const DesktopHeader = React.memo(({
               animate={{ scale: 2, opacity: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="absolute inset-0 bg-white/20 rounded-xl pointer-events-none"
+              className="absolute inset-0 bg-white/20 pointer-events-none"
+              style={{
+                borderRadius: 'var(--borderRadius, 12px)'
+              }}
             />
           )}
         </AnimatePresence>
@@ -961,61 +900,7 @@ const DesktopHeader = React.memo(({
    * Handles profile menu actions with comprehensive error handling
    * Implements enterprise-grade user management patterns
    */
-  const handleProfileNavigation = useCallback(async (action, route = null, method = 'get') => {
-    setProfileMenuState(prev => ({ ...prev, isLoading: true }));
-    
-    try {
-      switch (action) {
-        case 'profile':
-          if (route) {
-            await handleModuleNavigation(route, method);
-          } else {
-            await handleModuleNavigation(`profile.${auth.user.id}`, 'get');
-          }
-          break;
-          
-        case 'settings':
-          await handleModuleNavigation('user.settings', 'get');
-          break;
-          
-        case 'logout':
-          // Implement secure logout with proper session cleanup
-          if (confirm('Are you sure you want to sign out?')) {
-            await router.post(route('logout'), {}, {
-              onStart: () => console.log('[Auth] Starting logout process'),
-              onSuccess: () => {
-                console.log('[Auth] Logout successful');
-                // Clear any client-side storage
-                localStorage.removeItem('user_preferences');
-                sessionStorage.clear();
-              },
-              onError: (errors) => {
-                console.error('[Auth] Logout failed:', errors);
-                toast.error('Logout failed. Please try again.');
-              }
-            });
-          }
-          break;
-          
-        case 'switch_account':
-          // Handle account switching for multi-tenant scenarios
-          await handleModuleNavigation('account.switch', 'get');
-          break;
-          
-        default:
-          console.warn(`[Profile] Unknown action: ${action}`);
-          if (route) {
-            await handleModuleNavigation(route, method);
-          }
-      }
-    } catch (error) {
-      console.error('[Profile] Action failed:', error);
-      toast.error('Action failed. Please try again.');
-    } finally {
-      setProfileMenuState(prev => ({ ...prev, isLoading: false }));
-      setIsProfileDropdownOpen(false);
-    }
-  }, [auth.user.id, handleModuleNavigation]);
+
 
   // ===== ACTIVE STATE DETECTION =====
   /**
@@ -1562,28 +1447,9 @@ const DesktopHeader = React.memo(({
                   </Button>
                   
                   {/* Enhanced Profile Menu */}
-                  <Dropdown
-                    placement="bottom-end"
-                    closeDelay={100}
-                    isOpen={isProfileDropdownOpen}
-                    onOpenChange={setIsProfileDropdownOpen}
-                    classNames={{
-                      content: "bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden min-w-80"
-                    }}
-                    shouldCloseOnInteractOutside={(element) => {
-                      return !element.closest('[role="switch"]') && !element.closest('[data-testid="dropdown-item"]');
-                    }}
-                  >
-                    <DropdownTrigger>
-                      <ProfileButton />
-                    </DropdownTrigger>
-                    <ProfileMenu 
-                      auth={auth} 
-                      onNavigate={handleProfileNavigation}
-                      userStatus={profileMenuState.userStatus}
-                      isLoading={profileMenuState.isLoading}
-                    />
-                  </Dropdown>
+                  <ProfileMenu>
+                    <ProfileButton />
+                  </ProfileMenu>
                 </div>
               </div>
             </div>

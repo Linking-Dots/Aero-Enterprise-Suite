@@ -14,11 +14,18 @@ import {
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
 import DailyWorksTable from '@/Tables/DailyWorksTable.jsx';
-import GlassCard from "@/Components/GlassCard.jsx";
-import PageHeader from "@/Components/PageHeader.jsx";
+import { 
+    Card, 
+    CardHeader, 
+    CardBody, 
+    Input, 
+    Pagination,
+    Button,
+    Spinner,
+    ScrollShadow
+} from "@heroui/react";
 import StatsCards from "@/Components/StatsCards.jsx";
-import { Input, Pagination } from "@heroui/react";
-import useTheme, { getThemePrimaryColor } from '@/theme';
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
 import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
 import DailyWorksDownloadForm from "@/Forms/DailyWorksDownloadForm.jsx";
@@ -27,21 +34,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
-    const { isDark } = useTheme();
-    const primaryColor = getThemePrimaryColor();
-    
-    // Custom media query
-    const [isMobile, setIsMobile] = useState(false);
-    
-    useEffect(() => {
-        const checkScreenSize = () => {
-            setIsMobile(window.innerWidth < 640);
-        };
-        
-        checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
-        return () => window.removeEventListener('resize', checkScreenSize);
-    }, []);
+
+    const isLargeScreen = useMediaQuery('(min-width: 1025px)');
+    const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
+    const isMobile = useMediaQuery('(max-width: 640px)');
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -87,9 +83,9 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard.background,
-                    border: theme.glassCard.border,
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 }
             });
             setLoading(false);
@@ -286,77 +282,189 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 />
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
-                    <GlassCard>
-                        <PageHeader
-                            title="Project Work Management"
-                            subtitle="Track daily work progress and project activities"
-                            icon={<BriefcaseIcon className="w-8 h-8 text-blue-600" />}
-                            actionButtons={actionButtons}
+            <div className="flex justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full max-w-[2000px]"
+                >
+                    <Card 
+                        className="transition-all duration-200"
+                        style={{
+                            border: `var(--borderWidth, 2px) solid transparent`,
+                            borderRadius: `var(--borderRadius, 12px)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                            transform: `scale(var(--scale, 1))`,
+                            background: `linear-gradient(135deg, 
+                                var(--theme-content1, #FAFAFA) 20%, 
+                                var(--theme-content2, #F4F4F5) 10%, 
+                                var(--theme-content3, #F1F3F4) 20%)`,
+                        }}
+                    >
+                        {/* Main Card Content */}
+                        <CardHeader 
+                            className="border-b p-0"
+                            style={{
+                                borderColor: `var(--theme-divider, #E4E4E7)`,
+                                background: `linear-gradient(135deg, 
+                                    color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                    color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                            }}
                         >
-                            <div className="p-6">
-                                {/* Quick Stats */}
-                                <StatsCards stats={stats} />
-                                
-                                {/* Search Section */}
-                                <div className="mb-6">
-                                    <div className="w-full sm:w-auto sm:min-w-[300px]">
-                                        <TextField
-                                            label="Search Work Logs"
-                                            placeholder="Search by description, location, or notes..."
-                                            value={search}
-                                            onChange={handleSearch}
-                                            variant="outlined"
-                                            fullWidth
-                                            size={isMobile ? "small" : "medium"}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                                    </InputAdornment>
-                                                ),
-                                                style: {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    backdropFilter: 'blur(10px)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                    borderRadius: '12px',
-                                                }
-                                            }}
-                                        />
+                            <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
+                                <div className="flex flex-col space-y-4">
+                                    {/* Main Header Content */}
+                                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                        {/* Title Section */}
+                                        <div className="flex items-center gap-3 lg:gap-4">
+                                            <div 
+                                                className={`
+                                                    ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                    rounded-xl flex items-center justify-center
+                                                `}
+                                                style={{
+                                                    background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                    borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                    borderWidth: `var(--borderWidth, 2px)`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                }}
+                                            >
+                                                <BriefcaseIcon 
+                                                    className={`
+                                                        ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                                                    `}
+                                                    style={{ color: 'var(--theme-primary)' }}
+                                                />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <h4 
+                                                    className={`
+                                                        ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                        font-bold text-foreground
+                                                        ${!isLargeScreen ? 'truncate' : ''}
+                                                    `}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                >
+                                                    Project Work Management
+                                                </h4>
+                                                <p 
+                                                    className={`
+                                                        ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                        text-default-500
+                                                        ${!isLargeScreen ? 'truncate' : ''}
+                                                    `}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                >
+                                                    Track daily work progress and project activities
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {/* Action Buttons */}
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2">
+                                                {actionButtons.map((button, index) => (
+                                                    <Button
+                                                        key={index}
+                                                        size={isLargeScreen ? "md" : "sm"}
+                                                        variant={button.variant || "flat"}
+                                                        color={button.color || "primary"}
+                                                        startContent={button.icon}
+                                                        onPress={button.onPress}
+                                                        className={`${button.className || ''} font-medium`}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                            borderRadius: `var(--borderRadius, 12px)`,
+                                                        }}
+                                                    >
+                                                        {button.label}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Daily Works Table */}
-                                <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                                    <DailyWorksTable
-                                        setData={setData}
-                                        filteredData={filteredData}
-                                        setFilteredData={setFilteredData}
-                                        reports={reports}
-                                        setCurrentRow={setCurrentRow}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        setLoading={setLoading}
-                                        handleClickOpen={handleClickOpen}
-                                        openModal={openModal}
-                                        juniors={allData.juniors}
-                                        totalRows={totalRows}
-                                        lastPage={lastPage}
-                                        loading={loading}
-                                        allData={data}
-                                        allInCharges={allData.allInCharges}
-                                        jurisdictions={jurisdictions}
-                                        users={users}
-                                        reports_with_daily_works={reports_with_daily_works}
+                            </div>
+                        </CardHeader>
+                        
+                        <CardBody className="pt-6">
+                            {/* Quick Stats */}
+                            <StatsCards stats={stats} />
+                            
+                            {/* Search Section */}
+                            <div className="mb-6">
+                                <div className="w-full sm:w-auto sm:min-w-[300px]">
+                                    <Input
+                                        type="text"
+                                        placeholder="Search by description, location, or notes..."
+                                        value={search}
+                                        onChange={(e) => handleSearch(e)}
+                                        variant="bordered"
+                                        size={isMobile ? "sm" : "md"}
+                                        radius="md"
+                                        startContent={
+                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                        }
+                                        classNames={{
+                                            input: "text-foreground",
+                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                         focus-within:bg-content2/90 border-divider/50 
+                                                         hover:border-divider data-[focus]:border-primary`,
+                                        }}
+                                        style={{
+                                            fontFamily: 'var(--font-family)',
+                                            borderRadius: 'var(--borderRadius)',
+                                        }}
                                     />
+                                </div>
+                            </div>
+
+                            {/* Daily Works Table */}
+                            <Card 
+                                radius="lg"
+                                className="bg-content2/50 backdrop-blur-md border border-divider/30"
+                                style={{
+                                    fontFamily: 'var(--font-family)',
+                                    borderRadius: 'var(--borderRadius)',
+                                    backgroundColor: 'var(--theme-content2)',
+                                    borderColor: 'var(--theme-divider)',
+                                }}
+                            >
+                                <CardBody className="p-4">
+                                    <ScrollShadow className="max-h-[70vh]">
+                                        <DailyWorksTable
+                                            setData={setData}
+                                            filteredData={filteredData}
+                                            setFilteredData={setFilteredData}
+                                            reports={reports}
+                                            setCurrentRow={setCurrentRow}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            setLoading={setLoading}
+                                            handleClickOpen={handleClickOpen}
+                                            openModal={openModal}
+                                            juniors={allData.juniors}
+                                            totalRows={totalRows}
+                                            lastPage={lastPage}
+                                            loading={loading}
+                                            allData={data}
+                                            allInCharges={allData.allInCharges}
+                                            jurisdictions={jurisdictions}
+                                            users={users}
+                                            reports_with_daily_works={reports_with_daily_works}
+                                        />
+                                    </ScrollShadow>
                                     
                                     {/* Pagination */}
                                     {totalRows >= 30 && (
-                                        <div className="py-4 px-2 flex justify-center items-center">
+                                        <div className="pt-4 flex justify-center items-center">
                                             <Pagination
                                                 initialPage={1}
-                                                isCompact
+                                                isCompact={!isLargeScreen}
                                                 showControls
                                                 showShadow
                                                 color="primary"
@@ -364,20 +472,24 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                                 page={currentPage}
                                                 total={lastPage}
                                                 onChange={handlePageChange}
+                                                radius="md"
                                                 classNames={{
-                                                    wrapper: "bg-white/10 backdrop-blur-md border-white/20",
-                                                    item: "bg-white/5 border-white/10",
+                                                    wrapper: "bg-content1/80 backdrop-blur-md border-divider/50",
+                                                    item: "bg-content1/50 border-divider/30",
                                                     cursor: "bg-primary/20 backdrop-blur-md"
+                                                }}
+                                                style={{
+                                                    fontFamily: 'var(--font-family)',
                                                 }}
                                             />
                                         </div>
                                     )}
-                                </div>
-                            </div>
-                        </PageHeader>
-                    </GlassCard>
-                </Grow>
-            </Box>
+                                </CardBody>
+                            </Card>
+                        </CardBody>
+                    </Card>
+                </motion.div>
+            </div>
         </>
     );
 });

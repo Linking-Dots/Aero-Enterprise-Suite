@@ -77,7 +77,7 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
     // Dynamic card sizing based on count and screen size
     const getCardClasses = () => {
         const count = stats.length;
-        let baseClasses = "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 transition-all duration-200";
+        let baseClasses = "transition-all duration-200";
         
         if (isMobile) {
             // Mobile: More compact cards for better fit
@@ -100,7 +100,16 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
             return `${baseClasses} min-h-[100px]`; // Slightly compact for many cards
         }
         return `${baseClasses} min-h-[120px]`; // Standard desktop height
-    };    if (!stats || stats.length === 0) return null;
+    };
+
+    // Get theme-aware card styles
+    const getCardStyle = () => ({
+        background: `var(--theme-content1, #FAFAFA)`,
+        borderColor: `var(--theme-divider, #E4E4E7)`,
+        borderWidth: `var(--borderWidth, 2px)`,
+        borderRadius: `var(--borderRadius, 12px)`,
+        fontFamily: `var(--fontFamily, "Inter")`,
+    });    if (!stats || stats.length === 0) return null;
 
     return (
         <div className={className}>
@@ -126,8 +135,12 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                 animationDuration: '0.6s',
                                 animationFillMode: 'both',
                                 animationName: 'fadeInUp',
+                                ...getCardStyle(),
                                 ...customStyle
-                            } : customStyle}
+                            } : {
+                                ...getCardStyle(),
+                                ...customStyle
+                            }}
                         >
                             {isMobile && stats.length > 6 ? (
                                 // Ultra-compact mobile layout for many cards
@@ -148,10 +161,22 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <p className={`font-medium ${color} text-xs leading-tight`}>
+                                            <p 
+                                                className="font-medium text-xs leading-tight"
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    ...customStyle
+                                                }}
+                                            >
                                                 {title}
                                             </p>
-                                            <p className={`font-bold ${valueColor || color} text-sm leading-tight`}>
+                                            <p 
+                                                className="font-bold text-sm leading-tight"
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    ...customStyle
+                                                }}
+                                            >
                                                 {value}
                                             </p>
                                         </div>
@@ -176,7 +201,13 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                                     )}
                                                 </div>
                                             )}
-                                            <h6 className={`font-semibold ${color} ${isMobile ? 'text-sm' : 'text-lg'}`}>
+                                            <h6 
+                                                className={`font-semibold ${isMobile ? 'text-sm' : 'text-lg'}`}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    ...customStyle
+                                                }}
+                                            >
                                                 {title}
                                             </h6>
                                         </div>
@@ -184,16 +215,25 @@ const StatsCards = ({ stats = [], gridCols, className = "mb-6", animate = true, 
                                     
                                     <CardBody className={`pt-0 ${isMobile ? 'p-3' : 'p-4'}`}>
                                         <div 
-                                            className={`font-bold ${valueColor || color} ${isMobile ? 'text-xl' : 'text-2xl'}`}
-                                            style={typeof value === 'string' && value.length > 10 ? {
-                                                fontSize: isMobile ? '1rem' : '1.25rem',
-                                                lineHeight: '1.2'
-                                            } : {}}
+                                            className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}
+                                            style={{
+                                                ...(typeof value === 'string' && value.length > 10 ? {
+                                                    fontSize: isMobile ? '1rem' : '1.25rem',
+                                                    lineHeight: '1.2'
+                                                } : {}),
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                ...customStyle
+                                            }}
                                         >
                                             {value}
                                         </div>
                                         {description && (
-                                            <p className={`text-foreground-600 ${isMobile ? 'text-xs' : 'text-sm'} mt-1`}>
+                                            <p 
+                                                className={`text-foreground-600 ${isMobile ? 'text-xs' : 'text-sm'} mt-1`}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
+                                            >
                                                 {description}
                                             </p>
                                         )}

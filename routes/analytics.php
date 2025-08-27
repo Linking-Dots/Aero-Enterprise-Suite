@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Analytics\ReportController;
 use App\Http\Controllers\Analytics\DashboardController;
 use App\Http\Controllers\Analytics\KPIController;
+use App\Http\Controllers\Analytics\ReportController;
 use Illuminate\Support\Facades\Route;
 
 /*

@@ -13,6 +13,7 @@ import {
     Pagination,
     Skeleton,
     Card as HeroCard,
+    Card,
     CardBody,
     CardHeader,
     Divider,
@@ -21,7 +22,6 @@ import {
     Link,
     Input
 } from "@heroui/react";
-import GlassCard from "@/Components/GlassCard.jsx";
 import { usePage } from "@inertiajs/react";
 import dayjs from "dayjs";
 import { useTheme } from '@/Contexts/ThemeContext.jsx';
@@ -36,17 +36,9 @@ import {
     XCircleIcon,
     UserGroupIcon,
     DocumentArrowDownIcon,
+    PhoneIcon,
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
-
-// Alpha utility function for creating transparent colors
-const alpha = (color, opacity) => {
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 
 import { AbsentUsersInlineCard } from '@/Components/TimeSheet/AbsentUsersInlineCard';
 
@@ -83,6 +75,21 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
         refreshKey: 0,
         currentPage: 1
     });
+    
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
     
     const [filterData, setFilterData] = useState(externalFilterData || {
         currentMonth: dayjs().format('YYYY-MM'),
@@ -401,13 +408,14 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                             <Link
                             href={`tel:${attendance.user?.phone}`}
                             size="sm"
-                            className="text-xs text-blue-500 hover:underline"
+                            className="text-xs hover:underline"
+                            style={{ color: 'var(--theme-primary)' }}
                             >
                             {attendance.user?.phone}
                             </Link>
                         ) : (
-                            <span className="flex items-center gap-1 text-xs text-gray-400 italic">
-                            <PhoneOff className="w-3 h-3" /> No Phone
+                            <span className="flex items-center gap-1 text-xs text-default-400 italic">
+                            <PhoneIcon className="w-3 h-3" /> No Phone
                             </span>
                         )
                         }
@@ -722,12 +730,30 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 className="w-full"
             >
                 {error ? (
-                    <HeroCard className="p-4 bg-danger-50 border-danger-200">
+                    <Card 
+                        className="p-4 transition-all duration-200"
+                        style={{
+                            background: `color-mix(in srgb, var(--theme-danger, #F31260) 10%, transparent)`,
+                            borderColor: `color-mix(in srgb, var(--theme-danger, #F31260) 25%, transparent)`,
+                            borderWidth: `var(--borderWidth, 2px)`,
+                            borderRadius: `var(--borderRadius, 12px)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                            transform: `scale(var(--scale, 1))`
+                        }}
+                    >
                         <div className="flex items-center gap-3">
-                            <ExclamationTriangleIcon className="w-5 h-5 text-danger" />
-                            <p className="text-danger">{error}</p>
+                            <ExclamationTriangleIcon 
+                                className="w-5 h-5"
+                                style={{ color: 'var(--theme-danger)' }}
+                            />
+                            <p 
+                                className="text-sm"
+                                style={{ color: 'var(--theme-danger)' }}
+                            >
+                                {error}
+                            </p>
                         </div>
-                    </HeroCard>
+                    </Card>
                 ) : (
                     <>
                         <ScrollShadow
@@ -742,11 +768,18 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                     removeWrapper
                                     aria-label="Employee attendance timesheet table"
                                     isHeaderSticky
+                                    radius={getThemeRadius()}
                                     classNames={{
                                         base: "max-h-[520px] overflow-auto",
                                         table: "min-h-[200px] w-full",
                                         thead: "z-10",
                                         tbody: "overflow-y-auto",
+                                        th: "bg-default-100 text-default-700 font-semibold",
+                                        td: "text-default-600",
+                                    }}
+                                    style={{
+                                        borderRadius: `var(--borderRadius, 12px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`,
                                     }}
                                 >
                                     <TableHeader columns={columns}>
@@ -795,10 +828,14 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                     showShadow
                                     color="primary"
                                     variant="bordered"
+                                    radius={getThemeRadius()}
                                     page={currentPage}
                                     total={lastPage}
                                     onChange={handlePageChange}
                                     aria-label="Timesheet pagination"
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 />
                             </div>
                         )}
@@ -807,10 +844,10 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
             </div>
         );
     }    
-    // Admin view - render full layout with combined GlassCard wrapper
+    // Admin view - render full layout with combined Card wrapper
     return (
         <div 
-            className="flex justify-center p-2"
+            className="flex flex-col w-full h-full p-4"
             role="main"
             aria-label="Timesheet Management"
         >
@@ -822,19 +859,47 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <GlassCard>
+                        <Card 
+                            className="transition-all duration-200"
+                            style={{
+                                border: `var(--borderWidth, 2px) solid transparent`,
+                                borderRadius: `var(--borderRadius, 12px)`,
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                                transform: `scale(var(--scale, 1))`,
+                                background: `linear-gradient(135deg, 
+                                    var(--theme-content1, #FAFAFA) 20%, 
+                                    var(--theme-content2, #F4F4F5) 10%, 
+                                    var(--theme-content3, #F1F3F4) 20%)`,
+                            }}
+                        >
                             {/* Main Card Content */}
-                            <CardHeader className="bg-linear-to-br from-slate-50/50 to-white/30 backdrop-blur-xs border-b border-white/20 p-0">
+                            <CardHeader 
+                                className="border-b p-0"
+                                style={{
+                                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                                    background: `linear-gradient(135deg, 
+                                        color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                        color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                }}
+                            >
                                 <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
                                         <div className="flex flex-col space-y-4">
                                             {/* Main Header Content */}
                                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                 {/* Title Section */}
                                                 <div className="flex items-center gap-3 lg:gap-4">
-                                                    <div className={`
-                                                        ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
-                                                        rounded-xl bg-linear-to-br from-[rgba(var(--theme-primary-rgb),0.2)] to-[rgba(var(--theme-secondary-rgb),0.2)] border border-[rgba(var(--theme-primary-rgb),0.3)] backdrop-blur-xs
-                                                    `}>
+                                                    <div 
+                                                        className={`
+                                                            ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                            rounded-xl flex items-center justify-center
+                                                        `}
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                            borderWidth: `var(--borderWidth, 2px)`,
+                                                            borderRadius: `var(--borderRadius, 12px)`,
+                                                        }}
+                                                    >
                                                         <ClockIcon 
                                                             className={`
                                                                 ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
@@ -843,26 +908,26 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 className={`
-                                                            ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
-                                                            font-bold bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) bg-clip-text text-transparent
-                                                            ${!isLargeScreen ? 'truncate' : ''}
-                                                        `}
-                                                        style={{
-                                                            fontFamily: 'var(--font-current)',
-                                                            transition: 'all var(--transition)'
-                                                        }}
+                                                        <h4 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                                font-bold text-foreground
+                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
                                                         >
                                                             Daily Timesheet
                                                         </h4>
-                                                        <p className={`
-                                                            ${isLargeScreen ? 'text-sm' : 'text-xs'} 
-                                                            text-default-500
-                                                            ${!isLargeScreen ? 'truncate' : ''}
-                                                        `}
-                                                        style={{
-                                                                fontFamily: 'var(--font-current)',
-                                                                transition: 'all var(--transition)'
+                                                        <p 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                                text-default-500
+                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
                                                             }}
                                                         >
                                                             {new Date(selectedDate).toLocaleString('en-US', {
@@ -886,18 +951,17 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                     color="success"
                                                                     variant="flat"
                                                                     size={isLargeScreen ? "md" : "sm"}
+                                                                    radius={getThemeRadius()}
                                                                     startContent={
                                                                         <DocumentArrowDownIcon className={`
                                                                             ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
                                                                         `} />
                                                                     }
-                                                                    className="bg-linear-to-r from-[rgba(var(--theme-success-rgb),0.1)] to-[rgba(var(--theme-success-rgb),0.2)] hover:from-[rgba(var(--theme-success-rgb),0.2)] hover:to-[rgba(var(--theme-success-rgb),0.3)] border border-[rgba(var(--theme-success-rgb),0.2)] backdrop-blur-xs"
                                                                     onPress={exportExcel}
                                                                     isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
                                                                     isLoading={downloading === 'excel'}
                                                                     style={{
-                                                                        fontFamily: 'var(--font-current)',
-                                                                        transition: 'all var(--transition)'
+                                                                        fontFamily: `var(--fontFamily, "Inter")`,
                                                                     }}
                                                                 >
                                                                     {isLargeScreen ? 'Excel' : 'XLS'}
@@ -907,18 +971,17 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                                     color="danger"
                                                                     variant="flat"
                                                                     size={isLargeScreen ? "md" : "sm"}
+                                                                    radius={getThemeRadius()}
                                                                     startContent={
                                                                         <DocumentArrowDownIcon className={`
                                                                             ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
                                                                         `} />
                                                                     }
-                                                                    className="bg-linear-to-r from-[rgba(var(--theme-danger-rgb),0.1)] to-[rgba(var(--theme-danger-rgb),0.2)] hover:from-[rgba(var(--theme-danger-rgb),0.2)] hover:to-[rgba(var(--theme-danger-rgb),0.3)] border border-[rgba(var(--theme-danger-rgb),0.2)] backdrop-blur-xs"
                                                                     onPress={downloadPDF}
                                                                     isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
                                                                     isLoading={downloading === 'pdf'}
                                                                     style={{
-                                                                        fontFamily: 'var(--font-current)',
-                                                                        transition: 'all var(--transition)'
+                                                                        fontFamily: `var(--fontFamily, "Inter")`,
                                                                     }}
                                                                 >
                                                                     PDF
@@ -977,12 +1040,15 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         onChange={(e) => setEmployee(e.target.value)}
                                                         variant="bordered"
                                                         size="sm"
+                                                        radius={getThemeRadius()}
                                                         startContent={
                                                             <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
                                                         }
                                                         classNames={{
-                                                            input: "bg-transparent",
-                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20"
+                                                            input: "text-sm",
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
                                                         }}
                                                         aria-label="Search employees"
                                                     />
@@ -995,12 +1061,15 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                         onChange={handleDateChange}
                                                         value={new Date(selectedDate).toISOString().slice(0, 10) || ''}
                                                         size="sm"
+                                                        radius={getThemeRadius()}
                                                         startContent={
                                                             <CalendarDaysIcon className="w-4 h-4 text-default-400" />
                                                         }
                                                         classNames={{
-                                                            input: "bg-transparent",
-                                                            inputWrapper: "bg-white/10 backdrop-blur-md border-white/20"
+                                                            input: "text-sm",
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
                                                         }}
                                                         aria-label="Select date for timesheet"
                                                     />
@@ -1013,34 +1082,59 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                             <Divider />                           
                             <CardBody>
                                 {/* Two Column Layout for Present and Absent Users */}
-                                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                <div className="flex flex-col lg:flex-row gap-6 h-full">
                                     {/* Present Users - Attendance Table */}
-                                    <div className={`${canViewAllAttendance ? 'md:col-span-9' : 'md:col-span-12'}`}>
+                                    <div className={`${canViewAllAttendance ? 'lg:flex-1 lg:w-0' : 'w-full'} min-h-0`}>
                                         {error ? (
-                                            <HeroCard className="p-4 bg-danger-50 border-danger-200">
+                                            <Card 
+                                                className="p-4 transition-all duration-200"
+                                                style={{
+                                                    background: `color-mix(in srgb, var(--theme-danger, #F31260) 10%, transparent)`,
+                                                    borderColor: `color-mix(in srgb, var(--theme-danger, #F31260) 25%, transparent)`,
+                                                    borderWidth: `var(--borderWidth, 2px)`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    transform: `scale(var(--scale, 1))`
+                                                }}
+                                            >
                                                 <div className="flex items-center gap-3">
-                                                    <ExclamationTriangleIcon className="w-5 h-5 text-danger" />
-                                                    <p className="text-danger">{error}</p>
+                                                    <ExclamationTriangleIcon 
+                                                        className="w-5 h-5"
+                                                        style={{ color: 'var(--theme-danger)' }}
+                                                    />
+                                                    <p 
+                                                        className="text-sm"
+                                                        style={{ color: 'var(--theme-danger)' }}
+                                                    >
+                                                        {error}
+                                                    </p>
                                                 </div>
-                                            </HeroCard>
+                                            </Card>
                                         ) : (                                            
                                             <div 
                                                 role="region"
                                                 aria-label="Present employees attendance table"
-                                                className="border-r border-gray-200 pr-4"
+                                                className="h-full flex flex-col"
                                             >
                                                  
                                             
-                                                <div className="mb-4">
-                                                    <h6 className="text-lg font-semibold text-blue-600 flex items-center gap-2">
-                                                        <CheckCircleIcon className="w-5 h-5" />
+                                                <div className="mb-4 flex-shrink-0">
+                                                    <h6 
+                                                        className="text-lg font-semibold text-foreground flex items-center gap-2"
+                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                    >
+                                                        <CheckCircleIcon 
+                                                            className="w-5 h-5"
+                                                            style={{ color: 'var(--theme-success)' }}
+                                                        />
                                                         Present Employees ({totalRows})
                                                     </h6>
                                                 </div>
-                                                <ScrollShadow
-                                                    orientation="horizontal"
-                                                    className="overflow-y-hidden"
-                                                >
+                                                <div className="flex-1 min-h-0 flex flex-col">
+                                                    <ScrollShadow
+                                                        orientation="horizontal"
+                                                        className="overflow-y-hidden flex-1"
+                                                    >
                                                     <Skeleton className="rounded-lg" isLoaded={isLoaded}>
                                                         <Table
                                                          
@@ -1048,11 +1142,18 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                             removeWrapper
                                                             aria-label="Employee attendance timesheet table"
                                                             isHeaderSticky
+                                                            radius={getThemeRadius()}
                                                             classNames={{
                                                                 base: "max-h-[520px] overflow-auto",
                                                                 table: "min-h-[200px] w-full",
                                                                 thead: "z-10",
                                                                 tbody: "overflow-y-auto",
+                                                                th: "bg-default-100 text-default-700 font-semibold",
+                                                                td: "text-default-600",
+                                                            }}
+                                                            style={{
+                                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
                                                             }}
                                                         >
                                                             <TableHeader columns={columns}>
@@ -1094,30 +1195,36 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                             showShadow
                                                             color="primary"
                                                             variant="bordered"
+                                                            radius={getThemeRadius()}
                                                             page={currentPage}
                                                             total={lastPage}
                                                             onChange={handlePageChange}
                                                             aria-label="Timesheet pagination"
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
                                                         />
                                                     </div>
                                                 )}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Absent Users Section */}
                                     {canViewAllAttendance && (
-                                        <div className="md:col-span-3">
+                                        <div className="lg:w-80 lg:flex-shrink-0 h-full">
                                             <AbsentUsersInlineCard 
                                                 absentUsers={absentUsers}
                                                 selectedDate={selectedDate}
                                                 getUserLeave={getUserLeave}
+                                                isLoaded={isLoaded}
                                             />
                                         </div>
                                     )}
                                 </div>
                             </CardBody>
-                        </GlassCard>
+                        </Card>
                     </motion.div>
                     {/* End of Main Card Content */}
                 </div>

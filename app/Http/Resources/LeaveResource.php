@@ -27,7 +27,7 @@ class LeaveResource extends JsonResource
             'approved_by' => $this->approved_by,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            
+
             // Include employee data when available
             'employee' => $this->when($this->relationLoaded('employee') && $this->employee, function () {
                 return [
@@ -38,7 +38,7 @@ class LeaveResource extends JsonResource
                     'designation_id' => $this->employee->designation_id,
                 ];
             }),
-            
+
             // Include leave setting data when available
             'leave_setting' => $this->when($this->relationLoaded('leaveSetting') && $this->leaveSetting, function () {
                 return [
@@ -55,7 +55,7 @@ class LeaveResource extends JsonResource
      */
     private function formatDate($date): ?string
     {
-        if (!$date) {
+        if (! $date) {
             return null;
         }
 

@@ -1,14 +1,13 @@
 <?php
 
-use App\Http\Controllers\Compliance\DocumentController;
 use App\Http\Controllers\Compliance\AuditController;
+use App\Http\Controllers\Compliance\DocumentController;
 use App\Http\Controllers\Compliance\RequirementController;
 use Illuminate\Support\Facades\Route;
 
 // Compliance Routes
 Route::middleware(['auth', 'verified'])->prefix('compliance')->name('compliance.')->group(function () {
     // Compliance Dashboard
-
 
     // Documents
     Route::middleware(['permission:compliance.documents.view'])->group(function () {

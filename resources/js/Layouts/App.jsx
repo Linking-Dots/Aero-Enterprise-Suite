@@ -123,6 +123,7 @@ PageContent.displayName = 'PageContent';
 const App = React.memo(({ children }) => {
   // ===== CORE STATE MANAGEMENT =====
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [sideBarOpen, setSideBarOpen] = useState(() => {
     try {
       const stored = localStorage.getItem('sidebarOpen');
@@ -198,6 +199,10 @@ const App = React.memo(({ children }) => {
   const staticToggleThemeDrawer = useCallback(() => {
     setThemeDrawerOpen(prev => !prev);
   }, []); // Empty dependency array - stable reference
+
+  const staticCloseThemeDrawer = useCallback(() => {
+    setThemeDrawerOpen(false);
+  }, []); // Explicit close function
 
   const staticHandleUpdate = useCallback(async () => {
     setIsUpdating(true);
@@ -346,9 +351,9 @@ const App = React.memo(({ children }) => {
   const themeDrawer = useMemo(() => (
     <ThemeSettingDrawer
       isOpen={themeDrawerOpen}
-      onClose={staticToggleThemeDrawer}
+      onClose={staticCloseThemeDrawer}
     />
-  ), [themeDrawerOpen, staticToggleThemeDrawer]);
+  ), [themeDrawerOpen, staticCloseThemeDrawer]);
 
   // ===== RENDER =====
   return (
@@ -515,7 +520,7 @@ const App = React.memo(({ children }) => {
                   hideScrollBar={false}
                   size={40}
                 >
-                  <div className="min-h-full p-4">
+                  <div className="min-h-full">
                     <PageContent url={url}>
                       {children}
                     </PageContent>

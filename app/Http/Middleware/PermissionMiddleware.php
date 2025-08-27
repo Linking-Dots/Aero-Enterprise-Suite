@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Enhanced Permission Middleware
- * 
+ *
  * Provides granular permission checking with audit logging
  */
 class PermissionMiddleware
@@ -21,14 +21,14 @@ class PermissionMiddleware
      */
     public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         $user = Auth::user();
 
         // Check if user has the required permission
-        if (!$user->can($permission)) {
+        if (! $user->can($permission)) {
             // Log unauthorized access attempt
             \Log::warning('Unauthorized access attempt', [
                 'user_id' => $user->id,
@@ -37,14 +37,14 @@ class PermissionMiddleware
                 'url' => $request->url(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
 
             // Return appropriate response based on request type
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'You do not have permission to access this resource.',
-                    'required_permission' => $permission
+                    'required_permission' => $permission,
                 ], 403);
             }
 

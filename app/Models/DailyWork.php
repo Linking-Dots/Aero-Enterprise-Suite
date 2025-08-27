@@ -26,13 +26,11 @@ class DailyWork extends Model implements HasMedia
         'inspection_details',
         'resubmission_count',
         'resubmission_date',
-        'rfi_submission_date'
+        'rfi_submission_date',
     ];
-
-
 
     public function reports()
     {
-        return $this->belongsToMany(Report::class, 'daily_work_has_report', 'daily_work_id','report_id');
+        return $this->belongsToMany(Report::class, 'daily_work_has_report', 'daily_work_id', 'report_id');
     }
 }

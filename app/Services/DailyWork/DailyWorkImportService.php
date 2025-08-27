@@ -3,8 +3,8 @@
 namespace App\Services\DailyWork;
 
 use App\Imports\DailyWorkImport;
-use App\Models\DailyWork;
 use App\Models\DailySummary;
+use App\Models\DailyWork;
 use App\Models\Jurisdiction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -64,7 +64,7 @@ class DailyWorkImportService
 
         foreach ($importedDailyWorks as $importedDailyWork) {
             $result = $this->processDailyWorkRow($importedDailyWork, $date, $inChargeSummary);
-            
+
             if ($result['processed']) {
                 $inChargeSummary = $result['summary'];
             }
@@ -77,7 +77,7 @@ class DailyWorkImportService
             'sheet' => $sheetIndex + 1,
             'date' => $date,
             'summaries' => $inChargeSummary,
-            'processed_count' => count($importedDailyWorks)
+            'processed_count' => count($importedDailyWorks),
         ];
     }
 
@@ -88,9 +88,10 @@ class DailyWorkImportService
     {
         // Extract chainages and find jurisdiction
         $jurisdiction = $this->findJurisdictionForLocation($importedDailyWork[4]);
-        
-        if (!$jurisdiction) {
-            Log::warning('No jurisdiction found for location: ' . $importedDailyWork[4]);
+
+        if (! $jurisdiction) {
+            Log::warning('No jurisdiction found for location: '.$importedDailyWork[4]);
+
             return ['processed' => false, 'summary' => $inChargeSummary];
         }
 
@@ -98,7 +99,7 @@ class DailyWorkImportService
         $inChargeName = User::find($inCharge)->user_name;
 
         // Initialize incharge summary if not exists
-        if (!isset($inChargeSummary[$inChargeName])) {
+        if (! isset($inChargeSummary[$inChargeName])) {
             $inChargeSummary[$inChargeName] = [
                 'totalDailyWorks' => 0,
                 'resubmissions' => 0,
@@ -114,7 +115,7 @@ class DailyWorkImportService
 
         // Handle existing or new daily work
         $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
-        
+
         if ($existingDailyWork) {
             $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inChargeName], $inChargeName);
         } else {
@@ -133,8 +134,8 @@ class DailyWorkImportService
         $chainageRegex = '/(.*K[0-9]+(?:\+[0-9]+(?:\.[0-9]+)?)?)-(.*K[0-9]+(?:\+[0-9]+(?:\.[0-9]+)?)?)|(.*K[0-9]+)(.*)/';
 
         if (preg_match($chainageRegex, $location, $matches)) {
-            $startChainage = $matches[1] === "" ? $matches[0] : $matches[1];
-            $endChainage = $matches[2] === "" ? null : $matches[2];
+            $startChainage = $matches[1] === '' ? $matches[0] : $matches[1];
+            $endChainage = $matches[2] === '' ? null : $matches[2];
 
             $startChainageFormatted = $this->formatChainage($startChainage);
             $endChainageFormatted = $endChainage ? $this->formatChainage($endChainage) : null;
@@ -146,9 +147,10 @@ class DailyWorkImportService
                 $formattedEndJurisdiction = $this->formatChainage($jurisdiction->end_chainage);
 
                 // Check if the start chainage is within the jurisdiction's range
-                if ($startChainageFormatted >= $formattedStartJurisdiction && 
+                if ($startChainageFormatted >= $formattedStartJurisdiction &&
                     $startChainageFormatted <= $formattedEndJurisdiction) {
-                    Log::info('Jurisdiction Match Found: ' . $formattedStartJurisdiction . "-" . $formattedEndJurisdiction);
+                    Log::info('Jurisdiction Match Found: '.$formattedStartJurisdiction.'-'.$formattedEndJurisdiction);
+
                     return $jurisdiction;
                 }
 
@@ -156,7 +158,8 @@ class DailyWorkImportService
                 if ($endChainageFormatted &&
                     $endChainageFormatted >= $formattedStartJurisdiction &&
                     $endChainageFormatted <= $formattedEndJurisdiction) {
-                    Log::info('Jurisdiction Match Found for End Chainage: ' . $formattedStartJurisdiction . "-" . $formattedEndJurisdiction);
+                    Log::info('Jurisdiction Match Found for End Chainage: '.$formattedStartJurisdiction.'-'.$formattedEndJurisdiction);
+
                     return $jurisdiction;
                 }
             }
@@ -172,16 +175,16 @@ class DailyWorkImportService
     {
         // Remove spaces and convert to uppercase
         $chainage = strtoupper(trim($chainage));
-        
+
         // Extract K number and additional values
         if (preg_match('/K(\d+)(?:\+(\d+(?:\.\d+)?))?/', $chainage, $matches)) {
-            $kNumber = (int)$matches[1];
-            $additional = isset($matches[2]) ? (float)$matches[2] : 0;
-            
+            $kNumber = (int) $matches[1];
+            $additional = isset($matches[2]) ? (float) $matches[2] : 0;
+
             // Convert to a comparable format (e.g., K05+900 becomes 5.900)
             return sprintf('%d.%03d', $kNumber, $additional);
         }
-        
+
         return $chainage;
     }
 
@@ -248,9 +251,10 @@ class DailyWorkImportService
     private function getResubmissionDate(DailyWork $existingDailyWork, int $resubmissionCount): string
     {
         if ($resubmissionCount === 1) {
-            return $existingDailyWork->resubmission_date ?? $this->getOrdinalNumber($resubmissionCount) . " Resubmission on " . Carbon::now()->format('jS F Y');
+            return $existingDailyWork->resubmission_date ?? $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
         }
-        return $this->getOrdinalNumber($resubmissionCount) . " Resubmission on " . Carbon::now()->format('jS F Y');
+
+        return $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
     }
 
     /**
@@ -258,14 +262,15 @@ class DailyWorkImportService
      */
     private function getOrdinalNumber(int $number): string
     {
-        if (!in_array(($number % 100), [11, 12, 13])) {
+        if (! in_array(($number % 100), [11, 12, 13])) {
             switch ($number % 10) {
-                case 1: return $number . 'st';
-                case 2: return $number . 'nd';
-                case 3: return $number . 'rd';
+                case 1: return $number.'st';
+                case 2: return $number.'nd';
+                case 3: return $number.'rd';
             }
         }
-        return $number . 'th';
+
+        return $number.'th';
     }
 
     /**

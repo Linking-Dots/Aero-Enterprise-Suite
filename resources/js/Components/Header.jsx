@@ -41,7 +41,12 @@ const Header = ({
     showThemeToggle = true,
     showMobileMenu = true,
     customActions = null,
-    variant = 'default' // 'default', 'minimal', 'glass'
+    variant = 'default', // 'default', 'minimal', 'glass'
+    url,
+    pages,
+    toggleSideBar,
+    sideBarOpen,
+    toggleThemeDrawer
 }) => {
     const { props } = usePage();
     const { auth } = props;

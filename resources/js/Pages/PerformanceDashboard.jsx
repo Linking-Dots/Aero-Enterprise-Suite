@@ -327,7 +327,7 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                           </Tooltip>
                           <Button 
                             variant="outlined" 
-                            startIcon={<TrendingUpIcon />}
+                            startIcon={<TrendingUp />}
                             onClick={handleGenerateReport}
                             size="small"
                             className="border-blue-400/50 text-blue-400 hover:bg-blue-500/10"

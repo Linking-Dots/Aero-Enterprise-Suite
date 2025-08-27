@@ -30,7 +30,7 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { 
     ChartBarIcon,
-    TrendingUpIcon,
+    ArrowTrendingUpIcon,
     ExclamationTriangleIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
@@ -392,7 +392,7 @@ const ComplianceAnalytics = ({ timeRange = 'last_30_days' }) => {
                     <GlassCard>
                         <CardBody className="p-4 text-center">
                             <div className="flex items-center justify-center mb-2">
-                                <TrendingUpIcon className="w-8 h-8 text-blue-500" />
+                                <ArrowTrendingUpIcon className="w-8 h-8 text-blue-500" />
                             </div>
                             <Typography variant="h4" fontWeight="bold" color="primary">
                                 {summaryMetrics.trainingCompletionRate}%

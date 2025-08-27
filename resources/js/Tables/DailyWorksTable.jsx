@@ -1,17 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage } from "@inertiajs/react";
 import { toast } from "react-toastify";
-
-// Alpha utility function for creating transparent colors
-const alpha = (color, opacity) => {
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 
 import {
     Table,
@@ -30,13 +20,16 @@ import {
     DropdownMenu,
     DropdownItem,
     Card,
+    CardHeader,
     CardBody,
     Divider,
     ScrollShadow,
     Select,
     SelectItem,
     Link,
-    Spinner
+    Spinner,
+    CircularProgress,
+    Input
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -68,7 +61,6 @@ import {
     ArrowPathIcon as ArrowPathSolid
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
-import GlassCard from "@/Components/GlassCard";
 import { jsPDF } from "jspdf";
 
 const DailyWorksTable = ({ 
@@ -90,7 +82,6 @@ const DailyWorksTable = ({
     onPageChange
 }) => {
     const { auth, users, jurisdictions } = usePage().props;
-    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -113,32 +104,24 @@ const DailyWorksTable = ({
         'new': {
             color: 'primary',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha(theme.colors.primary, 0.1),
-            textColor: theme.colors.primary,
             label: 'New Work',
             description: 'Newly created work item'
         },
         'resubmission': {
             color: 'warning',
             icon: ArrowPathSolid,
-            bgColor: alpha('#f59e0b', 0.1), // warning color
-            textColor: '#f59e0b',
             label: 'Resubmission Required',
             description: 'Work needs to be resubmitted'
         },
         'completed': {
             color: 'success',
             icon: CheckCircleSolid,
-            bgColor: alpha('#10b981', 0.1), // success color
-            textColor: '#10b981',
             label: 'Completed',
             description: 'Work has been completed successfully'
         },
         'emergency': {
             color: 'danger',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha('#ef4444', 0.1), // danger color
-            textColor: '#ef4444',
             label: 'Emergency Work',
             description: 'Urgent work requiring immediate attention'
         }
@@ -361,9 +344,9 @@ const DailyWorksTable = ({
                 icon: false,
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard?.background || 'rgba(255,255,255,0.1)',
-                    border: theme.glassCard?.border || '1px solid rgba(255,255,255,0.2)',
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 },
             },
             success: {
@@ -379,9 +362,9 @@ const DailyWorksTable = ({
                 icon: '🟢',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard?.background || 'rgba(255,255,255,0.1)',
-                    border: theme.glassCard?.border || '1px solid rgba(255,255,255,0.2)',
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 },
             },
             error: {
@@ -391,9 +374,9 @@ const DailyWorksTable = ({
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard?.background || 'rgba(255,255,255,0.1)',
-                    border: theme.glassCard?.border || '1px solid rgba(255,255,255,0.2)',
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 },
             },
         });
@@ -572,9 +555,9 @@ const DailyWorksTable = ({
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard?.background || 'rgba(255,255,255,0.1)',
-                        border: theme.glassCard?.border || '1px solid rgba(255,255,255,0.2)',
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
             }
@@ -597,9 +580,9 @@ const DailyWorksTable = ({
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard?.background || 'rgba(255,255,255,0.1)',
-                    border: theme.glassCard?.border || '1px solid rgba(255,255,255,0.2)',
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 }
             });
         }
@@ -612,8 +595,17 @@ const DailyWorksTable = ({
         const statusConf = statusConfig[work.status] || statusConfig['new'];
 
         return (
-            <GlassCard className="mb-2" shadow="sm">
-                <CardBody className="p-3">
+            <Card 
+                radius="lg"
+                className="mb-3 bg-content1/95 backdrop-blur-md border border-divider/50 shadow-medium"
+                style={{
+                    fontFamily: 'var(--font-family)',
+                    borderRadius: 'var(--borderRadius)',
+                    backgroundColor: 'var(--theme-content1)',
+                    borderColor: 'var(--theme-divider)',
+                }}
+            >
+                <CardBody className="p-4">
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1">
                             <div className="flex flex-col">
@@ -630,9 +622,14 @@ const DailyWorksTable = ({
                             {userIsAdmin && (
                                 <Dropdown>
                                     <DropdownTrigger>
-                                        <IconButton size="small">
+                                        <Button
+                                            isIconOnly
+                                            size="sm"
+                                            variant="ghost"
+                                            radius="sm"
+                                        >
                                             <EllipsisVerticalIcon className="w-4 h-4" />
-                                        </IconButton>
+                                        </Button>
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Work actions">
                                         <DropdownItem
@@ -686,72 +683,72 @@ const DailyWorksTable = ({
                             </div>
                         )}
 
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <BuildingOfficeIcon className="w-4 h-4 text-default-500" />
-                            <Typography variant="body2" color="textSecondary">
+                            <span className="text-sm text-default-500">
                                 Jurisdiction: {getJurisdictionInfo(work.jurisdiction_id)?.name || 'Not assigned'}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
 
                         {work.side && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <MapPinIcon className="w-4 h-4 text-default-500" />
-                                <Typography variant="body2" color="textSecondary">
+                                <span className="text-sm text-default-500">
                                     Road Side: {work.side}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
 
                         {work.qty_layer && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-default-500" />
-                                <Typography variant="body2" color="textSecondary">
+                                <span className="text-sm text-default-500">
                                     Layers: {work.qty_layer}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
 
                         {userIsAdmin && inchargeUser.name !== 'Unassigned' && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <UserIcon className="w-4 h-4 text-default-500" />
-                                <Typography variant="body2" color="textSecondary">
+                                <span className="text-sm text-default-500">
                                     In-charge: {inchargeUser.name}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
 
                         {userIsAdmin && inchargeUser.name === 'Unassigned' && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <UserIcon className="w-4 h-4 text-default-500" />
                                 <Chip size="sm" variant="flat" color="default">
                                     No In-charge
                                 </Chip>
-                            </Box>
+                            </div>
                         )}
 
                         {userIsSE && assignedUser.name !== 'Unassigned' && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <UserIcon className="w-4 h-4 text-default-500" />
-                                <Typography variant="body2" color="textSecondary">
+                                <span className="text-sm text-default-500">
                                     Assigned: {assignedUser.name}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
 
                         {userIsSE && assignedUser.name === 'Unassigned' && (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <UserIcon className="w-4 h-4 text-default-500" />
                                 <Chip size="sm" variant="flat" color="default">
                                     Unassigned
                                 </Chip>
-                            </Box>
+                            </div>
                         )}
                     </div>
 
                     {(userIsAdmin || userIsSE) && (
                         <>
                             <Divider className="my-3" />
-                            <Box className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2 flex-wrap">
                                 {Object.keys(statusConfig).map((status) => (
                                     <Button
                                         key={status}
@@ -769,15 +766,19 @@ const DailyWorksTable = ({
                                         classNames={{
                                             base: "flex-1 min-w-[80px]"
                                         }}
+                                        radius="sm"
+                                        style={{
+                                            fontFamily: 'var(--font-family)',
+                                        }}
                                     >
                                         {statusConfig[status].label}
                                     </Button>
                                 ))}
-                            </Box>
+                            </div>
                         </>
                     )}
                 </CardBody>
-            </GlassCard>
+            </Card>
         );
     };
 
@@ -795,19 +796,19 @@ const DailyWorksTable = ({
             case "date":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <CalendarDaysIcon className="w-3 h-3 text-default-500" />
-                            <Typography variant="body2" className="text-sm font-medium">
+                            <span className="text-sm font-medium">
                                 {formatDate(work.date)}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "number":
                 return (
                     <TableCell>
-                        <Box className="flex flex-col">
+                        <div className="flex flex-col">
                             {work.status === 'completed' && work.file ? (
                                 <Link
                                     isExternal
@@ -834,23 +835,23 @@ const DailyWorksTable = ({
                                     {work.number}
                                 </Link>
                             ) : (
-                                <Typography variant="body2" className="text-sm font-medium text-primary">
+                                <span className="text-sm font-medium text-primary">
                                     {work.number}
-                                </Typography>
+                                </span>
                             )}
                             {work.reports?.map(report => (
-                                <Typography key={report.ref_no} variant="caption" color="textSecondary" className="text-xs">
+                                <span key={report.ref_no} className="text-xs text-default-500">
                                     • {report.ref_no}
-                                </Typography>
+                                </span>
                             ))}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
             case "status":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {(userIsAdmin || userIsSE) ? (
                                 <Select
                                     size="sm"
@@ -865,10 +866,16 @@ const DailyWorksTable = ({
                                         }
                                     }}
                                     isDisabled={updatingWorkId === work.id}
+                                    radius="sm"
                                     classNames={{
-                                        trigger: "min-h-10 w-full bg-white/50 hover:bg-white/80 focus:bg-white/90 transition-colors",
+                                        trigger: `min-h-10 w-full bg-content2/50 hover:bg-content2/80 
+                                                 focus:bg-content2/90 border-divider/50 hover:border-divider 
+                                                 data-[focus]:border-primary transition-colors`,
                                         value: "text-xs",
                                         popoverContent: "min-w-[240px]"
+                                    }}
+                                    style={{
+                                        fontFamily: 'var(--font-family)',
                                     }}
                                     renderValue={(items) => {
                                         if (items.length === 0) {
@@ -883,7 +890,7 @@ const DailyWorksTable = ({
                                         const StatusIcon = currentStatus.icon;
                                         return (
                                             <div className="flex items-center gap-2">
-                                                <StatusIcon className="w-4 h-4" style={{ color: currentStatus.textColor }} />
+                                                <StatusIcon className="w-4 h-4" />
                                                 <span className="text-xs font-medium">{currentStatus.label}</span>
                                             </div>
                                         );
@@ -896,7 +903,7 @@ const DailyWorksTable = ({
                                             <SelectItem 
                                                 key={status} 
                                                 textValue={config.label}
-                                                startContent={<StatusIcon className="w-4 h-4" style={{ color: config.textColor }} />}
+                                                startContent={<StatusIcon className="w-4 h-4" />}
                                                 description={config.description}
                                                 classNames={{
                                                     title: "text-sm font-medium",
@@ -911,84 +918,67 @@ const DailyWorksTable = ({
                             ) : (
                                 getStatusChip(work.status)
                             )}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
             case "type":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {getWorkTypeIcon(work.type, "w-4 h-4")}
-                            <Typography variant="body2" className="text-sm font-medium capitalize">
+                            <span className="text-sm font-medium capitalize">
                                 {work.type || 'Standard Work'}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
             case "description":
                 return (
                     <TableCell>
-                        <MuiTooltip title={work.description || "No description provided"} arrow>
-                            <Typography 
-                                variant="body2" 
-                                className="max-w-xs truncate cursor-help text-sm"
-                                color="textSecondary"
+                        <Tooltip content={work.description || "No description provided"}>
+                            <span 
+                                className="max-w-xs truncate cursor-help text-sm text-default-500"
                             >
                                 {work.description || "No description provided"}
-                            </Typography>
-                        </MuiTooltip>
+                            </span>
+                        </Tooltip>
                     </TableCell>
                 );
 
             case "location":
                 return (
                     <TableCell>
-                        <Box className="flex flex-col gap-1">
-                            <Box className="flex items-center gap-2">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
                                 <MapPinIcon className="w-3 h-3 text-default-500" />
-                                <Typography variant="body2" className="text-sm font-medium">
+                                <span className="text-sm font-medium">
                                     {work.location || 'Location not specified'}
-                                </Typography>
-                            </Box>
-                            
-                        </Box>
+                                </span>
+                            </div>
+                        </div>
                     </TableCell>
                 );
 
             case "inspection_details":
                 return (
                     <TableCell>
-                        <TextField
-                            size="small"
-                            variant="outlined"
+                        <Input
+                            size="sm"
+                            variant="bordered"
                             placeholder="Enter inspection details..."
                             value={work.inspection_details || ''}
                             onChange={(e) => handleChange(work.id, work.number, 'inspection_details', e.target.value)}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <DocumentCheckIcon className="w-4 h-4 text-default-400" />
-                                    </InputAdornment>
-                                ),
-                                style: {
-                                    fontSize: '0.75rem',
-                                    minHeight: '40px',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                }
+                            startContent={
+                                <DocumentCheckIcon className="w-4 h-4 text-default-400" />
+                            }
+                            classNames={{
+                                input: "text-xs",
+                                inputWrapper: "min-h-10 bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
                             }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    fontSize: '0.75rem',
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                }
+                            style={{
+                                fontFamily: 'var(--font-family)',
                             }}
                         />
                     </TableCell>
@@ -1011,21 +1001,21 @@ const DailyWorksTable = ({
             case "qty_layer":
                 return (
                     <TableCell>
-                        <Typography variant="body2" className="text-sm">
+                        <span className="text-sm">
                             {work.qty_layer ? `${work.qty_layer} layers` : 'N/A'}
-                        </Typography>
+                        </span>
                     </TableCell>
                 );
 
             case "planned_time":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <ClockIcon className="w-3 h-3 text-default-500" />
-                            <Typography variant="body2" className="text-sm">
+                            <span className="text-sm">
                                 {work.planned_time || 'Not set'}
-                            </Typography>
-                        </Box>
+                            </span>
+                        </div>
                     </TableCell>
                 );
 
@@ -1102,7 +1092,7 @@ const DailyWorksTable = ({
                                 ))}
                             </Select>
                         ) : (
-                            <Box className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 {inchargeUser.name !== 'Unassigned' ? (
                                     <User
                                         size="sm"
@@ -1122,7 +1112,7 @@ const DailyWorksTable = ({
                                         Unassigned
                                     </Chip>
                                 )}
-                            </Box>
+                            </div>
                         )}
                     </TableCell>
                 );
@@ -1130,7 +1120,7 @@ const DailyWorksTable = ({
             case "assigned":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             {assignedUser.name !== 'Unassigned' ? (
                                 <User
                                     size="sm"
@@ -1150,48 +1140,31 @@ const DailyWorksTable = ({
                                     Unassigned
                                 </Chip>
                             )}
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
             case "completion_time":
                 return (
                     <TableCell>
-                        <TextField
-                            size="small"
+                        <Input
+                            size="sm"
                             type="datetime-local"
-                            variant="outlined"
+                            variant="bordered"
                             value={work.completion_time
                                 ? new Date(work.completion_time).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)
                                 : ''
                             }
                             onChange={(e) => handleChange(work.id, work.number, 'completion_time', e.target.value)}
-                            fullWidth
-                            InputLabelProps={{
-                                shrink: true,
+                            startContent={
+                                <CheckCircleIcon className="w-4 h-4 text-default-400" />
+                            }
+                            classNames={{
+                                input: "text-xs",
+                                inputWrapper: "min-h-10 bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
                             }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <CheckCircleIcon className="w-4 h-4 text-default-400" />
-                                    </InputAdornment>
-                                ),
-                                style: {
-                                    fontSize: '0.75rem',
-                                    minHeight: '40px',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                }
-                            }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    fontSize: '0.75rem',
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                }
+                            style={{
+                                fontFamily: 'var(--font-family)',
                             }}
                         />
                     </TableCell>
@@ -1203,49 +1176,32 @@ const DailyWorksTable = ({
                 return (
                     <TableCell>
                         {userIsAdmin ? (
-                            <TextField
-                                size="small"
+                            <Input
+                                size="sm"
                                 type="date"
-                                variant="outlined"
+                                variant="bordered"
                                 value={work.rfi_submission_date ? 
                                     new Date(work.rfi_submission_date).toISOString().slice(0, 10) : ''
                                 }
                                 onChange={(e) => handleChange(work.id, work.number, 'rfi_submission_date', e.target.value)}
-                                fullWidth
-                                InputLabelProps={{
-                                    shrink: true,
+                                startContent={
+                                    <CalendarDaysIcon className="w-4 h-4 text-default-400" />
+                                }
+                                classNames={{
+                                    input: "text-xs",
+                                    inputWrapper: "min-h-10 bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
                                 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CalendarDaysIcon className="w-4 h-4 text-default-400" />
-                                        </InputAdornment>
-                                    ),
-                                    style: {
-                                        fontSize: '0.75rem',
-                                        minHeight: '40px',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                    }
-                                }}
-                                sx={{
-                                    '& .MuiInputBase-input': {
-                                        fontSize: '0.75rem',
-                                    },
-                                    '& .MuiOutlinedInput-root:hover': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                    },
-                                    '& .MuiOutlinedInput-root.Mui-focused': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                    }
+                                style={{
+                                    fontFamily: 'var(--font-family)',
                                 }}
                             />
                         ) : (
-                            <Box className="flex items-center gap-1">
+                            <div className="flex items-center gap-1">
                                 <CalendarDaysIcon className="w-3 h-3 text-default-500" />
-                                <Typography variant="body2" className="text-sm">
+                                <span className="text-sm">
                                     {work.rfi_submission_date ? formatDate(work.rfi_submission_date) : 'Not set'}
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         )}
                     </TableCell>
                 );
@@ -1253,51 +1209,47 @@ const DailyWorksTable = ({
             case "actions":
                 return (
                     <TableCell>
-                        <Box className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
                             <Tooltip content="Edit Work">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => {
+                                <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="ghost"
+                                    color="primary"
+                                    onPress={() => {
                                         if (updatingWorkId === work.id) return;
                                         setCurrentRow(work);
                                         openModal("editDailyWork");
                                     }}
-                                    sx={{
-                                        background: alpha(theme.palette.primary.main, 0.1),
-                                        '&:hover': {
-                                            background: alpha(theme.palette.primary.main, 0.2)
-                                        }
-                                    }}
+                                    className="min-w-8 h-8"
                                 >
                                     <PencilIcon className="w-4 h-4" />
-                                </IconButton>
+                                </Button>
                             </Tooltip>
                             <Tooltip content="Delete Work" color="danger">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => {
+                                <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="ghost"
+                                    color="danger"
+                                    onPress={() => {
                                         if (updatingWorkId === work.id) return;
                                         setCurrentRow(work);
                                         handleClickOpen(work.id, "deleteDailyWork");
                                     }}
-                                    sx={{
-                                        background: alpha(theme.palette.error.main, 0.1),
-                                        '&:hover': {
-                                            background: alpha(theme.palette.error.main, 0.2)
-                                        }
-                                    }}
+                                    className="min-w-8 h-8"
                                 >
                                     <TrashIcon className="w-4 h-4" />
-                                </IconButton>
+                                </Button>
                             </Tooltip>
-                        </Box>
+                        </div>
                     </TableCell>
                 );
 
             default:
                 return <TableCell>{work[columnKey]}</TableCell>;
         }
-    }, [userIsAdmin, userIsSE, updatingWorkId, theme, setCurrentRow, openModal, handleClickOpen, handleChange]);
+    }, [userIsAdmin, userIsSE, updatingWorkId, setCurrentRow, openModal, handleClickOpen, handleChange]);
 
     const columns = [
         { name: "Date", uid: "date", icon: CalendarDaysIcon, sortable: true },
@@ -1320,14 +1272,14 @@ const DailyWorksTable = ({
 
     if (isMobile) {
         return (
-            <Box className="space-y-4">
+            <div className="space-y-4">
                 <ScrollShadow className="max-h-[70vh]">
                     {allData?.map((work) => (
                         <MobileDailyWorkCard key={work.id} work={work} />
                     ))}
                 </ScrollShadow>
                 {totalRows > 30 && (
-                    <Box className="flex justify-center pt-4">
+                    <div className="flex justify-center pt-4">
                         <Pagination
                             showControls
                             showShadow
@@ -1338,14 +1290,14 @@ const DailyWorksTable = ({
                             onChange={handlePageChange}
                             size="sm"
                         />
-                    </Box>
+                    </div>
                 )}
-            </Box>
+            </div>
         );
     }
 
     return (
-        <Box sx={{ maxHeight: "84vh", overflowY: "auto" }}>
+        <div className="max-h-[84vh] overflow-y-auto">
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
@@ -1371,25 +1323,25 @@ const DailyWorksTable = ({
                                 align={column.uid === "actions" ? "center" : "start"}
                                 className="bg-default-100/80 backdrop-blur-md"
                             >
-                                <Box className="flex items-center gap-1">
+                                <div className="flex items-center gap-1">
                                     {column.icon && <column.icon className="w-3 h-3" />}
                                     <span className="text-xs font-semibold">{column.name}</span>
-                                </Box>
+                                </div>
                             </TableColumn>
                         )}
                     </TableHeader>
                     <TableBody 
                         items={allData || []}
                         emptyContent={
-                            <Box className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <DocumentTextIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <Typography variant="h6" color="textSecondary">
+                                <h6 className="text-lg font-medium text-default-600">
                                     No daily works found
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
+                                </h6>
+                                <span className="text-sm text-default-500">
                                     No work logs available for the selected period
-                                </Typography>
-                            </Box>
+                                </span>
+                            </div>
                         }
                         isLoading={loading}
                         loadingContent={<CircularProgress size={40} />}
@@ -1405,7 +1357,7 @@ const DailyWorksTable = ({
                 </Table>
             </ScrollShadow>
             {totalRows > 30 && (
-                <Box className="py-4 flex justify-center">
+                <div className="py-4 flex justify-center">
                     <Pagination
                         showControls
                         showShadow
@@ -1419,9 +1371,9 @@ const DailyWorksTable = ({
                     <div className="ml-4 text-xs text-gray-500">
                         Page {currentPage} of {lastPage} (Total: {totalRows} records)
                     </div>
-                </Box>
+                </div>
             )}
-        </Box>
+        </div>
     );
 };
 

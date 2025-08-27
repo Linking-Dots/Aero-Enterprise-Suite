@@ -6,7 +6,6 @@ use App\Exports\AttendanceAdminExport;
 use App\Exports\AttendanceExport;
 use App\Models\HRM\Attendance;
 use App\Models\HRM\AttendanceSetting;
-use App\Models\HRM\Designation;
 use App\Models\HRM\Holiday;
 use App\Models\HRM\LeaveSetting;
 use App\Models\User;
@@ -38,6 +37,7 @@ class AttendanceController extends Controller
             'title' => 'Attendances',
         ]);
     }
+
     public function paginate(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -58,7 +58,7 @@ class AttendanceController extends Controller
             });
 
             // Filter first (before pagination)
-            if (!empty($employee)) {
+            if (! empty($employee)) {
                 $attendances = $attendances->filter(function ($attendance) use ($employee) {
                     return stripos($attendance['name'], $employee) !== false;
                 });
@@ -79,11 +79,11 @@ class AttendanceController extends Controller
                 'leaveCounts' => $leaveCountsArray,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in paginate method: ' . $e->getMessage());
+            Log::error('Error in paginate method: '.$e->getMessage());
+
             return response()->json(['error' => 'An error occurred while fetching attendance data.'], 500);
         }
     }
-
 
     private function getEmployeeUsersWithAttendanceAndLeaves($year, $month)
     {
@@ -104,7 +104,7 @@ class AttendanceController extends Controller
                             ->whereMonth('leaves.to_date', $month);
                     })
                     ->orderBy('leaves.from_date', 'desc');
-            }
+            },
         ])->get();
     }
 
@@ -142,16 +142,17 @@ class AttendanceController extends Controller
             $leaveType = $leave->leave_type;
             $totalDays = $leave->total_days;
 
-            if (!isset($leaveCountsArray[$userId])) {
+            if (! isset($leaveCountsArray[$userId])) {
                 $leaveCountsArray[$userId] = [
                     'Casual' => 0,
                     'Sick' => 0,
                     'Weekend' => 0,
-                    'Earned' => 0
+                    'Earned' => 0,
                 ];
             }
             $leaveCountsArray[$userId][$leaveType] = $totalDays;
         }
+
         return $leaveCountsArray;
     }
 
@@ -159,9 +160,9 @@ class AttendanceController extends Controller
     {
         $daysInMonth = Carbon::create($year, $month)->daysInMonth;
         $attendanceData = [
-            'user_id'      => $user->id,
-            'employee_id'  => $user->employee_id,
-            'name'         => $user->name,
+            'user_id' => $user->id,
+            'employee_id' => $user->employee_id,
+            'name' => $user->name,
             'profile_image_url' => $user->profile_image_url,
         ];
 
@@ -170,15 +171,15 @@ class AttendanceController extends Controller
             $dateString = $date->toDateString();
 
             $attendancesForDate = $user->attendances
-                ->filter(fn($a) => Carbon::parse($a->date)->isSameDay($date))
+                ->filter(fn ($a) => Carbon::parse($a->date)->isSameDay($date))
                 ->sortBy('punchin');
 
-            $holiday = $holidays->first(fn($h) => $date->between(
+            $holiday = $holidays->first(fn ($h) => $date->between(
                 Carbon::parse($h->from_date)->startOfDay(),
                 Carbon::parse($h->to_date)->endOfDay()
             ));
             $leave = $user->leaves
-                ->first(fn($l) => $date->between(
+                ->first(fn ($l) => $date->between(
                     Carbon::parse($l->from_date)->startOfDay(),
                     Carbon::parse($l->to_date)->endOfDay()
                 ));
@@ -190,17 +191,19 @@ class AttendanceController extends Controller
             $totalWorkHours = '00:00';
             $remarks = 'Absent';
 
-            if ($holiday && !$leave) {
+            if ($holiday && ! $leave) {
                 if ($attendancesForDate->isNotEmpty()) {
                     $first = $attendancesForDate->first();
-                    $last = $attendancesForDate->count() === 1 ? $first : $attendancesForDate->reverse()->first(fn($item) => $item->punchout !== null);
+                    $last = $attendancesForDate->count() === 1 ? $first : $attendancesForDate->reverse()->first(fn ($item) => $item->punchout !== null);
 
                     $totalMinutes = 0;
                     foreach ($attendancesForDate as $attendance) {
                         if ($attendance->punchin && $attendance->punchout) {
                             $in = Carbon::parse($attendance->punchin);
                             $out = Carbon::parse($attendance->punchout);
-                            if ($out->lt($in)) $out->addDay();
+                            if ($out->lt($in)) {
+                                $out->addDay();
+                            }
                             $totalMinutes += $in->diffInMinutes($out);
                         }
                     }
@@ -221,14 +224,16 @@ class AttendanceController extends Controller
                 $remarks = 'On Leave';
             } elseif ($attendancesForDate->isNotEmpty()) {
                 $first = $attendancesForDate->first();
-                $last = $attendancesForDate->count() === 1 ? $first : $attendancesForDate->reverse()->first(fn($item) => $item->punchout !== null);
+                $last = $attendancesForDate->count() === 1 ? $first : $attendancesForDate->reverse()->first(fn ($item) => $item->punchout !== null);
 
                 $totalMinutes = 0;
                 foreach ($attendancesForDate as $attendance) {
                     if ($attendance->punchin && $attendance->punchout) {
                         $in = Carbon::parse($attendance->punchin);
                         $out = Carbon::parse($attendance->punchout);
-                        if ($out->lt($in)) $out->addDay();
+                        if ($out->lt($in)) {
+                            $out->addDay();
+                        }
                         $totalMinutes += $in->diffInMinutes($out);
                     }
                 }
@@ -240,7 +245,7 @@ class AttendanceController extends Controller
                 $remarks = $totalMinutes > 0 ? 'Present' : ($date->isToday() ? 'Currently Working' : 'Not Punched Out');
                 $punchIn = $first->punchin;
                 $punchOut = $last->punchout;
-            } elseif ($holiday && !$attendancesForDate->isNotEmpty()) {
+            } elseif ($holiday && ! $attendancesForDate->isNotEmpty()) {
                 $symbol = '#';
                 $remarks = 'Holiday';
             }
@@ -257,9 +262,6 @@ class AttendanceController extends Controller
         return $attendanceData;
     }
 
-
-
-
     public function updateAttendance(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -267,7 +269,7 @@ class AttendanceController extends Controller
             $validatedData = $request->validate([
                 'user_id' => 'required|integer',
                 'date' => 'required|date',
-                'symbol' => 'required|string|max:255' // Add appropriate validation rules
+                'symbol' => 'required|string|max:255', // Add appropriate validation rules
             ]);
 
             // Extract validated data
@@ -279,8 +281,8 @@ class AttendanceController extends Controller
             $attendance = Attendance::where('user_id', $userId)->whereDate('date', $date)->first();
 
             // If the record doesn't exist, create a new one
-            if (!$attendance) {
-                $attendance = new Attendance();
+            if (! $attendance) {
+                $attendance = new Attendance;
                 $attendance->user_id = $userId;
                 $attendance->date = $date;
             }
@@ -297,7 +299,6 @@ class AttendanceController extends Controller
         }
     }
 
-
     public function punch(Request $request)
     {
         $user = Auth::user();
@@ -305,7 +306,7 @@ class AttendanceController extends Controller
         // 1. Get the user's attendance type (with config)
         $attendanceType = $user->attendanceType; // Eloquent relation
 
-        if (!$attendanceType || !$attendanceType->is_active) {
+        if (! $attendanceType || ! $attendanceType->is_active) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'No active attendance type assigned to user.',
@@ -329,7 +330,7 @@ class AttendanceController extends Controller
         }
 
         // 3. Process the punch using the service
-        $punchService = new \App\Services\Attendance\AttendancePunchService();
+        $punchService = new \App\Services\Attendance\AttendancePunchService;
         $result = $punchService->processPunch($user, $request);
 
         if ($result['status'] === 'error') {
@@ -346,19 +347,21 @@ class AttendanceController extends Controller
     {
         try {
             $validator = \App\Services\Attendance\AttendanceValidatorFactory::create($attendanceType, $request);
+
             return $validator->validate();
         } catch (\InvalidArgumentException $e) {
             return [
                 'status' => 'error',
-                'message' => 'Invalid attendance type configuration: ' . $e->getMessage(),
-                'code' => 422
+                'message' => 'Invalid attendance type configuration: '.$e->getMessage(),
+                'code' => 422,
             ];
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Attendance validation error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Attendance validation error: '.$e->getMessage());
+
             return [
                 'status' => 'error',
                 'message' => 'Validation failed. Please try again.',
-                'code' => 500
+                'code' => 500,
             ];
         }
     }
@@ -381,7 +384,7 @@ class AttendanceController extends Controller
                 'user_id' => $request->user_id,
                 'date' => Carbon::today(),
                 'punchin' => Carbon::now(),
-                'punchin_location' => $request->location
+                'punchin_location' => $request->location,
             ]);
 
             // Return success response with no punches if there are none
@@ -418,7 +421,7 @@ class AttendanceController extends Controller
             // Return success response
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully punched out!'
+                'message' => 'Successfully punched out!',
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Handle the case where the attendance record is not found
@@ -428,7 +431,8 @@ class AttendanceController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-   public function getUserLocationsForDate(Request $request): \Illuminate\Http\JsonResponse
+
+    public function getUserLocationsForDate(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $selectedDate = Carbon::parse($request->query('date'))->format('Y-m-d');
@@ -440,6 +444,7 @@ class AttendanceController extends Controller
 
             $locations = $attendances->map(function ($attendance) {
                 $user = $attendance->user;
+
                 return [
                     'user_id' => $user->id ?? null,
                     'name' => $user->name ?? 'Unknown',
@@ -503,13 +508,14 @@ class AttendanceController extends Controller
                     $punchOutTime = $attendance->punchout ? Carbon::parse($attendance->punchout) : $now;
                     $duration = $punchInTime->diffInSeconds($punchOutTime);
                     $totalProductionTime += $duration;
+
                     return [
                         'date' => $attendance->date,
                         'punchin_time' => $attendance->punchin,
                         'punchin_location' => $attendance->punchin_location_array,
                         'punchout_time' => $attendance->punchout,
                         'punchout_location' => $attendance->punchout_location_array,
-                        'duration' => gmdate('H:i:s', $duration)
+                        'duration' => gmdate('H:i:s', $duration),
                     ];
                 });
             }
@@ -517,13 +523,15 @@ class AttendanceController extends Controller
             return response()->json([
                 'punches' => $punches,
                 'total_production_time' => gmdate('H:i:s', $totalProductionTime),
-                'isUserOnLeave' => $userLeave // null if not on leave, or leave object if on leave
+                'isUserOnLeave' => $userLeave, // null if not on leave, or leave object if on leave
             ]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json('An error occurred while retrieving attendance data.', 500);
         }
     }
+
     public function getAllUsersAttendanceForDate(Request $request): \Illuminate\Http\JsonResponse
     {        // Get the date from the query parameter, defaulting to today's date if none is provided
         $selectedDate = Carbon::parse($request->query('date'))->format('Y-m-d');
@@ -537,8 +545,8 @@ class AttendanceController extends Controller
             // Apply employee search filter to all users if provided
             if ($employee !== '') {
                 $allUsersQuery->where(function ($query) use ($employee) {
-                    $query->where('name', 'like', '%' . $employee . '%')
-                        ->orWhere('employee_id', 'like', '%' . $employee . '%');
+                    $query->where('name', 'like', '%'.$employee.'%')
+                        ->orWhere('employee_id', 'like', '%'.$employee.'%');
                 });
             }
 
@@ -554,8 +562,8 @@ class AttendanceController extends Controller
             // Apply employee search filter if provided
             if ($employee !== '') {
                 $usersWithAttendanceQuery->where(function ($query) use ($employee) {
-                    $query->where('name', 'like', '%' . $employee . '%')
-                        ->orWhere('employee_id', 'like', '%' . $employee . '%');
+                    $query->where('name', 'like', '%'.$employee.'%')
+                        ->orWhere('employee_id', 'like', '%'.$employee.'%');
                 });
             }
 
@@ -578,7 +586,7 @@ class AttendanceController extends Controller
                 ->get();            // Identify absent users: filter out users who don't have any attendance record
             // Only include users that match the search criteria
             $absentUsers = $allUsers->filter(function ($user) use ($usersWithAttendance) {
-                return !$usersWithAttendance->contains('id', $user->id);
+                return ! $usersWithAttendance->contains('id', $user->id);
             });
             if ($attendanceRecords->isEmpty()) {
                 return response()->json([
@@ -612,7 +620,7 @@ class AttendanceController extends Controller
                         $workMinutes = $punchIn->diffInMinutes($punchOut);
                         $totalWorkMinutes += $workMinutes;
                         $completePunches++;
-                    } elseif ($record->punchin && !$record->punchout) {
+                    } elseif ($record->punchin && ! $record->punchout) {
                         $hasIncompletePunch = true;
                     }
 
@@ -631,7 +639,7 @@ class AttendanceController extends Controller
                 $lastCompletePunch = $sortedPunches->where('punchout', '!=', null)->last();
 
                 return [
-                    'id' => 'user-' . $user->id, // Unique ID for user grouping
+                    'id' => 'user-'.$user->id, // Unique ID for user grouping
                     'user_id' => $user->id,
                     'user' => $user,
                     'date' => $firstRecord->date,
@@ -645,7 +653,7 @@ class AttendanceController extends Controller
                     'has_incomplete_punch' => $hasIncompletePunch,
                     'first_punch_date' => $firstRecord->date,
                     'last_punch_date' => $sortedPunches->last()->date,
-                    'punches' => $punches
+                    'punches' => $punches,
                 ];
             })->values();            // Get today's leaves for the filtered users
             $userIds = $allUsers->pluck('id');
@@ -671,12 +679,14 @@ class AttendanceController extends Controller
         } catch (Throwable $exception) {
             // Handle unexpected exceptions during data retrieval
             report($exception); // Report the exception for debugging or logging
+
             return response()->json([
                 'error' => 'An error occurred while retrieving attendance data.',
-                'details' => $exception->getMessage() // Return the error message for debugging
+                'details' => $exception->getMessage(), // Return the error message for debugging
             ], 500);
         }
     }
+
     public function getCurrentUserAttendanceForDate(Request $request): \Illuminate\Http\JsonResponse
     {
         $perPage = (int) $request->get('perPage', 10); // Default to 10 items per page
@@ -728,7 +738,7 @@ class AttendanceController extends Controller
                         $workMinutes = $punchIn->diffInMinutes($punchOut);
                         $totalWorkMinutes += $workMinutes;
                         $completePunches++;
-                    } elseif ($record->punchin && !$record->punchout) {
+                    } elseif ($record->punchin && ! $record->punchout) {
                         $hasIncompletePunch = true;
                     }
 
@@ -761,7 +771,7 @@ class AttendanceController extends Controller
                     'has_incomplete_punch' => $hasIncompletePunch,
                     'first_punch_date' => $date,
                     'last_punch_date' => $date,
-                    'punches' => $punches
+                    'punches' => $punches,
                 ];
             })->values();
 
@@ -783,9 +793,10 @@ class AttendanceController extends Controller
         } catch (Throwable $exception) {
             // Handle unexpected exceptions during data retrieval
             report($exception); // Report the exception for debugging or logging
+
             return response()->json([
                 'error' => 'An error occurred while retrieving attendance data.',
-                'details' => $exception->getMessage() // Return the error message for debugging
+                'details' => $exception->getMessage(), // Return the error message for debugging
             ], 500);
         }
     }
@@ -810,7 +821,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'ip' => $ip,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
     }
 
@@ -835,8 +846,8 @@ class AttendanceController extends Controller
             // Apply employee search filter if provided
             if ($employee !== '') {
                 $usersWithAttendanceQuery->where(function ($query) use ($employee) {
-                    $query->where('name', 'like', '%' . $employee . '%')
-                        ->orWhere('employee_id', 'like', '%' . $employee . '%');
+                    $query->where('name', 'like', '%'.$employee.'%')
+                        ->orWhere('employee_id', 'like', '%'.$employee.'%');
                 });
             }
 
@@ -888,7 +899,7 @@ class AttendanceController extends Controller
                         $workMinutes = $punchIn->diffInMinutes($punchOut);
                         $totalWorkMinutes += $workMinutes;
                         $completePunches++;
-                    } elseif ($record->punchin && !$record->punchout) {
+                    } elseif ($record->punchin && ! $record->punchout) {
                         $hasIncompletePunch = true;
                     }
 
@@ -907,7 +918,7 @@ class AttendanceController extends Controller
                 $lastCompletePunch = $sortedPunches->where('punchout', '!=', null)->last();
 
                 return [
-                    'id' => 'user-' . $user->id,
+                    'id' => 'user-'.$user->id,
                     'user_id' => $user->id,
                     'user' => $user,
                     'date' => $firstRecord->date,
@@ -921,7 +932,7 @@ class AttendanceController extends Controller
                     'has_incomplete_punch' => $hasIncompletePunch,
                     'first_punch_date' => $firstRecord->date,
                     'last_punch_date' => $sortedPunches->last()->date,
-                    'punches' => $punches
+                    'punches' => $punches,
                 ];
             })->values();
 
@@ -937,9 +948,10 @@ class AttendanceController extends Controller
             ]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json([
                 'error' => 'An error occurred while retrieving present users data.',
-                'details' => $exception->getMessage()
+                'details' => $exception->getMessage(),
             ], 500);
         }
     }
@@ -950,7 +962,6 @@ class AttendanceController extends Controller
     public function getAbsentUsersForDate(Request $request): \Illuminate\Http\JsonResponse
     {
         $selectedDate = Carbon::parse($request->query('date'))->format('Y-m-d');
-
 
         try {
 
@@ -967,9 +978,8 @@ class AttendanceController extends Controller
 
             // Identify absent users: filter out users who have attendance
             $absentUsers = $allUsers->filter(function ($user) use ($presentUserIds) {
-                return !$presentUserIds->contains($user->id);
+                return ! $presentUserIds->contains($user->id);
             });
-
 
             // Get leaves for the absent users
             $userIds = $absentUsers->pluck('id');
@@ -988,12 +998,14 @@ class AttendanceController extends Controller
             ]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json([
                 'error' => 'An error occurred while retrieving absent users data.',
-                'details' => $exception->getMessage()
+                'details' => $exception->getMessage(),
             ], 500);
         }
     }
+
     public function getMonthlyAttendanceStats(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -1024,8 +1036,6 @@ class AttendanceController extends Controller
             $weekendCount = $this->getWeekendDaysCount($currentYear, $currentMonth, $weekendDays);
             $totalWorkingDays = $totalDaysInMonth - $holidaysCount - $weekendCount;
 
-
-
             // Base query for attendance records
             $attendanceQuery = Attendance::whereBetween('date', [$startOfMonth, $endOfMonth]);
 
@@ -1046,7 +1056,6 @@ class AttendanceController extends Controller
             // Get attendance records
             $attendanceRecords = $attendanceQuery->get();
 
-
             // Calculate attendance metrics - count unique days with attendance, not individual punches
             if ($userId) {
                 // For individual employee: count unique dates where they punched in
@@ -1066,14 +1075,13 @@ class AttendanceController extends Controller
                 $presentDays = $attendanceRecords
                     ->where('punchin', '!=', null)
                     ->groupBy(function ($record) {
-                        return $record->user_id . '-' . Carbon::parse($record->date)->format('Y-m-d');
+                        return $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d');
                     })
                     ->count();
 
                 // For admin stats, calculate across all employees
                 $absentDays = $totalWorkingDays * $totalEmployees - $presentDays;
             }
-
 
             // Calculate late arrivals (assuming 9:00 AM is standard start time)
             // Only count one late arrival per user per day (earliest punch if multiple)
@@ -1085,17 +1093,17 @@ class AttendanceController extends Controller
                 // Individual employee: count late days
                 $lateArrivals = $attendanceRecords
                     ->whereNotNull('punchin')
-                    ->groupBy(fn($record) => Carbon::parse($record->date)->format('Y-m-d')) // Group by date
+                    ->groupBy(fn ($record) => Carbon::parse($record->date)->format('Y-m-d')) // Group by date
                     ->filter(function ($dayRecords) use ($lateMarkAfter, $officeStartTime) {
                         // Get the earliest punch-in for the day
                         $earliestPunchRecord = $dayRecords->sortBy('punchin')->first();
-                        if (!$earliestPunchRecord || !$earliestPunchRecord->punchin) return false;
+                        if (! $earliestPunchRecord || ! $earliestPunchRecord->punchin) {
+                            return false;
+                        }
 
                         $dateString = Carbon::parse($earliestPunchRecord->date)->format('Y-m-d');
-                        $punchTime = Carbon::parse($dateString . ' ' . $earliestPunchRecord->punchin->format('H:i:s'));
-                        $lateThreshold = Carbon::parse($dateString . ' ' . $officeStartTime)->addMinutes($lateMarkAfter);
-
-
+                        $punchTime = Carbon::parse($dateString.' '.$earliestPunchRecord->punchin->format('H:i:s'));
+                        $lateThreshold = Carbon::parse($dateString.' '.$officeStartTime)->addMinutes($lateMarkAfter);
 
                         return $punchTime->gt($lateThreshold);
                     })
@@ -1104,16 +1112,18 @@ class AttendanceController extends Controller
                 // Admin view: count total late arrivals per user per day
                 $lateArrivals = $attendanceRecords
                     ->whereNotNull('punchin')
-                    ->groupBy(fn($record) => $record->user_id . '-' . Carbon::parse($record->date)->format('Y-m-d'))
+                    ->groupBy(fn ($record) => $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d'))
                     ->filter(function ($userDayRecords) use ($lateMarkAfter, $officeStartTime) {
                         $earliestPunch = $userDayRecords->sortBy('punchin')->first();
 
-                        if (!$earliestPunch || !$earliestPunch->punchin) return false;
+                        if (! $earliestPunch || ! $earliestPunch->punchin) {
+                            return false;
+                        }
 
                         // Build full datetime for punch and office start
                         $dateString = Carbon::parse($earliestPunch->date)->format('Y-m-d');
-                        $punchTime = Carbon::parse($dateString . ' ' . $earliestPunch->punchin->format('H:i:s'));
-                        $lateThreshold = Carbon::parse($dateString . ' ' . $officeStartTime)->addMinutes($lateMarkAfter);
+                        $punchTime = Carbon::parse($dateString.' '.$earliestPunch->punchin->format('H:i:s'));
+                        $lateThreshold = Carbon::parse($dateString.' '.$officeStartTime)->addMinutes($lateMarkAfter);
 
                         return $punchTime->gt($lateThreshold);
                     })
@@ -1126,19 +1136,21 @@ class AttendanceController extends Controller
             if ($userId) {
                 // Individual employee: Group by date
                 $attendanceRecords
-                    ->groupBy(fn($record) => Carbon::parse($record->date)->format('Y-m-d'))
+                    ->groupBy(fn ($record) => Carbon::parse($record->date)->format('Y-m-d'))
                     ->each(function ($dayRecords) use (&$overtimeMinutes, $officeEndTime, $overtimeAfter) {
 
-                        $lastPunchOutRecord = $dayRecords->filter(fn($r) => $r->punchout)
+                        $lastPunchOutRecord = $dayRecords->filter(fn ($r) => $r->punchout)
                             ->sortByDesc('punchout')
                             ->first();
 
-                        if (!$lastPunchOutRecord) return;
+                        if (! $lastPunchOutRecord) {
+                            return;
+                        }
 
                         $date = Carbon::parse($lastPunchOutRecord->date)->format('Y-m-d');
-                        $punchOutTime = Carbon::parse($date . ' ' . $lastPunchOutRecord->punchout->format('H:i:s'));
+                        $punchOutTime = Carbon::parse($date.' '.$lastPunchOutRecord->punchout->format('H:i:s'));
 
-                        $overtimeStart = Carbon::parse($date . ' ' . $officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
+                        $overtimeStart = Carbon::parse($date.' '.$officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
 
                         if ($punchOutTime->gt($overtimeStart)) {
                             $overtimeMinutes += $overtimeStart->diffInMinutes($punchOutTime);
@@ -1147,27 +1159,27 @@ class AttendanceController extends Controller
             } else {
                 // Admin view: Group by user + date
                 $attendanceRecords
-                    ->groupBy(fn($record) => $record->user_id . '-' . Carbon::parse($record->date)->format('Y-m-d'))
+                    ->groupBy(fn ($record) => $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d'))
                     ->each(function ($userDayRecords) use (&$overtimeMinutes, $officeEndTime, $overtimeAfter) {
 
-                        $lastPunchOutRecord = $userDayRecords->filter(fn($r) => $r->punchout)
+                        $lastPunchOutRecord = $userDayRecords->filter(fn ($r) => $r->punchout)
                             ->sortByDesc('punchout')
                             ->first();
 
-                        if (!$lastPunchOutRecord) return;
+                        if (! $lastPunchOutRecord) {
+                            return;
+                        }
 
                         $date = Carbon::parse($lastPunchOutRecord->date)->format('Y-m-d');
-                        $punchOutTime = Carbon::parse($date . ' ' . $lastPunchOutRecord->punchout->format('H:i:s'));
+                        $punchOutTime = Carbon::parse($date.' '.$lastPunchOutRecord->punchout->format('H:i:s'));
 
-                        $overtimeStart = Carbon::parse($date . ' ' . $officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
+                        $overtimeStart = Carbon::parse($date.' '.$officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
 
                         if ($punchOutTime->gt($overtimeStart)) {
                             $overtimeMinutes += $overtimeStart->diffInMinutes($punchOutTime);
                         }
                     });
             }
-
-
 
             // Get leave statistics
             $leaveQuery = DB::table('leaves')
@@ -1184,8 +1196,8 @@ class AttendanceController extends Controller
             $leaves = $leaveQuery->select(
                 'leave_settings.type as leave_type',
                 DB::raw('SUM(DATEDIFF(
-                    LEAST(leaves.to_date, LAST_DAY(STR_TO_DATE(CONCAT(' . $currentYear . ',"-",' . $currentMonth . ',"-01"), "%Y-%m-%d"))),
-                    GREATEST(leaves.from_date, STR_TO_DATE(CONCAT(' . $currentYear . ',"-",' . $currentMonth . ',"-01"), "%Y-%m-%d"))
+                    LEAST(leaves.to_date, LAST_DAY(STR_TO_DATE(CONCAT('.$currentYear.',"-",'.$currentMonth.',"-01"), "%Y-%m-%d"))),
+                    GREATEST(leaves.from_date, STR_TO_DATE(CONCAT('.$currentYear.',"-",'.$currentMonth.',"-01"), "%Y-%m-%d"))
                 ) + 1) as total_days')
             )->groupBy('leave_settings.type')->get();
 
@@ -1235,7 +1247,7 @@ class AttendanceController extends Controller
             // Today's stats (for admin dashboard)
             $today = Carbon::today();
             $todayStats = [];
-            if (!$userId) {
+            if (! $userId) {
                 $todayAttendance = Attendance::whereDate('date', $today)->get();
 
                 // Count unique users who punched in today
@@ -1251,9 +1263,12 @@ class AttendanceController extends Controller
                     ->groupBy('user_id')
                     ->filter(function ($userRecords) {
                         $earliestPunch = $userRecords->sortBy('punchin')->first();
-                        if (!$earliestPunch->punchin) return false;
+                        if (! $earliestPunch->punchin) {
+                            return false;
+                        }
                         $punchTime = Carbon::parse($earliestPunch->punchin);
                         $standardTime = Carbon::parse($earliestPunch->date)->setTime(9, 0, 0);
+
                         return $punchTime->gt($standardTime);
                     })
                     ->count();
@@ -1296,18 +1311,17 @@ class AttendanceController extends Controller
                     // Meta data
                     'month' => Carbon::create($currentYear, $currentMonth)->format('F Y'),
                     'generated_at' => now()->toISOString(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Error calculating monthly attendance stats: ' . $e->getMessage());
+            Log::error('Error calculating monthly attendance stats: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to calculate attendance statistics.'
+                'error' => 'Failed to calculate attendance statistics.',
             ], 500);
         }
     }
-
-
 
     private function getTotalHolidayDays(int $year, int $month): int
     {
@@ -1353,6 +1367,7 @@ class AttendanceController extends Controller
         })->get()->map(function ($holiday) use ($startOfMonth, $endOfRange) {
             $from = Carbon::parse($holiday->from_date);
             $to = Carbon::parse($holiday->to_date);
+
             return [
                 'start' => $from->greaterThan($startOfMonth) ? $from : $startOfMonth,
                 'end' => $to->lessThan($endOfRange) ? $to : $endOfRange,
@@ -1370,7 +1385,7 @@ class AttendanceController extends Controller
                     return $current->betweenIncluded($range['start'], $range['end']);
                 });
 
-                if (!$isInsideHoliday) {
+                if (! $isInsideHoliday) {
                     $weekendCount++;
                 }
             }
@@ -1384,7 +1399,7 @@ class AttendanceController extends Controller
     /**
      * Check for updates to user locations
      *
-     * @param string $date The date to check for updates (Y-m-d format)
+     * @param  string  $date  The date to check for updates (Y-m-d format)
      * @return \Illuminate\Http\JsonResponse
      */
     public function checkForLocationUpdates($date)
@@ -1413,14 +1428,15 @@ class AttendanceController extends Controller
             return response()->json([
                 'success' => true,
                 'has_updates' => $lastUpdate !== null,
-                'last_updated' => $lastUpdateTime ? $lastUpdateTime->toIso8601String() : null
+                'last_updated' => $lastUpdateTime ? $lastUpdateTime->toIso8601String() : null,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error checking for location updates: ' . $e->getMessage());
+            Log::error('Error checking for location updates: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check for updates.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -1428,8 +1444,8 @@ class AttendanceController extends Controller
     /**
      * Check for timesheet updates
      *
-     * @param string $date The date to check for updates (Y-m-d format)
-     * @param string $month The month to check for updates (YYYY-MM format)
+     * @param  string  $date  The date to check for updates (Y-m-d format)
+     * @param  string  $month  The month to check for updates (YYYY-MM format)
      * @return \Illuminate\Http\JsonResponse
      */
     public function checkTimesheetUpdates($date, $month = null)
@@ -1439,11 +1455,11 @@ class AttendanceController extends Controller
             $validated = Validator::make(
                 [
                     'date' => $date,
-                    'month' => $month
+                    'month' => $month,
                 ],
                 [
                     'date' => 'required|date_format:Y-m-d',
-                    'month' => 'nullable|date_format:Y-m'
+                    'month' => 'nullable|date_format:Y-m',
                 ]
             );
 
@@ -1477,14 +1493,15 @@ class AttendanceController extends Controller
                 'success' => true,
                 'has_updates' => $lastUpdate !== null,
                 'has_records' => $hasRecords,
-                'last_updated' => $lastUpdate ? \Carbon\Carbon::parse($lastUpdate)->toIso8601String() : null
+                'last_updated' => $lastUpdate ? \Carbon\Carbon::parse($lastUpdate)->toIso8601String() : null,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error checking for timesheet updates: ' . $e->getMessage());
+            Log::error('Error checking for timesheet updates: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check for timesheet updates.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -1492,7 +1509,8 @@ class AttendanceController extends Controller
     public function exportExcel(Request $request)
     {
         $date = $request->input('date');
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AttendanceExport($date), 'Daily_Timesheet_' . date('Y_m_d', strtotime($date)) . '.xlsx');
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AttendanceExport($date), 'Daily_Timesheet_'.date('Y_m_d', strtotime($date)).'.xlsx');
     }
 
     public function exportPdf(Request $request)
@@ -1500,28 +1518,25 @@ class AttendanceController extends Controller
         $date = $request->input('date');
         $rows = (new AttendanceExport($date))->collection();
         $pdf = PDF::loadView('attendance_pdf', [
-            'title' => 'Daily Timesheet - ' . date('F d, Y', strtotime($date)),
+            'title' => 'Daily Timesheet - '.date('F d, Y', strtotime($date)),
             'generatedOn' => now()->format('F d, Y h:i A'),
-            'rows' => $rows
+            'rows' => $rows,
         ])->setPaper('a4', 'landscape');
-        return $pdf->download('Daily_Timesheet_' . date('Y_m_d', strtotime($date)) . '.pdf');
+
+        return $pdf->download('Daily_Timesheet_'.date('Y_m_d', strtotime($date)).'.pdf');
     }
-
-
-
 
     public function exportAdminExcel(Request $request)
     {
         $month = $request->get('month');
-        return (new AttendanceAdminExport())->export($month);
+
+        return (new AttendanceAdminExport)->export($month);
     }
-
-
 
     public function exportAdminPdf(Request $request)
     {
         $month = $request->get('month');
-        $from = Carbon::parse($month . '-01');
+        $from = Carbon::parse($month.'-01');
         $to = $from->copy()->endOfMonth();
         $monthName = $from->format('F Y');
 
@@ -1536,15 +1551,16 @@ class AttendanceController extends Controller
 
         // You can build a custom view file for formatting the PDF layout
         $pdf = PDF::loadView('attendance_admin_pdf', [
-            'monthName'      => $monthName,
-            'from'           => $from,
-            'to'             => $to,
-            'users'          => $users,
+            'monthName' => $monthName,
+            'from' => $from,
+            'to' => $to,
+            'users' => $users,
             'attendanceData' => $attendanceData,
-            'leaveTypes'     => $leaveTypes,
+            'leaveTypes' => $leaveTypes,
         ])->setPaper('A4', 'landscape');
 
         $fileName = "DBEDC_Attendance_{$monthName}.pdf";
+
         return $pdf->download($fileName);
     }
 }

@@ -22,22 +22,22 @@ class AttendancePunchService
 
             $existingAttendance = $this->getExistingAttendance($user->id, $today);
 
-            if ($existingAttendance && !$existingAttendance->punchout) {
+            if ($existingAttendance && ! $existingAttendance->punchout) {
                 return $this->punchOut($existingAttendance, $request);
             } else {
                 return $this->punchIn($user, $today, $request);
             }
 
         } catch (\Exception $e) {
-            Log::error('Attendance punch error: ' . $e->getMessage(), [
+            Log::error('Attendance punch error: '.$e->getMessage(), [
                 'user_id' => $user->id,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'status' => 'error',
                 'message' => 'Failed to record attendance. Please try again.',
-                'code' => 500
+                'code' => 500,
             ];
         }
     }
@@ -67,7 +67,7 @@ class AttendancePunchService
             'status' => 'success',
             'message' => 'Successfully punched out!',
             'action' => 'punch_out',
-            'attendance_id' => $attendance->id
+            'attendance_id' => $attendance->id,
         ];
     }
 
@@ -87,9 +87,11 @@ class AttendancePunchService
             'status' => 'success',
             'message' => 'Successfully punched in!',
             'action' => 'punch_in',
-            'attendance_id' => $attendance->id
+            'attendance_id' => $attendance->id,
         ];
-    }    /**
+    }
+
+    /**
      * Format location data from request
      */
     private function formatLocation(Request $request): ?string
@@ -97,7 +99,7 @@ class AttendancePunchService
         $lat = $request->input('lat');
         $lng = $request->input('lng');
 
-        if (!$lat || !$lng) {
+        if (! $lat || ! $lng) {
             return null;
         }
 
@@ -105,7 +107,7 @@ class AttendancePunchService
             'lat' => $lat,
             'lng' => $lng,
             'address' => $request->input('address', ''),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ];
 
         return json_encode($locationData);

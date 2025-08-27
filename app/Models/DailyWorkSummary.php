@@ -16,7 +16,7 @@ class DailyWorkSummary extends Model
         'resubmissions',
         'embankment',
         'structure',
-        'pavement'
+        'pavement',
     ];
 
     protected $casts = [

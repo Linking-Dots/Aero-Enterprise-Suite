@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class UserDevice extends Model
 {
@@ -65,7 +65,7 @@ class UserDevice extends Model
      */
     public function isOnline(): bool
     {
-        if (!$this->last_activity) {
+        if (! $this->last_activity) {
             return false;
         }
 
@@ -109,7 +109,7 @@ class UserDevice extends Model
     /**
      * Update device activity.
      */
-    public function updateActivity(string $sessionId = null): bool
+    public function updateActivity(?string $sessionId = null): bool
     {
         return $this->update([
             'last_activity' => Carbon::now(),

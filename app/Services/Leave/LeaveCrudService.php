@@ -42,7 +42,7 @@ class LeaveCrudService
 
         // Get leave type ID
         $leaveTypeId = LeaveSetting::where('type', $data['leaveType'])->value('id');
-        if (!$leaveTypeId) {
+        if (! $leaveTypeId) {
             // Fallback to current leave_type if not found
             $leaveTypeId = $leave->leave_type;
         }
@@ -76,7 +76,7 @@ class LeaveCrudService
             return [
                 'success' => true,
                 'updated' => true,
-                'message' => 'Leave application status updated to ' . $status,
+                'message' => 'Leave application status updated to '.$status,
             ];
         }
 
@@ -93,6 +93,7 @@ class LeaveCrudService
     public function deleteLeave(int $leaveId): bool
     {
         $leave = Leave::findOrFail($leaveId);
+
         return $leave->delete();
     }
 

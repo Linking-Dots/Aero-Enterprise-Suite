@@ -16,46 +16,46 @@ return new class extends Migration
             // Drop and recreate the type enum to include 'temporary'
             $table->dropColumn('type');
         });
-        
+
         Schema::table('jobs_recruitment', function (Blueprint $table) {
             $table->enum('type', ['full_time', 'part_time', 'contract', 'temporary', 'internship', 'remote'])
-                  ->default('full_time')
-                  ->after('location');
+                ->default('full_time')
+                ->after('location');
         });
 
         // Update status enum to include 'cancelled'
         Schema::table('jobs_recruitment', function (Blueprint $table) {
             $table->dropColumn('status');
         });
-        
+
         Schema::table('jobs_recruitment', function (Blueprint $table) {
             $table->enum('status', ['draft', 'open', 'closed', 'on_hold', 'cancelled'])
-                  ->default('draft')
-                  ->after('type');
+                ->default('draft')
+                ->after('type');
         });
 
         // Update job_applications table - ensure it matches the fillable fields
         Schema::table('job_applications', function (Blueprint $table) {
             // Add missing columns if they don't exist
-            if (!Schema::hasColumn('job_applications', 'application_ip')) {
+            if (! Schema::hasColumn('job_applications', 'application_ip')) {
                 $table->string('application_ip')->nullable()->after('custom_fields');
             }
-            if (!Schema::hasColumn('job_applications', 'referral_source')) {
+            if (! Schema::hasColumn('job_applications', 'referral_source')) {
                 $table->string('referral_source')->nullable()->after('source');
             }
-            if (!Schema::hasColumn('job_applications', 'referrer_id')) {
+            if (! Schema::hasColumn('job_applications', 'referrer_id')) {
                 $table->foreignId('referrer_id')->nullable()->constrained('users')->onDelete('set null')->after('referral_source');
             }
-            if (!Schema::hasColumn('job_applications', 'notice_period')) {
+            if (! Schema::hasColumn('job_applications', 'notice_period')) {
                 $table->integer('notice_period')->nullable()->after('salary_currency');
             }
-            if (!Schema::hasColumn('job_applications', 'experience_years')) {
+            if (! Schema::hasColumn('job_applications', 'experience_years')) {
                 $table->decimal('experience_years', 4, 1)->nullable()->after('notice_period');
             }
-            if (!Schema::hasColumn('job_applications', 'rating')) {
+            if (! Schema::hasColumn('job_applications', 'rating')) {
                 $table->decimal('rating', 3, 2)->nullable()->after('status');
             }
-            if (!Schema::hasColumn('job_applications', 'last_status_change')) {
+            if (! Schema::hasColumn('job_applications', 'last_status_change')) {
                 $table->datetime('last_status_change')->nullable()->after('application_date');
             }
         });
@@ -63,21 +63,21 @@ return new class extends Migration
         // Update job_interviews table to ensure column names match model
         Schema::table('job_interviews', function (Blueprint $table) {
             // Rename scheduled_at to interview_date if it exists
-            if (Schema::hasColumn('job_interviews', 'scheduled_at') && !Schema::hasColumn('job_interviews', 'interview_date')) {
+            if (Schema::hasColumn('job_interviews', 'scheduled_at') && ! Schema::hasColumn('job_interviews', 'interview_date')) {
                 $table->renameColumn('scheduled_at', 'interview_date');
             }
-            
+
             // Add missing columns
-            if (!Schema::hasColumn('job_interviews', 'scheduled_by')) {
+            if (! Schema::hasColumn('job_interviews', 'scheduled_by')) {
                 $table->foreignId('scheduled_by')->nullable()->constrained('users')->onDelete('set null')->after('interviewers');
             }
-            if (!Schema::hasColumn('job_interviews', 'interview_notes')) {
+            if (! Schema::hasColumn('job_interviews', 'interview_notes')) {
                 $table->text('interview_notes')->nullable()->after('scheduled_by');
             }
-            if (!Schema::hasColumn('job_interviews', 'feedback')) {
+            if (! Schema::hasColumn('job_interviews', 'feedback')) {
                 $table->text('feedback')->nullable()->after('interview_notes');
             }
-            if (!Schema::hasColumn('job_interviews', 'interviewer_ids')) {
+            if (! Schema::hasColumn('job_interviews', 'interviewer_ids')) {
                 $table->json('interviewer_ids')->nullable()->after('interviewers');
             }
         });
@@ -92,7 +92,7 @@ return new class extends Migration
         Schema::table('jobs_recruitment', function (Blueprint $table) {
             $table->dropColumn(['type', 'status']);
         });
-        
+
         Schema::table('jobs_recruitment', function (Blueprint $table) {
             $table->enum('type', ['full_time', 'part_time', 'contract', 'internship', 'remote'])->default('full_time');
             $table->enum('status', ['draft', 'open', 'closed', 'on_hold'])->default('draft');
@@ -101,12 +101,12 @@ return new class extends Migration
         Schema::table('job_applications', function (Blueprint $table) {
             $table->dropColumn([
                 'application_ip',
-                'referral_source', 
+                'referral_source',
                 'referrer_id',
                 'experience_years',
                 'notice_period',
                 'rating',
-                'last_status_change'
+                'last_status_change',
             ]);
         });
 
@@ -118,7 +118,7 @@ return new class extends Migration
                 'scheduled_by',
                 'interview_notes',
                 'feedback',
-                'interviewer_ids'
+                'interviewer_ids',
             ]);
         });
     }

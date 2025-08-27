@@ -50,7 +50,7 @@ class DailyWorkPaginationService
         return [
             'dailyWorks' => $dailyWorks,
             'role' => $this->getUserRole($user),
-            'userInfo' => $this->getUserInfo($user)
+            'userInfo' => $this->getUserInfo($user),
         ];
     }
 
@@ -61,7 +61,7 @@ class DailyWorkPaginationService
     {
         $userWithDesignation = User::with('designation')->find($user->id);
         $userDesignationTitle = $userWithDesignation->designation?->title;
-        
+
         if ($userDesignationTitle === 'Supervision Engineer') {
             return DailyWork::with('reports')->where('incharge', $user->id);
         }
@@ -119,7 +119,7 @@ class DailyWorkPaginationService
     {
         $userWithDesignation = User::with('designation')->find($user->id);
         $userDesignationTitle = $userWithDesignation->designation?->title;
-        
+
         if ($userDesignationTitle === 'Supervision Engineer') {
             return 'Supervision Engineer';
         }
@@ -146,7 +146,7 @@ class DailyWorkPaginationService
     {
         $userWithDesignation = User::with('designation')->find($user->id);
         $userDesignationTitle = $userWithDesignation->designation?->title;
-        
+
         if ($userDesignationTitle === 'Supervision Engineer') {
             return [
                 'allInCharges' => [],
@@ -156,7 +156,7 @@ class DailyWorkPaginationService
 
         if ($user->hasRole('Administrator')) {
             return [
-                'allInCharges' => User::whereHas('designation', function($q) {
+                'allInCharges' => User::whereHas('designation', function ($q) {
                     $q->where('title', 'Supervision Engineer');
                 })->get(),
                 'juniors' => [],

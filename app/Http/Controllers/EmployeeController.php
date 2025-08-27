@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class EmployeeController extends Controller
@@ -84,14 +83,15 @@ class EmployeeController extends Controller
 
             return response()->json([
                 'message' => 'Employee created successfully',
-                'employee' => $user->load(['department', 'designation', 'attendanceType'])
+                'employee' => $user->load(['department', 'designation', 'attendanceType']),
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating employee', [
                 'error' => $e->getMessage(),
-                'request' => $request->all()
+                'request' => $request->all(),
             ]);
+
             return response()->json(['error' => 'Failed to create employee'], 500);
         }
     }
@@ -102,7 +102,7 @@ class EmployeeController extends Controller
     public function show($id)
     {
         $employee = User::with(['department', 'designation', 'attendanceType', 'roles'])
-                       ->findOrFail($id);
+            ->findOrFail($id);
 
         return response()->json(['employee' => $employee]);
     }
@@ -114,33 +114,33 @@ class EmployeeController extends Controller
     {
         try {
             $employee = User::findOrFail($id);
-            
+
             // Enhanced authorization check
             $currentUser = Auth::user();
-            if (!$this->canModifyEmployee($currentUser, $employee)) {
+            if (! $this->canModifyEmployee($currentUser, $employee)) {
                 return response()->json(['error' => 'Unauthorized to modify this employee'], 403);
             }
 
             // Enhanced validation
             $validated = $request->validate([
                 'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|email|unique:users,email,' . $id,
+                'email' => 'sometimes|email|unique:users,email,'.$id,
                 'department_id' => 'sometimes|nullable|exists:departments,id',
                 'designation_id' => 'sometimes|nullable|exists:designations,id',
                 'attendance_type_id' => 'sometimes|nullable|exists:attendance_types,id',
                 'active' => 'sometimes|boolean',
                 'phone' => 'sometimes|nullable|string|max:20',
                 'hire_date' => 'sometimes|nullable|date',
-                'salary' => 'sometimes|nullable|numeric|min:0'
+                'salary' => 'sometimes|nullable|numeric|min:0',
             ]);
 
             // Track what was changed for audit
             $changes = [];
             foreach ($validated as $key => $value) {
-                if ($employee->$key != $value) {
+                if ($value != $employee->$key) {
                     $changes[$key] = [
                         'old' => $employee->$key,
-                        'new' => $value
+                        'new' => $value,
                     ];
                 }
             }
@@ -153,19 +153,20 @@ class EmployeeController extends Controller
                 'employee_name' => $employee->name,
                 'changes' => $changes,
                 'updated_by' => Auth::id(),
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
 
             return response()->json([
                 'message' => 'Employee updated successfully',
-                'employee' => $employee->fresh()
+                'employee' => $employee->fresh(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating employee', [
                 'error' => $e->getMessage(),
                 'employee_id' => $id,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
             ]);
+
             return response()->json(['error' => 'Failed to update employee'], 500);
         }
     }
@@ -177,19 +178,19 @@ class EmployeeController extends Controller
     {
         try {
             $employee = User::findOrFail($id);
-            
+
             // Enhanced authorization check
             $currentUser = Auth::user();
-            if (!$this->canDeleteEmployee($currentUser, $employee)) {
+            if (! $this->canDeleteEmployee($currentUser, $employee)) {
                 return response()->json(['error' => 'Unauthorized to delete this employee'], 403);
             }
-            
+
             // Check for dependencies before deletion
             $dependencies = $this->checkEmployeeDependencies($employee);
-            if (!empty($dependencies)) {
+            if (! empty($dependencies)) {
                 return response()->json([
                     'error' => 'Cannot delete employee with active dependencies',
-                    'dependencies' => $dependencies
+                    'dependencies' => $dependencies,
                 ], 422);
             }
 
@@ -203,7 +204,7 @@ class EmployeeController extends Controller
                 'employee_id' => $id,
                 'employee_name' => $employee->name,
                 'deleted_by' => Auth::id(),
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
 
             return response()->json(['message' => 'Employee deleted successfully']);
@@ -211,8 +212,9 @@ class EmployeeController extends Controller
             Log::error('Error deleting employee', [
                 'error' => $e->getMessage(),
                 'employee_id' => $id,
-                'deleted_by' => Auth::id()
+                'deleted_by' => Auth::id(),
             ]);
+
             return response()->json(['error' => 'Failed to delete employee'], 500);
         }
     }
@@ -226,33 +228,33 @@ class EmployeeController extends Controller
         if ($currentUser->hasRole('Super Administrator')) {
             return true;
         }
-        
+
         // Administrators can modify employees
         if ($currentUser->hasRole('Administrator')) {
             return true;
         }
-        
+
         // HR managers can modify employees in their organization
         if ($currentUser->hasRole('HR Manager')) {
             return true;
         }
-        
+
         // Department managers can modify employees in their department
-        if ($currentUser->hasRole('Department Manager') && 
+        if ($currentUser->hasRole('Department Manager') &&
             $currentUser->department_id === $employee->department_id) {
             return true;
         }
-        
+
         // Check if user has the specific permission (fallback)
         if ($currentUser->can('users.update')) {
             return true;
         }
-        
+
         // Users can only modify their own profile (limited fields)
         if ($currentUser->id === $employee->id) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -265,22 +267,22 @@ class EmployeeController extends Controller
         if ($currentUser->hasRole('Super Administrator') && $currentUser->id !== $employee->id) {
             return true;
         }
-        
+
         // HR managers can delete employees (except themselves)
         if ($currentUser->hasRole('HR Manager') && $currentUser->id !== $employee->id) {
             return true;
         }
-        
+
         // Administrators can delete employees (except themselves)
         if ($currentUser->hasRole('Administrator') && $currentUser->id !== $employee->id) {
             return true;
         }
-        
+
         // Check if user has the specific permission (fallback)
         if ($currentUser->can('users.delete') && $currentUser->id !== $employee->id) {
             return true;
         }
-        
+
         // Users cannot delete themselves or others
         return false;
     }
@@ -291,7 +293,7 @@ class EmployeeController extends Controller
     private function checkEmployeeDependencies($employee)
     {
         $dependencies = [];
-        
+
         // Check for active projects (if the table exists)
         try {
             if (Schema::hasTable('project_members')) {
@@ -300,7 +302,7 @@ class EmployeeController extends Controller
                     ->where('project_members.user_id', $employee->id)
                     ->where('projects.status', 'active')
                     ->count();
-                    
+
                 if ($activeProjects > 0) {
                     $dependencies['active_projects'] = $activeProjects;
                 }
@@ -308,7 +310,7 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             // Table doesn't exist, skip this check
         }
-        
+
         // Check for pending leaves
         try {
             if (Schema::hasTable('leaves')) {
@@ -316,7 +318,7 @@ class EmployeeController extends Controller
                     ->where('user_id', $employee->id)
                     ->where('status', 'pending')
                     ->count();
-                    
+
                 if ($pendingLeaves > 0) {
                     $dependencies['pending_leaves'] = $pendingLeaves;
                 }
@@ -324,7 +326,7 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             // Table doesn't exist, skip this check
         }
-        
+
         // Check for active trainings
         try {
             if (Schema::hasTable('training_enrollments')) {
@@ -333,7 +335,7 @@ class EmployeeController extends Controller
                     ->where('training_enrollments.user_id', $employee->id)
                     ->where('trainings.status', 'active')
                     ->count();
-                    
+
                 if ($activeTrainings > 0) {
                     $dependencies['active_trainings'] = $activeTrainings;
                 }
@@ -341,7 +343,7 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             // Table doesn't exist, skip this check
         }
-        
+
         return $dependencies;
     }
 
@@ -360,8 +362,9 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             Log::error('Error restoring employee', [
                 'error' => $e->getMessage(),
-                'employee_id' => $id
+                'employee_id' => $id,
             ]);
+
             return response()->json(['error' => 'Failed to restore employee'], 500);
         }
     }
@@ -382,36 +385,36 @@ class EmployeeController extends Controller
 
             // Build query - no eager loading due to attribute/relationship name conflicts
             $query = User::query();
-            
+
             // Include soft deleted if status filter includes inactive
             if ($status === 'all' || $status === 'inactive') {
                 $query->withTrashed();
             }
 
             // Apply search filter
-            if (!empty($search)) {
-                $query->where(function($q) use ($search) {
+            if (! empty($search)) {
+                $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%")
-                      ->orWhere('employee_id', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('employee_id', 'like', "%{$search}%");
                 });
             }
 
             // Apply filters
-            if (!empty($department) && $department !== 'all') {
+            if (! empty($department) && $department !== 'all') {
                 $query->where('department_id', $department);
             }
 
-            if (!empty($designation) && $designation !== 'all') {
+            if (! empty($designation) && $designation !== 'all') {
                 $query->where('designation_id', $designation);
             }
 
-            if (!empty($attendanceType) && $attendanceType !== 'all') {
+            if (! empty($attendanceType) && $attendanceType !== 'all') {
                 $query->where('attendance_type_id', $attendanceType);
             }
 
-            if (!empty($status) && $status !== 'all') {
+            if (! empty($status) && $status !== 'all') {
                 switch ($status) {
                     case 'active':
                         $query->where('active', true);
@@ -426,28 +429,28 @@ class EmployeeController extends Controller
             $employees = $query->paginate($perPage, ['*'], 'page', $page);
 
             // Transform data for frontend
-            $employees->getCollection()->transform(function($employee) {
+            $employees->getCollection()->transform(function ($employee) {
                 // Get department name safely
                 $departmentName = null;
                 if ($employee->department_id) {
                     $dept = \App\Models\HRM\Department::find($employee->department_id);
                     $departmentName = $dept ? $dept->name : null;
                 }
-                
+
                 // Get designation name safely
                 $designationName = null;
                 if ($employee->designation_id) {
                     $desig = \App\Models\HRM\Designation::find($employee->designation_id);
                     $designationName = $desig ? $desig->title : null;
                 }
-                
+
                 // Get attendance type name safely
                 $attendanceTypeName = null;
                 if ($employee->attendance_type_id) {
                     $attType = \App\Models\HRM\AttendanceType::find($employee->attendance_type_id);
                     $attendanceTypeName = $attType ? $attType->name : null;
                 }
-                
+
                 return [
                     'id' => $employee->id,
                     'name' => $employee->name,
@@ -471,13 +474,14 @@ class EmployeeController extends Controller
 
             return response()->json([
                 'employees' => $employees,
-                'stats' => $this->getEmployeeStats()
+                'stats' => $this->getEmployeeStats(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error paginating employees', [
                 'error' => $e->getMessage(),
-                'request' => $request->all()
+                'request' => $request->all(),
             ]);
+
             return response()->json(['error' => 'Failed to retrieve employees'], 500);
         }
     }
@@ -498,8 +502,8 @@ class EmployeeController extends Controller
         $prefix = 'EMP';
         $year = date('Y');
         $lastEmployee = User::where('employee_id', 'like', "{$prefix}{$year}%")
-                           ->orderByDesc('employee_id')
-                           ->first();
+            ->orderByDesc('employee_id')
+            ->first();
 
         if ($lastEmployee) {
             $lastNumber = (int) substr($lastEmployee->employee_id, -4);
@@ -508,7 +512,7 @@ class EmployeeController extends Controller
             $newNumber = '0001';
         }
 
-        return $prefix . $year . $newNumber;
+        return $prefix.$year.$newNumber;
     }
 
     /**
@@ -527,7 +531,7 @@ class EmployeeController extends Controller
                 return [
                     'name' => $dept->name,
                     'count' => $dept->users_count,
-                    'percentage' => $totalEmployees > 0 ? round(($dept->users_count / $totalEmployees) * 100, 1) : 0
+                    'percentage' => $totalEmployees > 0 ? round(($dept->users_count / $totalEmployees) * 100, 1) : 0,
                 ];
             });
 
@@ -538,7 +542,7 @@ class EmployeeController extends Controller
                 return [
                     'name' => $desig->title,
                     'count' => $desig->users_count,
-                    'percentage' => $totalEmployees > 0 ? round(($desig->users_count / $totalEmployees) * 100, 1) : 0
+                    'percentage' => $totalEmployees > 0 ? round(($desig->users_count / $totalEmployees) * 100, 1) : 0,
                 ];
             });
 
@@ -567,8 +571,8 @@ class EmployeeController extends Controller
                 'recent_hires' => $recentHires,
                 'monthly_growth_rate' => 0, // Calculate based on your business logic
                 'current_month_hires' => User::whereMonth('created_at', now()->month)
-                                            ->whereYear('created_at', now()->year)
-                                            ->count(),
+                    ->whereYear('created_at', now()->year)
+                    ->count(),
             ],
             'workforce_health' => [
                 'status_ratio' => [

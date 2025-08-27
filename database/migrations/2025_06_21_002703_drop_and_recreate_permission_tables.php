@@ -44,7 +44,6 @@ return new class extends Migration
             $table->unique(['name', 'guard_name']);
             $table->index(['module', 'guard_name'], 'permissions_module_guard_name_index');
 
-
         });
 
         // Create roles table

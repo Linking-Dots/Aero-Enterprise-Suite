@@ -23,14 +23,14 @@ class SingleDeviceLoginMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Only apply to authenticated users
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $next($request);
         }
 
         $user = Auth::user();
-        
+
         // Skip if single device login is not enabled for this user
-        if (!$user->hasSingleDeviceLoginEnabled()) {
+        if (! $user->hasSingleDeviceLoginEnabled()) {
             return $next($request);
         }
 
@@ -40,8 +40,8 @@ class SingleDeviceLoginMiddleware
 
         // Check if current device is valid
         $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
-        
-        if (!$deviceCheck['allowed']) {
+
+        if (! $deviceCheck['allowed']) {
             // Log out user and redirect to login with message
             Auth::logout();
             $request->session()->invalidate();

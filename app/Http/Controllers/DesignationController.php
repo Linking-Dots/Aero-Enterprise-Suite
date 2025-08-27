@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HRM\Department;
 use App\Models\HRM\Designation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use App\Models\HRM\Department;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DesignationController extends Controller
 {
@@ -25,8 +25,8 @@ class DesignationController extends Controller
     {
         $managers = User::whereHas('roles', function ($q) {
             $q->where('name', 'like', '%Manager%')
-              ->orWhere('name', 'like', '%Director%')
-              ->orWhere('name', 'like', '%Head%');
+                ->orWhere('name', 'like', '%Director%')
+                ->orWhere('name', 'like', '%Head%');
         })->get(['id', 'name']);
 
         $parentDesignations = Designation::whereNull('parent_id')
@@ -142,6 +142,7 @@ class DesignationController extends Controller
     public function show($id)
     {
         $designation = Designation::with('department')->findOrFail($id);
+
         return response()->json(['designation' => $designation]);
     }
 
@@ -204,6 +205,7 @@ class DesignationController extends Controller
             'inactive' => Designation::where('is_active', false)->count(),
             'parent_designations' => Designation::whereNull('parent_id')->orWhere('parent_id', 0)->count(),
         ];
+
         return response()->json(['stats' => $stats]);
     }
 }

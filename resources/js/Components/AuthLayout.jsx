@@ -4,25 +4,13 @@ import {
     ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import GlassCard from '@/Components/GlassCard';
-
+import { useTheme } from '@/Contexts/ThemeContext';
 
 import logo from '../../../public/assets/images/logo.png';
 
-// Custom theme object for styling
-const theme = {
-    primary: '#3b82f6',
-    secondary: '#8b5cf6',
-    spacing: (factor) => `${factor * 0.5}rem`,
-    palette: {
-        text: {
-            primary: 'hsl(var(--foreground))',
-            secondary: 'hsl(var(--foreground) / 0.7)'
-        }
-    }
-};
-
 const AuthLayout = ({ children, title, subtitle }) => {
     const [isDesktop, setIsDesktop] = useState(false);
+    const { themeSettings } = useTheme();
 
     // Check if screen is desktop for showing floating elements
     useEffect(() => {
@@ -37,17 +25,35 @@ const AuthLayout = ({ children, title, subtitle }) => {
     }, []);
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-1 sm:p-2 relative overflow-hidden">
+        <div 
+            className="min-h-screen flex items-center justify-center p-1 sm:p-2 relative overflow-hidden"
+            style={{
+                fontFamily: `var(--fontFamily, 'Inter')`,
+                transform: `scale(var(--scale, 1))`,
+                transformOrigin: 'center center',
+                // Use transparent background to allow the global theme background to show through
+                // The global theme background is applied to document.body by the theme system
+                backgroundColor: 'transparent',
+                background: 'transparent'
+            }}
+        >
             {/* Floating Background Elements - Responsive positioning */}
             {isDesktop && (
                 <>
                     <motion.div
-                        className="absolute w-12 h-12 rounded-full"
+                        className="w-12 h-12 rounded-full"
                         style={{
+                            position: 'absolute',
                             top: '10%',
                             left: '8%',
-                            background: `linear-gradient(135deg, ${theme.primary}15, ${theme.secondary}15)`,
-                            backdropFilter: 'blur(8px)'
+                            background: `linear-gradient(135deg, 
+                                color-mix(in srgb, var(--theme-primary, #006FEE) 15%, transparent), 
+                                color-mix(in srgb, var(--theme-secondary, #7C3AED) 15%, transparent)
+                            )`,
+                            backdropFilter: 'blur(8px)',
+                            borderRadius: `var(--borderRadius, 50%)`,
+                            border: `var(--borderWidth, 1px) solid color-mix(in srgb, var(--theme-primary, #006FEE) 20%, transparent)`,
+                            transform: `scale(var(--scale, 1))`
                         }}
                         animate={{ 
                             y: [-10, 10, -10],
@@ -60,12 +66,19 @@ const AuthLayout = ({ children, title, subtitle }) => {
                         }}
                     />
                     <motion.div
-                        className="absolute w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full"
                         style={{
+                            position: 'absolute',
                             bottom: '15%',
                             right: '10%',
-                            background: `linear-gradient(135deg, ${theme.secondary}20, ${theme.primary}20)`,
-                            backdropFilter: 'blur(6px)'
+                            background: `linear-gradient(135deg, 
+                                color-mix(in srgb, var(--theme-secondary, #7C3AED) 20%, transparent), 
+                                color-mix(in srgb, var(--theme-primary, #006FEE) 20%, transparent)
+                            )`,
+                            backdropFilter: 'blur(6px)',
+                            borderRadius: `var(--borderRadius, 50%)`,
+                            border: `var(--borderWidth, 1px) solid color-mix(in srgb, var(--theme-secondary, #7C3AED) 20%, transparent)`,
+                            transform: `scale(var(--scale, 1))`
                         }}
                         animate={{ 
                             x: [-8, 8, -8],
@@ -90,7 +103,27 @@ const AuthLayout = ({ children, title, subtitle }) => {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="w-full max-w-[420px]"
                     >
-                        <GlassCard className="p-3 sm:p-4 md:p-6 relative overflow-visible w-full rounded-2xl sm:rounded-3xl">
+                        <GlassCard 
+                            className="p-3 sm:p-4 md:p-6 relative overflow-visible w-full rounded-2xl sm:rounded-3xl"
+                            style={{
+                                borderRadius: `var(--borderRadius, 24px)`,
+                                borderWidth: `var(--borderWidth, 2px)`,
+                                borderStyle: 'solid',
+                                borderColor: 'color-mix(in srgb, var(--theme-divider, #E4E4E7) 50%, transparent)',
+                                fontFamily: `var(--fontFamily, 'Inter')`,
+                                transform: `scale(var(--scale, 1))`,
+                                background: `linear-gradient(to bottom right, 
+                                    color-mix(in srgb, var(--theme-content1, #FAFAFA) 98%, transparent), 
+                                    color-mix(in srgb, var(--theme-content2, #F4F4F5) 95%, transparent)
+                                )`,
+                                backdropFilter: 'blur(20px) saturate(200%)',
+                                boxShadow: `
+                                    0 20px 40px color-mix(in srgb, var(--theme-shadow, #000000) 10%, transparent),
+                                    0 8px 16px color-mix(in srgb, var(--theme-shadow, #000000) 8%, transparent),
+                                    inset 0 1px 0 color-mix(in srgb, var(--theme-background, #FFFFFF) 30%, transparent)
+                                `
+                            }}
+                        >
                             {/* Logo at top of form card */}
                             <motion.div
                                 initial={{ opacity: 0, y: -20 }}
@@ -128,16 +161,26 @@ const AuthLayout = ({ children, title, subtitle }) => {
                                     <h1
                                         className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-1 sm:mb-2"
                                         style={{
-                                            background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.primary})`,
+                                            background: `linear-gradient(135deg, 
+                                                var(--theme-foreground, #11181C), 
+                                                color-mix(in srgb, var(--theme-foreground, #11181C) 80%, var(--theme-primary, #006FEE))
+                                            )`,
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             WebkitTextFillColor: 'transparent',
+                                            fontFamily: `var(--fontFamily, 'Inter')`
                                         }}
                                     >
                                         {title}
                                     </h1>
                                     {subtitle && (
-                                        <p className="text-foreground-600 text-sm sm:text-base leading-relaxed px-1 sm:px-0">
+                                        <p 
+                                            className="text-foreground-600 text-sm sm:text-base leading-relaxed px-1 sm:px-0"
+                                            style={{
+                                                color: 'color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)',
+                                                fontFamily: `var(--fontFamily, 'Inter')`
+                                            }}
+                                        >
                                             {subtitle}
                                         </p>
                                     )}
@@ -157,7 +200,12 @@ const AuthLayout = ({ children, title, subtitle }) => {
                             <motion.div
                                 className="absolute -top-1 -right-1 w-3 h-3 rounded-full opacity-40"
                                 style={{
-                                    background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`
+                                    background: `linear-gradient(135deg, 
+                                        var(--theme-primary, #006FEE), 
+                                        var(--theme-secondary, #7C3AED)
+                                    )`,
+                                    borderRadius: `var(--borderRadius, 50%)`,
+                                    transform: `scale(var(--scale, 1))`
                                 }}
                                 animate={{ scale: [1, 1.2, 1] }}
                                 transition={{ duration: 3, repeat: Infinity }}
@@ -165,7 +213,12 @@ const AuthLayout = ({ children, title, subtitle }) => {
                             <motion.div
                                 className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full opacity-40"
                                 style={{
-                                    background: `linear-gradient(135deg, ${theme.secondary}, ${theme.primary})`
+                                    background: `linear-gradient(135deg, 
+                                        var(--theme-secondary, #7C3AED), 
+                                        var(--theme-primary, #006FEE)
+                                    )`,
+                                    borderRadius: `var(--borderRadius, 50%)`,
+                                    transform: `scale(var(--scale, 1))`
                                 }}
                                 animate={{ scale: [1, 1.3, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}

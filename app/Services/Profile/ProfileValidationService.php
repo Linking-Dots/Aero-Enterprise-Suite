@@ -16,7 +16,7 @@ class ProfileValidationService
             'name' => 'required|string|max:255',
             'user_name' => ['required', 'string', 'unique:users,user_name', function ($attribute, $value, $fail) {
                 if (preg_match('/\s/', $value) || strtolower($value) !== $value) {
-                    $fail('The ' . $attribute . ' must not contain spaces and must be all lowercase.');
+                    $fail('The '.$attribute.' must not contain spaces and must be all lowercase.');
                 }
             }],
             'password' => 'required|string|min:8',
@@ -60,8 +60,8 @@ class ProfileValidationService
                     'date_of_joining' => 'nullable|date',
                     'address' => 'nullable|string',
                     'employee_id' => 'required|integer',
-                    'phone' => 'required|string|unique:users,phone,' . $userId,
-                    'email' => 'required|string|email|unique:users,email,' . $userId,
+                    'phone' => 'required|string|unique:users,phone,'.$userId,
+                    'email' => 'required|string|email|unique:users,email,'.$userId,
                     'department' => 'required|exists:departments,id',
                     'designation' => 'nullable',
                     'report_to' => 'nullable',
@@ -235,10 +235,10 @@ class ProfileValidationService
     {
         // Default to 'profile' rule set if no ruleSet is specified
         $ruleSet = $request->ruleSet ?? 'profile';
-        
+
         $rules = $this->getUpdateRulesBySet($ruleSet, $request->id);
         $messages = $this->getValidationMessages();
-        
+
         return $request->validate($rules, $messages);
     }
 }

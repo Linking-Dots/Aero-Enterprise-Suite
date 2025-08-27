@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,11 +36,11 @@ Route::middleware('auth')->group(function () {
     // Email Verification Routes
     Route::get('verify-email', [EmailVerificationController::class, 'prompt'])->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-                ->middleware(['signed', 'throttle:6,1'])
-                ->name('verification.verify');
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
     Route::post('email/verification-notification', [EmailVerificationController::class, 'send'])
-                ->middleware('throttle:6,1')
-                ->name('verification.send');
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
     // Logout Route
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');

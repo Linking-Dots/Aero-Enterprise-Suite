@@ -15,7 +15,7 @@ class ProfileMediaService
     {
         $messages = [];
 
-        if (!$request->hasFile('profile_image')) {
+        if (! $request->hasFile('profile_image')) {
             return $messages;
         }
 
@@ -36,6 +36,7 @@ class ProfileMediaService
 
         if ($existingMedia && $existingMedia->getPath() === $newProfileImage->getPath()) {
             $messages[] = 'Profile image is already up-to-date.';
+
             return $messages;
         }
 
@@ -43,7 +44,7 @@ class ProfileMediaService
         if ($user->hasMedia('profile_images')) {
             $user->clearMediaCollection('profile_images');
         }
-        
+
         // Clear the old profile_image field to force use of MediaLibrary
         $user->profile_image = null;
         $user->save();
@@ -57,7 +58,7 @@ class ProfileMediaService
         } catch (\Exception $e) {
             throw new \Illuminate\Validation\ValidationException(
                 \Illuminate\Support\Facades\Validator::make([], []),
-                ['profile_image' => ['Failed to upload profile image: ' . $e->getMessage()]]
+                ['profile_image' => ['Failed to upload profile image: '.$e->getMessage()]]
             );
         }
 
@@ -79,15 +80,15 @@ class ProfileMediaService
             } else {
                 $messages[] = 'No profile image to remove';
             }
-            
+
             // Clear the old profile_image field to ensure removal
             $user->profile_image = null;
             $user->save();
-            
+
         } catch (\Exception $e) {
             throw new \Illuminate\Validation\ValidationException(
                 \Illuminate\Support\Facades\Validator::make([], []),
-                ['profile_image' => ['Failed to remove profile image: ' . $e->getMessage()]]
+                ['profile_image' => ['Failed to remove profile image: '.$e->getMessage()]]
             );
         }
 
@@ -102,12 +103,13 @@ class ProfileMediaService
         try {
             // Use MediaLibrary standard method to get the first media URL
             $url = $user->getFirstMediaUrl('profile_images');
-            
+
             // Return null if no media found (empty string from getFirstMediaUrl means no media)
             return empty($url) ? null : $url;
         } catch (\Exception $e) {
             // Log error and return null if there's an exception
-            Log::warning('Failed to get profile image URL for user ' . $user->id . ': ' . $e->getMessage());
+            Log::warning('Failed to get profile image URL for user '.$user->id.': '.$e->getMessage());
+
             return null;
         }
     }
@@ -120,7 +122,8 @@ class ProfileMediaService
         try {
             return $user->hasMedia('profile_images');
         } catch (\Exception $e) {
-            Log::warning('Failed to check profile image for user ' . $user->id . ': ' . $e->getMessage());
+            Log::warning('Failed to check profile image for user '.$user->id.': '.$e->getMessage());
+
             return false;
         }
     }
@@ -153,7 +156,7 @@ class ProfileMediaService
 
         // Validate MIME type matches extension
         $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
             throw new \Exception('Invalid image type. Only JPEG, PNG, JPG, and WebP are allowed.');
         }
 
@@ -165,7 +168,7 @@ class ProfileMediaService
             'javascript:',
             'vbscript:',
             'onload=',
-            'onerror='
+            'onerror=',
         ];
 
         foreach ($suspiciousPatterns as $pattern) {

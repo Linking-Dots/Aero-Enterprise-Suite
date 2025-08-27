@@ -4,10 +4,9 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserDevice;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Jenssegers\Agent\Agent;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Jenssegers\Agent\Agent;
 
 class DeviceTrackingService
 {
@@ -15,7 +14,7 @@ class DeviceTrackingService
 
     public function __construct()
     {
-        $this->agent = new Agent();
+        $this->agent = new Agent;
     }
 
     /**
@@ -25,7 +24,7 @@ class DeviceTrackingService
     public function generateDeviceId(Request $request): string
     {
         $userAgent = $request->userAgent() ?? '';
-        
+
         // Create a stable device fingerprint that doesn't include IP
         // This prevents issues with dynamic IPs, WiFi switching, VPN usage, etc.
         $fingerprint = [
@@ -35,7 +34,7 @@ class DeviceTrackingService
         ];
 
         $fingerprintString = json_encode($fingerprint);
-        
+
         return hash('sha256', $fingerprintString);
     }
 
@@ -46,10 +45,10 @@ class DeviceTrackingService
     public function generateCompatibleDeviceId(Request $request): string
     {
         $userAgent = $request->userAgent() ?? '';
-        
+
         // Extract core browser and platform info, ignoring version details
         $this->agent->setUserAgent($userAgent);
-        
+
         $coreFingerprint = [
             'browser' => $this->agent->browser(),
             'platform' => $this->agent->platform(),
@@ -57,7 +56,7 @@ class DeviceTrackingService
         ];
 
         $fingerprintString = json_encode($coreFingerprint);
-        
+
         return hash('sha256', $fingerprintString);
     }
 
@@ -99,15 +98,15 @@ class DeviceTrackingService
     {
         $browser = $this->agent->browser();
         $platform = $this->agent->platform();
-        
+
         if ($this->agent->isMobile()) {
             return "{$browser} on {$platform} Mobile";
         }
-        
+
         if ($this->agent->isTablet()) {
             return "{$browser} on {$platform} Tablet";
         }
-        
+
         return "{$browser} on {$platform}";
     }
 
@@ -117,9 +116,9 @@ class DeviceTrackingService
     public function canUserLoginFromDevice(User $user, Request $request): array
     {
         $deviceId = $this->generateDeviceId($request);
-        
+
         // If single device login is not enabled, allow login
-        if (!$user->hasSingleDeviceLoginEnabled()) {
+        if (! $user->hasSingleDeviceLoginEnabled()) {
             return [
                 'allowed' => true,
                 'device_id' => $deviceId,
@@ -153,7 +152,7 @@ class DeviceTrackingService
         if ($compatibleDevice) {
             // Update the device with new device_id for future logins
             $compatibleDevice->update(['device_id' => $deviceId]);
-            
+
             return [
                 'allowed' => true,
                 'device_id' => $deviceId,
@@ -256,11 +255,11 @@ class DeviceTrackingService
     /**
      * Update device activity.
      */
-    public function updateDeviceActivity(User $user, Request $request, string $sessionId = null): void
+    public function updateDeviceActivity(User $user, Request $request, ?string $sessionId = null): void
     {
         $deviceId = $this->generateDeviceId($request);
         $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
-        
+
         // First try to find by exact device ID
         $device = $user->devices()
             ->where('device_id', $deviceId)
@@ -268,12 +267,12 @@ class DeviceTrackingService
             ->first();
 
         // If not found, try to find by compatible device ID
-        if (!$device) {
+        if (! $device) {
             $device = $user->devices()
                 ->where('compatible_device_id', $compatibleDeviceId)
                 ->active()
                 ->first();
-                
+
             // Update the device ID if found through compatible ID
             if ($device) {
                 $device->update(['device_id' => $deviceId]);

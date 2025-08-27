@@ -13,7 +13,7 @@ class DeviceTrackingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new DeviceTrackingService();
+        $this->service = new DeviceTrackingService;
     }
 
     public function test_device_id_generation_excludes_ip_address()

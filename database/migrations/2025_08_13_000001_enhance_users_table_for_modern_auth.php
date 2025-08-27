@@ -13,58 +13,56 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Add modern authentication columns if they don't exist
-            if (!Schema::hasColumn('users', 'two_factor_secret')) {
+            if (! Schema::hasColumn('users', 'two_factor_secret')) {
                 $table->text('two_factor_secret')->nullable()->after('password');
             }
 
-            if (!Schema::hasColumn('users', 'two_factor_recovery_codes')) {
+            if (! Schema::hasColumn('users', 'two_factor_recovery_codes')) {
                 $table->text('two_factor_recovery_codes')->nullable()->after('two_factor_secret');
             }
 
-            if (!Schema::hasColumn('users', 'two_factor_confirmed_at')) {
+            if (! Schema::hasColumn('users', 'two_factor_confirmed_at')) {
                 $table->timestamp('two_factor_confirmed_at')->nullable()->after('two_factor_recovery_codes');
             }
 
-       
-
             // Security tracking columns
-            if (!Schema::hasColumn('users', 'last_login_at')) {
+            if (! Schema::hasColumn('users', 'last_login_at')) {
                 $table->timestamp('last_login_at')->nullable()->after('email_verified_at');
             }
 
-            if (!Schema::hasColumn('users', 'last_login_ip')) {
+            if (! Schema::hasColumn('users', 'last_login_ip')) {
                 $table->string('last_login_ip', 45)->nullable()->after('last_login_at');
             }
 
-            if (!Schema::hasColumn('users', 'login_count')) {
+            if (! Schema::hasColumn('users', 'login_count')) {
                 $table->integer('login_count')->default(0)->after('last_login_ip');
             }
 
             // Security preferences
-            if (!Schema::hasColumn('users', 'notification_preferences')) {
+            if (! Schema::hasColumn('users', 'notification_preferences')) {
                 $table->json('notification_preferences')->nullable()->after('login_count');
             }
 
-            if (!Schema::hasColumn('users', 'security_notifications')) {
+            if (! Schema::hasColumn('users', 'security_notifications')) {
                 $table->boolean('security_notifications')->default(true)->after('notification_preferences');
             }
 
             // Account status
-            if (!Schema::hasColumn('users', 'is_active')) {
+            if (! Schema::hasColumn('users', 'is_active')) {
                 $table->boolean('is_active')->default(true)->after('security_notifications');
             }
 
-            if (!Schema::hasColumn('users', 'account_locked_at')) {
+            if (! Schema::hasColumn('users', 'account_locked_at')) {
                 $table->timestamp('account_locked_at')->nullable()->after('is_active');
             }
 
-            if (!Schema::hasColumn('users', 'locked_reason')) {
+            if (! Schema::hasColumn('users', 'locked_reason')) {
                 $table->string('locked_reason')->nullable()->after('account_locked_at');
             }
         });
 
         // Create authentication events table
-        if (!Schema::hasTable('authentication_events')) {
+        if (! Schema::hasTable('authentication_events')) {
             Schema::create('authentication_events', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
@@ -76,7 +74,7 @@ return new class extends Migration
                 $table->string('risk_level', 20)->default('low'); // Limited length: low, medium, high, critical
                 $table->timestamp('occurred_at');
                 $table->timestamps();
-                
+
                 $table->index(['user_id', 'event_type']);
                 $table->index(['ip_address', 'occurred_at']);
                 $table->index(['event_type', 'status']); // Now safe with limited lengths
@@ -84,7 +82,7 @@ return new class extends Migration
         }
 
         // Create user sessions table for tracking
-        if (!Schema::hasTable('user_sessions')) {
+        if (! Schema::hasTable('user_sessions')) {
             Schema::create('user_sessions', function (Blueprint $table) {
                 $table->id();
                 $table->string('session_id', 191)->unique(); // Limited for index
@@ -98,7 +96,7 @@ return new class extends Migration
                 $table->timestamp('last_activity');
                 $table->timestamp('expires_at')->nullable();
                 $table->timestamps();
-                
+
                 $table->index(['user_id', 'is_current']);
                 $table->index(['session_id', 'is_current']);
                 $table->index('last_activity');
@@ -106,7 +104,7 @@ return new class extends Migration
         }
 
         // Create password reset tokens table (enhanced)
-        if (!Schema::hasTable('password_reset_tokens_secure')) {
+        if (! Schema::hasTable('password_reset_tokens_secure')) {
             Schema::create('password_reset_tokens_secure', function (Blueprint $table) {
                 $table->id();
                 $table->string('email');
@@ -126,7 +124,7 @@ return new class extends Migration
         }
 
         // Create failed login attempts table
-        if (!Schema::hasTable('failed_login_attempts')) {
+        if (! Schema::hasTable('failed_login_attempts')) {
             Schema::create('failed_login_attempts', function (Blueprint $table) {
                 $table->id();
                 $table->string('email');
@@ -136,7 +134,7 @@ return new class extends Migration
                 $table->json('metadata')->nullable();
                 $table->timestamp('attempted_at');
                 $table->timestamps();
-                
+
                 $table->index(['email', 'attempted_at']);
                 $table->index(['ip_address', 'attempted_at']);
             });
@@ -160,7 +158,7 @@ return new class extends Migration
                 'security_notifications',
                 'is_active',
                 'account_locked_at',
-                'locked_reason'
+                'locked_reason',
             ]);
         });
 

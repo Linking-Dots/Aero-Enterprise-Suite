@@ -25,17 +25,16 @@ class JurisdictionController extends Controller
 
             // Return a successful response with the work locations
             return response()->json([
-                'work_locations' => $workLocations
+                'work_locations' => $workLocations,
             ], 200); // 200 is the HTTP status code for OK
         } catch (\Exception $e) {
             // Catch any exceptions that occur and return an error response
             return response()->json([
                 'error' => 'Failed to retrieve work locations',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500); // 500 is the HTTP status code for Internal Server Error
         }
     }
-
 
     public function addWorkLocation(Request $request)
     {
@@ -47,7 +46,7 @@ class JurisdictionController extends Controller
                 'start_chainage' => 'required|string|unique:work_locations',
                 'end_chainage' => 'required|string|unique:work_locations',
                 'incharge' => 'required|string|unique:work_locations',
-            ],[
+            ], [
                 'location.required' => 'Work location name is required.',
                 'start_chainage.unique' => 'A work location with same start chainage is already exists.',
                 'start_chainage.required' => 'Start Chainage is required.',
@@ -57,9 +56,8 @@ class JurisdictionController extends Controller
                 'incharge.required' => 'Location incharge is required.',
             ]);
 
-
             // Create a new NCR instance
-            $workLocation = new Jurisdiction();
+            $workLocation = new Jurisdiction;
             $workLocation->location = $validatedData['location'];
             $workLocation->start_chainage = $validatedData['start_chainage'];
             $workLocation->end_chainage = $validatedData['end_chainage'];
@@ -81,5 +79,4 @@ class JurisdictionController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 }

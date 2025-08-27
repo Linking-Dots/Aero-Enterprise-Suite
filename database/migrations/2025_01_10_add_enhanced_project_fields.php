@@ -151,7 +151,7 @@ return new class extends Migration
                 'external_project_id',
                 'external_integrations',
                 'jira_project_key',
-                'confluence_space'
+                'confluence_space',
             ]);
         });
     }

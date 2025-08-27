@@ -61,6 +61,7 @@ class Designation extends Model
         $array = parent::toArray();
         $array['department_name'] = optional($this->department)->name;
         $array['employee_count'] = $this->employee_count;
+
         return $array;
     }
 }

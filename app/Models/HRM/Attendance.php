@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models\HRM;
 
 use App\Models\User;
@@ -46,5 +45,4 @@ class Attendance extends Model
     {
         return $this->punchout_location ? json_decode($this->punchout_location, true) : null;
     }
-
 }

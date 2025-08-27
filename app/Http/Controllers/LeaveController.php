@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\LeaveResource;
 use App\Http\Resources\LeaveResourceCollection;
+use App\Models\HRM\Department;
 use App\Models\HRM\Leave;
 use App\Models\HRM\LeaveSetting;
 use App\Models\User;
@@ -17,14 +18,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use App\Models\HRM\Department;
 
 class LeaveController extends Controller
 {
     protected LeaveValidationService $validationService;
+
     protected LeaveOverlapService $overlapService;
+
     protected LeaveCrudService $crudService;
+
     protected LeaveQueryService $queryService;
+
     protected LeaveSummaryService $summaryService;
 
     public function __construct(
@@ -40,12 +44,13 @@ class LeaveController extends Controller
         $this->queryService = $queryService;
         $this->summaryService = $summaryService;
     }
+
     public function index1(): \Inertia\Response
     {
         return Inertia::render('LeavesEmployee', [
             'title' => 'Leaves',
             'allUsers' => User::all(),
-            
+
         ]);
     }
 
@@ -61,14 +66,14 @@ class LeaveController extends Controller
     {
         try {
             $leaveData = $this->queryService->getLeaveRecords($request);
-            
+
             // Debug log the structure returned by LeaveQueryService
             Log::info('LeaveController - leaveData structure:', [
                 'leavesData_keys' => array_keys($leaveData['leavesData'] ?? []),
                 'publicHolidays_count' => count($leaveData['leavesData']['publicHolidays'] ?? []),
-                'publicHolidays_sample' => array_slice($leaveData['leavesData']['publicHolidays'] ?? [], 0, 3)
+                'publicHolidays_sample' => array_slice($leaveData['leavesData']['publicHolidays'] ?? [], 0, 3),
             ]);
-            
+
             $response = [
                 'leaves' => new LeaveResourceCollection($leaveData['leaveRecords']),
                 'leavesData' => $leaveData['leavesData'],
@@ -84,6 +89,7 @@ class LeaveController extends Controller
             return response()->json($response, 200);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'success' => false,
                 'error' => 'An error occurred while retrieving leave data.',
@@ -102,6 +108,7 @@ class LeaveController extends Controller
             ]);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'error' => 'An error occurred while retrieving leave data.',
                 'details' => $e->getMessage(),
@@ -117,7 +124,7 @@ class LeaveController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
-                'message' => 'Validation failed'
+                'message' => 'Validation failed',
             ], 422);
         }
 
@@ -132,7 +139,7 @@ class LeaveController extends Controller
                 return response()->json([
                     'success' => false,
                     'error' => $overlapError,
-                    'message' => 'Leave dates overlap with existing leave or holiday'
+                    'message' => 'Leave dates overlap with existing leave or holiday',
                 ], 422);
             }
 
@@ -163,6 +170,7 @@ class LeaveController extends Controller
             ], 201);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'success' => false,
                 'error' => 'An error occurred while submitting the leave data.',
@@ -200,6 +208,7 @@ class LeaveController extends Controller
             ], 200);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'error' => 'An error occurred while updating the leave.',
                 'details' => $e->getMessage(),
@@ -235,6 +244,7 @@ class LeaveController extends Controller
             ]);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'error' => 'An error occurred while deleting the leave.',
                 'details' => $e->getMessage(),
@@ -265,7 +275,7 @@ class LeaveController extends Controller
         try {
             $request->validate([
                 'leave_ids' => 'required|array',
-                'leave_ids.*' => 'integer|exists:leave_applications,id'
+                'leave_ids.*' => 'integer|exists:leave_applications,id',
             ]);
 
             $leaveIds = $request->input('leave_ids');
@@ -281,10 +291,11 @@ class LeaveController extends Controller
             return response()->json([
                 'message' => "{$updatedCount} leave(s) approved successfully",
                 'updated_count' => $updatedCount,
-                'total_requested' => count($leaveIds)
+                'total_requested' => count($leaveIds),
             ]);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'error' => 'An error occurred while approving leaves.',
                 'details' => $e->getMessage(),
@@ -297,7 +308,7 @@ class LeaveController extends Controller
         try {
             $request->validate([
                 'leave_ids' => 'required|array',
-                'leave_ids.*' => 'integer|exists:leave_applications,id'
+                'leave_ids.*' => 'integer|exists:leave_applications,id',
             ]);
 
             $leaveIds = $request->input('leave_ids');
@@ -313,10 +324,11 @@ class LeaveController extends Controller
             return response()->json([
                 'message' => "{$updatedCount} leave(s) rejected successfully",
                 'updated_count' => $updatedCount,
-                'total_requested' => count($leaveIds)
+                'total_requested' => count($leaveIds),
             ]);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'error' => 'An error occurred while rejecting leaves.',
                 'details' => $e->getMessage(),

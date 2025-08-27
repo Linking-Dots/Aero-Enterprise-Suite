@@ -6,17 +6,14 @@ use App\Models\DailySummary;
 use App\Models\DailyWork;
 use App\Models\DailyWorkSummary;
 use App\Models\Jurisdiction;
-use App\Models\Report;
 use App\Models\Tasks;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DailyWorkSummaryController extends Controller
 {
-
     public function index()
     {
         // Get the authenticated user
@@ -34,7 +31,7 @@ class DailyWorkSummaryController extends Controller
 
         $dailyTasks = $tasksQuery->get();
         $dailySummaries = $summaryQuery->get();
-        $inCharges = User::whereHas('designation', function($q) {
+        $inCharges = User::whereHas('designation', function ($q) {
             $q->where('title', 'Supervision Engineer');
         })->get();
 
@@ -62,7 +59,7 @@ class DailyWorkSummaryController extends Controller
             }
 
             // If the date is not found, add the current summary as a new entry
-            if (!$found) {
+            if (! $found) {
                 $mergedSummaries[] = $summary;
             }
         }
@@ -109,14 +106,7 @@ class DailyWorkSummaryController extends Controller
         ]);
     }
 
-
-
-
-
-    public function dailySummary()
-    {
-
-    }
+    public function dailySummary() {}
 
     public function filterSummary(Request $request)
     {
@@ -147,7 +137,6 @@ class DailyWorkSummaryController extends Controller
                 $summaryQuery->whereBetween('date', [$startDate, $endDate]);
             }
 
-
             // Filter tasks by incharge
             if ($request->incharge !== 'all' && $request->incharge !== null) {
                 $incharge = $request->incharge;
@@ -158,8 +147,6 @@ class DailyWorkSummaryController extends Controller
             // Retrieve filtered tasks
             $filteredTasks = $tasksQuery->get();
             $filteredSummery = $summaryQuery->get();
-
-
 
             $mergedSummaries = [];
 
@@ -185,7 +172,7 @@ class DailyWorkSummaryController extends Controller
                 }
 
                 // If the date is not found, add the current summary as a new entry
-                if (!$found) {
+                if (! $found) {
                     $mergedSummaries[] = $summary;
                 }
             }
@@ -230,22 +217,22 @@ class DailyWorkSummaryController extends Controller
             // Return JSON response with filtered tasks
             return response()->json([
                 'summaries' => $dailySummaries,
-                'message' => 'Tasks filtered successfully'
+                'message' => 'Tasks filtered successfully',
             ]);
         } catch (\Exception $e) {
             // Handle any exceptions that occur during filtering
             return response()->json([
-                'error' => 'An error occurred while filtering tasks: ' . $e->getMessage()
+                'error' => 'An error occurred while filtering tasks: '.$e->getMessage(),
             ], 500);
         }
     }
 
     public function exportDailySummary()
     {
-//        $settings = [
-//            'title' => 'All Tasks',
-//        ];
-//        $team = Auth::team();
-//        return view('task/add',compact('team', 'settings'));
+        //        $settings = [
+        //            'title' => 'All Tasks',
+        //        ];
+        //        $team = Auth::team();
+        //        return view('task/add',compact('team', 'settings'));
     }
 }

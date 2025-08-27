@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\VersionController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SystemMonitoringController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\SystemMonitoringController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Api\VersionController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,7 +26,7 @@ Route::post('/log-error', function (Request $request) {
             'component_stack' => 'nullable|string',
             'url' => 'required|string',
             'user_agent' => 'nullable|string',
-            'timestamp' => 'required|string'
+            'timestamp' => 'required|string',
         ]);
 
         DB::table('error_logs')->insert([
@@ -40,15 +40,16 @@ Route::post('/log-error', function (Request $request) {
             'ip_address' => $request->ip(),
             'metadata' => json_encode([
                 'timestamp' => $validated['timestamp'],
-                'session_id' => session()->getId()
+                'session_id' => session()->getId(),
             ]),
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return response()->json(['success' => true]);
     } catch (\Exception $e) {
-        Log::error('Failed to log frontend error: ' . $e->getMessage());
+        Log::error('Failed to log frontend error: '.$e->getMessage());
+
         return response()->json(['success' => false], 500);
     }
 })->middleware(['web']);
@@ -63,7 +64,7 @@ Route::post('/log-performance', function (Request $request) {
             'metric_type' => 'required|string|in:page_load,api_response,query_execution,render_time',
             'identifier' => 'required|string',
             'execution_time_ms' => 'required|numeric',
-            'metadata' => 'nullable|array'
+            'metadata' => 'nullable|array',
         ]);
 
         DB::table('performance_metrics')->insert([
@@ -73,12 +74,13 @@ Route::post('/log-performance', function (Request $request) {
             'metadata' => json_encode($validated['metadata'] ?? []),
             'user_id' => auth()->id(),
             'ip_address' => $request->ip(),
-            'created_at' => now()
+            'created_at' => now(),
         ]);
 
         return response()->json(['success' => true]);
     } catch (\Exception $e) {
-        Log::error('Failed to log performance metric: ' . $e->getMessage());
+        Log::error('Failed to log performance metric: '.$e->getMessage());
+
         return response()->json(['success' => false], 500);
     }
 })->middleware(['web']);

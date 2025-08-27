@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Add missing active field
-            if (!Schema::hasColumn('users', 'active')) {
+            if (! Schema::hasColumn('users', 'active')) {
                 $table->boolean('active')->default(true)->after('email_verified_at');
             }
-            
+
             // Check if we need to rename columns to match database schema
-            if (Schema::hasColumn('users', 'department_id') && !Schema::hasColumn('users', 'department')) {
+            if (Schema::hasColumn('users', 'department_id') && ! Schema::hasColumn('users', 'department')) {
                 $table->renameColumn('department_id', 'department');
             }
-            
-            if (Schema::hasColumn('users', 'designation_id') && !Schema::hasColumn('users', 'designation')) {
+
+            if (Schema::hasColumn('users', 'designation_id') && ! Schema::hasColumn('users', 'designation')) {
                 $table->renameColumn('designation_id', 'designation');
             }
         });
@@ -37,12 +37,12 @@ return new class extends Migration
             if (Schema::hasColumn('users', 'active')) {
                 $table->dropColumn('active');
             }
-            
-            if (Schema::hasColumn('users', 'department') && !Schema::hasColumn('users', 'department_id')) {
+
+            if (Schema::hasColumn('users', 'department') && ! Schema::hasColumn('users', 'department_id')) {
                 $table->renameColumn('department', 'department_id');
             }
-            
-            if (Schema::hasColumn('users', 'designation') && !Schema::hasColumn('users', 'designation_id')) {
+
+            if (Schema::hasColumn('users', 'designation') && ! Schema::hasColumn('users', 'designation_id')) {
                 $table->renameColumn('designation', 'designation_id');
             }
         });

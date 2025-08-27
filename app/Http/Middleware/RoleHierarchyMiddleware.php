@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Role Hierarchy Middleware
- * 
+ *
  * Ensures users can only manage roles below their hierarchy level
  */
 class RoleHierarchyMiddleware
@@ -19,7 +19,7 @@ class RoleHierarchyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -40,14 +40,14 @@ class RoleHierarchyMiddleware
                     'target_role' => $targetRole->name,
                     'target_hierarchy' => $targetRole->hierarchy_level,
                     'action' => $request->method(),
-                    'timestamp' => now()
+                    'timestamp' => now(),
                 ]);
 
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => 'You cannot manage roles at or above your hierarchy level.',
                         'user_level' => $userHierarchyLevel,
-                        'target_level' => $targetRole->hierarchy_level
+                        'target_level' => $targetRole->hierarchy_level,
                     ], 403);
                 }
 
@@ -73,7 +73,7 @@ class RoleHierarchyMiddleware
             'Department Head' => 4,
             'Team Lead' => 5,
             'Senior Employee' => 6,
-            'Employee' => 10
+            'Employee' => 10,
         ];
 
         $highestLevel = 999; // Default to lowest authority

@@ -12,17 +12,18 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
     protected ProfileValidationService $validationService;
+
     protected ProfileCrudService $crudService;
+
     protected ProfileUpdateService $updateService;
 
     public function __construct(
@@ -34,6 +35,7 @@ class ProfileController extends Controller
         $this->crudService = $crudService;
         $this->updateService = $updateService;
     }
+
     /**
      * Display the user's profile form.
      */
@@ -91,14 +93,14 @@ class ProfileController extends Controller
 
             // Save the user
             $this->crudService->saveUser($user);
-            
+
             // Get fresh user data with profile image URL
             $freshUser = $user->fresh();
 
             return response()->json([
                 'messages' => $messages,
                 'user' => $freshUser,
-                'profile_image_url' => $freshUser->profile_image_url // Explicitly include accessor
+                'profile_image_url' => $freshUser->profile_image_url, // Explicitly include accessor
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -108,9 +110,6 @@ class ProfileController extends Controller
         }
     }
 
-
-
-
     /**
      * Get profile statistics for dashboard cards
      */
@@ -119,7 +118,7 @@ class ProfileController extends Controller
         try {
             // Cache key for user stats
             $cacheKey = "profile_stats_{$user->id}";
-            
+
             $stats = Cache::remember($cacheKey, 3600, function () use ($user) {
                 // Calculate profile completion percentage
                 $sections = [
@@ -132,36 +131,36 @@ class ProfileController extends Controller
                     'education' => $user->educations && $user->educations->count() > 0,
                     'experience' => $user->experiences && $user->experiences->count() > 0,
                 ];
-                
+
                 $completed = collect($sections)->filter()->count();
                 $total = count($sections);
                 $completion_percentage = round(($completed / $total) * 100);
-                
+
                 // Get profile views (if tracking is implemented)
                 $profile_views = DB::table('profile_views')
                     ->where('user_id', $user->id)
                     ->count() ?? 0;
-                
+
                 return [
                     'completion_percentage' => $completion_percentage,
                     'total_sections' => $total,
                     'completed_sections' => $completed,
                     'last_updated' => $user->updated_at,
                     'profile_views' => $profile_views,
-                    'sections_status' => $sections
+                    'sections_status' => $sections,
                 ];
             });
-            
+
             return response()->json([
                 'success' => true,
-                'stats' => $stats
+                'stats' => $stats,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch profile statistics',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -176,9 +175,9 @@ class ProfileController extends Controller
             if (Auth::id() !== $user->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
-            
+
             $profileData = $this->crudService->getUserWithDetails($user->id);
-            
+
             // Format data for export
             $exportData = [
                 'basic_information' => [
@@ -211,7 +210,7 @@ class ProfileController extends Controller
                         'name' => $profileData->emergency_contact_secondary_name,
                         'relationship' => $profileData->emergency_contact_secondary_relationship,
                         'phone' => $profileData->emergency_contact_secondary_phone,
-                    ]
+                    ],
                 ],
                 'bank_information' => [
                     'bank_name' => $profileData->bank_name,
@@ -224,18 +223,18 @@ class ProfileController extends Controller
                 'exported_at' => now()->toISOString(),
                 'exported_by' => Auth::user()->name,
             ];
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $exportData,
-                'filename' => "profile_{$user->name}_" . now()->format('Y-m-d_H-i-s') . '.json'
+                'filename' => "profile_{$user->name}_".now()->format('Y-m-d_H-i-s').'.json',
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to export profile data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -247,39 +246,39 @@ class ProfileController extends Controller
     {
         try {
             $query = User::with(['department', 'designation']);
-            
+
             // Search filters
             if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('employee_id', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('employee_id', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
                 });
             }
-            
+
             if ($request->filled('department')) {
                 $query->where('department', $request->department);
             }
-            
+
             if ($request->filled('designation')) {
                 $query->where('designation', $request->designation);
             }
-            
+
             if ($request->filled('status')) {
                 $query->where('active', $request->status === 'active');
             }
-            
+
             // Sorting
             $sortField = $request->get('sort_field', 'name');
             $sortDirection = $request->get('sort_direction', 'asc');
             $query->orderBy($sortField, $sortDirection);
-            
+
             // Pagination
             $perPage = $request->get('per_page', 15);
             $profiles = $query->paginate($perPage);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $profiles->items(),
@@ -290,14 +289,14 @@ class ProfileController extends Controller
                     'total' => $profiles->total(),
                     'from' => $profiles->firstItem(),
                     'to' => $profiles->lastItem(),
-                ]
+                ],
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to search profiles',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -317,19 +316,18 @@ class ProfileController extends Controller
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
-                
+
                 // Clear cache to refresh stats
                 Cache::forget("profile_stats_{$user->id}");
             }
-            
+
             return response()->json(['success' => true]);
-            
+
         } catch (\Exception $e) {
             // Fail silently for tracking
             return response()->json(['success' => false], 200);
         }
     }
-
 
     /**
      * Delete the user's account.

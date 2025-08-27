@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Modal,
     ModalContent,
@@ -24,6 +24,7 @@ import {
     scalingOptions, 
     opacityOptions 
 } from '../theme/index.js';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import GlassDialog from './GlassDialog';
 
 const ThemeSettingDrawer = ({ 
@@ -31,6 +32,32 @@ const ThemeSettingDrawer = ({
     onClose
 }) => {
     const { themeSettings, updateTheme, toggleMode, resetTheme, prebuiltThemes } = useTheme();
+
+    // Enhanced close handler with cleanup
+    const handleClose = useCallback(() => {
+        console.log('ThemeDrawer handleClose called');
+        
+        // Immediate cleanup of any custom overlays
+        const overlay = document.getElementById('background-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+
+        // Force cleanup of stuck modal backdrops immediately
+        setTimeout(() => {
+            const allBackdrops = document.querySelectorAll('[data-slot="backdrop"], .nextui-backdrop, [data-modal-backdrop], .backdrop');
+            allBackdrops.forEach(backdrop => {
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            });
+        }, 100);
+
+        // Call the parent close handler
+        if (onClose) {
+            onClose();
+        }
+    }, [onClose]);
 
     // Background settings state
     const [backgroundType, setBackgroundType] = useState(themeSettings?.background?.type || 'color');
@@ -88,18 +115,34 @@ const ThemeSettingDrawer = ({
     // Apply current background settings on mount
     useEffect(() => {
         if (themeSettings?.background) {
-            console.log('ThemeSettingDrawer mounted, applying background:', themeSettings.background);
+          
             applyBackgroundToDocument(themeSettings.background);
         }
     }, [themeSettings?.background]);
 
-    // Cleanup overlay when drawer is closed
+    // Sync local state with theme settings when they change
     useEffect(() => {
-        return () => {
-            if (!isOpen) {
+        if (themeSettings?.background) {
+            setBackgroundType(themeSettings.background.type || 'color');
+            setBackgroundImage(themeSettings.background.image || '');
+            setBackgroundColor(themeSettings.background.color || '#ffffff');
+            setBackgroundSize(themeSettings.background.size || 'cover');
+            setBackgroundPosition(themeSettings.background.position || 'center');
+            setBackgroundRepeat(themeSettings.background.repeat || 'no-repeat');
+            setBackgroundOpacity(themeSettings.background.opacity || 100);
+            setBackgroundBlur(themeSettings.background.blur || 0);
+        }
+    }, [themeSettings?.background]);
+
+    // Enhanced cleanup when modal state changes
+    useEffect(() => {
+        if (!isOpen) {
+            // Add a small delay to ensure proper cleanup after modal close animation
+            const timeoutId = setTimeout(() => {
                 // Clean up any remaining overlays when drawer is closed
                 const overlay = document.getElementById('background-overlay');
                 if (overlay) {
+                    console.log('Removing background overlay on close');
                     overlay.remove();
                 }
                 
@@ -111,9 +154,46 @@ const ThemeSettingDrawer = ({
                         el.remove();
                     }
                 });
-            }
-        };
+
+                // Force cleanup of any modal backdrops that might be stuck
+                const modalBackdrops = document.querySelectorAll('[data-slot="backdrop"], .nextui-backdrop, [data-modal-backdrop]');
+                modalBackdrops.forEach(backdrop => {
+                    if (backdrop && (backdrop.style.opacity === '0' || backdrop.style.display === 'none')) {
+                        console.log('Removing stuck modal backdrop');
+                        backdrop.remove();
+                    }
+                });
+
+                // Ensure body overflow is reset
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            }, 350); // Wait for modal close animation to complete
+
+            return () => clearTimeout(timeoutId);
+        } else {
+            // When opening, ensure clean state
+            console.log('ThemeDrawer opening - ensuring clean backdrop state');
+        }
     }, [isOpen]);
+
+    // Cleanup on component unmount
+    useEffect(() => {
+        return () => {
+            // Clean up any remaining overlays when component unmounts
+            const overlay = document.getElementById('background-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+
+            // Force cleanup of any modal backdrops
+            const modalBackdrops = document.querySelectorAll('[data-slot="backdrop"], .backdrop');
+            modalBackdrops.forEach(backdrop => {
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            });
+        };
+    }, []);
 
     // Handle color updates
     const handleCustomColorChange = (colorKey, newColor) => {
@@ -217,7 +297,7 @@ const ThemeSettingDrawer = ({
     };
 
     const handleBackgroundUpdate = (property, value) => {
-        console.log('handleBackgroundUpdate called:', property, typeof value === 'string' && value.length > 100 ? value.substring(0, 100) + '...' : value);
+        console.log(`Updating background ${property}:`, value);
         
         const newBackgroundSettings = {
             ...themeSettings.background,
@@ -261,7 +341,7 @@ const ThemeSettingDrawer = ({
         });
 
         // Apply background to document body immediately (duplicate call for immediate feedback)
-        console.log('Applying background immediately:', newBackgroundSettings);
+        console.log('Applying background to document with settings:', newBackgroundSettings);
         applyBackgroundToDocument(newBackgroundSettings);
     };
 
@@ -270,7 +350,7 @@ const ThemeSettingDrawer = ({
         const body = document.body;
         
         if (backgroundSettings.type === 'image' && backgroundSettings.image) {
-            console.log('Applying image background locally:', backgroundSettings.image.substring(0, 100) + '...');
+            console.log('Applying image background:', backgroundSettings.image.substring(0, 50) + '...');
             // Apply image background
             body.style.backgroundImage = `url(${backgroundSettings.image})`;
             body.style.backgroundSize = backgroundSettings.size || 'cover';
@@ -402,13 +482,36 @@ const ThemeSettingDrawer = ({
         const file = event.target.files[0];
         if (file) {
             console.log('File selected:', file.name, file.type, file.size);
+            
+            // Check file size (limit to 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                console.warn('File too large:', file.size, 'bytes');
+                alert('File size is too large. Please choose a file smaller than 5MB.');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const imageUrl = e.target.result;
                 console.log('File read as data URL, length:', imageUrl.length);
                 console.log('Setting background image to:', imageUrl.substring(0, 100) + '...');
-                handleBackgroundUpdate('image', imageUrl);
-                handleBackgroundUpdate('type', 'image');
+                
+                try {
+                    // Test if we can store this in localStorage
+                    const testKey = 'test-image-storage';
+                    localStorage.setItem(testKey, imageUrl);
+                    localStorage.removeItem(testKey);
+                    console.log('localStorage test successful for image data');
+                    
+                    handleBackgroundUpdate('image', imageUrl);
+                    handleBackgroundUpdate('type', 'image');
+                } catch (error) {
+                    console.error('Failed to store image in localStorage:', error);
+                    alert('Image is too large to store. Please choose a smaller image.');
+                }
+            };
+            reader.onerror = (error) => {
+                console.error('FileReader error:', error);
             };
             reader.readAsDataURL(file);
         }
@@ -430,17 +533,37 @@ const ThemeSettingDrawer = ({
 
     return (
         <Modal
+            key={isOpen ? 'theme-drawer-open' : 'theme-drawer-closed'} // Force re-render
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={handleClose}
             size="lg"
             placement="center"
             hideCloseButton
-            backdrop='blur'
-        
-      
+            backdrop="blur"
             scrollBehavior="inside"
-        
-           
+            isDismissable={true}
+            isKeyboardDismissDisabled={false}
+            closeButton={false}
+            motionProps={{
+                variants: {
+                    enter: {
+                        y: 0,
+                        opacity: 1,
+                        transition: {
+                            duration: 0.3,
+                            ease: "easeOut",
+                        },
+                    },
+                    exit: {
+                        y: -20,
+                        opacity: 0,
+                        transition: {
+                            duration: 0.2,
+                            ease: "easeIn",
+                        },
+                    },
+                },
+            }}
         >
             <ModalContent>
                 <ModalHeader className="flex items-center justify-between px-6 py-4 border-b border-default-200">
@@ -481,7 +604,7 @@ const ThemeSettingDrawer = ({
                             isIconOnly
                             variant="light"
                             className="text-default-500 hover:text-default-700"
-                            onPress={onClose}
+                            onPress={handleClose}
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -662,6 +785,9 @@ const ThemeSettingDrawer = ({
                                             color={backgroundType === 'color' ? 'primary' : 'default'}
                                             onPress={() => handleBackgroundUpdate('type', 'color')}
                                         >
+                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                                            </svg>
                                             Solid Color
                                         </Button>
                                         <Button
@@ -669,204 +795,17 @@ const ThemeSettingDrawer = ({
                                             color={backgroundType === 'image' ? 'primary' : 'default'}
                                             onPress={() => handleBackgroundUpdate('type', 'image')}
                                         >
+                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
                                             Image
                                         </Button>
                                     </div>
                                 </div>
 
-                                {/* Image Background Options */}
-                                {backgroundType === 'image' && (
-                                    <>
-                                        {/* Image Upload/URL Input */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                    </svg>
-                                                } 
-                                                title="Upload Image or Enter URL" 
-                                            />
-                                            
-                                            <div className="space-y-3">
-                                                <div className="flex gap-3">
-                                                    <Input
-                                                        placeholder="Enter image URL"
-                                                        value={backgroundImage}
-                                                        onChange={(e) => handleBackgroundUpdate('image', e.target.value)}
-                                                        className="flex-1"
-                                                    />
-                                                    <Button
-                                                        variant="bordered"
-                                                        onPress={() => document.getElementById('background-file-input').click()}
-                                                    >
-                                                        Upload
-                                                    </Button>
-                                                </div>
-                                                <input
-                                                    id="background-file-input"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileUpload}
-                                                    style={{ display: 'none' }}
-                                                />
-                                                
-                                                {backgroundImage && (
-                                                    <div className="w-full h-32 rounded-lg border border-default-200 overflow-hidden">
-                                                        <img 
-                                                            src={backgroundImage} 
-                                                            alt="Background preview" 
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Size */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                                    </svg>
-                                                } 
-                                                title="Background Size" 
-                                            />
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {backgroundSizeOptions.map((option) => (
-                                                    <Button
-                                                        key={option.value}
-                                                        variant={backgroundSize === option.value ? 'solid' : 'bordered'}
-                                                        color={backgroundSize === option.value ? 'primary' : 'default'}
-                                                        onPress={() => handleBackgroundUpdate('size', option.value)}
-                                                        className="flex flex-col gap-1 h-auto py-3"
-                                                    >
-                                                        <span className="font-medium">{option.label}</span>
-                                                        <span className="text-xs text-default-500">{option.description}</span>
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Position */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                                    </svg>
-                                                } 
-                                                title="Background Position" 
-                                            />
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {backgroundPositionOptions.map((option) => (
-                                                    <Button
-                                                        key={option.value}
-                                                        variant={backgroundPosition === option.value ? 'solid' : 'bordered'}
-                                                        color={backgroundPosition === option.value ? 'primary' : 'default'}
-                                                        onPress={() => handleBackgroundUpdate('position', option.value)}
-                                                        size="sm"
-                                                    >
-                                                        {option.label}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Repeat */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                    </svg>
-                                                } 
-                                                title="Background Repeat" 
-                                            />
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {backgroundRepeatOptions.map((option) => (
-                                                    <Button
-                                                        key={option.value}
-                                                        variant={backgroundRepeat === option.value ? 'solid' : 'bordered'}
-                                                        color={backgroundRepeat === option.value ? 'primary' : 'default'}
-                                                        onPress={() => handleBackgroundUpdate('repeat', option.value)}
-                                                        size="sm"
-                                                    >
-                                                        {option.label}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Opacity */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                                                    </svg>
-                                                } 
-                                                title="Background Opacity" 
-                                            />
-                                            <div className="space-y-3">
-                                                <Slider
-                                                    aria-label="Background Opacity"
-                                                    size="md"
-                                                    step={5}
-                                                    minValue={0}
-                                                    maxValue={100}
-                                                    value={backgroundOpacity}
-                                                    onChange={(value) => handleBackgroundUpdate('opacity', value)}
-                                                    className="max-w-md"
-                                                    showTooltip={true}
-                                                    tooltipProps={{
-                                                        content: `${backgroundOpacity}%`
-                                                    }}
-                                                />
-                                                <div className="text-sm text-default-500">
-                                                    Current: {backgroundOpacity}%
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Background Blur */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                } 
-                                                title="Background Blur" 
-                                            />
-                                            <div className="space-y-3">
-                                                <Slider
-                                                    aria-label="Background Blur"
-                                                    size="md"
-                                                    step={1}
-                                                    minValue={0}
-                                                    maxValue={20}
-                                                    value={backgroundBlur}
-                                                    onChange={(value) => handleBackgroundUpdate('blur', value)}
-                                                    className="max-w-md"
-                                                    showTooltip={true}
-                                                    tooltipProps={{
-                                                        content: `${backgroundBlur}px`
-                                                    }}
-                                                />
-                                                <div className="text-sm text-default-500">
-                                                    Current: {backgroundBlur}px
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Solid Color Background Options */}
+                                {/* Solid Color Background Section */}
                                 {backgroundType === 'color' && (
-                                    <>
+                                    <div className="space-y-6">
                                         {/* Predefined Colors */}
                                         <div>
                                             <SectionHeader 
@@ -1052,9 +991,12 @@ const ThemeSettingDrawer = ({
                                                 </div>
                                             </div>
                                         </div>
-                                    
-                                
-                                    
+                                    </div>
+                                )}
+
+                                {/* Image Background Section */}
+                                {backgroundType === 'image' && (
+                                    <div className="space-y-6">
                                         {/* Image Upload/URL Input */}
                                         <div>
                                             <SectionHeader 
@@ -1090,12 +1032,41 @@ const ThemeSettingDrawer = ({
                                                 />
                                                 
                                                 {backgroundImage && (
-                                                    <div className="w-full h-32 rounded-lg border border-default-200 overflow-hidden">
-                                                        <img 
-                                                            src={backgroundImage} 
-                                                            alt="Background preview" 
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                    <div className="space-y-2">
+                                                        <div className="w-full h-32 rounded-lg border border-default-200 overflow-hidden">
+                                                            <img 
+                                                                src={backgroundImage} 
+                                                                alt="Background preview" 
+                                                                className="w-full h-full object-cover"
+                                                                onLoad={() => console.log('Image preview loaded successfully')}
+                                                                onError={(e) => {
+                                                                    console.error('Image preview failed to load:', e);
+                                                                    e.target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="text-xs text-default-500 flex items-center gap-2">
+                                                            <CheckCircleIcon className="w-4 h-4 text-success" />
+                                                            <span>Image loaded ({backgroundImage.length} characters)</span>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="light"
+                                                                onPress={() => {
+                                                                    console.log('Current background settings:', {
+                                                                        type: backgroundType,
+                                                                        image: backgroundImage ? `${backgroundImage.substring(0, 50)}... (${backgroundImage.length} chars)` : 'No image',
+                                                                        size: backgroundSize,
+                                                                        position: backgroundPosition,
+                                                                        repeat: backgroundRepeat,
+                                                                        opacity: backgroundOpacity,
+                                                                        blur: backgroundBlur
+                                                                    });
+                                                                    console.log('ThemeSettings from context:', themeSettings);
+                                                                }}
+                                                            >
+                                                                Debug
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -1239,8 +1210,107 @@ const ThemeSettingDrawer = ({
                                                 </div>
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )}
+
+                                {/* Common Background Controls - Always Available */}
+                                <div className="pt-4 border-t border-default-200">
+                                    <div className="space-y-6">
+                                        {/* Quick Background Type Switch */}
+                                        <div>
+                                            <SectionHeader 
+                                                icon={
+                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                } 
+                                                title="Quick Switch" 
+                                            />
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="bordered"
+                                                    onPress={() => {
+                                                        handleBackgroundUpdate('type', backgroundType === 'color' ? 'image' : 'color');
+                                                    }}
+                                                >
+                                                    Switch to {backgroundType === 'color' ? 'Image' : 'Color'} Background
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="bordered"
+                                                    color="danger"
+                                                    onPress={() => {
+                                                        handleBackgroundUpdate('type', 'color');
+                                                        handleBackgroundUpdate('color', '#ffffff');
+                                                        handleBackgroundUpdate('image', '');
+                                                        handleBackgroundUpdate('opacity', 100);
+                                                        handleBackgroundUpdate('blur', 0);
+                                                    }}
+                                                >
+                                                    Reset Background
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Current Background Preview */}
+                                        <div>
+                                            <SectionHeader 
+                                                icon={
+                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                } 
+                                                title="Current Background Preview" 
+                                            />
+                                            <div className="space-y-3">
+                                                <div 
+                                                    className="w-full h-24 rounded-lg border border-default-200 relative overflow-hidden"
+                                                    style={{
+                                                        background: backgroundType === 'color' && backgroundColor 
+                                                            ? backgroundColor 
+                                                            : backgroundType === 'image' && backgroundImage 
+                                                                ? `url(${backgroundImage})` 
+                                                                : '#f5f5f5',
+                                                        backgroundSize: backgroundType === 'image' ? (backgroundSize || 'cover') : undefined,
+                                                        backgroundPosition: backgroundType === 'image' ? (backgroundPosition || 'center') : undefined,
+                                                        backgroundRepeat: backgroundType === 'image' ? (backgroundRepeat || 'no-repeat') : undefined
+                                                    }}
+                                                >
+                                                    {/* Overlay for opacity and blur preview */}
+                                                    {(backgroundOpacity < 100 || backgroundBlur > 0) && (
+                                                        <div 
+                                                            className="absolute inset-0"
+                                                            style={{
+                                                                backgroundColor: `rgba(0, 0, 0, ${1 - (backgroundOpacity || 100) / 100})`,
+                                                                backdropFilter: `blur(${backgroundBlur || 0}px)`
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <span className="text-sm font-medium px-3 py-1 rounded bg-black/20 text-white backdrop-blur-sm">
+                                                            Preview
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-xs text-default-500 space-y-1">
+                                                    <div>Type: <span className="font-medium">{backgroundType}</span></div>
+                                                    {backgroundType === 'color' && backgroundColor && (
+                                                        <div>Color: <span className="font-medium">{backgroundColor}</span></div>
+                                                    )}
+                                                    {backgroundType === 'image' && backgroundImage && (
+                                                        <div>Image: <span className="font-medium">{backgroundImage.length > 50 ? backgroundImage.substring(0, 50) + '...' : backgroundImage}</span></div>
+                                                    )}
+                                                    <div>Opacity: <span className="font-medium">{backgroundOpacity}%</span></div>
+                                                    {backgroundType === 'image' && backgroundBlur > 0 && (
+                                                        <div>Blur: <span className="font-medium">{backgroundBlur}px</span></div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </Tab>
 

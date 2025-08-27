@@ -10,7 +10,6 @@ use App\Services\DailyWork\DailyWorkCrudService;
 use App\Services\DailyWork\DailyWorkFileService;
 use App\Services\DailyWork\DailyWorkImportService;
 use App\Services\DailyWork\DailyWorkPaginationService;
-use App\Services\DailyWork\DailyWorkValidationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -19,8 +18,11 @@ use Inertia\Inertia;
 class DailyWorkController extends Controller
 {
     private DailyWorkPaginationService $paginationService;
+
     private DailyWorkImportService $importService;
+
     private DailyWorkCrudService $crudService;
+
     private DailyWorkFileService $fileService;
 
     public function __construct(
@@ -39,7 +41,7 @@ class DailyWorkController extends Controller
     {
         $user = User::with('designation')->find(Auth::id());
         $userDesignationTitle = $user->designation?->title;
-        
+
         $allData = $userDesignationTitle === 'Supervision Engineer'
             ? [
                 'allInCharges' => [],
@@ -50,7 +52,7 @@ class DailyWorkController extends Controller
                 ? []
                 : ($user->hasRole('Administrator')
                     ? [
-                        'allInCharges' => User::whereHas('designation', function($q) {
+                        'allInCharges' => User::whereHas('designation', function ($q) {
                             $q->where('title', 'Supervision Engineer');
                         })->get(),
                         'juniors' => [],
@@ -65,6 +67,7 @@ class DailyWorkController extends Controller
         // Loop through each user and add a new field 'role' with the role name
         $users->transform(function ($user) {
             $user->role = $user->roles->first()->name;
+
             return $user;
         });
 
@@ -83,11 +86,11 @@ class DailyWorkController extends Controller
         ]);
     }
 
-
     public function paginate(Request $request)
     {
         try {
             $paginatedDailyWorks = $this->paginationService->getPaginatedDailyWorks($request);
+
             return response()->json($paginatedDailyWorks);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -98,6 +101,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->paginationService->getAllDailyWorks($request);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -108,9 +112,10 @@ class DailyWorkController extends Controller
     {
         try {
             $results = $this->importService->processImport($request);
+
             return response()->json([
                 'message' => 'Import completed successfully',
-                'results' => $results
+                'results' => $results,
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -123,6 +128,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->crudService->update($request);
+
             return response()->json($result);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -135,6 +141,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->crudService->delete($request);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -145,6 +152,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->crudService->create($request);
+
             return response()->json($result);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -157,6 +165,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->fileService->uploadRfiFile($request);
+
             return response()->json($result);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -167,13 +176,14 @@ class DailyWorkController extends Controller
 
     public function getOrdinalNumber($number): string
     {
-        return $this->crudService->getOrdinalNumber((int)$number);
+        return $this->crudService->getOrdinalNumber((int) $number);
     }
 
     public function attachReport(Request $request)
     {
         try {
             $result = $this->fileService->attachReport($request);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -184,6 +194,7 @@ class DailyWorkController extends Controller
     {
         try {
             $result = $this->fileService->detachReport($request);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

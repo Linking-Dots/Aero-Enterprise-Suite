@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\UserDevice;
 use App\Services\DeviceTrackingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -15,12 +14,13 @@ class DeviceLockDebugTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected DeviceTrackingService $deviceService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create([
             'id' => 18,
             'email' => 'test@example.com',
@@ -42,29 +42,29 @@ class DeviceLockDebugTest extends TestCase
 
         // Generate device ID for this request
         $deviceId = $this->deviceService->generateDeviceId($request);
-        echo "\nGenerated Device ID: " . $deviceId . "\n";
+        echo "\nGenerated Device ID: ".$deviceId."\n";
 
         // First login attempt - should be allowed
         $firstLoginCheck = $this->deviceService->canUserLoginFromDevice($this->user, $request);
-        echo "First login check result: " . json_encode($firstLoginCheck, JSON_PRETTY_PRINT) . "\n";
+        echo 'First login check result: '.json_encode($firstLoginCheck, JSON_PRETTY_PRINT)."\n";
         $this->assertTrue($firstLoginCheck['allowed'], 'First login should be allowed');
 
         // Register the device (simulate successful login)
-        $sessionId = 'test_session_' . time();
+        $sessionId = 'test_session_'.time();
         $device = $this->deviceService->registerDevice($this->user, $request, $sessionId);
-        echo "Registered device: " . json_encode([
+        echo 'Registered device: '.json_encode([
             'id' => $device->id,
             'device_id' => $device->device_id,
             'device_name' => $device->device_name,
             'is_active' => $device->is_active,
-        ], JSON_PRETTY_PRINT) . "\n";
+        ], JSON_PRETTY_PRINT)."\n";
 
         // Reload user with devices
         $this->user->refresh();
         $this->user->load('devices');
 
-        echo "User has " . $this->user->devices()->count() . " devices\n";
-        echo "User has " . $this->user->devices()->active()->count() . " active devices\n";
+        echo 'User has '.$this->user->devices()->count()." devices\n";
+        echo 'User has '.$this->user->devices()->active()->count()." active devices\n";
 
         // Second login attempt from the SAME device - should be allowed
         $sameDeviceRequest = Request::create('/', 'GET');
@@ -74,11 +74,11 @@ class DeviceLockDebugTest extends TestCase
         $sameDeviceRequest->headers->set('Accept-Encoding', 'gzip, deflate, br');
 
         $sameDeviceId = $this->deviceService->generateDeviceId($sameDeviceRequest);
-        echo "\nSame device ID (second request): " . $sameDeviceId . "\n";
-        echo "Device IDs match: " . ($deviceId === $sameDeviceId ? 'YES' : 'NO') . "\n";
+        echo "\nSame device ID (second request): ".$sameDeviceId."\n";
+        echo 'Device IDs match: '.($deviceId === $sameDeviceId ? 'YES' : 'NO')."\n";
 
         $secondLoginCheck = $this->deviceService->canUserLoginFromDevice($this->user, $sameDeviceRequest);
-        echo "Second login check (same device) result: " . json_encode($secondLoginCheck, JSON_PRETTY_PRINT) . "\n";
+        echo 'Second login check (same device) result: '.json_encode($secondLoginCheck, JSON_PRETTY_PRINT)."\n";
 
         // This should be TRUE but might be FALSE due to a bug
         $this->assertTrue($secondLoginCheck['allowed'], 'Login from same device should be allowed');
@@ -91,10 +91,10 @@ class DeviceLockDebugTest extends TestCase
         $differentDeviceRequest->headers->set('Accept-Encoding', 'gzip, deflate, br');
 
         $differentDeviceId = $this->deviceService->generateDeviceId($differentDeviceRequest);
-        echo "\nDifferent device ID: " . $differentDeviceId . "\n";
+        echo "\nDifferent device ID: ".$differentDeviceId."\n";
 
         $thirdLoginCheck = $this->deviceService->canUserLoginFromDevice($this->user, $differentDeviceRequest);
-        echo "Third login check (different device) result: " . json_encode($thirdLoginCheck, JSON_PRETTY_PRINT) . "\n";
+        echo 'Third login check (different device) result: '.json_encode($thirdLoginCheck, JSON_PRETTY_PRINT)."\n";
 
         $this->assertFalse($thirdLoginCheck['allowed'], 'Login from different device should be blocked');
     }
@@ -110,7 +110,7 @@ class DeviceLockDebugTest extends TestCase
         $baseRequest->headers->set('Accept-Encoding', 'gzip, deflate, br');
 
         $baseDeviceId = $this->deviceService->generateDeviceId($baseRequest);
-        echo "\nBase device ID: " . $baseDeviceId . "\n";
+        echo "\nBase device ID: ".$baseDeviceId."\n";
 
         // Test with slightly different IP (might happen with dynamic IP)
         $differentIpRequest = Request::create('/', 'GET');
@@ -120,8 +120,8 @@ class DeviceLockDebugTest extends TestCase
         $differentIpRequest->headers->set('Accept-Encoding', 'gzip, deflate, br');
 
         $differentIpDeviceId = $this->deviceService->generateDeviceId($differentIpRequest);
-        echo "Different IP device ID: " . $differentIpDeviceId . "\n";
-        echo "Device IDs match with different IP: " . ($baseDeviceId === $differentIpDeviceId ? 'YES' : 'NO') . "\n";
+        echo 'Different IP device ID: '.$differentIpDeviceId."\n";
+        echo 'Device IDs match with different IP: '.($baseDeviceId === $differentIpDeviceId ? 'YES' : 'NO')."\n";
 
         // Test with missing headers
         $minimalRequest = Request::create('/', 'GET');
@@ -129,8 +129,8 @@ class DeviceLockDebugTest extends TestCase
         $minimalRequest->server->set('REMOTE_ADDR', '192.168.1.100');
 
         $minimalDeviceId = $this->deviceService->generateDeviceId($minimalRequest);
-        echo "Minimal headers device ID: " . $minimalDeviceId . "\n";
-        echo "Device IDs match with minimal headers: " . ($baseDeviceId === $minimalDeviceId ? 'YES' : 'NO') . "\n";
+        echo 'Minimal headers device ID: '.$minimalDeviceId."\n";
+        echo 'Device IDs match with minimal headers: '.($baseDeviceId === $minimalDeviceId ? 'YES' : 'NO')."\n";
     }
 
     /** @test */
@@ -156,10 +156,10 @@ class DeviceLockDebugTest extends TestCase
             'Accept-Encoding' => 'gzip, deflate, br',
         ]);
 
-        echo "\nFirst login response status: " . $response->getStatusCode() . "\n";
-        
+        echo "\nFirst login response status: ".$response->getStatusCode()."\n";
+
         if ($response->getStatusCode() === 302) {
-            echo "Redirected to: " . $response->headers->get('Location') . "\n";
+            echo 'Redirected to: '.$response->headers->get('Location')."\n";
         }
 
         // Check if user is authenticated
@@ -178,19 +178,19 @@ class DeviceLockDebugTest extends TestCase
             'Accept-Encoding' => 'gzip, deflate, br',
         ]);
 
-        echo "\nSecond login response status: " . $response2->getStatusCode() . "\n";
-        
+        echo "\nSecond login response status: ".$response2->getStatusCode()."\n";
+
         if ($response2->getStatusCode() === 302) {
-            echo "Redirected to: " . $response2->headers->get('Location') . "\n";
+            echo 'Redirected to: '.$response2->headers->get('Location')."\n";
         }
 
         // Check session flash messages
         $flashData = session()->all();
-        if (!empty($flashData)) {
-            echo "Session flash data: " . json_encode($flashData, JSON_PRETTY_PRINT) . "\n";
+        if (! empty($flashData)) {
+            echo 'Session flash data: '.json_encode($flashData, JSON_PRETTY_PRINT)."\n";
         }
 
         // The bug might be here - user can't login from the same device they were locked to
-        echo "User authenticated after second login: " . (Auth::check() ? 'YES' : 'NO') . "\n";
+        echo 'User authenticated after second login: '.(Auth::check() ? 'YES' : 'NO')."\n";
     }
 }

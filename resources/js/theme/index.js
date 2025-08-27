@@ -8,6 +8,23 @@
 export const heroUIThemes = {
   heroui: {
     name: 'HeroUI',
+    layout: {
+      fontFamily: 'Inter',
+      borderRadius: '12px',
+      borderWidth: '2px',
+      scale: '100%',
+      disabledOpacity: '0.5'
+    },
+    background: {
+      type: 'color',
+      color: '#ffffff',
+      image: '',
+      size: 'cover',
+      position: 'center',
+      repeat: 'no-repeat',
+      opacity: 100,
+      blur: 0
+    },
     colors: {
       background: '#FFFFFF',
       foreground: '#11181C',
@@ -105,15 +122,32 @@ export const heroUIThemes = {
   },
   modern: {
     name: 'Modern',
+    layout: {
+      fontFamily: 'Roboto',
+      borderRadius: '4px',
+      borderWidth: '1px',
+      scale: '110%',
+      disabledOpacity: '0.6'
+    },
+    background: {
+      type: 'color',
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      image: '',
+      size: 'cover',
+      position: 'center',
+      repeat: 'no-repeat',
+      opacity: 95,
+      blur: 0
+    },
     colors: {
-      background: '#FFFFFF',
-      foreground: '#11181C',
-      divider: '#E4E4E7',
+      background: '#F8FAFC',
+      foreground: '#1E293B',
+      divider: '#CBD5E1',
       focus: '#0070F3',
       content1: '#FFFFFF',
-      content2: '#F4F4F5',
-      content3: '#E4E4E7',
-      content4: '#D4D4D8',
+      content2: '#F1F5F9',
+      content3: '#E2E8F0',
+      content4: '#CBD5E1',
       default: {
         DEFAULT: '#71717A',
         foreground: '#FFFFFF'
@@ -142,15 +176,32 @@ export const heroUIThemes = {
   },
   elegant: {
     name: 'Elegant',
+    layout: {
+      fontFamily: 'Playfair Display',
+      borderRadius: '0px',
+      borderWidth: '3px',
+      scale: '95%',
+      disabledOpacity: '0.4'
+    },
+    background: {
+      type: 'color',
+      color: 'linear-gradient(45deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%)',
+      image: '',
+      size: 'cover',
+      position: 'center',
+      repeat: 'no-repeat',
+      opacity: 90,
+      blur: 0
+    },
     colors: {
-      background: '#FFFFFF',
-      foreground: '#11181C',
-      divider: '#E4E4E7',
-      focus: '#1F2937',
+      background: '#FAFAFA',
+      foreground: '#1F2937',
+      divider: '#D1D5DB',
+      focus: '#374151',
       content1: '#FFFFFF',
-      content2: '#F4F4F5',
-      content3: '#E4E4E7',
-      content4: '#D4D4D8',
+      content2: '#F9FAFB',
+      content3: '#F3F4F6',
+      content4: '#E5E7EB',
       default: {
         DEFAULT: '#71717A',
         foreground: '#FFFFFF'
@@ -179,15 +230,32 @@ export const heroUIThemes = {
   },
   coffee: {
     name: 'Coffee',
+    layout: {
+      fontFamily: 'Poppins',
+      borderRadius: '20px',
+      borderWidth: '4px',
+      scale: '105%',
+      disabledOpacity: '0.3'
+    },
+    background: {
+      type: 'color',
+      color: 'linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #CD853F 100%)',
+      image: '',
+      size: 'cover',
+      position: 'center',
+      repeat: 'no-repeat',
+      opacity: 85,
+      blur: 2
+    },
     colors: {
-      background: '#FFFFFF',
-      foreground: '#11181C',
-      divider: '#E4E4E7',
-      focus: '#8B4513',
-      content1: '#FFFFFF',
-      content2: '#F4F4F5',
-      content3: '#E4E4E7',
-      content4: '#D4D4D8',
+      background: '#FEF7ED',
+      foreground: '#451A03',
+      divider: '#D97706',
+      focus: '#92400E',
+      content1: '#FFFBEB',
+      content2: '#FEF3C7',
+      content3: '#FDE68A',
+      content4: '#F59E0B',
       default: {
         DEFAULT: '#71717A',
         foreground: '#FFFFFF'
@@ -387,10 +455,13 @@ export const applyThemeToDocument = (theme) => {
     });
   }
   
-  // Apply background settings
+  // Apply background settings with persistence check
   if (theme.background) {
     console.log('Applying background settings:', theme.background);
     const body = document.body;
+    
+    // Store background settings in a data attribute for persistence
+    body.setAttribute('data-background-settings', JSON.stringify(theme.background));
     
     if (theme.background.type === 'image' && theme.background.image) {
       console.log('Setting image background:', theme.background.image);
@@ -529,6 +600,30 @@ export const applyThemeToDocument = (theme) => {
   }
 };
 
+/**
+ * Restore theme on page load from stored data attributes
+ */
+export const restoreThemeFromDOM = () => {
+  const body = document.body;
+  const storedBackground = body.getAttribute('data-background-settings');
+  
+  if (storedBackground) {
+    try {
+      const backgroundSettings = JSON.parse(storedBackground);
+      console.log('Restoring background from DOM:', backgroundSettings);
+      
+      // Reapply background settings
+      const savedTheme = localStorage.getItem('heroui-theme-settings');
+      if (savedTheme) {
+        const theme = JSON.parse(savedTheme);
+        applyThemeToDocument(theme);
+      }
+    } catch (error) {
+      console.warn('Failed to restore background from DOM:', error);
+    }
+  }
+};
+
 export default {
   heroUIThemes,
   darkModeColors,
@@ -539,5 +634,6 @@ export default {
   opacityOptions,
   getTheme,
   generateHeroUIConfig,
-  applyThemeToDocument
+  applyThemeToDocument,
+  restoreThemeFromDOM
 };

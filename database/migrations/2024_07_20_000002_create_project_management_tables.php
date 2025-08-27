@@ -13,22 +13,22 @@ return new class extends Migration
     {
         // Extend existing projects table with additional fields
         Schema::table('projects', function (Blueprint $table) {
-            if (!Schema::hasColumn('projects', 'status')) {
+            if (! Schema::hasColumn('projects', 'status')) {
                 $table->string('status')->default('not_started')->after('description');
             }
-            if (!Schema::hasColumn('projects', 'budget')) {
+            if (! Schema::hasColumn('projects', 'budget')) {
                 $table->decimal('budget', 15, 2)->nullable()->after('rate_type');
             }
-            if (!Schema::hasColumn('projects', 'department_id')) {
+            if (! Schema::hasColumn('projects', 'department_id')) {
                 $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
             }
-            if (!Schema::hasColumn('projects', 'progress')) {
+            if (! Schema::hasColumn('projects', 'progress')) {
                 $table->integer('progress')->default(0)->after('project_leader_id');
             }
-            if (!Schema::hasColumn('projects', 'color')) {
+            if (! Schema::hasColumn('projects', 'color')) {
                 $table->string('color')->nullable()->after('progress');
             }
-            if (!Schema::hasColumn('projects', 'notes')) {
+            if (! Schema::hasColumn('projects', 'notes')) {
                 $table->text('notes')->nullable()->after('description');
             }
         });

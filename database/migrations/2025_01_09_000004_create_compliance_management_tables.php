@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Compliance Policies
-        if (!Schema::hasTable('compliance_policies')) {
+        if (! Schema::hasTable('compliance_policies')) {
             Schema::create('compliance_policies', function (Blueprint $table) {
                 $table->id();
                 $table->string('policy_number')->unique();
@@ -41,7 +41,7 @@ return new class extends Migration
         }
 
         // Compliance Policy Acknowledgments
-        if (!Schema::hasTable('compliance_policy_acknowledgments')) {
+        if (! Schema::hasTable('compliance_policy_acknowledgments')) {
             Schema::create('compliance_policy_acknowledgments', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('policy_id')->constrained('compliance_policies')->cascadeOnDelete();
@@ -56,7 +56,7 @@ return new class extends Migration
         }
 
         // Regulatory Requirements
-        if (!Schema::hasTable('regulatory_requirements')) {
+        if (! Schema::hasTable('regulatory_requirements')) {
             Schema::create('regulatory_requirements', function (Blueprint $table) {
                 $table->id();
                 $table->string('requirement_number')->unique();
@@ -81,7 +81,7 @@ return new class extends Migration
         }
 
         // Risk Assessments
-        if (!Schema::hasTable('risk_assessments')) {
+        if (! Schema::hasTable('risk_assessments')) {
             Schema::create('risk_assessments', function (Blueprint $table) {
                 $table->id();
                 $table->string('assessment_number')->unique();
@@ -108,7 +108,7 @@ return new class extends Migration
         }
 
         // Risk Mitigation Actions
-        if (!Schema::hasTable('risk_mitigation_actions')) {
+        if (! Schema::hasTable('risk_mitigation_actions')) {
             Schema::create('risk_mitigation_actions', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('risk_assessment_id')->constrained()->cascadeOnDelete();
@@ -128,7 +128,7 @@ return new class extends Migration
         }
 
         // Compliance Audits
-        if (!Schema::hasTable('compliance_audits')) {
+        if (! Schema::hasTable('compliance_audits')) {
             Schema::create('compliance_audits', function (Blueprint $table) {
                 $table->id();
                 $table->string('audit_number')->unique();
@@ -159,7 +159,7 @@ return new class extends Migration
         }
 
         // Audit Findings
-        if (!Schema::hasTable('audit_findings')) {
+        if (! Schema::hasTable('audit_findings')) {
             Schema::create('audit_findings', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('audit_id')->constrained('compliance_audits')->cascadeOnDelete();
@@ -186,7 +186,7 @@ return new class extends Migration
         }
 
         // Compliance Training Records
-        if (!Schema::hasTable('compliance_training_records')) {
+        if (! Schema::hasTable('compliance_training_records')) {
             Schema::create('compliance_training_records', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -208,7 +208,7 @@ return new class extends Migration
         }
 
         // Document Control
-        if (!Schema::hasTable('controlled_documents')) {
+        if (! Schema::hasTable('controlled_documents')) {
             Schema::create('controlled_documents', function (Blueprint $table) {
                 $table->id();
                 $table->string('document_number')->unique();
@@ -237,7 +237,7 @@ return new class extends Migration
         }
 
         // Document Revisions
-        if (!Schema::hasTable('document_revisions')) {
+        if (! Schema::hasTable('document_revisions')) {
             Schema::create('document_revisions', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('controlled_document_id')->constrained()->cascadeOnDelete();

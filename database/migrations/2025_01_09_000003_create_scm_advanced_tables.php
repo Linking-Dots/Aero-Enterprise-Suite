@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Procurement Portal Tables
-        if (!Schema::hasTable('procurement_requests')) {
+        if (! Schema::hasTable('procurement_requests')) {
             Schema::create('procurement_requests', function (Blueprint $table) {
                 $table->id();
                 $table->string('request_number')->unique();
@@ -33,7 +33,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('procurement_request_items')) {
+        if (! Schema::hasTable('procurement_request_items')) {
             Schema::create('procurement_request_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('procurement_request_id')->constrained()->cascadeOnDelete();
@@ -49,7 +49,7 @@ return new class extends Migration
         }
 
         // Demand Forecasting Tables
-        if (!Schema::hasTable('demand_forecasts')) {
+        if (! Schema::hasTable('demand_forecasts')) {
             Schema::create('demand_forecasts', function (Blueprint $table) {
                 $table->id();
                 $table->string('forecast_name');
@@ -72,7 +72,7 @@ return new class extends Migration
         }
 
         // Production Planning Tables
-        if (!Schema::hasTable('production_plans')) {
+        if (! Schema::hasTable('production_plans')) {
             Schema::create('production_plans', function (Blueprint $table) {
                 $table->id();
                 $table->string('plan_number')->unique();
@@ -94,7 +94,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('production_plan_materials')) {
+        if (! Schema::hasTable('production_plan_materials')) {
             Schema::create('production_plan_materials', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('production_plan_id')->constrained()->cascadeOnDelete();
@@ -107,7 +107,7 @@ return new class extends Migration
         }
 
         // Return Management (RMA) Tables
-        if (!Schema::hasTable('return_requests')) {
+        if (! Schema::hasTable('return_requests')) {
             Schema::create('return_requests', function (Blueprint $table) {
                 $table->id();
                 $table->string('rma_number')->unique();
@@ -134,7 +134,7 @@ return new class extends Migration
         }
 
         // Import/Export Management Tables
-        if (!Schema::hasTable('trade_documents')) {
+        if (! Schema::hasTable('trade_documents')) {
             Schema::create('trade_documents', function (Blueprint $table) {
                 $table->id();
                 $table->string('document_number')->unique();
@@ -158,7 +158,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('customs_declarations')) {
+        if (! Schema::hasTable('customs_declarations')) {
             Schema::create('customs_declarations', function (Blueprint $table) {
                 $table->id();
                 $table->string('declaration_number')->unique();

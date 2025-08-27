@@ -57,7 +57,7 @@ return new class extends Migration
         });
 
         // Add a table for position competencies if it doesn't exist
-        if (!Schema::hasTable('position_competencies')) {
+        if (! Schema::hasTable('position_competencies')) {
             Schema::create('position_competencies', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('position_id')->constrained('designations')->onDelete('cascade');

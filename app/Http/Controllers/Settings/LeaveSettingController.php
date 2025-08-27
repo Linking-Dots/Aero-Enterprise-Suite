@@ -12,6 +12,7 @@ class LeaveSettingController extends Controller
     public function index(): \Inertia\Response
     {
         $leaveSettings = LeaveSetting::all();
+
         return Inertia::render('Settings/LeaveSettings', [
             'title' => 'Leave Settings',
             'leaveTypes' => $leaveSettings,
@@ -99,6 +100,4 @@ class LeaveSettingController extends Controller
             return response()->json(['message' => 'Failed to delete leave type.'], 500);
         }
     }
-
-
 }

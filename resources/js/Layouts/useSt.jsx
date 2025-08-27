@@ -141,6 +141,10 @@ function App({ children }) {
     const toggleThemeDrawer = useCallback(() => {
         setThemeDrawerOpen(prev => !prev);
     }, []);
+
+    const closeThemeDrawer = useCallback(() => {
+        setThemeDrawerOpen(false);
+    }, []);
     
     const toggleSideBar = useCallback(() => {
         // Use requestAnimationFrame for smoother animation start

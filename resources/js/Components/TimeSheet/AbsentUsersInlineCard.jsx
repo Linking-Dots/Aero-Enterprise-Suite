@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
     Avatar,
     Input,
-    Button
+    Button,
+    Spinner
 } from "@heroui/react";
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,9 +26,22 @@ import PageHeader from '@/Components/PageHeader';
 
 
 // Inline AbsentUsersCard component for the combined layout
-export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, getUserLeave }) => {
+export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, getUserLeave, isLoaded = false }) => {
     const [visibleUsersCount, setVisibleUsersCount] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
     // Filter absent users based on search term
     const filteredAbsentUsers = useMemo(() => {
@@ -61,15 +75,77 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
     const getLeaveStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
             case 'approved':
-                return <CheckCircleIcon className="w-4 h-4 text-success" />;
+                return <CheckCircleIcon className="w-4 h-4" style={{ color: 'var(--theme-success)' }} />;
             case 'rejected':
-                return <XCircleIcon className="w-4 h-4 text-danger" />;
+                return <XCircleIcon className="w-4 h-4" style={{ color: 'var(--theme-danger)' }} />;
+            case 'pending':
+                return <ClockIcon className="w-4 h-4" style={{ color: 'var(--theme-warning)' }} />;
             default:
-                return <ClockIcon className="w-4 h-4 text-warning" />;
+                return <ClockIcon className="w-4 h-4" style={{ color: 'var(--theme-primary)' }} />;
+        }
+    };
+
+    const getLeaveStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'approved':
+                return 'var(--theme-success)';
+            case 'rejected':
+                return 'var(--theme-danger)';
+            case 'pending':
+                return 'var(--theme-warning)';
+            default:
+                return 'var(--theme-primary)';
         }
     };    
     const totalRows = filteredAbsentUsers.length;
-    if (absentUsers.length === 0) {
+    
+    // Show loading state when data hasn't been loaded yet
+    if (!isLoaded) {
+        return (
+            <div className="h-full flex flex-col">
+                <div className="mb-4 flex-shrink-0">
+                    <h3 
+                        className="font-semibold flex items-center gap-2 text-lg text-default-700"
+                        style={{ 
+                            color: 'var(--theme-default)',
+                            fontFamily: `var(--fontFamily, "Inter")`
+                        }}
+                    >
+                        <ClockIcon 
+                            className="w-5 h-5"
+                            style={{ color: 'var(--theme-default)' }}
+                        />
+                        Loading Attendance Data...
+                    </h3>
+                </div>
+                <div 
+                    className="text-center py-12 h-96 flex flex-col items-center justify-center"
+                    style={{
+                        background: `color-mix(in srgb, var(--theme-default) 5%, transparent)`,
+                        borderColor: `color-mix(in srgb, var(--theme-default) 20%, transparent)`,
+                        borderWidth: `var(--borderWidth, 2px)`,
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
+                >
+                    <Spinner 
+                        size="lg" 
+                        className="mb-4"
+                        style={{ color: 'var(--theme-primary)' }}
+                    />
+                    <p 
+                        className="text-default-500 text-sm"
+                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    >
+                        Checking attendance records...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+    
+    // Only show "Perfect Attendance!" when data is loaded AND no absent users
+    if (isLoaded && absentUsers.length === 0) {
         return (
             <div className="h-full">
                 <PageHeader
@@ -90,16 +166,38 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                 <div 
                     role="region"
                     aria-label="No absent employees today"
-                    className="text-center py-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg h-96 flex flex-col items-center justify-center"
+                    className="text-center py-12 h-96 flex flex-col items-center justify-center"
+                    style={{
+                        background: `color-mix(in srgb, var(--theme-success) 10%, transparent)`,
+                        borderColor: `color-mix(in srgb, var(--theme-success) 20%, transparent)`,
+                        borderWidth: `var(--borderWidth, 2px)`,
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
                 >
-                    <CheckCircleIcon className="w-12 h-12 text-success mx-auto mb-4" />
-                    <p className="text-success mb-2 text-sm font-medium">
+                    <CheckCircleIcon 
+                        className="w-12 h-12 mx-auto mb-4"
+                        style={{ color: 'var(--theme-success)' }}
+                    />
+                    <p 
+                        className="mb-2 text-sm font-medium"
+                        style={{ 
+                            color: 'var(--theme-success)',
+                            fontFamily: `var(--fontFamily, "Inter")`
+                        }}
+                    >
                         Perfect Attendance!
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">
+                    <p 
+                        className="text-default-500 text-xs"
+                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    >
                         No employees are absent today.
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1 block text-xs">
+                    <p 
+                        className="text-default-500 mt-1 block text-xs"
+                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    >
                         All employees are either present or on approved leave.
                     </p>
                 </div>
@@ -108,17 +206,24 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
     }
 
     return (
-        <div className="h-full">
-            <div className="mb-4 flex items-center justify-between">
-                <div className="mb-4">
-                    <h3 className="font-semibold text-red-600 flex items-center gap-2 text-lg">
-                        <XCircleIcon className="w-5 h-5" />
-                        Absent Employees ({totalRows})
-                    </h3>
-                </div>
+        <div className="h-full flex flex-col">
+            <div className="mb-4 flex-shrink-0">
+                <h3 
+                    className="font-semibold flex items-center gap-2 text-lg text-default-700"
+                    style={{ 
+                        color: 'var(--theme-danger)',
+                        fontFamily: `var(--fontFamily, "Inter")`
+                    }}
+                >
+                    <XCircleIcon 
+                        className="w-5 h-5"
+                        style={{ color: 'var(--theme-danger)' }}
+                    />
+                    Absent Employees ({totalRows})
+                </h3>
             </div>
             {/* Search Input */}
-            <div className="mb-3 m-2">
+            <div className="mb-3 flex-shrink-0">
                 <Input
                     type="text"
                     placeholder="Search absent employees..."
@@ -126,18 +231,25 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                     onChange={handleSearchChange}
                     startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                     variant="bordered"
+                    size="sm"
+                    radius={getThemeRadius()}
                     aria-label="Search absent employees"
                     classNames={{
-                        inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 h-10",
                         input: "text-sm"
+                    }}
+                    style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
                     }}
                 />
             </div>
 
             {/* Show search results count */}
             {searchTerm && (
-                <div className="mb-2">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">
+                <div className="mb-2 flex-shrink-0">
+                    <p 
+                        className="text-default-500 text-xs"
+                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    >
                         {filteredAbsentUsers.length} of {absentUsers.length} employees found
                     </p>
                 </div>
@@ -145,9 +257,21 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
 
             {/* Show message if no results found */}
             {searchTerm && filteredAbsentUsers.length === 0 && (
-                <div className="text-center py-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg">
+                <div 
+                    className="text-center py-8 flex-1 flex flex-col items-center justify-center"
+                    style={{
+                        background: `color-mix(in srgb, var(--theme-default) 10%, transparent)`,
+                        borderColor: `color-mix(in srgb, var(--theme-default) 20%, transparent)`,
+                        borderWidth: `var(--borderWidth, 2px)`,
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
+                >
                     <MagnifyingGlassIcon className="w-8 h-8 text-default-300 mx-auto mb-2" />
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    <p 
+                        className="text-default-500 text-sm"
+                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    >
                         No employees found matching "{searchTerm}"
                     </p>
                 </div>
@@ -156,7 +280,8 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
             <div 
                 role="region"
                 aria-label="Absent employees list"
-                className="overflow-y-auto max-h-[520px]"
+                className="flex-1 overflow-y-auto min-h-0"
+                style={{ maxHeight: 'calc(100vh - 400px)' }}
             >
                 <AnimatePresence>
                     {filteredAbsentUsers.slice(0, visibleUsersCount).map((user) => {
@@ -169,57 +294,104 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.2 }}
-                                className="p-3 m-2 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-200 rounded-lg"
+                                className="p-3 mb-3 transition-all duration-200"
+                                style={{
+                                    background: `color-mix(in srgb, var(--theme-content1) 80%, transparent)`,
+                                    borderColor: `color-mix(in srgb, var(--theme-divider) 50%, transparent)`,
+                                    borderWidth: `var(--borderWidth, 1px)`,
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = `color-mix(in srgb, var(--theme-content2) 60%, transparent)`;
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = `color-mix(in srgb, var(--theme-content1) 80%, transparent)`;
+                                }}
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-2 flex-1">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
                                         <Avatar 
                                             src={user.profile_image_url || user.profile_image} 
                                             name={user.name}
                                             isBordered
                                             size="sm"
                                             showFallback
+                                            radius={getThemeRadius()}
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                                            <p 
+                                                className="truncate text-sm font-medium text-foreground"
+                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                            >
                                                 {user.name}
                                             </p>
                                             {user.employee_id && (
-                                                <p className="block text-xs text-gray-500 dark:text-gray-400">
+                                                <p 
+                                                    className="block text-xs text-default-500"
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                >
                                                     ID: {user.employee_id}
                                                 </p>
                                             )}
                                             {userLeave ? (
                                                 <div className="flex flex-col gap-1 mt-1">
-                                                    <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    <p 
+                                                        className="flex items-center gap-1 text-xs text-default-500"
+                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                    >
                                                         <CalendarDaysIcon className="w-3 h-3" />
-                                                        {userLeave.from_date === userLeave.to_date 
-                                                            ? userLeave.from_date 
-                                                            : `${userLeave.from_date} - ${userLeave.to_date}`
-                                                        }
+                                                        <span className="truncate">
+                                                            {userLeave.from_date === userLeave.to_date 
+                                                                ? userLeave.from_date 
+                                                                : `${userLeave.from_date} - ${userLeave.to_date}`
+                                                            }
+                                                        </span>
                                                     </p>
-                                                    <p className="flex items-center gap-1 text-xs text-primary">
+                                                    <p 
+                                                        className="flex items-center gap-1 text-xs"
+                                                        style={{ 
+                                                            color: getLeaveStatusColor(userLeave.status),
+                                                            fontFamily: `var(--fontFamily, "Inter")`
+                                                        }}
+                                                    >
                                                         {getLeaveStatusIcon(userLeave.status)}
-                                                        {userLeave.leave_type} Leave
+                                                        <span className="truncate">{userLeave.leave_type} Leave</span>
                                                     </p>
                                                 </div>
                                             ) : (
-                                                <p className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                                                <p 
+                                                    className="flex items-center gap-1 mt-1 text-xs"
+                                                    style={{ 
+                                                        color: 'var(--theme-danger)',
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
                                                     <ExclamationTriangleIcon className="w-3 h-3" />
-                                                    Absent without leave
+                                                    <span className="truncate">Absent without leave</span>
                                                 </p>
                                             )}
                                         </div>
                                     </div>
                                     {userLeave && (
-                                        <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-md px-1.5 py-0.5 ml-2">
+                                        <div 
+                                            className="px-1.5 py-0.5 ml-2 flex-shrink-0"
+                                            style={{
+                                                background: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 15%, transparent)`,
+                                                borderColor: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 30%, transparent)`,
+                                                borderWidth: `var(--borderWidth, 1px)`,
+                                                borderRadius: `var(--borderRadius, 6px)`,
+                                            }}
+                                        >
                                             <div className="flex items-center gap-1">
                                                 {getLeaveStatusIcon(userLeave.status)}
-                                                <span className={`font-semibold text-xs ${
-                                                    userLeave.status?.toLowerCase() === 'approved' ? 'text-green-600' :
-                                                    userLeave.status?.toLowerCase() === 'rejected' ? 'text-red-600' :
-                                                    'text-orange-600'
-                                                }`}>
+                                                <span 
+                                                    className="font-semibold text-xs"
+                                                    style={{ 
+                                                        color: getLeaveStatusColor(userLeave.status),
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
                                                     {userLeave.status}
                                                 </span>
                                             </div>
@@ -231,14 +403,18 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                     })}
                 </AnimatePresence>
                 {visibleUsersCount < filteredAbsentUsers.length && (
-                    <div className="text-center mt-4 pb-4">
+                    <div className="text-center mt-4 pb-4 flex-shrink-0">
                         <Button 
                             variant="bordered" 
                             onPress={handleLoadMore}
                             startContent={<ChevronDownIcon className="w-4 h-4" />}
                             size="sm"
                             color="warning"
+                            radius={getThemeRadius()}
                             fullWidth
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         >
                             Show More ({filteredAbsentUsers.length - visibleUsersCount} remaining)
                         </Button>

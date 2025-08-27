@@ -14,8 +14,8 @@ import {
 import {
     ChartBarSquareIcon,
     ChartPieIcon,
-    TrendingUpIcon,
-    TrendingDownIcon,
+    ArrowTrendingUpIcon,
+    ArrowTrendingDownIcon,
     ClockIcon,
     BanknotesIcon,
     ExclamationTriangleIcon,
@@ -494,7 +494,7 @@ const ProjectAnalyticsView = ({
                                             {analytics.timelineAnalysis.overdue}
                                         </Chip>
                                         {analytics.timelineAnalysis.overdue > 0 && (
-                                            <TrendingUpIcon className="w-4 h-4 text-danger" />
+                                            <ArrowTrendingUpIcon className="w-4 h-4 text-danger" />
                                         )}
                                     </div>
                                 </div>

@@ -9,6 +9,8 @@ import ErrorBoundary from './Components/ErrorBoundary/ErrorBoundary';
 import { AppStateProvider } from './Contexts/AppStateContext';
 import { ThemeProvider } from './Contexts/ThemeContext';
 import { HeroUIProvider } from '@heroui/react';
+import './bootstrap';
+import './theme/index.js';
 
 // Enhanced axios configuration with interceptors
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -172,6 +174,9 @@ createInertiaApp({
         }
     },
 }).then(() => {
+    // Theme restoration is now handled by ThemeContext
+    console.log('App initialization complete - theme handled by ThemeContext');
+    
     // Initialize application monitoring only in development
     if (ENABLE_MONITORING && typeof window !== 'undefined') {
         // Monitor memory usage (throttled)

@@ -78,7 +78,7 @@ class Leave extends Model
     // Accessors
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'New' => 'primary',
             'Pending' => 'warning',
             'Approved' => 'success',
@@ -108,6 +108,4 @@ class Leave extends Model
     {
         return $value ? Carbon::parse($value)->format('Y-m-d') : $value;
     }
-
-
 }

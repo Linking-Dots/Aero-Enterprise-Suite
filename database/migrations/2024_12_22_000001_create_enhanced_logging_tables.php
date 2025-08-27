@@ -10,7 +10,8 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {        Schema::create('audit_logs', function (Blueprint $table) {
+    {
+        Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->string('action', 100); // Reduced length for better indexing
             $table->json('context')->nullable();
