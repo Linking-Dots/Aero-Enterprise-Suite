@@ -820,7 +820,10 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                             </Skeleton>
                         </ScrollShadow>
                         {totalRows > perPage && (
-                            <div className="py-4 flex justify-center">
+                           
+                            <div 
+                                className="flex justify-center items-center"
+                            >
                                 <Pagination
                                     initialPage={1}
                                     isCompact
@@ -837,6 +840,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                         fontFamily: `var(--fontFamily, "Inter")`,
                                     }}
                                 />
+                                
                             </div>
                         )}
                     </>

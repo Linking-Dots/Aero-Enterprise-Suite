@@ -349,133 +349,110 @@ const ThemeSettingDrawer = ({
         console.log('applyBackgroundToDocument called with:', backgroundSettings);
         const body = document.body;
         
+        // Clear any existing background styles first
+        body.style.backgroundImage = '';
+        body.style.backgroundSize = '';
+        body.style.backgroundPosition = '';
+        body.style.backgroundRepeat = '';
+        body.style.backgroundAttachment = '';
+        body.style.backgroundColor = '';
+        body.style.background = '';
+        
+        // Remove any existing overlay
+        const existingOverlay = document.getElementById('background-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
         if (backgroundSettings.type === 'image' && backgroundSettings.image) {
             console.log('Applying image background:', backgroundSettings.image.substring(0, 50) + '...');
-            // Apply image background
-            body.style.backgroundImage = `url(${backgroundSettings.image})`;
-            body.style.backgroundSize = backgroundSettings.size || 'cover';
-            body.style.backgroundPosition = backgroundSettings.position || 'center';
-            body.style.backgroundRepeat = backgroundSettings.repeat || 'no-repeat';
-            body.style.backgroundAttachment = 'fixed';
-            body.style.backgroundColor = '';
             
-            console.log('Applied image background styles:', {
-                backgroundImage: body.style.backgroundImage ? 'SET' : 'NOT SET',
-                backgroundSize: body.style.backgroundSize,
-                backgroundPosition: body.style.backgroundPosition,
-                backgroundRepeat: body.style.backgroundRepeat
-            });
-            
-            // Apply opacity and blur through overlay
-            let overlay = document.getElementById('background-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'background-overlay';
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100%';
-                overlay.style.height = '100%';
-                overlay.style.pointerEvents = 'none';
-                overlay.style.zIndex = '-1';
-                body.appendChild(overlay);
+            // Validate the image URL/data
+            if (backgroundSettings.image.startsWith('data:image/') || 
+                backgroundSettings.image.startsWith('http://') || 
+                backgroundSettings.image.startsWith('https://') ||
+                backgroundSettings.image.startsWith('/')) {
+                
+                // Apply image background with proper CSS escaping
+                body.style.backgroundImage = `url("${backgroundSettings.image}")`;
+                body.style.backgroundSize = backgroundSettings.size || 'cover';
+                body.style.backgroundPosition = backgroundSettings.position || 'center';
+                body.style.backgroundRepeat = backgroundSettings.repeat || 'no-repeat';
+                body.style.backgroundAttachment = 'fixed';
+                
+                console.log('Applied image background styles:', {
+                    backgroundImage: 'SET',
+                    backgroundSize: body.style.backgroundSize,
+                    backgroundPosition: body.style.backgroundPosition,
+                    backgroundRepeat: body.style.backgroundRepeat
+                });
+                
+                // Apply opacity and blur through overlay
+                const opacity = (backgroundSettings.opacity || 100) / 100;
+                const blur = backgroundSettings.blur || 0;
+                
+                if (opacity < 1 || blur > 0) {
+                    const overlay = document.createElement('div');
+                    overlay.id = 'background-overlay';
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        z-index: -1;
+                        backdrop-filter: ${blur > 0 ? `blur(${blur}px)` : 'none'};
+                        background-color: rgba(0, 0, 0, ${1 - opacity});
+                    `;
+                    body.appendChild(overlay);
+                }
+            } else {
+                console.error('Invalid image URL/data:', backgroundSettings.image);
             }
             
-            const opacity = (backgroundSettings.opacity || 100) / 100;
-            const blur = backgroundSettings.blur || 0;
-            overlay.style.backdropFilter = blur > 0 ? `blur(${blur}px)` : 'none';
-            overlay.style.backgroundColor = `rgba(0, 0, 0, ${1 - opacity})`;
-            
         } else if (backgroundSettings.type === 'color' && backgroundSettings.color) {
+            console.log('Applying color background:', backgroundSettings.color);
             // Apply solid color background
-            body.style.backgroundImage = '';
-            body.style.backgroundSize = '';
-            body.style.backgroundPosition = '';
-            body.style.backgroundRepeat = '';
-            body.style.backgroundAttachment = '';
-            
-            // Apply color with opacity
             const color = backgroundSettings.color;
             const opacity = (backgroundSettings.opacity || 100) / 100;
             
             if (color.startsWith('linear-gradient') || color.startsWith('radial-gradient')) {
-                // Handle gradient backgrounds with overlay for opacity
+                // Handle gradient backgrounds
                 body.style.background = color;
-                body.style.backgroundColor = '';
-                body.style.opacity = '';
                 
                 // Create overlay for gradient opacity if needed
                 if (opacity < 1) {
-                    let overlay = document.getElementById('background-overlay');
-                    if (!overlay) {
-                        overlay = document.createElement('div');
-                        overlay.id = 'background-overlay';
-                        overlay.style.position = 'fixed';
-                        overlay.style.top = '0';
-                        overlay.style.left = '0';
-                        overlay.style.width = '100%';
-                        overlay.style.height = '100%';
-                        overlay.style.pointerEvents = 'none';
-                        overlay.style.zIndex = '-1';
-                        body.appendChild(overlay);
-                    }
-                    overlay.style.backgroundColor = `rgba(255, 255, 255, ${1 - opacity})`;
-                    overlay.style.backdropFilter = 'none';
-                } else {
-                    // Remove overlay if opacity is 100%
-                    const overlay = document.getElementById('background-overlay');
-                    if (overlay) {
-                        overlay.remove();
-                    }
+                    const overlay = document.createElement('div');
+                    overlay.id = 'background-overlay';
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        z-index: -1;
+                        background-color: rgba(255, 255, 255, ${1 - opacity});
+                    `;
+                    body.appendChild(overlay);
                 }
             } else {
-                // Handle solid colors with rgba for proper opacity
-                body.style.background = '';
-                body.style.opacity = '';
-                
-                if (opacity < 1) {
-                    // Convert hex to rgba if needed
-                    let rgba = color;
-                    if (color.startsWith('#')) {
-                        const hex = color.replace('#', '');
-                        const r = parseInt(hex.substr(0, 2), 16);
-                        const g = parseInt(hex.substr(2, 2), 16);
-                        const b = parseInt(hex.substr(4, 2), 16);
-                        rgba = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                    }
-                    body.style.backgroundColor = rgba;
+                // Handle solid colors
+                if (opacity < 1 && color.startsWith('#')) {
+                    // Convert hex to rgba for proper opacity
+                    const hex = color.replace('#', '');
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    body.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
                 } else {
                     body.style.backgroundColor = color;
                 }
-                
-                // Remove image overlay if it exists
-                const overlay = document.getElementById('background-overlay');
-                if (overlay) {
-                    overlay.remove();
-                }
-            }
-            const overlay = document.getElementById('background-overlay');
-            if (overlay) {
-                overlay.remove();
-            }
-            
-        } else {
-            // Reset to default
-            body.style.backgroundImage = '';
-            body.style.backgroundSize = '';
-            body.style.backgroundPosition = '';
-            body.style.backgroundRepeat = '';
-            body.style.backgroundAttachment = '';
-            body.style.backgroundColor = '';
-            body.style.background = '';
-            body.style.opacity = '';
-            
-            // Remove overlay
-            const overlay = document.getElementById('background-overlay');
-            if (overlay) {
-                overlay.remove();
             }
         }
+        
+        console.log('Background applied successfully');
     };
 
     const handleFileUpload = (event) => {

@@ -37,13 +37,19 @@ const getThemeRadius = () => {
     return 'full';
 };
 
-// Get theme-aware card styles consistent with StatsCards
+// Get theme-aware card styles consistent with StatisticCard
 const getCardStyle = () => ({
-    background: `var(--theme-content1, #FAFAFA)`,
-    borderColor: `var(--theme-divider, #E4E4E7)`,
+    background: `linear-gradient(135deg, 
+        var(--theme-content1, #FAFAFA) 20%, 
+        var(--theme-content2, #F4F4F5) 10%, 
+        var(--theme-content3, #F1F3F4) 20%)`,
+    borderColor: `transparent`,
     borderWidth: `var(--borderWidth, 2px)`,
     borderRadius: `var(--borderRadius, 12px)`,
     fontFamily: `var(--fontFamily, "Inter")`,
+    transform: `scale(var(--scale, 1))`,
+    transition: 'all 0.2s ease-in-out',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
 });
 
 const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
@@ -87,54 +93,52 @@ const UpdateSection = ({ title, items, users, icon: IconComponent, color }) => {
 
     return (
         <Card 
-            className="h-full flex flex-col border"
+            className="h-full flex flex-col"
             radius={getThemeRadius()}
             style={getCardStyle()}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, ${color} 50%, transparent)`;
+                e.currentTarget.style.borderRadius = `var(--borderRadius, 12px)`;
+                e.currentTarget.style.transform = `scale(calc(var(--scale, 1) * 1.02))`;
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.border = `var(--borderWidth, 2px) solid transparent`;
+                e.currentTarget.style.transform = `scale(var(--scale, 1))`;
+            }}
         >
             <CardHeader 
-                className="border-b p-0"
+                className="pb-2 p-4"
                 style={{
-                    borderColor: `var(--theme-divider, #E4E4E7)`,
-                    background: `linear-gradient(135deg, 
-                        color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
-                        color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                    background: `transparent`,
                 }}
             >
-                <div className="p-4 w-full">
-                    <div className="flex items-center gap-3">
-                        <div 
-                            className="p-2 rounded-xl flex items-center justify-center"
-                            style={{
-                                background: `color-mix(in srgb, ${color} 15%, transparent)`,
-                                borderColor: `color-mix(in srgb, ${color} 25%, transparent)`,
-                                borderWidth: `var(--borderWidth, 2px)`,
-                                borderRadius: `var(--borderRadius, 12px)`,
-                            }}
-                        >
-                            <IconComponent 
-                                className="w-5 h-5"
-                                style={{ color: color }}
-                                aria-hidden="true"
-                            />
-                        </div>
-                        <h2 
-                            className="text-lg font-semibold text-foreground"
-                            style={{
-                                fontFamily: `var(--fontFamily, "Inter")`,
-                            }}
-                        >
-                            {title}
-                        </h2>
+                <div className="flex items-center gap-3 w-full">
+                    <div 
+                        className="p-2 rounded-xl flex items-center justify-center min-w-[48px] min-h-[48px] flex-shrink-0"
+                        style={{
+                            backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+                            borderRadius: `var(--borderRadius, 12px)`,
+                            border: `var(--borderWidth, 1px) solid color-mix(in srgb, ${color} 25%, transparent)`
+                        }}
+                    >
+                        <IconComponent 
+                            className="w-6 h-6 stroke-2"
+                            style={{ color: color }}
+                            aria-hidden="true"
+                        />
                     </div>
+                    <h2 
+                        className="text-lg font-bold text-foreground flex-1"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        {title}
+                    </h2>
                 </div>
             </CardHeader>
-            <Divider 
-                style={{
-                    borderColor: `var(--theme-divider, #E4E4E7)`,
-                }}
-            />
             <CardBody 
-                className="flex-1 overflow-auto p-4"
+                className="flex-1 overflow-auto pt-0 p-4"
                 style={{
                     fontFamily: `var(--fontFamily, "Inter")`,
                 }}
@@ -502,14 +506,14 @@ const UpdatesCards = () => {
     if (loading) {
         return (
             <section 
-                className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'}`}
+                
                 aria-label="Employee updates loading"
             >
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                     {[1, 2, 3].map((_, idx) => (
                         <div key={idx}>
                             <Card 
-                                className="w-full h-full p-4" 
+                                className="w-full h-full" 
                                 radius={getThemeRadius()}
                                 style={getCardStyle()}
                             >
@@ -531,12 +535,15 @@ const UpdatesCards = () => {
         return (
             <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} flex items-center justify-center min-h-[200px]`}>
                 <Card 
-                    className="p-4"
+                    
                     radius={getThemeRadius()}
                     style={{
                         ...getCardStyle(),
-                        borderColor: `var(--theme-danger, #f31260)`,
-                        background: `color-mix(in srgb, var(--theme-danger) 5%, var(--theme-content1))`,
+                        borderColor: `color-mix(in srgb, var(--theme-danger) 50%, transparent)`,
+                        background: `linear-gradient(135deg, 
+                            color-mix(in srgb, var(--theme-danger) 5%, var(--theme-content1)) 20%, 
+                            color-mix(in srgb, var(--theme-danger) 3%, var(--theme-content2)) 10%, 
+                            color-mix(in srgb, var(--theme-danger) 2%, var(--theme-content3)) 20%)`,
                     }}
                 >
                     <div className="flex items-center gap-3">
@@ -561,7 +568,7 @@ const UpdatesCards = () => {
 
     return (
         <section 
-            className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'}`}
+            className="p-4"
             aria-label="Employee Updates Dashboard"
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-stretch">
@@ -597,51 +604,49 @@ const UpdatesCards = () => {
                         <Card
                             radius={getThemeRadius()}
                             style={getCardStyle()}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-warning) 50%, transparent)`;
+                                e.currentTarget.style.borderRadius = `var(--borderRadius, 12px)`;
+                                e.currentTarget.style.transform = `scale(calc(var(--scale, 1) * 1.02))`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.border = `var(--borderWidth, 2px) solid transparent`;
+                                e.currentTarget.style.transform = `scale(var(--scale, 1))`;
+                            }}
                         >
                             <CardHeader 
-                                className="border-b p-0"
+                                className="pb-2 p-4"
                                 style={{
-                                    borderColor: `var(--theme-divider, #E4E4E7)`,
-                                    background: `linear-gradient(135deg, 
-                                        color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
-                                        color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                    background: `transparent`,
                                 }}
                             >
-                                <div className="p-4 w-full">
-                                    <div className="flex items-center gap-3">
-                                        <div 
-                                            className="p-2 rounded-xl flex items-center justify-center"
-                                            style={{
-                                                background: `color-mix(in srgb, var(--theme-warning) 15%, transparent)`,
-                                                borderColor: `color-mix(in srgb, var(--theme-warning) 25%, transparent)`,
-                                                borderWidth: `var(--borderWidth, 2px)`,
-                                                borderRadius: `var(--borderRadius, 12px)`,
-                                            }}
-                                        >
-                                            <SunIcon 
-                                                className="w-5 h-5"
-                                                style={{ color: 'var(--theme-warning)' }}
-                                                aria-hidden="true"
-                                            />
-                                        </div>
-                                        <h2 
-                                            className="text-lg font-semibold text-foreground"
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
-                                        >
-                                            Upcoming Holiday
-                                        </h2>
+                                <div className="flex items-center gap-3 w-full">
+                                    <div 
+                                        className="p-2 rounded-xl flex items-center justify-center min-w-[48px] min-h-[48px] flex-shrink-0"
+                                        style={{
+                                            backgroundColor: `color-mix(in srgb, var(--theme-warning) 15%, transparent)`,
+                                            borderRadius: `var(--borderRadius, 12px)`,
+                                            border: `var(--borderWidth, 1px) solid color-mix(in srgb, var(--theme-warning) 25%, transparent)`
+                                        }}
+                                    >
+                                        <SunIcon 
+                                            className="w-6 h-6 stroke-2"
+                                            style={{ color: 'var(--theme-warning)' }}
+                                            aria-hidden="true"
+                                        />
                                     </div>
+                                    <h2 
+                                        className="text-lg font-bold text-foreground flex-1"
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    >
+                                        Upcoming Holiday
+                                    </h2>
                                 </div>
                             </CardHeader>
-                            <Divider 
-                                style={{
-                                    borderColor: `var(--theme-divider, #E4E4E7)`,
-                                }}
-                            />
                             <CardBody 
-                                className="p-4"
+                                className="pt-0 p-4"
                                 style={{
                                     fontFamily: `var(--fontFamily, "Inter")`,
                                 }}

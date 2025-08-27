@@ -17,7 +17,7 @@ import {
     SelectItem,
     Spinner
 } from "@heroui/react";
-import useTheme, { getThemePrimaryColor } from '@/theme';
+import useTheme from '@/theme';
 import { 
     glassyFormControlStyles, 
     glassyMenuStyles,
@@ -61,7 +61,6 @@ import { toast } from 'react-toastify';
 const LeavesAdmin = ({ title, allUsers }) => {
     const { auth } = usePage().props;
     const { isDark } = useTheme();
-    const primaryColor = getThemePrimaryColor();
     
     // Custom media queries
     const [isMobile, setIsMobile] = useState(false);

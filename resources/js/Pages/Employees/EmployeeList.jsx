@@ -7,6 +7,7 @@ import {
   ButtonGroup,
   Card,
   CardBody,
+  CardHeader,
   User,
   Divider,
   Pagination,
@@ -37,19 +38,34 @@ import {
 } from "@heroicons/react/24/outline";
 
 import App from "@/Layouts/App.jsx";
-import GlassCard from "@/Components/GlassCard.jsx";
-import PageHeader from "@/Components/PageHeader.jsx";
-import { useTheme } from '@/Contexts/ThemeContext';
+
 import StatsCards from "@/Components/StatsCards.jsx";
 import EmployeeTable from "@/Tables/EmployeeTable.jsx";
 import ProfileAvatar from "@/Components/ProfileAvatar.jsx";
+
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const EmployeesList = ({ title, departments, designations, attendanceTypes }) => {
-  const { theme } = useTheme();
-  const [isMobile] = useState(window.innerWidth < 640);
-  const [isTablet] = useState(window.innerWidth < 768);
+
+  // Custom media query logic - matching AttendanceEmployee
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isMediumScreen, setIsMediumScreen] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsTablet(window.innerWidth < 768);
+      setIsLargeScreen(window.innerWidth >= 1025);
+      setIsMediumScreen(window.innerWidth >= 641 && window.innerWidth <= 1024);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   // State for employee data with server-side pagination
   const [employees, setEmployees] = useState([]);
@@ -75,6 +91,20 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
     perPage: 10,
     total: 0
   });
+   // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
   // Stats - Updated to match comprehensive backend stats structure
   const [stats, setStats] = useState({
@@ -408,51 +438,164 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
 
   return (
     <>
-      <Head title={title} />
-
-      <div className="flex justify-center p-2">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          <GlassCard>
-            <PageHeader
-              title="Employee Directory"
-              subtitle="Manage employee information, departments, and designations"
-              icon={<UsersIcon className="w-8 h-8" />}
-              variant="default"
-              actionButtons={[
-                {
-                  label: isMobile ? "Add" : "Add Employee",
-                  icon: <UserPlusIcon className="w-4 h-4" />,
-                  className: "bg-linear-to-r from-(--theme-primary) to-(--theme-secondary) text-white font-medium hover:opacity-90"
-                }
-              ]}
+      <Head title={title || "Employee Directory"} />
+      <div 
+        className="flex flex-col w-full h-full p-4"
+        role="main"
+        aria-label="Employee Directory Management"
+      >
+        <div className="space-y-4">
+          <div className="w-full">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
             >
-              <div className="p-4 sm:p-6">
-                {/* Statistics Cards */}
-                <StatsCards stats={statsData} className="mb-6" />
+              <Card 
+                className="transition-all duration-200"
+                style={{
+                  border: `var(--borderWidth, 2px) solid transparent`,
+                  borderRadius: `var(--borderRadius, 12px)`,
+                  fontFamily: `var(--fontFamily, "Inter")`,
+                  transform: `scale(var(--scale, 1))`,
+                  background: `linear-gradient(135deg, 
+                    var(--theme-content1, #FAFAFA) 20%, 
+                    var(--theme-content2, #F4F4F5) 10%, 
+                    var(--theme-content3, #F1F3F4) 20%)`,
+                }}
+              >
+                <CardHeader 
+                  className="border-b p-0"
+                  style={{
+                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                    background: `linear-gradient(135deg, 
+                      color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                      color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                  }}
+                >
+                  <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
+                    <div className="flex flex-col space-y-4">
+                      {/* Main Header Content */}
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        {/* Title Section */}
+                        <div className="flex items-center gap-3 lg:gap-4">
+                          <div 
+                            className={`
+                              ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                              rounded-xl flex items-center justify-center
+                            `}
+                            style={{
+                              background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                              borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                              borderWidth: `var(--borderWidth, 2px)`,
+                              borderRadius: `var(--borderRadius, 12px)`,
+                            }}
+                          >
+                            <UsersIcon 
+                              className={`
+                                ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                              `}
+                              style={{ color: 'var(--theme-primary)' }}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 
+                              className={`
+                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                font-bold text-foreground
+                                ${!isLargeScreen ? 'truncate' : ''}
+                              `}
+                              style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                              }}
+                            >
+                              Employee Directory
+                            </h4>
+                            <p 
+                              className={`
+                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                text-default-500
+                                ${!isLargeScreen ? 'truncate' : ''}
+                              `}
+                              style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                              }}
+                            >
+                              Manage employee information and organizational structure
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            className="text-white font-medium"
+                            style={{
+                              background: `linear-gradient(135deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 80%, var(--theme-secondary)))`,
+                              borderRadius: getThemeRadius(),
+                            }}
+                            startContent={<UserPlusIcon className="w-4 h-4" />}
+                          >
+                            {isMobile ? "Add" : "Add Employee"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardBody className="p-6">
+                  {/* Statistics Cards */}
+                  <StatsCards stats={statsData} className="mb-6" />
+                  
+                 
 
                 {/* Analytics Dashboard */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Department Distribution */}
-                  <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <h3 className="text-lg font-semibold text-foreground mb-4">
+                  <div 
+                    className="p-4"
+                    style={{
+                      background: `color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+                      border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                      borderRadius: getThemeRadius(),
+                      backdropFilter: 'blur(16px)',
+                    }}
+                  >
+                    <h3 
+                      className="text-lg font-semibold mb-4"
+                      style={{ color: 'var(--theme-foreground)' }}
+                    >
                       Department Distribution
                     </h3>
                     <div className="space-y-3">
                       {stats.distribution?.by_department?.slice(0, 5).map((dept, index) => (
                         <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm text-default-600">{dept.name}</span>
+                          <span 
+                            className="text-sm opacity-80"
+                            style={{ color: 'var(--theme-foreground)' }}
+                          >
+                            {dept.name}
+                          </span>
                           <div className="flex items-center gap-2">
-                            <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div 
+                              className="w-20 h-2 rounded-full overflow-hidden"
+                              style={{ background: 'color-mix(in srgb, var(--theme-content3) 40%, transparent)' }}
+                            >
                               <div 
-                                className="h-full bg-linear-to-r from-blue-500 to-purple-500 rounded-full"
-                                style={{ width: `${dept.percentage}%` }}
+                                className="h-full rounded-full"
+                                style={{ 
+                                  width: `${dept.percentage}%`,
+                                  background: `linear-gradient(90deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 80%, var(--theme-secondary)))`
+                                }}
                               />
                             </div>
-                            <span className="text-xs text-default-500 w-8">{dept.count}</span>
+                            <span 
+                              className="text-xs w-8 opacity-70"
+                              style={{ color: 'var(--theme-foreground)' }}
+                            >
+                              {dept.count}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -460,20 +603,47 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                   </div>
 
                   {/* Hiring Trends */}
-                  <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 p-4">
-                    <h3 className="text-lg font-semibold text-foreground mb-4">
+                  <div 
+                    className="p-4"
+                    style={{
+                      background: `color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+                      border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                      borderRadius: getThemeRadius(),
+                      backdropFilter: 'blur(16px)',
+                    }}
+                  >
+                    <h3 
+                      className="text-lg font-semibold mb-4"
+                      style={{ color: 'var(--theme-foreground)' }}
+                    >
                       Hiring Trends
                     </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-default-600">Last 30 Days</span>
-                        <span className="text-sm font-medium text-foreground">
+                        <span 
+                          className="text-sm opacity-80"
+                          style={{ color: 'var(--theme-foreground)' }}
+                        >
+                          Last 30 Days
+                        </span>
+                        <span 
+                          className="text-sm font-medium"
+                          style={{ color: 'var(--theme-foreground)' }}
+                        >
                           {stats.hiring_trends?.recent_hires?.last_30_days || 0}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-default-600">Last 90 Days</span>
-                        <span className="text-sm font-medium text-foreground">
+                        <span 
+                          className="text-sm opacity-80"
+                          style={{ color: 'var(--theme-foreground)' }}
+                        >
+                          Last 90 Days
+                        </span>
+                        <span 
+                          className="text-sm font-medium"
+                          style={{ color: 'var(--theme-foreground)' }}
+                        >
                           {stats.hiring_trends?.recent_hires?.last_90_days || 0}
                         </span>
                       </div>
@@ -545,237 +715,147 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                   </div>
                 </div>
 
-                {/* View Controls */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                  <div className="flex-1">
-                    <Input
-                      label="Search Employees"
-                      placeholder="Search by name, email, or employee ID..."
-                      value={filters.search}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-500" />}
-                      size={isMobile ? "sm" : "md"}
-                      classNames={{
-                        base: "max-w-full",
-                        mainWrapper: "h-full",
-                        input: "text-small",
-                        inputWrapper: "h-full bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 group-data-[focus=true]:border-primary",
-                        label: "text-white/70 group-data-[focus=true]:text-primary"
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 items-end">
-                    {/* View Toggle */}
-                    <ButtonGroup variant="bordered" className="bg-white/5">
-                      <Button
-                        isIconOnly={isMobile}
-                        color={viewMode === 'table' ? 'primary' : 'default'}
-                        onPress={() => setViewMode('table')}
-                        className={viewMode === 'table' ? 'bg-blue-500/20' : ''}
-                      >
-                        <TableCellsIcon className="w-4 h-4" />
-                        {!isMobile && <span className="ml-1">Table</span>}
-                      </Button>
-                      <Button
-                        isIconOnly={isMobile}
-                        color={viewMode === 'grid' ? 'primary' : 'default'}
-                        onPress={() => setViewMode('grid')}
-                        className={viewMode === 'grid' ? 'bg-blue-500/20' : ''}
-                      >
-                        <Squares2X2Icon className="w-4 h-4" />
-                        {!isMobile && <span className="ml-1">Grid</span>}
-                      </Button>
-                    </ButtonGroup>
-                    
-                    {/* Filter Toggle */}
-                    <Button
-                      isIconOnly={isMobile}
-                      variant="bordered"
-                      onPress={() => setShowFilters(!showFilters)}
-                      className={showFilters ? 'bg-purple-500/20' : 'bg-white/5'}
-                    >
-                      <AdjustmentsHorizontalIcon className="w-4 h-4" />
-                      {!isMobile && <span className="ml-1">Filters</span>}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Filters Section */}
-                {showFilters && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Select
-                          label="Department"
-                          placeholder="Select Department"
-                          selectedKeys={filters.department === 'all' ? [] : [filters.department]}
-                          onSelectionChange={(keys) => {
-                            const selectedValue = Array.from(keys)[0] || 'all';
-                            handleDepartmentFilterChange(selectedValue);
-                          }}
+                 {/* Filters Section */}
+                  <div className="mb-6">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                      <div className="flex-1">
+                        <Input
+                          label="Search Employees"
+                          placeholder="Search by name, email, or employee ID..."
+                          value={filters.search}
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                          startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                          variant="bordered"
                           size="sm"
+                          radius={getThemeRadius()}
                           classNames={{
-                            base: "max-w-full",
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
-                            label: "text-white/70 group-data-[filled=true]:text-primary",
-                            value: "text-white/90",
-                            selectorIcon: "text-white/70"
+                            input: "text-sm",
                           }}
-                          popoverProps={{
-                            classNames: {
-                              base: "bg-white/10 backdrop-blur-md border border-white/20",
-                              content: "bg-transparent"
-                            }
+                          style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                          }}
+                          aria-label="Search employees"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2 items-end">
+                        {/* View Toggle */}
+                        <ButtonGroup 
+                          variant="bordered"
+                          style={{
+                            background: 'color-mix(in srgb, var(--theme-content2) 30%, transparent)',
+                            border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                            borderRadius: getThemeRadius(),
                           }}
                         >
-                          <SelectItem key="all" value="all">All Departments</SelectItem>
-                          {departments?.map(dept => (
-                            <SelectItem key={dept.id.toString()} value={dept.id.toString()}>
-                              {dept.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
-
-                        <Select
-                          label="Designation"
-                          placeholder="Select Designation"
-                          selectedKeys={filters.designation === 'all' ? [] : [filters.designation]}
-                          onSelectionChange={(keys) => {
-                            const selectedValue = Array.from(keys)[0] || 'all';
-                            handleDesignationFilterChange(selectedValue);
-                          }}
-                          size="sm"
-                          classNames={{
-                            base: "max-w-full",
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
-                            label: "text-white/70 group-data-[filled=true]:text-primary",
-                            value: "text-white/90",
-                            selectorIcon: "text-white/70"
-                          }}
-                          popoverProps={{
-                            classNames: {
-                              base: "bg-white/10 backdrop-blur-md border border-white/20",
-                              content: "bg-transparent"
-                            }
-                          }}
-                        >
-                          <SelectItem key="all" value="all">All Designations</SelectItem>
-                          {filteredDesignations?.map(desig => (
-                            <SelectItem key={desig.id.toString()} value={desig.id.toString()}>
-                              {desig.title}
-                            </SelectItem>
-                          ))}
-                        </Select>
-
-                        {!isMobile && (
-                          <Select
-                            label="Attendance Type"
-                            placeholder="Select Attendance Type"
-                            selectedKeys={filters.attendanceType === 'all' ? [] : [filters.attendanceType]}
-                            onSelectionChange={(keys) => {
-                              const selectedValue = Array.from(keys)[0] || 'all';
-                              handleAttendanceTypeFilterChange(selectedValue);
-                            }}
-                            size="sm"
-                            classNames={{
-                              base: "max-w-full",
-                              trigger: "bg-white/10 backdrop-blur-md border-white/20 data-[hover=true]:border-white/30 data-[open=true]:border-primary",
-                              label: "text-white/70 group-data-[filled=true]:text-primary",
-                              value: "text-white/90",
-                              selectorIcon: "text-white/70"
-                            }}
-                            popoverProps={{
-                              classNames: {
-                                base: "bg-white/10 backdrop-blur-md border border-white/20",
-                                content: "bg-transparent"
-                              }
+                          <Button
+                            isIconOnly={isMobile}
+                            color={viewMode === 'table' ? 'primary' : 'default'}
+                            onPress={() => setViewMode('table')}
+                            style={{
+                              background: viewMode === 'table' 
+                                ? `var(--theme-primary)` 
+                                : 'transparent',
+                              color: viewMode === 'table' 
+                                ? 'white' 
+                                : 'var(--theme-foreground)',
                             }}
                           >
-                            <SelectItem key="all" value="all">All Attendance Types</SelectItem>
-                            {attendanceTypes?.map(type => (
-                              <SelectItem key={type.id.toString()} value={type.id.toString()}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </Select>
-                        )}
+                            <TableCellsIcon className="w-4 h-4" />
+                            {!isMobile && <span className="ml-1">Table</span>}
+                          </Button>
+                          <Button
+                            isIconOnly={isMobile}
+                            color={viewMode === 'grid' ? 'primary' : 'default'}
+                            onPress={() => setViewMode('grid')}
+                            style={{
+                              background: viewMode === 'grid' 
+                                ? `var(--theme-primary)` 
+                                : 'transparent',
+                              color: viewMode === 'grid' 
+                                ? 'white' 
+                                : 'var(--theme-foreground)',
+                            }}
+                          >
+                            <Squares2X2Icon className="w-4 h-4" />
+                            {!isMobile && <span className="ml-1">Grid</span>}
+                          </Button>
+                        </ButtonGroup>
+                        
+                        <Button
+                          isIconOnly
+                          variant="bordered"
+                          onPress={() => setShowFilters(!showFilters)}
+                          style={{
+                            background: showFilters 
+                              ? 'color-mix(in srgb, var(--theme-primary) 20%, transparent)' 
+                              : 'color-mix(in srgb, var(--theme-content2) 30%, transparent)',
+                            border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                            color: showFilters 
+                              ? 'var(--theme-primary)' 
+                              : 'var(--theme-foreground)',
+                            borderRadius: getThemeRadius(),
+                          }}
+                        >
+                          <FunnelIcon className="w-4 h-4" />
+                        </Button>
                       </div>
-
-                      {/* Active Filters */}
-                      {(filters.search || filters.department !== 'all' || filters.designation !== 'all' || filters.attendanceType !== 'all') && (
-                        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/10">
-                          {filters.search && (
-                            <Chip
-                              variant="flat"
-                              color="primary"
-                              size="sm"
-                              onClose={() => setFilters(prev => ({ ...prev, search: '' }))}
-                            >
-                              Search: {filters.search}
-                            </Chip>
-                          )}
-                          {filters.department !== 'all' && (
-                            <Chip
-                              variant="flat"
-                              color="secondary"
-                              size="sm"
-                              onClose={() => setFilters(prev => ({ ...prev, department: 'all' }))}
-                            >
-                              Department: {departments?.find(d => d.id === parseInt(filters.department))?.name}
-                            </Chip>
-                          )}
-                          {filters.designation !== 'all' && (
-                            <Chip
-                              variant="flat"
-                              color="warning"
-                              size="sm"
-                              onClose={() => setFilters(prev => ({ ...prev, designation: 'all' }))}
-                            >
-                              Designation: {designations?.find(d => d.id === parseInt(filters.designation))?.title}
-                            </Chip>
-                          )}
-                          {filters.attendanceType !== 'all' && (
-                            <Chip
-                              variant="flat"
-                              color="success"
-                              size="sm"
-                              onClose={() => setFilters(prev => ({ ...prev, attendanceType: 'all' }))}
-                            >
-                              Attendance: {attendanceTypes?.find(t => t.id === parseInt(filters.attendanceType))?.name}
-                            </Chip>
-                          )}
-                        </div>
-                      )}
                     </div>
-                  </motion.div>
-                )}
-
-                {/* Content Area */}
-                <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 overflow-hidden">
-                  <div className="p-4 border-b border-white/10">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {viewMode === 'table' ? 'Employee Table' : 'Employee Grid'} 
-                      <span className="text-sm text-default-500 ml-2">
-                        ({totalRows} {totalRows === 1 ? 'employee' : 'employees'})
-                      </span>
-                    </h3>
                   </div>
-                  
-                  {loading ? (
-                    <div className="text-center py-8">
-                      <Spinner size="lg" color="primary" />
-                      <p className="mt-4 text-default-500">
-                        Loading employees data...
-                      </p>
+
+                {/* Employee Table Section */}
+                <Card 
+                  className="transition-all duration-200"
+                  style={{
+                    border: `var(--borderWidth, 2px) solid transparent`,
+                    borderRadius: `var(--borderRadius, 12px)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    background: `linear-gradient(135deg, 
+                      var(--theme-content1, #FAFAFA) 20%, 
+                      var(--theme-content2, #F4F4F5) 10%, 
+                      var(--theme-content3, #F1F3F4) 20%)`,
+                  }}
+                >
+                  <CardHeader 
+                    className="border-b pb-2"
+                    style={{
+                      borderColor: `var(--theme-divider, #E4E4E7)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="p-2 rounded-lg flex items-center justify-center"
+                        style={{
+                          background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                          borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                        }}
+                      >
+                        <UsersIcon 
+                          className="w-6 h-6" 
+                          style={{ color: 'var(--theme-primary)' }}
+                        />
+                      </div>
+                      <h1 
+                        className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground"
+                        style={{
+                          fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                      >
+                        Employee Directory
+                      </h1>
                     </div>
-                  ) : viewMode === 'table' ? (
-                    <EmployeeTable 
+                  </CardHeader>
+                  <CardBody>
+                    <div className="max-h-[84vh] overflow-y-auto">
+                      {loading ? (
+                        <div className="text-center py-8">
+                          <Spinner size="lg" color="primary" />
+                          <p className="mt-4 text-default-500">
+                            Loading employees data...
+                          </p>
+                        </div>
+                      ) : viewMode === 'table' ? (
+                        <EmployeeTable 
                       allUsers={employees} 
                       departments={departments}
                       designations={designations}
@@ -819,29 +899,48 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                       
                       {/* Pagination for Grid View */}
                       {employees.length > 0 && (
-                        <div className="flex justify-center mt-6 border-t border-white/10 pt-4">
-                          <Pagination
-                            total={Math.ceil(totalRows / pagination.perPage)}
-                            initialPage={pagination.currentPage}
-                            page={pagination.currentPage}
-                            onChange={handlePageChange}
-                            size={isMobile ? "sm" : "md"}
-                            variant="bordered"
-                            showControls
-                            classNames={{
-                              item: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                              cursor: "bg-white/20 backdrop-blur-md border-white/20",
-                            }}
-                          />
-                        </div>
+                        <div 
+                                className="flex flex-col sm:flex-row items-center justify-between px-4 py-2"
+                                style={{
+                                  borderTop: `1px solid color-mix(in srgb, var(--theme-content3) 30%, transparent)`,
+                                  background: `color-mix(in srgb, var(--theme-content2) 30%, transparent)`,
+                                  backdropFilter: 'blur(16px)',
+                                }}
+                              >
+                                <span 
+                                  className="text-xs mb-3 sm:mb-0 opacity-70"
+                                  style={{ color: 'var(--theme-foreground)' }}
+                                >
+                                  Showing {((pagination.currentPage - 1) * pagination.perPage) + 1} to {
+                                    Math.min(pagination.currentPage * pagination.perPage, pagination.total)
+                                  } of {pagination.total} employees
+                                </span>
+                                
+                                <Pagination
+                                  total={Math.ceil(pagination.total / pagination.perPage)}
+                                  initialPage={pagination.currentPage}
+                                  page={pagination.currentPage}
+                                  onChange={handlePageChange}
+                                  size={isMobile ? "sm" : "md"}
+                                  variant="bordered"
+                                  showControls
+                                  style={{
+                                    '--pagination-item-bg': 'color-mix(in srgb, var(--theme-content2) 50%, transparent)',
+                                    '--pagination-item-border': 'color-mix(in srgb, var(--theme-content3) 50%, transparent)',
+                                  }}
+                                />
+                              </div>
                       )}
                     </div>
                   )}
-                </div>
-              </div>
-            </PageHeader>
-          </GlassCard>
-        </motion.div>
+                    </div>
+                  </CardBody>
+                </Card>
+                </CardBody>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </>
   );

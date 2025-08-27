@@ -385,7 +385,20 @@ const MobileHeader = React.memo(({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card>
+      <Card
+        className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+        style={{
+          background: `linear-gradient(135deg, 
+            var(--theme-content1, #FAFAFA) 20%, 
+            var(--theme-content2, #F4F4F5) 10%, 
+            var(--theme-content3, #F1F3F4) 20%)`,
+          borderColor: `var(--theme-divider, #E4E4E7)`,
+          borderWidth: `var(--borderWidth, 2px)`,
+          borderRadius: `var(--borderRadius, 12px)`,
+          fontFamily: `var(--fontFamily, "Inter")`,
+          boxShadow: `0 4px 20px -2px var(--theme-shadow, rgba(0,0,0,0.1))`,
+        }}
+      >
         <Navbar
           shouldHideOnScroll
           maxWidth="full"
@@ -402,9 +415,11 @@ const MobileHeader = React.memo(({
               isIconOnly
               variant="light"
               onPress={handleInternalToggle}
-              className="text-foreground hover:bg-primary/10 transition-all duration-300"
+              className="text-foreground hover:bg-primary/10 transition-all duration-300 hover:scale-105 active:scale-95"
               style={{
                 color: 'var(--theme-foreground, inherit)',
+                backgroundColor: 'transparent',
+                borderRadius: 'var(--borderRadius, 8px)',
                 '--hover-bg': 'var(--theme-primary, #006FEE)15'
               }}
               size="sm"
@@ -429,13 +444,15 @@ const MobileHeader = React.memo(({
                   <NavbarBrand className="flex items-center gap-3 min-w-0">
                     <div className="relative">
                       <div 
-                        className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden border"
+                        className="rounded-xl flex items-center justify-center shadow-xl overflow-hidden border transition-all duration-300 hover:shadow-2xl hover:scale-105"
                         style={{ 
                           width: 'calc(60px - 20px)',
                           height: 'calc(60px - 20px)',
                           aspectRatio: '1',
-                          backgroundColor: 'var(--theme-primary, #006FEE)15',
-                          borderColor: 'var(--theme-primary, #006FEE)30'
+                          background: `linear-gradient(135deg, var(--theme-primary, #006FEE)15, var(--theme-primary, #006FEE)05)`,
+                          borderColor: 'var(--theme-primary, #006FEE)30',
+                          borderWidth: 'var(--borderWidth, 1px)',
+                          borderRadius: 'var(--borderRadius, 12px)'
                         }}
                       >
                         <img 
@@ -481,13 +498,15 @@ const MobileHeader = React.memo(({
               }
               endContent={<Kbd className="hidden lg:inline-block" keys={["command"]}>K</Kbd>}
               classNames={{
-                inputWrapper: "backdrop-blur-md border hover:bg-opacity-20",
+                inputWrapper: "backdrop-blur-md border hover:bg-opacity-20 transition-all duration-300",
                 input: "text-sm"
               }}
               style={{
                 '--input-bg': 'var(--theme-background, #FFFFFF)10',
                 '--input-border': 'var(--theme-divider, #E4E4E7)',
-                '--input-hover-bg': 'var(--theme-background, #FFFFFF)15'
+                '--input-hover-bg': 'var(--theme-background, #FFFFFF)15',
+                borderRadius: 'var(--borderRadius, 8px)',
+                fontFamily: 'var(--fontFamily, inherit)'
               }}
               size="sm"
             />
@@ -499,9 +518,11 @@ const MobileHeader = React.memo(({
             <Button
               isIconOnly
               variant="light"
-              className="md:hidden text-foreground hover:bg-primary/10"
+              className="md:hidden text-foreground hover:bg-primary/10 transition-all duration-300 hover:scale-105 active:scale-95"
               style={{
                 color: 'var(--theme-foreground, inherit)',
+                backgroundColor: 'transparent',
+                borderRadius: 'var(--borderRadius, 8px)',
                 '--hover-bg': 'var(--theme-primary, #006FEE)10'
               }}
               size="sm"
@@ -515,7 +536,13 @@ const MobileHeader = React.memo(({
               <Button
                 isIconOnly
                 variant="light"
-                className="text-foreground hover:bg-white/10"
+                className="text-foreground hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+                style={{
+                  color: 'var(--theme-foreground, inherit)',
+                  backgroundColor: 'transparent',
+                  borderRadius: 'var(--borderRadius, 8px)',
+                  '--hover-bg': 'var(--theme-foreground, #11181C)10'
+                }}
                 size="sm"
                 aria-label="Help and Support"
               >
@@ -528,14 +555,27 @@ const MobileHeader = React.memo(({
               placement="bottom-end" 
               closeDelay={100}
               classNames={{
-                content: "bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden"
+                content: `backdrop-blur-xl border shadow-2xl rounded-2xl overflow-hidden transition-all duration-300`
+              }}
+              style={{
+                backgroundColor: `var(--theme-content1, #FAFAFA)95`,
+                borderColor: `var(--theme-divider, #E4E4E7)`,
+                borderWidth: `var(--borderWidth, 1px)`,
+                borderRadius: `var(--borderRadius, 16px)`,
+                fontFamily: `var(--fontFamily, inherit)`
               }}
             >
               <DropdownTrigger>
                 <Button
                   isIconOnly
                   variant="light"
-                  className="relative text-foreground hover:bg-white/10 transition-all duration-300"
+                  className="relative text-foreground hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+                  style={{
+                    color: 'var(--theme-foreground, inherit)',
+                    backgroundColor: 'transparent',
+                    borderRadius: 'var(--borderRadius, 8px)',
+                    '--hover-bg': 'var(--theme-foreground, #11181C)10'
+                  }}
                   size="sm"
                   aria-label="Notifications"
                 >

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Link, router } from '@inertiajs/react';
 import { toast } from "react-toastify";
 import axios from 'axios';
+
 import { 
   Table, 
   TableBody, 
@@ -64,19 +65,6 @@ const EmployeeTable = ({
   updateEmployeeOptimized,
   deleteEmployeeOptimized
 }) => {
-  // Custom theme for glassmorphism styling
-  const glassTheme = {
-    glassCard: {
-      background: 'rgba(15, 20, 25, 0.15)',
-      border: '1px solid rgba(255, 255, 255, 0.2)'
-    },
-    palette: {
-      text: {
-        primary: '#ffffff'
-      }
-    }
-  };
-  
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [attendanceConfig, setAttendanceConfig] = useState({});
@@ -91,6 +79,21 @@ const EmployeeTable = ({
     isOpen: false,
     employee: null
   });
+
+   // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
   const handleDepartmentChange = async (userId, departmentId) => {
     const promise = new Promise(async (resolve, reject) => {
@@ -670,8 +673,18 @@ const EmployeeTable = ({
     if (!pagination || loading) return null;
     
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2 border-t border-white/10 bg-white/5 backdrop-blur-md">
-        <span className="text-xs text-default-400 mb-3 sm:mb-0">
+      <div 
+        className="flex flex-col sm:flex-row items-center justify-between px-4 py-2"
+        style={{
+          borderTop: `1px solid color-mix(in srgb, var(--theme-content3) 30%, transparent)`,
+          background: `color-mix(in srgb, var(--theme-content2) 30%, transparent)`,
+          backdropFilter: 'blur(16px)',
+        }}
+      >
+        <span 
+          className="text-xs mb-3 sm:mb-0 opacity-70"
+          style={{ color: 'var(--theme-foreground)' }}
+        >
           Showing {((pagination.currentPage - 1) * pagination.perPage) + 1} to {
             Math.min(pagination.currentPage * pagination.perPage, pagination.total)
           } of {pagination.total} employees
@@ -685,9 +698,9 @@ const EmployeeTable = ({
           size={isMobile ? "sm" : "md"}
           variant="bordered"
           showControls
-          classNames={{
-            item: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-            cursor: "bg-white/20 backdrop-blur-md border-white/20",
+          style={{
+            '--pagination-item-bg': 'color-mix(in srgb, var(--theme-content2) 50%, transparent)',
+            '--pagination-item-border': 'color-mix(in srgb, var(--theme-content3) 50%, transparent)',
           }}
         />
       </div>
@@ -695,13 +708,42 @@ const EmployeeTable = ({
   };
 
   return (
-    <div className="w-full overflow-hidden flex flex-col border border-white/10 rounded-lg relative" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+    <div 
+      className="w-full overflow-hidden flex flex-col relative" 
+      style={{ 
+        maxHeight: 'calc(100vh - 200px)',
+        background: `color-mix(in srgb, var(--theme-content1) 85%, transparent)`,
+        backdropFilter: 'blur(16px)',
+        border: `1px solid color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+        borderRadius: getThemeRadius(),
+      }}
+    >
       {/* Global loading overlay */}
       {loading && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-xs flex items-center justify-center z-50 rounded-lg">
-          <div className="flex flex-col items-center gap-4 p-6 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
+        <div 
+          className="absolute inset-0 flex items-center justify-center z-50"
+          style={{
+            background: 'color-mix(in srgb, var(--theme-content1) 20%, transparent)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: getThemeRadius(),
+          }}
+        >
+          <div 
+            className="flex flex-col items-center gap-4 p-6"
+            style={{
+              background: `color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+              border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+              borderRadius: getThemeRadius(),
+              backdropFilter: 'blur(16px)',
+            }}
+          >
             <Spinner size="lg" color="primary" />
-            <span className="text-sm text-foreground">Loading employees...</span>
+            <span 
+              className="text-sm"
+              style={{ color: 'var(--theme-foreground)' }}
+            >
+              Loading employees...
+            </span>
           </div>
         </div>
       )}
@@ -712,11 +754,16 @@ const EmployeeTable = ({
           removeWrapper
           classNames={{
             base: "bg-transparent min-w-[800px]", // Set minimum width to prevent squishing on small screens
-            th: "bg-white/5 backdrop-blur-md text-default-500 border-b border-white/10 font-medium text-xs sticky top-0 z-10 whitespace-nowrap",
-            td: "border-b border-white/5 py-3 whitespace-nowrap",
+            th: "backdrop-blur-md font-medium text-xs sticky top-0 z-10 whitespace-nowrap",
+            td: "py-3 whitespace-nowrap",
             table: "border-collapse table-auto",
-            thead: "bg-white/5",
-            tr: "hover:bg-white/5"
+            thead: "",
+            tr: "hover:opacity-80 transition-all duration-200"
+          }}
+          style={{
+            '--table-header-bg': 'color-mix(in srgb, var(--theme-content2) 60%, transparent)',
+            '--table-row-hover': 'color-mix(in srgb, var(--theme-content2) 30%, transparent)',
+            '--table-border': 'color-mix(in srgb, var(--theme-content3) 30%, transparent)',
           }}
           isHeaderSticky
           isCompact={isMobile}
@@ -728,7 +775,12 @@ const EmployeeTable = ({
                 align={column.uid === "actions" ? "center" : column.uid === "sl" ? "center" : "start"}
                 width={column.width}
                 minWidth={column.minWidth}
-                className={column.uid === "employee" ? "whitespace-nowrap" : ""}
+                className={`backdrop-blur-md ${column.uid === "employee" ? "whitespace-nowrap" : ""}`}
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--theme-content2) 60%, transparent)',
+                  color: 'var(--theme-foreground)',
+                  borderBottom: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                }}
               >
                 {column.name}
               </TableColumn>
@@ -736,7 +788,26 @@ const EmployeeTable = ({
           </TableHeader>
           <TableBody 
             items={allUsers || []} 
-            emptyContent="No employees found"
+            emptyContent={
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <UserIcon 
+                  className="w-12 h-12 mb-4 opacity-40"
+                  style={{ color: 'var(--theme-foreground)' }}
+                />
+                <h6 
+                  className="text-lg font-semibold mb-2"
+                  style={{ color: 'var(--theme-foreground)' }}
+                >
+                  No employees found
+                </h6>
+                <p 
+                  className="text-sm opacity-70"
+                  style={{ color: 'var(--theme-foreground)' }}
+                >
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            }
             loadingContent={<Spinner />}
             isLoading={loading}
           >
@@ -747,7 +818,11 @@ const EmployeeTable = ({
               return (
                 <TableRow 
                   key={item.id}
-                  className="transition-all duration-300 hover:bg-white/5"
+                  className="transition-all duration-200 hover:scale-[1.01]"
+                  style={{
+                    color: 'var(--theme-foreground)',
+                    borderBottom: `1px solid color-mix(in srgb, var(--theme-content3) 30%, transparent)`,
+                  }}
                 >
                   {(columnKey) => (
                     <TableCell className="transition-all duration-300">

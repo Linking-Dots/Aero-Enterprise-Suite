@@ -4,17 +4,8 @@ import {
     TrashIcon as DeleteIcon,
     EllipsisVerticalIcon as MoreVertIcon
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 
-// Alpha utility function for creating transparent colors
-const alpha = (color, opacity) => {
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 import { usePage } from "@inertiajs/react";
 import { toast } from "react-toastify";
 import {
@@ -60,7 +51,6 @@ import {
     ExclamationTriangleIcon as ExclamationTriangleSolid
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
-import GlassCard from "@/Components/GlassCard";
 import { PhoneOff } from "lucide-react";
 
 
@@ -90,7 +80,7 @@ const LeaveEmployeeTable = React.forwardRef(({
     fetchLeavesStats 
 }, ref) => {
     const { auth } = usePage().props;
-    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
+
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -104,6 +94,21 @@ const LeaveEmployeeTable = React.forwardRef(({
         () => Array.from(selectedKeys).join(", ").replaceAll("_", " "),
         [selectedKeys]
     );
+
+     // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
     const topContent = React.useMemo(() => {
         const isAllSelected = selectedKeys === "all";
@@ -125,6 +130,12 @@ const LeaveEmployeeTable = React.forwardRef(({
                                         : leaves.filter(leave => selectedKeys.has(leave.id.toString()));
                                     onBulkDelete(selectedLeavesArray);
                                 }}
+                                style={{
+                                    background: `color-mix(in srgb, var(--theme-danger) 20%, transparent)`,
+                                    border: `1px solid color-mix(in srgb, var(--theme-danger) 30%, transparent)`,
+                                    color: 'var(--theme-danger)',
+                                    borderRadius: getThemeRadius(),
+                                }}
                             >
                                 Delete {selectedCount} selected
                             </Button>
@@ -132,7 +143,10 @@ const LeaveEmployeeTable = React.forwardRef(({
                     </div>
                 </div>
                 {hasSelection && (
-                    <span className="text-default-400 text-small">
+                    <span 
+                        className="text-small opacity-70"
+                        style={{ color: 'var(--theme-foreground)' }}
+                    >
                         {selectedCount} of {leaves.length} selected
                     </span>
                 )}
@@ -152,28 +166,22 @@ const LeaveEmployeeTable = React.forwardRef(({
         'New': {
             color: 'primary',
             icon: ExclamationTriangleSolid,
-            bgColor: alpha(theme.colors.primary, 0.1),
-            textColor: theme.colors.primary
         },
         'Pending': {
             color: 'warning',
             icon: ClockSolid,
-            bgColor: alpha('#f59e0b', 0.1), // warning color
-            textColor: '#f59e0b'
         },
         'Approved': {
             color: 'success',
             icon: CheckCircleSolid,
-            bgColor: alpha('#10b981', 0.1), // success color
-            textColor: '#10b981'
         },
         'Declined': {
             color: 'danger',
             icon: XCircleSolid,
-            bgColor: alpha('#ef4444', 0.1), // danger color
-            textColor: '#ef4444'
         }
     };
+
+    
 
     const getLeaveTypeIcon = (type) => {
         switch (type?.toLowerCase()) {
@@ -256,15 +264,52 @@ const LeaveEmployeeTable = React.forwardRef(({
         const config = statusConfig[status] || statusConfig['New'];
         const StatusIcon = config.icon;
 
+        // Map status to theme colors
+        const getStatusColors = (status) => {
+            switch (status.toLowerCase()) {
+                case 'approved':
+                    return {
+                        bg: 'color-mix(in srgb, var(--theme-success) 20%, transparent)',
+                        border: 'color-mix(in srgb, var(--theme-success) 40%, transparent)',
+                        color: 'var(--theme-success)'
+                    };
+                case 'rejected':
+                    return {
+                        bg: 'color-mix(in srgb, var(--theme-danger) 20%, transparent)',
+                        border: 'color-mix(in srgb, var(--theme-danger) 40%, transparent)',
+                        color: 'var(--theme-danger)'
+                    };
+                case 'pending':
+                    return {
+                        bg: 'color-mix(in srgb, var(--theme-warning) 20%, transparent)',
+                        border: 'color-mix(in srgb, var(--theme-warning) 40%, transparent)',
+                        color: 'var(--theme-warning)'
+                    };
+                default:
+                    return {
+                        bg: 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                        border: 'color-mix(in srgb, var(--theme-primary) 40%, transparent)',
+                        color: 'var(--theme-primary)'
+                    };
+            }
+        };
+
+        const colors = getStatusColors(status);
+
         return (
             <Chip
                 size="sm"
                 variant="flat"
-                color={config.color}
                 startContent={<StatusIcon className="w-3 h-3" />}
                 classNames={{
                     base: "h-6",
                     content: "text-xs font-medium"
+                }}
+                style={{
+                    background: colors.bg,
+                    border: `1px solid ${colors.border}`,
+                    color: colors.color,
+                    borderRadius: getThemeRadius(),
                 }}
             >
                 {status}
@@ -300,7 +345,15 @@ const LeaveEmployeeTable = React.forwardRef(({
 
 
         return (
-            <GlassCard className="mb-2" shadow="sm">
+            <Card 
+                className="mb-2"
+                style={{
+                    background: `color-mix(in srgb, var(--theme-content1) 85%, transparent)`,
+                    backdropFilter: 'blur(16px)',
+                    border: `1px solid color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+                    borderRadius: getThemeRadius(),
+                }}
+            >
                 <CardBody className="p-3">
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1">
@@ -393,19 +446,40 @@ const LeaveEmployeeTable = React.forwardRef(({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <CalendarDaysIcon className="w-4 h-4 text-default-500" />
-                            <span className="text-sm text-default-500">
+                            <CalendarDaysIcon 
+                                className="w-4 h-4 opacity-60"
+                                style={{ color: 'var(--theme-foreground)' }}
+                            />
+                            <span 
+                                className="text-sm opacity-80"
+                                style={{ color: 'var(--theme-foreground)' }}
+                            >
                                 {formatDate(leave.from_date)} - {formatDate(leave.to_date)}
                             </span>
-                            <Chip size="sm" variant="bordered" color="default">
+                            <Chip 
+                                size="sm" 
+                                variant="bordered"
+                                style={{
+                                    background: 'color-mix(in srgb, var(--theme-content2) 50%, transparent)',
+                                    border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                                    color: 'var(--theme-foreground)',
+                                    borderRadius: getThemeRadius(),
+                                }}
+                            >
                                 {duration}
                             </Chip>
                         </div>
 
                         {leave.reason && (
                             <div className="flex items-start gap-2">
-                                <ClockIconOutline className="w-4 h-4 text-default-500 mt-0.5" />
-                                <span className="text-sm text-default-500 flex-1">
+                                <ClockIconOutline 
+                                    className="w-4 h-4 mt-0.5 opacity-60"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                />
+                                <span 
+                                    className="text-sm flex-1 opacity-80"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                >
                                     {leave.reason}
                                 </span>
                             </div>
@@ -444,7 +518,7 @@ const LeaveEmployeeTable = React.forwardRef(({
                         </>
                     )}
                 </CardBody>
-            </GlassCard>
+            </Card>
         );
     };
 
@@ -507,13 +581,22 @@ const LeaveEmployeeTable = React.forwardRef(({
                 return (
                     <TableCell>
                         <div className="flex items-center gap-1">
-                            <CalendarDaysIcon className="w-3 h-3 text-default-500" />
+                            <CalendarDaysIcon 
+                                className="w-3 h-3 opacity-60"
+                                style={{ color: 'var(--theme-foreground)' }}
+                            />
                             <div>
-                                <span className="text-sm">
+                                <span 
+                                    className="text-sm"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                >
                                     {formatDate(leave[columnKey])}
                                 </span>
                                 {columnKey === "from_date" && (
-                                    <div className="text-xs text-default-500">
+                                    <div 
+                                        className="text-xs opacity-60"
+                                        style={{ color: 'var(--theme-foreground)' }}
+                                    >
                                         {getLeaveDuration(leave.from_date, leave.to_date)}
                                     </div>
                                 )}
@@ -569,7 +652,10 @@ const LeaveEmployeeTable = React.forwardRef(({
                 return (
                     <TableCell>
                         <Tooltip content={leave.reason || "No reason provided"}>
-                            <span className="max-w-xs truncate cursor-help text-xs text-default-500">
+                            <span 
+                                className="max-w-xs truncate cursor-help text-xs opacity-70"
+                                style={{ color: 'var(--theme-foreground)' }}
+                            >
                                 {leave.reason || "No reason provided"}
                             </span>
                         </Tooltip>
@@ -626,7 +712,7 @@ const LeaveEmployeeTable = React.forwardRef(({
             default:
                 return <TableCell>{leave[columnKey]}</TableCell>;
         }
-    }, [isAdminView, canApproveLeaves, isLargeScreen, updatingLeave, theme, setCurrentLeave, openModal, handleClickOpen, updateLeaveStatus]);
+    }, [isAdminView, canApproveLeaves, isLargeScreen, updatingLeave, setCurrentLeave, openModal, handleClickOpen, updateLeaveStatus]);
 
     const columns = [
         ...(isAdminView ? [{ name: "Employee", uid: "employee", icon: UserIcon }] : []),
@@ -659,17 +745,26 @@ const LeaveEmployeeTable = React.forwardRef(({
                     ))}
                 </ScrollShadow>
                 {totalRows > perPage && (
-                    <div className="flex justify-center pt-4">
+                    <div 
+                        className="flex justify-center items-center"
+                    >
                         <Pagination
+                            initialPage={1}
+                            isCompact
                             showControls
                             showShadow
                             color="primary"
                             variant="bordered"
                             page={currentPage}
+                            radius={getThemeRadius()}
                             total={lastPage}
                             onChange={handlePageChange}
-                            size="sm"
+                            
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         />
+                        
                     </div>
                 )}
             </div>
@@ -677,11 +772,14 @@ const LeaveEmployeeTable = React.forwardRef(({
     }
 
     return (
-        <div className="max-h-[84vh] overflow-y-auto">
+        <div 
+           
+        >
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
-                    selectionMode="multiple"
+                    setSelection
+                    selectionMode={isAdminView? "multiple" : "none"}
                     selectedKeys={selectedKeys}
                     onSelectionChange={setSelectedKeys}
                     topContent={topContent}
@@ -691,14 +789,18 @@ const LeaveEmployeeTable = React.forwardRef(({
                     removeWrapper
                     aria-label="Leave Management Table"
                     disabledBehavior="selection"
+                    radius={getThemeRadius()}
                     classNames={{
-                        wrapper: "min-h-[200px]",
-                        table: "min-h-[300px]",
-                        thead: "[&>tr]:first:shadow-small bg-default-100/80",
-                        tbody: "divide-y divide-default-200/50",
-                        tr: "group hover:bg-default-50/50 transition-colors h-12",
-                        td: "py-2 px-3 text-sm",
-                        th: "py-2 px-3 text-xs font-semibold"
+                        base: "max-h-[520px] overflow-auto",
+                        table: "min-h-[200px] w-full",
+                        thead: "z-10",
+                        tbody: "overflow-y-auto",
+                        th: "bg-default-100 text-default-700 font-semibold",
+                        td: "text-default-600",
+                    }}
+                    style={{
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
                     }}
                 >
                     <TableHeader columns={columns}>
@@ -706,7 +808,12 @@ const LeaveEmployeeTable = React.forwardRef(({
                             <TableColumn 
                                 key={column.uid} 
                                 align={column.uid === "actions" ? "center" : "start"}
-                                className="bg-default-100/80 backdrop-blur-md"
+                                className="backdrop-blur-md"
+                                style={{
+                                    backgroundColor: 'color-mix(in srgb, var(--theme-content2) 60%, transparent)',
+                                    color: 'var(--theme-foreground)',
+                                    borderBottom: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                                }}
                             >
                                 <div className="flex items-center gap-1">
                                     {column.icon && <column.icon className="w-3 h-3" />}
@@ -719,11 +826,20 @@ const LeaveEmployeeTable = React.forwardRef(({
                         items={leaves}
                         emptyContent={
                             <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <CalendarDaysIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <h6 className="text-lg font-semibold text-default-500">
+                                <CalendarDaysIcon 
+                                    className="w-12 h-12 mb-4 opacity-40"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                />
+                                <h6 
+                                    className="text-lg font-semibold mb-2"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                >
                                     No leaves found
                                 </h6>
-                                <p className="text-sm text-default-500">
+                                <p 
+                                    className="text-sm opacity-70"
+                                    style={{ color: 'var(--theme-foreground)' }}
+                                >
                                     {employee ? `No leaves found for "${employee}"` : "No leave requests for the selected period"}
                                 </p>
                             </div>
@@ -731,7 +847,12 @@ const LeaveEmployeeTable = React.forwardRef(({
                     >
                         {(leave) => (
                             <TableRow 
-                                key={leave.id} 
+                                key={leave.id}
+                                className="transition-all duration-200 hover:scale-[1.01]"
+                                style={{
+                                    color: 'var(--theme-foreground)',
+                                    borderBottom: `1px solid color-mix(in srgb, var(--theme-content3) 30%, transparent)`,
+                                }}
                             >
                                 {(columnKey) => renderCell(leave, columnKey)}
                             </TableRow>
@@ -740,18 +861,29 @@ const LeaveEmployeeTable = React.forwardRef(({
                 </Table>
             </ScrollShadow>
             {totalRows > perPage && (
-                <div className="py-4 flex justify-center">
+                <div 
+                    className="flex justify-center items-center"
+                >
                     <Pagination
+                        initialPage={1}
+                        isCompact
                         showControls
                         showShadow
                         color="primary"
                         variant="bordered"
                         page={currentPage}
+                        radius={getThemeRadius()}
                         total={lastPage}
                         onChange={handlePageChange}
-                        size={isMediumScreen ? "sm" : "md"}
+                        
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     />
-                    <div className="ml-4 text-xs text-gray-500">
+                    <div 
+                        className="text-xs opacity-70"
+                        style={{ color: 'var(--theme-foreground)' }}
+                    >
                         Page {currentPage} of {lastPage} (Total: {totalRows} records)
                     </div>
                 </div>

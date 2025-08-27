@@ -16,10 +16,8 @@ import {
 import { useTheme } from '@/Contexts/ThemeContext';
 import { RefreshCcw, Download, FileText } from 'lucide-react';
 import App from "@/Layouts/App.jsx";
-import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import TimeSheetTable from "@/Tables/TimeSheetTable.jsx";
-import GlassCard from '@/Components/GlassCard.jsx';
 import { 
   ClockIcon, 
   CalendarDaysIcon,
@@ -37,22 +35,40 @@ import {
 const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, absentDays, lateArrivals }) => {
     const { auth } = usePage().props;
     const { isDark } = useTheme();
-    const primaryColor = getThemePrimaryColor();
     
-    // Custom media query logic
+    // Custom media query logic - matching TimeSheetTable
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
+    const [isLargeScreen, setIsLargeScreen] = useState(false);
+    const [isMediumScreen, setIsMediumScreen] = useState(false);
     
     useEffect(() => {
         const checkScreenSize = () => {
             setIsMobile(window.innerWidth < 640);
             setIsTablet(window.innerWidth < 768);
+            setIsLargeScreen(window.innerWidth >= 1025);
+            setIsMediumScreen(window.innerWidth >= 641 && window.innerWidth <= 1024);
         };
         
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
+    
+    // Helper function to convert theme borderRadius to HeroUI radius values - matching TimeSheetTable
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
     
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
@@ -133,142 +149,251 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
             title: "Working Days",
             value: attendanceStats.totalWorkingDays,
             icon: <CalendarDaysIcon />,
-            color: "text-blue-400",
-            iconBg: "bg-blue-500/20",
+            color: "text-primary",
+            iconBg: "bg-primary/20",
             description: `Total for ${attendanceStats.month || 'this month'}`
         },
         {
             title: "Present Days",
             value: attendanceStats.presentDays,
             icon: <CheckCircleIcon />,
-            color: "text-green-400",
-            iconBg: "bg-green-500/20",
+            color: "text-success",
+            iconBg: "bg-success/20",
             description: "Days attended this month"
         },
         {
             title: "Absent Days",
             value: attendanceStats.absentDays,
             icon: <XCircleIcon />,
-            color: "text-red-400",
-            iconBg: "bg-red-500/20",
+            color: "text-danger",
+            iconBg: "bg-danger/20",
             description: "Days missed this month"
         },
         {
             title: "Late Arrivals",
             value: attendanceStats.lateArrivals,
             icon: <ExclamationTriangleIcon />,
-            color: "text-orange-400",
-            iconBg: "bg-orange-500/20",
+            color: "text-warning",
+            iconBg: "bg-warning/20",
             description: "Times late this month"
         },
         {
             title: "Attendance Rate",
             value: `${attendanceStats.attendancePercentage}%`,
             icon: <ChartBarIcon />,
-            color: "text-emerald-400",
-            iconBg: "bg-emerald-500/20",
+            color: "text-success",
+            iconBg: "bg-success/20",
             description: "Your monthly performance"
         },
         {
             title: "Avg Work Hours",
             value: `${attendanceStats.averageWorkHours}h`,
             icon: <ClockIcon />,
-            color: "text-blue-400",
-            iconBg: "bg-blue-500/20",
+            color: "text-primary",
+            iconBg: "bg-primary/20",
             description: "Daily average this month"
         },
         {
             title: "Overtime",
             value: `${attendanceStats.overtimeHours}h`,
             icon: <ClockIcon />,
-            color: "text-purple-400",
-            iconBg: "bg-purple-500/20",
+            color: "text-secondary",
+            iconBg: "bg-secondary/20",
             description: "Extra hours this month"
         },
         {
             title: "Leave Days",
             value: attendanceStats.totalLeaveDays,
             icon: <UserIcon />,
-            color: "text-amber-400",
-            iconBg: "bg-amber-500/20",
+            color: "text-warning",
+            iconBg: "bg-warning/20",
             description: "Leaves taken this month"
         }
     ];
 
     return (
-        <>            <Head title={title || "My Attendance"} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
-                    <GlassCard>
-                        <PageHeader
-                            title="My Attendance"
-                            subtitle="View your attendance records and timesheet details"
-                            icon={<PresentationChartLineIcon className="w-8 h-8" />}
-                            variant="default"
-                            
+        <>
+            <Head title={title || "My Attendance"} />
+            <div 
+                className="flex flex-col w-full h-full p-4"
+                role="main"
+                aria-label="My Attendance Management"
+            >
+                <div className="space-y-4">
+                    <div className="w-full">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5 }}
                         >
-                            <div className="p-6">
-                                {/* All Stats - Responsive Layout for 8 cards */}
-                                <StatsCards stats={allStatsData} className="mb-6" />
-                                
-                                {/* Filters Section - Matching AttendanceAdmin */}
-                                <div className="mb-6">
-                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-                                        <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                            <Input
-                                                label="Month/Year"
-                                                type="month"
-                                                value={filterData.currentMonth}
-                                                onChange={(e) => handleFilterChange('currentMonth', e.target.value)}
-                                                startContent={<CalendarDaysIcon className="w-4 h-4" />}
-                                                variant="bordered"
-                                                classNames={{
-                                                    inputWrapper: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                                                }}
-                                                size={isMobile ? "sm" : "md"}
-                                            />
+                            <Card 
+                                className="transition-all duration-200"
+                                style={{
+                                    border: `var(--borderWidth, 2px) solid transparent`,
+                                    borderRadius: `var(--borderRadius, 12px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    transform: `scale(var(--scale, 1))`,
+                                    background: `linear-gradient(135deg, 
+                                        var(--theme-content1, #FAFAFA) 20%, 
+                                        var(--theme-content2, #F4F4F5) 10%, 
+                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                }}
+                            >
+                                <CardHeader 
+                                    className="border-b p-0"
+                                    style={{
+                                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                                        background: `linear-gradient(135deg, 
+                                            color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                            color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                    }}
+                                >
+                                    <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
+                                        <div className="flex flex-col space-y-4">
+                                            {/* Main Header Content */}
+                                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                {/* Title Section */}
+                                                <div className="flex items-center gap-3 lg:gap-4">
+                                                    <div 
+                                                        className={`
+                                                            ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                            rounded-xl flex items-center justify-center
+                                                        `}
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                            borderWidth: `var(--borderWidth, 2px)`,
+                                                            borderRadius: `var(--borderRadius, 12px)`,
+                                                        }}
+                                                    >
+                                                        <PresentationChartLineIcon 
+                                                            className={`
+                                                                ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                                                            `}
+                                                            style={{ color: 'var(--theme-primary)' }}
+                                                        />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <h4 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                                font-bold text-foreground
+                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                        >
+                                                            My Attendance
+                                                        </h4>
+                                                        <p 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                                text-default-500
+                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                        >
+                                                            View your attendance records and timesheet details
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </CardHeader>
 
-                                {/* Attendance Table - Matching AttendanceAdminTable */}
-                                <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
-                                    <MuiCardHeader
-                                        title={
-                                            <Box className="flex items-center gap-3">
-                                                <ClockIcon className="w-6 h-6 text-primary" />
-                                                <Typography 
-                                                    variant="h5"
-                                                    component="h1"
-                                                    sx={{ 
-                                                        fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' },
-                                                        fontWeight: 600
+                                <CardBody className="p-6">
+                                    {/* All Stats - Responsive Layout for 8 cards */}
+                                    <StatsCards stats={allStatsData} className="mb-6" />
+                                    
+                                    {/* Filters Section */}
+                                    <div className="mb-6">
+                                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                                            <div className="w-full sm:w-auto sm:min-w-[200px]">
+                                                <Input
+                                                    label="Month/Year"
+                                                    type="month"
+                                                    value={filterData.currentMonth}
+                                                    onChange={(e) => handleFilterChange('currentMonth', e.target.value)}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    startContent={<CalendarDaysIcon className="w-4 h-4 text-default-400" />}
+                                                    classNames={{
+                                                        input: "text-sm",
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                    aria-label="Select month and year for attendance"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Attendance Table Section */}
+                                    <Card 
+                                        className="transition-all duration-200"
+                                        style={{
+                                            border: `var(--borderWidth, 2px) solid transparent`,
+                                            borderRadius: `var(--borderRadius, 12px)`,
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                            background: `linear-gradient(135deg, 
+                                                var(--theme-content1, #FAFAFA) 20%, 
+                                                var(--theme-content2, #F4F4F5) 10%, 
+                                                var(--theme-content3, #F1F3F4) 20%)`,
+                                        }}
+                                    >
+                                        <CardHeader 
+                                            className="border-b pb-2"
+                                            style={{
+                                                borderColor: `var(--theme-divider, #E4E4E7)`,
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div 
+                                                    className="p-2 rounded-lg flex items-center justify-center"
+                                                    style={{
+                                                        background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                        borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                    }}
+                                                >
+                                                    <ClockIcon 
+                                                        className="w-6 h-6" 
+                                                        style={{ color: 'var(--theme-primary)' }}
+                                                    />
+                                                </div>
+                                                <h1 
+                                                    className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground"
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
                                                     }}
                                                 >
                                                     My Attendance Records
-                                                </Typography>
-                                            </Box>
-                                        }
-                                        
-                                        sx={{ padding: '24px' }}
-                                    />
-                                    <Divider />
-                                    <MuiCardContent>
-                                        <Box sx={{ maxHeight: '84vh', overflowY: 'auto' }}>
-                                            <TimeSheetTable 
-                                                selectedDate={selectedDate} 
-                                                handleDateChange={handleDateChange}                                                updateTimeSheet={updateTimeSheet}
-                                                externalFilterData={filterData}
-                                                key={`${selectedDate}-${filterData.currentMonth}`}
-                                            />
-                                        </Box>
-                                    </MuiCardContent>
-                                </div>
-                            </div>
-                        </PageHeader>
-                    </GlassCard>
-                </Grow>
-            </Box>
+                                                </h1>
+                                            </div>
+                                        </CardHeader>
+                                        <CardBody>
+                                            <div className="max-h-[84vh] overflow-y-auto">
+                                                <TimeSheetTable 
+                                                    selectedDate={selectedDate} 
+                                                    handleDateChange={handleDateChange}
+                                                    updateTimeSheet={updateTimeSheet}
+                                                    externalFilterData={filterData}
+                                                    key={`${selectedDate}-${filterData.currentMonth}`}
+                                                />
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                </CardBody>
+                            </Card>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 });

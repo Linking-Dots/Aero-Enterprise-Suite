@@ -8,9 +8,11 @@ import {
   Chip,
   Button,
   Spinner,
-  Progress
+  Progress,
+  CircularProgress,
+  Tooltip
 } from "@heroui/react";
-import useTheme, { getThemePrimaryColor } from '@/theme';
+import useTheme from '@/theme';
 import {
   RefreshCw,
   Download,
@@ -39,7 +41,6 @@ import GlassCard from "@/Components/GlassCard.jsx";
  */
 const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => {
   const { isDark } = useTheme();
-  const primaryColor = getThemePrimaryColor();
   
   // Custom media query
   const [isMobile, setIsMobile] = useState(false);
@@ -180,20 +181,13 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
     return (
       <div className="relative inline-flex">
         <CircularProgress
-          variant="determinate"
           value={score}
-          size={size}
-          thickness={4}
-          sx={{ color: getColor(score) }}
+          size="lg"
+          strokeWidth={4}
+          color={score >= 90 ? 'success' : score >= 70 ? 'warning' : 'danger'}
+          showValueLabel={true}
+          className="w-24 h-24"
         />
-        <div className="absolute inset-0 flex items-center justify-center flex-col">
-          <div className="text-3xl font-bold" style={{ color: getColor(score) }}>
-            {score}
-          </div>
-          <div className="text-xs text-gray-400">
-            /100
-          </div>
-        </div>
       </div>
     );
   };
@@ -277,8 +271,8 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
     return (
       <>
         <Head title={title} />
-        <div className="min-h-screen flex items-center justify-center">
-          <CircularProgress size={60} />
+        <div className="min-h-screen flex items-center justify-center bg-[var(--theme-background,#ffffff)]">
+          <Spinner size="lg" color="primary" />
         </div>
       </>
     );
@@ -288,27 +282,31 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
     <>
       <Head title={title} />
       
-      <div className="min-h-screen p-2 sm:p-4 md:p-6">
+      <div className="min-h-screen p-2 sm:p-4 md:p-6 bg-[var(--theme-background,#ffffff)]">
         <div className="mx-auto max-w-7xl">
-          <Grow in timeout={800}>
-            <div>
-              <GlassCard>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Card className="bg-[var(--theme-surface,#ffffff)] border-[var(--theme-border,#e5e7eb)] shadow-lg">
+              <CardBody className="p-0">
                 {/* Header Section with Gradient Background */}
                 <div className="relative overflow-hidden">
-                  <div className="absolute inset-0 bg-linear-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20"></div>
-                  <div className="relative px-6 py-8">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--theme-primary,#0070f3)]/20 via-[var(--theme-secondary,#6366f1)]/20 to-[var(--theme-accent,#ec4899)]/20"></div>
+                  <div className="relative px-6 py-8 bg-[var(--theme-surface,#ffffff)]">
                     <div className="flex flex-col gap-6">
                       {/* Title and Description */}
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="p-3 bg-linear-to-br from-blue-500/20 to-purple-500/20 rounded-2xl backdrop-blur-xs border border-white/10">
-                            <ChartBarIcon className="w-8 h-8 text-blue-400" />
+                          <div className="p-3 bg-gradient-to-br from-[var(--theme-primary,#0070f3)]/20 to-[var(--theme-secondary,#6366f1)]/20 rounded-2xl backdrop-blur-sm border border-[var(--theme-border,#e5e7eb)]">
+                            <ChartBarIcon className="w-8 h-8 text-[var(--theme-primary,#0070f3)]" />
                           </div>
                           <div>
-                            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[var(--theme-primary,#0070f3)] via-[var(--theme-secondary,#6366f1)] to-[var(--theme-accent,#ec4899)] bg-clip-text text-transparent">
                               🚀 Performance Monitor
                             </h1>
-                            <p className="text-gray-400 mt-1 text-sm md:text-base">
+                            <p className="text-[var(--theme-text-secondary,#6b7280)] mt-1 text-sm md:text-base">
                               Real-time performance monitoring and optimization insights
                             </p>
                           </div>
@@ -316,30 +314,32 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                         
                         {/* Action Buttons */}
                         <div className="flex gap-2 flex-wrap">
-                          <Tooltip title="Refresh Data">
-                            <IconButton 
-                              onClick={fetchPerformanceData} 
-                              disabled={refreshing}
-                              className="text-blue-400 hover:bg-blue-500/10"
+                          <Tooltip content="Refresh Data">
+                            <Button 
+                              isIconOnly
+                              variant="light"
+                              onPress={fetchPerformanceData} 
+                              isDisabled={refreshing}
+                              className="text-[var(--theme-primary,#0070f3)] hover:bg-[var(--theme-primary,#0070f3)]/10"
                             >
                               <ArrowPathIcon className="w-5 h-5" />
-                            </IconButton>
+                            </Button>
                           </Tooltip>
                           <Button 
-                            variant="outlined" 
-                            startIcon={<TrendingUp />}
-                            onClick={handleGenerateReport}
-                            size="small"
-                            className="border-blue-400/50 text-blue-400 hover:bg-blue-500/10"
+                            variant="bordered" 
+                            startContent={<TrendingUp />}
+                            onPress={handleGenerateReport}
+                            size="sm"
+                            className="border-[var(--theme-primary,#0070f3)]/50 text-[var(--theme-primary,#0070f3)] hover:bg-[var(--theme-primary,#0070f3)]/10"
                           >
                             Generate Report
                           </Button>
                           <Button 
-                            variant="outlined" 
-                            startIcon={<DownloadIcon />}
-                            onClick={handleDownloadReport}
-                            size="small"
-                            className="border-purple-400/50 text-purple-400 hover:bg-purple-500/10"
+                            variant="bordered" 
+                            startContent={<Download />}
+                            onPress={handleDownloadReport}
+                            size="sm"
+                            className="border-[var(--theme-secondary,#6366f1)]/50 text-[var(--theme-secondary,#6366f1)] hover:bg-[var(--theme-secondary,#6366f1)]/10"
                           >
                             Export
                           </Button>
@@ -347,12 +347,16 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                       </div>
 
                       {/* Statistics Cards */}
-                      <Fade in timeout={1000}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                      >
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/15 transition-all duration-300 group">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
-                                <SpeedIcon className="w-5 h-5 text-blue-400" />
+                              <div className="p-2 bg-[var(--theme-primary,#0070f3)]/20 rounded-lg group-hover:bg-[var(--theme-primary,#0070f3)]/30 transition-colors">
+                                <Gauge className="w-5 h-5 text-[var(--theme-primary,#0070f3)]" />
                               </div>
                               <div>
                                 <div className="text-xl font-bold text-blue-400">
@@ -413,7 +417,7 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                             </div>
                           </div>
                         </div>
-                      </Fade>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
@@ -428,7 +432,11 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                   ))}
 
                   {/* Performance Overview */}
-                  <Fade in timeout={1200}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
                       <div className="lg:col-span-1">
                         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center">
@@ -453,20 +461,28 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                         </div>
                       </div>
                     </div>
-                  </Fade>
+                  </motion.div>
 
                   {/* Feature Performance */}
-                  <Fade in timeout={1400}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-6">
                       <div className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         📦 Feature Module Performance
                       </div>
                       <FeaturePerformance features={performanceData?.baseline?.features} />
                     </div>
-                  </Fade>
+                  </motion.div>
 
                   {/* Quick Actions */}
-                  <Fade in timeout={1600}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                  >
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
                       <div className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         🔧 Quick Actions
@@ -474,10 +490,10 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <Button 
                           fullWidth 
-                          variant="outlined" 
-                          startIcon={<SpeedIcon />}
-                          onClick={() => window.open('/storage/app/reports/performance-dashboard.html', '_blank')}
-                          className="border-blue-400/50 text-blue-400 hover:bg-blue-500/10"
+                          variant="bordered" 
+                          startContent={<Gauge />}
+                          onPress={() => window.open('/storage/app/reports/performance-dashboard.html', '_blank')}
+                          className="border-[var(--theme-primary,#0070f3)]/50 text-[var(--theme-primary,#0070f3)] hover:bg-[var(--theme-primary,#0070f3)]/10"
                         >
                           View Full Dashboard
                         </Button>
@@ -507,11 +523,11 @@ const PerformanceDashboardPage = ({ auth, title = "Performance Dashboard" }) => 
                         </Button>
                       </div>
                     </div>
-                  </Fade>
+                  </motion.div>
                 </div>
-              </GlassCard>
-            </div>
-          </Grow>
+              </CardBody>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </>

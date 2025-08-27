@@ -330,9 +330,9 @@ const App = React.memo(({ children }) => {
 
   // ===== MEMOIZED COMPONENTS THAT CAN RE-RENDER =====
   const breadcrumbContent = useMemo(() => {
-    if (!staticLayoutData.currentAuth?.user) return null;
+    // Show breadcrumb for all pages, not just authenticated users
     return <Breadcrumb />;
-  }, [staticLayoutData.currentAuth?.user?.id, url]);
+  }, [url]);
 
   const bottomNavContent = useMemo(() => {
     if (!staticLayoutData.currentAuth?.user || !isMobile) return null;
