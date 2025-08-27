@@ -309,59 +309,61 @@ const PunchStatusCard = React.memo(() => {
 
     // ===== CORE FUNCTIONS =====
     const calculateRealtimeWorkTime = useCallback((currentTime) => {
-        let totalSeconds = 0;
+        setAttendanceState(prev => {
+            let totalSeconds = 0;
 
-        attendanceState.todayPunches.forEach((punch) => {
-            if (punch.punchin_time) {
-                let punchInTime;
-                
-                if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
-                    const today = new Date();
-                    const [hours, minutes, seconds] = punch.punchin_time.split(':');
-                    punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                        parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                } else {
-                    punchInTime = new Date(punch.punchin_time);
-                }
-
-                if (isNaN(punchInTime.getTime())) return;
-
-                if (punch.punchout_time) {
-                    let punchOutTime;
+            prev.todayPunches.forEach((punch) => {
+                if (punch.punchin_time) {
+                    let punchInTime;
                     
-                    if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
+                    if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
                         const today = new Date();
-                        const [hours, minutes, seconds] = punch.punchout_time.split(':');
-                        punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                        const [hours, minutes, seconds] = punch.punchin_time.split(':');
+                        punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
                             parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
                     } else {
-                        punchOutTime = new Date(punch.punchout_time);
+                        punchInTime = new Date(punch.punchin_time);
                     }
 
-                    if (isNaN(punchOutTime.getTime())) return;
+                    if (isNaN(punchInTime.getTime())) return;
 
-                    const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
-                    if (sessionSeconds > 0) totalSeconds += sessionSeconds;
-                } else {
-                    const sessionSeconds = Math.floor((currentTime - punchInTime) / 1000);
-                    if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                    if (punch.punchout_time) {
+                        let punchOutTime;
+                        
+                        if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
+                            const today = new Date();
+                            const [hours, minutes, seconds] = punch.punchout_time.split(':');
+                            punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                        } else {
+                            punchOutTime = new Date(punch.punchout_time);
+                        }
+
+                        if (isNaN(punchOutTime.getTime())) return;
+
+                        const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
+                        if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                    } else {
+                        const sessionSeconds = Math.floor((currentTime - punchInTime) / 1000);
+                        if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                    }
                 }
-            }
+            });
+
+            if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            return {
+                ...prev,
+                realtimeWorkTime: formattedTime
+            };
         });
-
-        if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        setAttendanceState(prev => ({
-            ...prev,
-            realtimeWorkTime: formattedTime
-        }));
-    }, [attendanceState.todayPunches]);
+    }, []); // Remove dependency to prevent recreation
 
     const fetchCurrentStatus = useCallback(async () => {
         try {
@@ -382,10 +384,6 @@ const PunchStatusCard = React.memo(() => {
                 })()
             }));
 
-            // Initialize real-time calculation
-            setTimeout(() => {
-                calculateRealtimeWorkTime(new Date());
-            }, 100);
         } catch (error) {
             console.error('Error fetching current status:', error);
             toast.error('Failed to fetch attendance status');
@@ -394,7 +392,7 @@ const PunchStatusCard = React.memo(() => {
                 realtimeWorkTime: '00:00:00'
             }));
         }
-    }, [calculateRealtimeWorkTime]);
+    }, []); // Remove calculateRealtimeWorkTime dependency to prevent loop
 
     const getDeviceFingerprint = useCallback(() => {
         const canvas = document.createElement('canvas');
@@ -594,13 +592,69 @@ const PunchStatusCard = React.memo(() => {
             const now = new Date();
             setSystemState(prev => ({ ...prev, currentTime: now }));
 
-            if (attendanceState.currentStatus === 'punched_in' && attendanceState.todayPunches.length > 0) {
-                calculateRealtimeWorkTime(now);
-            }
+            // Check status and calculate work time
+            setAttendanceState(prev => {
+                if (prev.currentStatus === 'punched_in' && prev.todayPunches.length > 0) {
+                    // Calculate work time directly within setState
+                    let totalSeconds = 0;
+
+                    prev.todayPunches.forEach((punch) => {
+                        if (punch.punchin_time) {
+                            let punchInTime;
+                            
+                            if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
+                                const today = new Date();
+                                const [hours, minutes, seconds] = punch.punchin_time.split(':');
+                                punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                    parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                            } else {
+                                punchInTime = new Date(punch.punchin_time);
+                            }
+
+                            if (isNaN(punchInTime.getTime())) return;
+
+                            if (punch.punchout_time) {
+                                let punchOutTime;
+                                
+                                if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
+                                    const today = new Date();
+                                    const [hours, minutes, seconds] = punch.punchout_time.split(':');
+                                    punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                        parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                                } else {
+                                    punchOutTime = new Date(punch.punchout_time);
+                                }
+
+                                if (isNaN(punchOutTime.getTime())) return;
+
+                                const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
+                                if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                            } else {
+                                const sessionSeconds = Math.floor((now - punchInTime) / 1000);
+                                if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                            }
+                        }
+                    });
+
+                    if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    return {
+                        ...prev,
+                        realtimeWorkTime: formattedTime
+                    };
+                }
+                return prev;
+            });
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [attendanceState.currentStatus, attendanceState.todayPunches, calculateRealtimeWorkTime]);
+    }, []); // Remove all dependencies to prevent recreation
 
     useEffect(() => {
         fetchCurrentStatus();
@@ -637,7 +691,7 @@ const PunchStatusCard = React.memo(() => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [fetchCurrentStatus, checkLocationConnectionStatus]);
+    }, []); // Remove dependencies to prevent infinite loop
 
     // ===== RENDER =====
     return (
