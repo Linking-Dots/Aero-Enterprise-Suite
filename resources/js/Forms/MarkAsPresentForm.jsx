@@ -437,57 +437,153 @@ const MarkAsPresentForm = ({
 
                                     <Divider style={{ background: `var(--theme-divider)` }} />
 
-                                    {/* Additional Information Section */}
+                                    {/* Additional Information Section with Location & Security */}
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2">
-                                            <InformationCircleIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
+                                            <MapPinIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
                                             <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
-                                                Additional Information
+                                                Location & Security Information
                                             </h3>
                                         </div>
                                         
-                                        <div className="grid grid-cols-1 gap-4">
-                                            {/* Location */}
-                                            <Input
-                                                label="Location"
-                                                value={formData.location}
-                                                onValueChange={(value) => handleFieldChange('location', value)}
-                                                isInvalid={Boolean(errors.location)}
-                                                errorMessage={errors.location}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
-                                                classNames={{
-                                                    input: "text-small",
-                                                    inputWrapper: "min-h-unit-10"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
-                                            />
-
-                                            {/* Reason */}
-                                            <Textarea
-                                                label="Reason (Optional)"
-                                                placeholder="Reason for manually marking as present..."
-                                                value={formData.reason}
-                                                onValueChange={(value) => handleFieldChange('reason', value)}
-                                                isInvalid={Boolean(errors.reason)}
-                                                errorMessage={errors.reason}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                minRows={3}
-                                                maxRows={5}
-                                                classNames={{
-                                                    input: "text-small"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
-                                            />
-                                        </div>
+                                        <Tabs 
+                                            aria-label="Attendance Information" 
+                                            color="primary"
+                                            variant="underlined"
+                                            classNames={{
+                                                tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                                                cursor: "w-full bg-primary-500",
+                                                tab: "max-w-fit px-0 h-12",
+                                                tabContent: "group-data-[selected=true]:text-primary-500"
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        >
+                                            <Tab 
+                                                key="location" 
+                                                title={
+                                                    <div className="flex items-center space-x-2">
+                                                        <MapPinIcon className="w-4 h-4"/>
+                                                        <span>Location</span>
+                                                    </div>
+                                                }
+                                            >
+                                                <div className="space-y-4 py-4">
+                                                    {/* Location Picker Map */}
+                                                    <LocationPickerMap
+                                                        onLocationChange={handleLocationChange}
+                                                        initialLocation={formData.coordinates}
+                                                    />
+                                                    
+                                                    {/* Location Text Input (Auto-filled from map) */}
+                                                    <Input
+                                                        label="Location Description"
+                                                        value={formData.location}
+                                                        onValueChange={(value) => handleFieldChange('location', value)}
+                                                        isInvalid={Boolean(errors.location)}
+                                                        errorMessage={errors.location}
+                                                        variant="bordered"
+                                                        size="sm"
+                                                        radius={getThemeRadius()}
+                                                        startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
+                                                        classNames={{
+                                                            input: "text-small",
+                                                            inputWrapper: "min-h-unit-10"
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                        }}
+                                                        description="This will be auto-filled when you select a location on the map"
+                                                    />
+                                                </div>
+                                            </Tab>
+                                            
+                                            <Tab 
+                                                key="details" 
+                                                title={
+                                                    <div className="flex items-center space-x-2">
+                                                        <InformationCircleIcon className="w-4 h-4"/>
+                                                        <span>Details</span>
+                                                    </div>
+                                                }
+                                            >
+                                                <div className="space-y-4 py-4">
+                                                    {/* Reason */}
+                                                    <Textarea
+                                                        label="Reason (Optional)"
+                                                        placeholder="Reason for manually marking as present..."
+                                                        value={formData.reason}
+                                                        onValueChange={(value) => handleFieldChange('reason', value)}
+                                                        isInvalid={Boolean(errors.reason)}
+                                                        errorMessage={errors.reason}
+                                                        variant="bordered"
+                                                        size="sm"
+                                                        radius={getThemeRadius()}
+                                                        minRows={3}
+                                                        maxRows={5}
+                                                        classNames={{
+                                                            input: "text-small"
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                        }}
+                                                    />
+                                                </div>
+                                            </Tab>
+                                            
+                                            <Tab 
+                                                key="security" 
+                                                title={
+                                                    <div className="flex items-center space-x-2">
+                                                        <ShieldCheckIcon className="w-4 h-4"/>
+                                                        <span>Security</span>
+                                                    </div>
+                                                }
+                                            >
+                                                <div className="space-y-4 py-4">
+                                                    <Card style={{
+                                                        background: `color-mix(in srgb, var(--theme-content2) 60%, transparent)`,
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                    }}>
+                                                        <CardBody className="p-4">
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <ShieldCheckIcon className="w-5 h-5" style={{ color: 'var(--theme-success)' }} />
+                                                                    <span className="text-sm font-medium" style={{ color: 'var(--theme-foreground)' }}>
+                                                                        Security Information
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" style={{ color: 'var(--theme-foreground-600)' }}>
+                                                                    <div>
+                                                                        <strong>IP Address:</strong><br />
+                                                                        {formData.ip || 'Detecting...'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong>Browser:</strong><br />
+                                                                        {navigator.userAgent.split(' ')[0] || 'Unknown'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong>Platform:</strong><br />
+                                                                        {navigator.platform || 'Unknown'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong>Timezone:</strong><br />
+                                                                        {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="text-xs" style={{ color: 'var(--theme-foreground-500)' }}>
+                                                                    <strong>Note:</strong> This attendance entry will include security verification data 
+                                                                    to ensure consistency with regular punch entries.
+                                                                </div>
+                                                            </div>
+                                                        </CardBody>
+                                                    </Card>
+                                                </div>
+                                            </Tab>
+                                        </Tabs>
                                     </div>
 
                                     {/* Preview Section */}
