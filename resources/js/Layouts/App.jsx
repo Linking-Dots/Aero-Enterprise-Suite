@@ -386,6 +386,7 @@ const App = React.memo(({ children }) => {
             pauseOnFocusLoss
             draggable
             pauseOnHover
+            
             theme="colored"
           />
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePage } from '@inertiajs/react';
 import {
     Button,
     Input,
@@ -31,6 +32,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import LocationPickerMap from '@/Components/LocationPickerMap';
 
+
 const MarkAsPresentForm = ({ 
     open, 
     closeModal, 
@@ -39,6 +41,9 @@ const MarkAsPresentForm = ({
     refreshTimeSheet,
     currentUser = null
 }) => {
+    // Get auth user from Inertia page props
+    const { props: { auth } } = usePage();
+    
     // Helper function to convert theme borderRadius to HeroUI radius values
     const getThemeRadius = () => {
         if (typeof window === 'undefined') return 'lg';
@@ -62,83 +67,35 @@ const MarkAsPresentForm = ({
         punch_out_time: '',
         reason: '',
         location: 'Office - Manually marked present by admin',
-        // New fields for punch alignment
-        coordinates: null,
-        ip: 'Unknown',
-        device_fingerprint: null,
-        user_agent: navigator.userAgent
+        coordinates: null
     });
     
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    // Get device fingerprint for security (same as PunchStatusCard)
-    const getDeviceFingerprint = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('Device fingerprint', 2, 2);
-
-        return {
-            userAgent: navigator.userAgent,
-            screen: `${screen.width}x${screen.height}`,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            language: navigator.language,
-            canvasFingerprint: canvas.toDataURL(),
-            timestamp: Date.now()
-        };
-    };
-
-    // Get IP address
-    const getClientIp = async () => {
-        try {
-            const response = await axios.get(route('getClientIp'));
-            return response.data.ip;
-        } catch (error) {
-            console.warn('Could not fetch IP address:', error);
-            return 'Unknown';
-        }
-    };
-
     // Initialize form data
     useEffect(() => {
-        const initializeForm = async () => {
-            // Get IP address and device fingerprint
-            const ip = await getClientIp();
-            const deviceFingerprint = getDeviceFingerprint();
-
-            if (currentUser) {
-                setFormData(prev => ({
-                    ...prev,
-                    user_id: currentUser.id,
-                    date: selectedDate,
-                    ip,
-                    device_fingerprint: JSON.stringify(deviceFingerprint)
-                }));
-            } else {
-                setFormData(prev => ({
-                    ...prev,
-                    user_id: '',
-                    date: selectedDate,
-                    punch_in_time: '09:00',
-                    punch_out_time: '',
-                    reason: '',
-                    location: 'Office - Manually marked present by admin',
-                    ip,
-                    device_fingerprint: JSON.stringify(deviceFingerprint)
-                }));
-            }
-        };
-
-        if (open) {
-            initializeForm();
+        if (currentUser) {
+            setFormData(prev => ({
+                ...prev,
+                user_id: currentUser.id,
+                date: selectedDate
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                user_id: '',
+                date: selectedDate,
+                punch_in_time: '09:00',
+                punch_out_time: '',
+            }));
         }
-        setErrors({});
-    }, [currentUser, selectedDate, open]);
+    }, [currentUser, selectedDate]); // Add dependency array to prevent infinite re-renders
+            
+       
 
     // Handle location change from map
-    const handleLocationChange = (locationData) => {
+    const handleLocationChange = useCallback((locationData) => {
         setFormData(prev => ({
             ...prev,
             coordinates: locationData,
@@ -146,7 +103,7 @@ const MarkAsPresentForm = ({
                 ? `Manual: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`
                 : `GPS: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)} (±${Math.round(locationData.accuracy)}m)`
         }));
-    };
+    }, []);
 
     // Filter out employees who already have attendance
     const availableUsers = useMemo(() => {
@@ -201,24 +158,17 @@ const MarkAsPresentForm = ({
                 return;
             }
 
-            // Prepare submit data aligned with punch requirements
+            // Prepare submit data using the same format as regular punch function
             const submitData = {
                 user_id: parseInt(formData.user_id),
                 date: formData.date,
                 punch_in_time: formData.punch_in_time,
                 punch_out_time: formData.punch_out_time || null,
-                reason: formData.reason || 'Marked present by administrator',
-                location: formData.location,
-                // Additional punch data for consistency
+            
+                // Location data in the same format as punch function
                 lat: formData.coordinates.latitude,
                 lng: formData.coordinates.longitude,
-                accuracy: formData.coordinates.accuracy || 10,
-                ip: formData.ip,
-                device_fingerprint: formData.device_fingerprint,
-                user_agent: formData.user_agent,
-                timestamp: new Date().toISOString(),
-                wifi_ssid: 'Unknown', // Default for manual entries
-                manual_entry: true // Flag to indicate this is a manual entry
+                address: formData.location || `Manually marked present by ${auth.user?.name || 'Administrator'}`
             };
 
             const response = await axios.post(route('attendance.mark-as-present'), submitData);
@@ -241,7 +191,7 @@ const MarkAsPresentForm = ({
     };
 
     // Get selected user details
-    const selectedUser = availableUsers.find(user => user.id == formData.user_id);
+    const selectedUser = currentUser || availableUsers.find(user => user.id == formData.user_id);
 
     return (
         <Modal 
@@ -251,11 +201,11 @@ const MarkAsPresentForm = ({
             radius={getThemeRadius()}
             scrollBehavior="inside"
             classNames={{
-                base: "backdrop-blur-md mx-2 my-2 sm:mx-4 sm:my-8 max-h-[95vh]",
+                base: "backdrop-blur-md mx-2 my-2 sm:mx-4 sm:my-4 max-h-[90vh]",
                 backdrop: "bg-black/50 backdrop-blur-sm",
-                header: "border-b border-divider",
-                body: "overflow-y-auto",
-                footer: "border-t border-divider",
+                header: "border-b border-divider flex-shrink-0",
+                body: "overflow-y-auto max-h-[calc(90vh-8rem)]",
+                footer: "border-t border-divider flex-shrink-0",
                 closeButton: "hover:bg-white/5 active:bg-white/10"
             }}
             style={{
@@ -289,64 +239,89 @@ const MarkAsPresentForm = ({
                                 <div className="space-y-6">
                                     {/* Employee Selection Section */}
                                     <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <UserPlusIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
-                            <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
-                                Employee Selection
-                            </h3>
-                        </div>                                        <div className="grid grid-cols-1 gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <UserPlusIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
+                                            <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
+                                                Employee Selection
+                                            </h3>
+                                        </div>                                        
+                                        <div className="grid grid-cols-1 gap-4">
                                             {/* Employee Selection */}
-                                            <Select
-                                                label="Select Employee"
-                                                placeholder="Choose an employee to mark as present"
-                                                selectedKeys={formData.user_id ? new Set([formData.user_id.toString()]) : new Set()}
-                                                onSelectionChange={(keys) => {
-                                                    const value = Array.from(keys)[0];
-                                                    handleFieldChange('user_id', value || '');
-                                                }}
-                                                isInvalid={Boolean(errors.user_id)}
-                                                errorMessage={errors.user_id}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                classNames={{
-                                                    trigger: "min-h-unit-12",
-                                                    value: "text-small"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
-                                                renderValue={(items) => {
-                                                    return items.map((item) => {
-                                                        const user = availableUsers.find(u => u.id.toString() === item.key);
-                                                        return user ? (
-                                                            <div key={item.key} className="flex items-center gap-2">
-                                                                <span>{user.name}</span>
-                                                                <span className="text-xs text-default-500">({user.employee_id})</span>
-                                                            </div>
-                                                        ) : null;
-                                                    });
-                                                }}
-                                            >
-                                                {availableUsers.map((user) => (
-                                                    <SelectItem 
-                                                        key={user.id.toString()} 
-                                                        value={user.id.toString()}
-                                                        textValue={`${user.name} (${user.employee_id})`}
-                                                    >
-                                                        <User
-                                                            avatarProps={{
-                                                                size: "sm",
-                                                                src: user.profile_image_url,
-                                                                showFallback: true,
-                                                                name: user.name,
-                                                            }}
-                                                            description={`ID: ${user.employee_id}`}
-                                                            name={user.name}
-                                                        />
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
+                                            {currentUser ? (
+                                                // Show selected user when passed as prop
+                                                <div 
+                                                    className="p-3 rounded-lg border"
+                                                    style={{
+                                                        backgroundColor: 'var(--theme-content2)',
+                                                        borderColor: 'var(--theme-divider)',
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                    }}
+                                                >
+                                                    <User
+                                                        avatarProps={{
+                                                            size: "sm",
+                                                            src: currentUser.profile_image_url,
+                                                            showFallback: true,
+                                                            name: currentUser.name,
+                                                        }}
+                                                        description={`Employee ID: ${currentUser.employee_id}`}
+                                                        name={currentUser.name}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                // Show dropdown when no user is preselected
+                                                <Select
+                                                    label="Select Employee"
+                                                    placeholder="Choose an employee to mark as present"
+                                                    selectedKeys={formData.user_id ? new Set([formData.user_id.toString()]) : new Set()}
+                                                    onSelectionChange={(keys) => {
+                                                        const value = Array.from(keys)[0];
+                                                        handleFieldChange('user_id', value || '');
+                                                    }}
+                                                    isInvalid={Boolean(errors.user_id)}
+                                                    errorMessage={errors.user_id}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        trigger: "min-h-unit-12",
+                                                        value: "text-small"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                    renderValue={(items) => {
+                                                        return items.map((item) => {
+                                                            const user = availableUsers.find(u => u.id.toString() === item.key);
+                                                            return user ? (
+                                                                <div key={item.key} className="flex items-center gap-2">
+                                                                    <span>{user.name}</span>
+                                                                    <span className="text-xs text-default-500">({user.employee_id})</span>
+                                                                </div>
+                                                            ) : null;
+                                                        });
+                                                    }}
+                                                >
+                                                    {availableUsers.map((user) => (
+                                                        <SelectItem 
+                                                            key={user.id.toString()} 
+                                                            value={user.id.toString()}
+                                                            textValue={`${user.name} (${user.employee_id})`}
+                                                        >
+                                                            <User
+                                                                avatarProps={{
+                                                                    size: "sm",
+                                                                    src: user.profile_image_url,
+                                                                    showFallback: true,
+                                                                    name: user.name,
+                                                                }}
+                                                                description={`ID: ${user.employee_id}`}
+                                                                name={user.name}
+                                                            />
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+                                            )}
 
                                             {/* Date Display */}
                                             <Input
@@ -445,145 +420,14 @@ const MarkAsPresentForm = ({
                                                 Location & Security Information
                                             </h3>
                                         </div>
-                                        
-                                        <Tabs 
-                                            aria-label="Attendance Information" 
-                                            color="primary"
-                                            variant="underlined"
-                                            classNames={{
-                                                tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                                cursor: "w-full bg-primary-500",
-                                                tab: "max-w-fit px-0 h-12",
-                                                tabContent: "group-data-[selected=true]:text-primary-500"
-                                            }}
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
-                                        >
-                                            <Tab 
-                                                key="location" 
-                                                title={
-                                                    <div className="flex items-center space-x-2">
-                                                        <MapPinIcon className="w-4 h-4"/>
-                                                        <span>Location</span>
-                                                    </div>
-                                                }
-                                            >
-                                                <div className="space-y-4 py-4">
-                                                    {/* Location Picker Map */}
-                                                    <LocationPickerMap
-                                                        onLocationChange={handleLocationChange}
-                                                        initialLocation={formData.coordinates}
-                                                    />
-                                                    
-                                                    {/* Location Text Input (Auto-filled from map) */}
-                                                    <Input
-                                                        label="Location Description"
-                                                        value={formData.location}
-                                                        onValueChange={(value) => handleFieldChange('location', value)}
-                                                        isInvalid={Boolean(errors.location)}
-                                                        errorMessage={errors.location}
-                                                        variant="bordered"
-                                                        size="sm"
-                                                        radius={getThemeRadius()}
-                                                        startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
-                                                        classNames={{
-                                                            input: "text-small",
-                                                            inputWrapper: "min-h-unit-10"
-                                                        }}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                        description="This will be auto-filled when you select a location on the map"
-                                                    />
-                                                </div>
-                                            </Tab>
-                                            
-                                            <Tab 
-                                                key="details" 
-                                                title={
-                                                    <div className="flex items-center space-x-2">
-                                                        <InformationCircleIcon className="w-4 h-4"/>
-                                                        <span>Details</span>
-                                                    </div>
-                                                }
-                                            >
-                                                <div className="space-y-4 py-4">
-                                                    {/* Reason */}
-                                                    <Textarea
-                                                        label="Reason (Optional)"
-                                                        placeholder="Reason for manually marking as present..."
-                                                        value={formData.reason}
-                                                        onValueChange={(value) => handleFieldChange('reason', value)}
-                                                        isInvalid={Boolean(errors.reason)}
-                                                        errorMessage={errors.reason}
-                                                        variant="bordered"
-                                                        size="sm"
-                                                        radius={getThemeRadius()}
-                                                        minRows={3}
-                                                        maxRows={5}
-                                                        classNames={{
-                                                            input: "text-small"
-                                                        }}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                    />
-                                                </div>
-                                            </Tab>
-                                            
-                                            <Tab 
-                                                key="security" 
-                                                title={
-                                                    <div className="flex items-center space-x-2">
-                                                        <ShieldCheckIcon className="w-4 h-4"/>
-                                                        <span>Security</span>
-                                                    </div>
-                                                }
-                                            >
-                                                <div className="space-y-4 py-4">
-                                                    <Card style={{
-                                                        background: `color-mix(in srgb, var(--theme-content2) 60%, transparent)`,
-                                                        borderRadius: `var(--borderRadius, 8px)`,
-                                                    }}>
-                                                        <CardBody className="p-4">
-                                                            <div className="space-y-3">
-                                                                <div className="flex items-center gap-2">
-                                                                    <ShieldCheckIcon className="w-5 h-5" style={{ color: 'var(--theme-success)' }} />
-                                                                    <span className="text-sm font-medium" style={{ color: 'var(--theme-foreground)' }}>
-                                                                        Security Information
-                                                                    </span>
-                                                                </div>
-                                                                
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" style={{ color: 'var(--theme-foreground-600)' }}>
-                                                                    <div>
-                                                                        <strong>IP Address:</strong><br />
-                                                                        {formData.ip || 'Detecting...'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <strong>Browser:</strong><br />
-                                                                        {navigator.userAgent.split(' ')[0] || 'Unknown'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <strong>Platform:</strong><br />
-                                                                        {navigator.platform || 'Unknown'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <strong>Timezone:</strong><br />
-                                                                        {Intl.DateTimeFormat().resolvedOptions().timeZone}
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <div className="text-xs" style={{ color: 'var(--theme-foreground-500)' }}>
-                                                                    <strong>Note:</strong> This attendance entry will include security verification data 
-                                                                    to ensure consistency with regular punch entries.
-                                                                </div>
-                                                            </div>
-                                                        </CardBody>
-                                                    </Card>
-                                                </div>
-                                            </Tab>
-                                        </Tabs>
+
+                                        {/* Location Picker Map */}
+                                        <div className="space-y-4 py-4">
+                                            <LocationPickerMap
+                                                onLocationChange={handleLocationChange}
+                                                initialLocation={formData.coordinates}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Preview Section */}

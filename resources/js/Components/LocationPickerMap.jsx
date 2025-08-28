@@ -152,7 +152,7 @@ const LocationPickerMap = ({
                     accuracy: null
                 });
             });
-    }, [initialLocation, getCurrentLocation, onLocationChange]);
+    }, [initialLocation]); // Remove onLocationChange and getCurrentLocation from dependencies
 
     // Handle location selection from map click
     const handleLocationSelect = useCallback((coords) => {
@@ -163,7 +163,7 @@ const LocationPickerMap = ({
             accuracy: coords.accuracy || 10
         }));
         onLocationChange?.(coords);
-    }, [onLocationChange]);
+    }, []); // Remove onLocationChange from dependencies to prevent infinite loops
 
     // Handle manual coordinate input
     const handleManualCoordSubmit = useCallback(() => {
@@ -211,7 +211,7 @@ const LocationPickerMap = ({
                     error: error.message
                 }));
             });
-    }, [getCurrentLocation, onLocationChange]);
+    }, [getCurrentLocation]); // Remove onLocationChange from dependencies
 
     return (
         <div className={`space-y-4 ${className}`} style={style}>

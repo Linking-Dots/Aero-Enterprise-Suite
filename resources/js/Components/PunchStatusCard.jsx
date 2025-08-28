@@ -583,7 +583,7 @@ const PunchStatusCard = React.memo(() => {
         } catch (error) {
             console.error('Punch operation failed:', error);
             
-            const errorMessage = error.message || 'Unable to record attendance. Please try again.';
+            const errorMessage = error.response.data.message || 'Unable to record attendance. Please try again.';
             
             toast.error(errorMessage, {
                 style: {
