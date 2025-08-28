@@ -7,9 +7,7 @@ import {
     Chip
 } from '@heroui/react';
 import { 
-    MagnifyingGlassIcon,
-    BuildingOfficeIcon,
-    UserIcon
+    MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
@@ -35,6 +33,21 @@ const DepartmentEmployeeSelector = ({
     className = '',
     theme
 }) => {
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [departmentSearchTerm, setDepartmentSearchTerm] = useState('');
     const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
     const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -94,18 +107,16 @@ const DepartmentEmployeeSelector = ({
             {/* Department Selector */}
             <div>
                 <Select
-                    label={
-                        <div className="flex items-center gap-2">
-                            <BuildingOfficeIcon className="w-4 h-4" />
-                            {label.department}
-                        </div>
-                    }
-                    selectedKeys={selectedDepartmentId ? [String(selectedDepartmentId)] : []}
+                    label={label.department}
+                    placeholder="Select Department"
+                    selectionMode="single"
+                    selectedKeys={selectedDepartmentId != null ? new Set([String(selectedDepartmentId)]) : new Set()}
                     onSelectionChange={(keys) => {
                         const deptId = Array.from(keys)[0];
-                        onDepartmentChange(deptId === '' ? '' : parseInt(deptId));
+                        const parsedId = deptId === '' || deptId === undefined || deptId === null ? null : parseInt(deptId);
+                        onDepartmentChange(parsedId);
                         if (selectedEmployeeId) {
-                            onEmployeeChange('');
+                            onEmployeeChange(null);
                         }
                         setDepartmentSearchTerm('');
                         setEmployeeSearchTerm('');
@@ -114,24 +125,31 @@ const DepartmentEmployeeSelector = ({
                     isRequired={required}
                     isInvalid={Boolean(error.department_id)}
                     errorMessage={error.department_id}
-                    variant={variant}
+                    variant="bordered"
+                    size={size === 'medium' ? 'sm' : size}
+                    radius={getThemeRadius()}
+                    className="w-full"
+                    classNames={{
+                        trigger: "text-sm",
+                    }}
+                    style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
                 >
                     {showAllOption && (
-                        <SelectItem key="" value="">
-                            <div className="flex items-center gap-2">
-                                <BuildingOfficeIcon className="w-4 h-4" />
-                                <span>All Departments</span>
-                            </div>
+                        <SelectItem key="" value="" textValue="All Departments">
+                            <span>All Departments</span>
                         </SelectItem>
                     )}
                     
                     {filteredDepartments.map((department) => (
-                        <SelectItem key={String(department.id)} value={String(department.id)}>
+                        <SelectItem 
+                            key={String(department.id)} 
+                            value={String(department.id)}
+                            textValue={department.name}
+                        >
                             <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-2">
-                                    <BuildingOfficeIcon className="w-4 h-4" />
-                                    <span>{department.name}</span>
-                                </div>
+                                <span>{department.name}</span>
                                 <Chip 
                                     size="sm" 
                                     variant="bordered"
@@ -148,40 +166,45 @@ const DepartmentEmployeeSelector = ({
             {/* Employee Selector */}
             <div>
                 <Select
-                    label={
-                        <div className="flex items-center gap-2">
-                            <UserIcon className="w-4 h-4" />
-                            {label.employee}
-                            {(!selectedDepartmentId && !showAllOption) && (
-                                <span className="text-xs text-gray-500">(Select department first)</span>
-                            )}
-                        </div>
-                    }
-                    selectedKeys={selectedEmployeeId ? [String(selectedEmployeeId)] : []}
+                    label={label.employee}
+                    placeholder={(!selectedDepartmentId && !showAllOption) ? "Select department first" : "Select Employee"}
+                    selectionMode="single"
+                    selectedKeys={selectedEmployeeId != null ? new Set([String(selectedEmployeeId)]) : new Set()}
                     onSelectionChange={(keys) => {
                         const empId = Array.from(keys)[0];
-                        onEmployeeChange(empId === '' ? '' : parseInt(empId));
+                        const parsedId = empId === '' || empId === undefined || empId === null ? null : parseInt(empId);
+                        onEmployeeChange(parsedId);
                         setEmployeeSearchTerm('');
                     }}
                     isDisabled={disabled || loadingEmployees || (!selectedDepartmentId && !showAllOption)}
                     isRequired={required}
                     isInvalid={Boolean(error.user_id)}
                     errorMessage={error.user_id}
-                    variant={variant}
+                    variant="bordered"
+                    size={size === 'medium' ? 'sm' : size}
+                    radius={getThemeRadius()}
+                    className="w-full"
+                    classNames={{
+                        trigger: "text-sm",
+                    }}
+                    style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
                 >
                     {showAllOption && (
-                        <SelectItem key="" value="">
-                            <div className="flex items-center gap-2">
-                                <UserIcon className="w-4 h-4" />
-                                <span>
-                                    {selectedDepartmentId ? 'All Employees in Department' : 'Select Department First'}
-                                </span>
-                            </div>
+                        <SelectItem key="" value="" textValue={selectedDepartmentId ? 'All Employees in Department' : 'Select Department First'}>
+                            <span>
+                                {selectedDepartmentId ? 'All Employees in Department' : 'Select Department First'}
+                            </span>
                         </SelectItem>
                     )}
                     
                     {filteredEmployees.map((user) => (
-                        <SelectItem key={String(user.id)} value={String(user.id)}>
+                        <SelectItem 
+                            key={String(user.id)} 
+                            value={String(user.id)}
+                            textValue={user.name}
+                        >
                             <div className="flex items-center gap-2 w-full">
                                 <Avatar
                                     src={user.profile_image_url || user.profile_image}

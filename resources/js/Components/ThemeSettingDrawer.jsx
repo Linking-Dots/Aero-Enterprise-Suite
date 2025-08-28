@@ -21,7 +21,7 @@ import {
     fontFamilies, 
     radiusOptions, 
     borderWidthOptions, 
-    scalingOptions, 
+    scalingOptions,
     opacityOptions 
 } from '../theme/index.js';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
@@ -35,8 +35,6 @@ const ThemeSettingDrawer = ({
 
     // Enhanced close handler with cleanup
     const handleClose = useCallback(() => {
-        console.log('ThemeDrawer handleClose called');
-        
         // Immediate cleanup of any custom overlays
         const overlay = document.getElementById('background-overlay');
         if (overlay) {
@@ -66,8 +64,6 @@ const ThemeSettingDrawer = ({
     const [backgroundSize, setBackgroundSize] = useState(themeSettings?.background?.size || 'cover');
     const [backgroundPosition, setBackgroundPosition] = useState(themeSettings?.background?.position || 'center');
     const [backgroundRepeat, setBackgroundRepeat] = useState(themeSettings?.background?.repeat || 'no-repeat');
-    const [backgroundOpacity, setBackgroundOpacity] = useState(themeSettings?.background?.opacity || 100);
-    const [backgroundBlur, setBackgroundBlur] = useState(themeSettings?.background?.blur || 0);
 
     // Color customization state
     const [customColors, setCustomColors] = useState({
@@ -129,8 +125,6 @@ const ThemeSettingDrawer = ({
             setBackgroundSize(themeSettings.background.size || 'cover');
             setBackgroundPosition(themeSettings.background.position || 'center');
             setBackgroundRepeat(themeSettings.background.repeat || 'no-repeat');
-            setBackgroundOpacity(themeSettings.background.opacity || 100);
-            setBackgroundBlur(themeSettings.background.blur || 0);
         }
     }, [themeSettings?.background]);
 
@@ -142,7 +136,6 @@ const ThemeSettingDrawer = ({
                 // Clean up any remaining overlays when drawer is closed
                 const overlay = document.getElementById('background-overlay');
                 if (overlay) {
-                    console.log('Removing background overlay on close');
                     overlay.remove();
                 }
                 
@@ -159,7 +152,6 @@ const ThemeSettingDrawer = ({
                 const modalBackdrops = document.querySelectorAll('[data-slot="backdrop"], .nextui-backdrop, [data-modal-backdrop]');
                 modalBackdrops.forEach(backdrop => {
                     if (backdrop && (backdrop.style.opacity === '0' || backdrop.style.display === 'none')) {
-                        console.log('Removing stuck modal backdrop');
                         backdrop.remove();
                     }
                 });
@@ -172,7 +164,6 @@ const ThemeSettingDrawer = ({
             return () => clearTimeout(timeoutId);
         } else {
             // When opening, ensure clean state
-            console.log('ThemeDrawer opening - ensuring clean backdrop state');
         }
     }, [isOpen]);
 
@@ -297,14 +288,10 @@ const ThemeSettingDrawer = ({
     };
 
     const handleBackgroundUpdate = (property, value) => {
-        console.log(`Updating background ${property}:`, value);
-        
         const newBackgroundSettings = {
             ...themeSettings.background,
             [property]: value
         };
-
-        console.log('New background settings:', newBackgroundSettings);
 
         // Update local state
         switch(property) {
@@ -326,12 +313,6 @@ const ThemeSettingDrawer = ({
             case 'repeat':
                 setBackgroundRepeat(value);
                 break;
-            case 'opacity':
-                setBackgroundOpacity(value);
-                break;
-            case 'blur':
-                setBackgroundBlur(value);
-                break;
         }
 
         // Update theme context
@@ -341,167 +322,64 @@ const ThemeSettingDrawer = ({
         });
 
         // Apply background to document body immediately (duplicate call for immediate feedback)
-        console.log('Applying background to document with settings:', newBackgroundSettings);
         applyBackgroundToDocument(newBackgroundSettings);
     };
 
     const applyBackgroundToDocument = (backgroundSettings) => {
-        console.log('applyBackgroundToDocument called with:', backgroundSettings);
+        // This function is now mainly for immediate preview in the theme drawer
+        // The actual application is handled by applyThemeToDocument in theme/index.js
         const body = document.body;
         
         // Clear any existing background styles first
-        body.style.backgroundImage = '';
-        body.style.backgroundSize = '';
-        body.style.backgroundPosition = '';
-        body.style.backgroundRepeat = '';
-        body.style.backgroundAttachment = '';
-        body.style.backgroundColor = '';
-        body.style.background = '';
-        
-        // Remove any existing overlay
-        const existingOverlay = document.getElementById('background-overlay');
-        if (existingOverlay) {
-            existingOverlay.remove();
-        }
+        body.style.setProperty('background-image', '', 'important');
+        body.style.setProperty('background-size', '', 'important');
+        body.style.setProperty('background-position', '', 'important');
+        body.style.setProperty('background-repeat', '', 'important');
+        body.style.setProperty('background-attachment', '', 'important');
+        body.style.setProperty('background-color', '', 'important');
         
         if (backgroundSettings.type === 'image' && backgroundSettings.image) {
-            console.log('Applying image background:', backgroundSettings.image.substring(0, 50) + '...');
-            
-            // Validate the image URL/data
             if (backgroundSettings.image.startsWith('data:image/') || 
                 backgroundSettings.image.startsWith('http://') || 
                 backgroundSettings.image.startsWith('https://') ||
-                backgroundSettings.image.startsWith('/')) {
+                backgroundSettings.image.startsWith('/') ||
+                backgroundSettings.image.includes('.')) {
                 
-                // Apply image background with proper CSS escaping
-                body.style.backgroundImage = `url("${backgroundSettings.image}")`;
-                body.style.backgroundSize = backgroundSettings.size || 'cover';
-                body.style.backgroundPosition = backgroundSettings.position || 'center';
-                body.style.backgroundRepeat = backgroundSettings.repeat || 'no-repeat';
-                body.style.backgroundAttachment = 'fixed';
-                
-                console.log('Applied image background styles:', {
-                    backgroundImage: 'SET',
-                    backgroundSize: body.style.backgroundSize,
-                    backgroundPosition: body.style.backgroundPosition,
-                    backgroundRepeat: body.style.backgroundRepeat
-                });
-                
-                // Apply opacity and blur through overlay
-                const opacity = (backgroundSettings.opacity || 100) / 100;
-                const blur = backgroundSettings.blur || 0;
-                
-                if (opacity < 1 || blur > 0) {
-                    const overlay = document.createElement('div');
-                    overlay.id = 'background-overlay';
-                    overlay.style.cssText = `
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        pointer-events: none;
-                        z-index: -1;
-                        backdrop-filter: ${blur > 0 ? `blur(${blur}px)` : 'none'};
-                        background-color: rgba(0, 0, 0, ${1 - opacity});
-                    `;
-                    body.appendChild(overlay);
-                }
-            } else {
-                console.error('Invalid image URL/data:', backgroundSettings.image);
+                body.style.setProperty('background-image', `url("${backgroundSettings.image}")`, 'important');
+                body.style.setProperty('background-size', backgroundSettings.size || 'cover', 'important');
+                body.style.setProperty('background-position', backgroundSettings.position || 'center', 'important');
+                body.style.setProperty('background-repeat', backgroundSettings.repeat || 'no-repeat', 'important');
+                body.style.setProperty('background-attachment', 'fixed', 'important');
             }
-            
         } else if (backgroundSettings.type === 'color' && backgroundSettings.color) {
-            console.log('Applying color background:', backgroundSettings.color);
-            // Apply solid color background
             const color = backgroundSettings.color;
-            const opacity = (backgroundSettings.opacity || 100) / 100;
-            
             if (color.startsWith('linear-gradient') || color.startsWith('radial-gradient')) {
-                // Handle gradient backgrounds
-                body.style.background = color;
-                
-                // Create overlay for gradient opacity if needed
-                if (opacity < 1) {
-                    const overlay = document.createElement('div');
-                    overlay.id = 'background-overlay';
-                    overlay.style.cssText = `
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        pointer-events: none;
-                        z-index: -1;
-                        background-color: rgba(255, 255, 255, ${1 - opacity});
-                    `;
-                    body.appendChild(overlay);
-                }
+                // Use background-image for gradients instead of shorthand background
+                body.style.setProperty('background-image', color, 'important');
             } else {
-                // Handle solid colors
-                if (opacity < 1 && color.startsWith('#')) {
-                    // Convert hex to rgba for proper opacity
-                    const hex = color.replace('#', '');
-                    const r = parseInt(hex.substr(0, 2), 16);
-                    const g = parseInt(hex.substr(2, 2), 16);
-                    const b = parseInt(hex.substr(4, 2), 16);
-                    body.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                } else {
-                    body.style.backgroundColor = color;
-                }
+                body.style.setProperty('background-color', color, 'important');
             }
         }
-        
-        console.log('Background applied successfully');
-    };
-
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            console.log('File selected:', file.name, file.type, file.size);
-            
-            // Check file size (limit to 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                console.warn('File too large:', file.size, 'bytes');
-                alert('File size is too large. Please choose a file smaller than 5MB.');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const imageUrl = e.target.result;
-                console.log('File read as data URL, length:', imageUrl.length);
-                console.log('Setting background image to:', imageUrl.substring(0, 100) + '...');
-                
-                try {
-                    // Test if we can store this in localStorage
-                    const testKey = 'test-image-storage';
-                    localStorage.setItem(testKey, imageUrl);
-                    localStorage.removeItem(testKey);
-                    console.log('localStorage test successful for image data');
-                    
-                    handleBackgroundUpdate('image', imageUrl);
-                    handleBackgroundUpdate('type', 'image');
-                } catch (error) {
-                    console.error('Failed to store image in localStorage:', error);
-                    alert('Image is too large to store. Please choose a smaller image.');
-                }
-            };
-            reader.onerror = (error) => {
-                console.error('FileReader error:', error);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-
-
-    const SectionHeader = ({ icon, title, info = false }) => (
+    };    const SectionHeader = ({ icon, title, info = false }) => (
         <div className="flex items-center gap-2 mb-3">
             {icon}
-            <span className="text-sm font-medium text-default-600">{title}</span>
+            <span 
+                className="text-sm font-medium"
+                style={{ 
+                    color: `var(--theme-foreground, #11181C)`,
+                    fontFamily: `var(--fontFamily, "Inter")`
+                }}
+            >
+                {title}
+            </span>
             {info && (
-                <svg className="w-4 h-4 text-default-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg 
+                    className="w-4 h-4" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    style={{ color: `color-mix(in srgb, var(--theme-foreground, #11181C) 60%, transparent)` }}
+                >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             )}
@@ -542,15 +420,52 @@ const ThemeSettingDrawer = ({
                 },
             }}
         >
-            <ModalContent>
-                <ModalHeader className="flex items-center justify-between px-6 py-4 border-b border-default-200">
+            <ModalContent
+                style={{
+                    background: `linear-gradient(135deg, 
+                        var(--theme-content1, #FAFAFA) 20%, 
+                        var(--theme-content2, #F4F4F5) 10%, 
+                        var(--theme-content3, #F1F3F4) 20%)`,
+                    borderRadius: `var(--borderRadius, 12px)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    transform: `scale(var(--scale, 1))`,
+                    border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                }}
+            >
+                <ModalHeader 
+                    className="flex items-center justify-between px-6 py-4 border-b"
+                    style={{
+                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                        background: `linear-gradient(135deg, 
+                            color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                            color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                        fontFamily: `var(--fontFamily, "Inter")`
+                    }}
+                >
                     <div className="flex items-center gap-3">
-                        <h2 className="text-lg font-semibold text-default-700">Theme</h2>
+                        <h2 
+                            className="text-lg font-semibold"
+                            style={{ color: `var(--theme-foreground, #11181C)` }}
+                        >
+                            Theme Settings
+                        </h2>
                         <Button
                             variant="light"
                             size="sm"
-                            className="text-default-500 hover:text-default-700"
                             onPress={resetTheme || (() => {})}
+                            style={{
+                                color: `var(--theme-foreground, #11181C)`,
+                                borderRadius: `var(--borderRadius, 8px)`,
+                                border: `var(--borderWidth, 2px) solid transparent`,
+                                fontFamily: `var(--fontFamily, "Inter")`
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`;
+                                e.target.style.borderRadius = `var(--borderRadius, 8px)`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid transparent`;
+                            }}
                             startContent={
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -564,8 +479,19 @@ const ThemeSettingDrawer = ({
                         <Button
                             isIconOnly
                             variant="light"
-                            className="text-default-500 hover:text-default-700"
                             onPress={handleModeToggle}
+                            style={{
+                                color: `var(--theme-foreground, #11181C)`,
+                                borderRadius: `var(--borderRadius, 8px)`,
+                                border: `var(--borderWidth, 2px) solid transparent`,
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`;
+                                e.target.style.borderRadius = `var(--borderRadius, 8px)`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid transparent`;
+                            }}
                         >
                             {themeSettings?.mode === 'dark' ? (
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -580,8 +506,19 @@ const ThemeSettingDrawer = ({
                         <Button
                             isIconOnly
                             variant="light"
-                            className="text-default-500 hover:text-default-700"
                             onPress={handleClose}
+                            style={{
+                                color: `var(--theme-foreground, #11181C)`,
+                                borderRadius: `var(--borderRadius, 8px)`,
+                                border: `var(--borderWidth, 2px) solid transparent`,
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid color-mix(in srgb, var(--theme-danger, #F31260) 50%, transparent)`;
+                                e.target.style.borderRadius = `var(--borderRadius, 8px)`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.border = `var(--borderWidth, 2px) solid transparent`;
+                            }}
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -590,20 +527,33 @@ const ThemeSettingDrawer = ({
                     </div>
                 </ModalHeader>
 
-                <ModalBody>
+                <ModalBody
+                    style={{
+                        background: `transparent`,
+                        fontFamily: `var(--fontFamily, "Inter")`
+                    }}
+                >
                     <Tabs 
                         aria-label="Theme Settings" 
                         className="w-full"
                         variant="underlined"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`
+                        }}
                     >
                         {/* Themes Tab */}
                         <Tab key="themes" title="Themes">
-                            <div className="p-6 space-y-6">
+                            <div 
+                                className="p-6 space-y-6"
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`
+                                }}
+                            >
                                 {/* Prebuilt Themes Section */}
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                                             </svg>
                                         } 
@@ -616,7 +566,10 @@ const ThemeSettingDrawer = ({
                                         onSelectionChange={(keys) => handlePrebuiltThemeSelect(Array.from(keys)[0])}
                                         classNames={{
                                             base: "mb-4",
-                                            trigger: "bg-default-100 border border-default-200 hover:bg-default-200 transition-colors"
+                                            trigger: "border"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`
                                         }}
                                     >
                                         {themeOptions.map((themeOption) => (
@@ -631,7 +584,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                                             </svg>
                                         } 
@@ -644,10 +597,22 @@ const ThemeSettingDrawer = ({
                                                 type="color"
                                                 value={customColors.primary}
                                                 onChange={(e) => handleNativeColorChange('primary', e.target.value)}
-                                                className="w-12 h-12 rounded-lg border-2 border-default-200 cursor-pointer hover:scale-105 transition-transform"
-                                                style={{ backgroundColor: customColors.primary }}
+                                                className="w-12 h-12 cursor-pointer hover:scale-105 transition-transform"
+                                                style={{ 
+                                                    backgroundColor: customColors.primary,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                    border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                                                }}
                                             />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div 
+                                                className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                                style={{
+                                                    color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                    backgroundColor: `var(--theme-foreground, #11181C)`,
+                                                    borderRadius: `var(--borderRadius, 6px)`,
+                                                    fontFamily: `var(--fontFamily, "Inter")`
+                                                }}
+                                            >
                                                 Primary Color
                                             </div>
                                         </div>
@@ -658,7 +623,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                             </svg>
                                         } 
@@ -672,10 +637,22 @@ const ThemeSettingDrawer = ({
                                                     type="color"
                                                     value={customColors[color.key] || color.value}
                                                     onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
-                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
-                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                    className="w-12 h-12 cursor-pointer hover:scale-105 transition-transform"
+                                                    style={{ 
+                                                        backgroundColor: customColors[color.key] || color.value,
+                                                        borderRadius: `var(--borderRadius, 12px)`,
+                                                        border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                                                    }}
                                                 />
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                <div 
+                                                    className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                                    style={{
+                                                        color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                        backgroundColor: `var(--theme-foreground, #11181C)`,
+                                                        borderRadius: `var(--borderRadius, 6px)`,
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
                                                     {color.name}
                                                 </div>
                                             </div>
@@ -687,7 +664,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         } 
@@ -701,10 +678,22 @@ const ThemeSettingDrawer = ({
                                                     type="color"
                                                     value={customColors[color.key] || color.value}
                                                     onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
-                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
-                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                    className="w-12 h-12 cursor-pointer hover:scale-105 transition-transform"
+                                                    style={{ 
+                                                        backgroundColor: customColors[color.key] || color.value,
+                                                        borderRadius: `var(--borderRadius, 12px)`,
+                                                        border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                                                    }}
                                                 />
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                <div 
+                                                    className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                                    style={{
+                                                        color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                        backgroundColor: `var(--theme-foreground, #11181C)`,
+                                                        borderRadius: `var(--borderRadius, 6px)`,
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
                                                     {color.name}
                                                 </div>
                                             </div>
@@ -716,7 +705,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                                             </svg>
                                         } 
@@ -730,10 +719,22 @@ const ThemeSettingDrawer = ({
                                                     type="color"
                                                     value={customColors[color.key] || color.value}
                                                     onChange={(e) => handleNativeColorChange(color.key, e.target.value)}
-                                                    className="w-12 h-12 rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-default-200"
-                                                    style={{ backgroundColor: customColors[color.key] || color.value }}
+                                                    className="w-12 h-12 cursor-pointer hover:scale-105 transition-transform"
+                                                    style={{ 
+                                                        backgroundColor: customColors[color.key] || color.value,
+                                                        borderRadius: `var(--borderRadius, 12px)`,
+                                                        border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                                                    }}
                                                 />
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                <div 
+                                                    className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                                    style={{
+                                                        color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                        backgroundColor: `var(--theme-foreground, #11181C)`,
+                                                        borderRadius: `var(--borderRadius, 6px)`,
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
                                                     {color.name}
                                                 </div>
                                             </div>
@@ -745,12 +746,17 @@ const ThemeSettingDrawer = ({
 
                         {/* Background Tab */}
                         <Tab key="background" title="Background">
-                            <div className="p-6 space-y-6">
+                            <div 
+                                className="p-6 space-y-6"
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`
+                                }}
+                            >
                                 {/* Background Type Selection */}
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                         } 
@@ -761,6 +767,11 @@ const ThemeSettingDrawer = ({
                                             variant={backgroundType === 'color' ? 'solid' : 'bordered'}
                                             color={backgroundType === 'color' ? 'primary' : 'default'}
                                             onPress={() => handleBackgroundUpdate('type', 'color')}
+                                            style={{
+                                                borderRadius: `var(--borderRadius, 8px)`,
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                border: backgroundType !== 'color' ? `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)` : undefined
+                                            }}
                                         >
                                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
@@ -771,6 +782,11 @@ const ThemeSettingDrawer = ({
                                             variant={backgroundType === 'image' ? 'solid' : 'bordered'}
                                             color={backgroundType === 'image' ? 'primary' : 'default'}
                                             onPress={() => handleBackgroundUpdate('type', 'image')}
+                                            style={{
+                                                borderRadius: `var(--borderRadius, 8px)`,
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                border: backgroundType !== 'image' ? `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)` : undefined
+                                            }}
                                         >
                                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -787,7 +803,7 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                                                     </svg>
                                                 } 
@@ -815,23 +831,48 @@ const ThemeSettingDrawer = ({
                                                         className="flex flex-col items-center gap-2"
                                                     >
                                                         <button
-                                                            className={`w-12 h-12 rounded-lg border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                            className={`w-12 h-12 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                                 (themeSettings?.background?.color || '#ffffff') === color.value 
-                                                                    ? 'border-primary ring-2 ring-primary/20' 
-                                                                    : 'border-default-200 hover:border-default-300'
+                                                                    ? 'ring-2' 
+                                                                    : 'hover:ring-2 hover:ring-opacity-50'
                                                             }`}
-                                                            style={{ backgroundColor: color.value }}
+                                                            style={{ 
+                                                                backgroundColor: color.value,
+                                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                                border: `var(--borderWidth, 2px) solid ${
+                                                                    (themeSettings?.background?.color || '#ffffff') === color.value 
+                                                                        ? 'var(--theme-primary, #006FEE)' 
+                                                                        : 'var(--theme-divider, #E4E4E7)'
+                                                                }`,
+                                                                ringColor: 'var(--theme-primary, #006FEE)'
+                                                            }}
                                                             onClick={() => handleBackgroundUpdate('color', color.value)}
                                                             title={`${color.name} - ${color.description}`}
                                                         />
-                                                        <span className="text-xs text-default-500 text-center">{color.name}</span>
+                                                        <span 
+                                                            className="text-xs text-center"
+                                                            style={{ 
+                                                                color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
+                                                            {color.name}
+                                                        </span>
                                                     </div>
                                                 ))}
                                             </div>
                                             
                                             {/* Gradient Options */}
                                             <div className="mt-6">
-                                                <h4 className="text-sm font-medium text-default-700 mb-3">Gradient Backgrounds</h4>
+                                                <h4 
+                                                    className="text-sm font-medium mb-3"
+                                                    style={{ 
+                                                        color: `var(--theme-foreground, #11181C)`,
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
+                                                >
+                                                    Gradient Backgrounds
+                                                </h4>
                                                 <div className="grid grid-cols-3 gap-3">
                                                     {[
                                                         { name: 'Blue Wave', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
@@ -843,15 +884,32 @@ const ThemeSettingDrawer = ({
                                                     ].map((gradient) => (
                                                         <button
                                                             key={gradient.name}
-                                                            className={`h-16 rounded-lg border-2 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary flex items-end p-2 ${
+                                                            className={`h-16 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary flex items-end p-2 ${
                                                                 (themeSettings?.background?.color || '#ffffff') === gradient.value 
-                                                                    ? 'border-primary ring-2 ring-primary/20' 
-                                                                    : 'border-default-200 hover:border-default-300'
+                                                                    ? 'ring-2' 
+                                                                    : 'hover:ring-2 hover:ring-opacity-50'
                                                             }`}
-                                                            style={{ background: gradient.value }}
+                                                            style={{ 
+                                                                background: gradient.value,
+                                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                                border: `var(--borderWidth, 2px) solid ${
+                                                                    (themeSettings?.background?.color || '#ffffff') === gradient.value 
+                                                                        ? 'var(--theme-primary, #006FEE)' 
+                                                                        : 'var(--theme-divider, #E4E4E7)'
+                                                                }`,
+                                                                ringColor: 'var(--theme-primary, #006FEE)'
+                                                            }}
                                                             onClick={() => handleBackgroundUpdate('color', gradient.value)}
                                                         >
-                                                            <span className="text-xs text-white font-medium bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
+                                                            <span 
+                                                                className="text-xs font-medium px-2 py-1 rounded backdrop-blur-sm"
+                                                                style={{
+                                                                    color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                                    backgroundColor: `color-mix(in srgb, var(--theme-foreground, #11181C) 20%, transparent)`,
+                                                                    borderRadius: `var(--borderRadius, 6px)`,
+                                                                    fontFamily: `var(--fontFamily, "Inter")`
+                                                                }}
+                                                            >
                                                                 {gradient.name}
                                                             </span>
                                                         </button>
@@ -864,7 +922,7 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                                                     </svg>
                                                 } 
@@ -884,7 +942,9 @@ const ThemeSettingDrawer = ({
                                                             className="w-16 h-16"
                                                             style={{ 
                                                                 padding: 0,
-                                                                border: 'none'
+                                                                border: 'none',
+                                                                borderRadius: `var(--borderRadius, 8px)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
                                                             }}
                                                         />
                                                     )}
@@ -899,7 +959,14 @@ const ThemeSettingDrawer = ({
                                                                     handleBackgroundUpdate('color', value);
                                                                 }
                                                             }}
-                                                            startContent={<span className="text-default-400">#</span>}
+                                                            startContent={
+                                                                <span style={{ color: `color-mix(in srgb, var(--theme-foreground, #11181C) 60%, transparent)` }}>
+                                                                    #
+                                                                </span>
+                                                            }
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
                                                         />
                                                     </div>
                                                 </div>
@@ -908,13 +975,38 @@ const ThemeSettingDrawer = ({
                                                 {themeSettings?.background?.color && 
                                                  (themeSettings.background.color.startsWith('linear-gradient') || 
                                                   themeSettings.background.color.startsWith('radial-gradient')) && (
-                                                    <div className="p-4 bg-default-100 rounded-lg">
-                                                        <div className="text-sm text-default-600 mb-2">Current gradient:</div>
+                                                    <div 
+                                                        className="p-4 rounded-lg"
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-content2, #F4F4F5) 50%, transparent)`,
+                                                            borderRadius: `var(--borderRadius, 12px)`,
+                                                            border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`
+                                                        }}
+                                                    >
                                                         <div 
-                                                            className="h-8 rounded border"
-                                                            style={{ background: themeSettings.background.color }}
+                                                            className="text-sm mb-2"
+                                                            style={{ 
+                                                                color: `var(--theme-foreground, #11181C)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
+                                                            Current gradient:
+                                                        </div>
+                                                        <div 
+                                                            className="h-8 border"
+                                                            style={{ 
+                                                                background: themeSettings.background.color,
+                                                                borderRadius: `var(--borderRadius, 8px)`,
+                                                                border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`
+                                                            }}
                                                         />
-                                                        <div className="text-xs text-default-500 mt-2 font-mono break-all">
+                                                        <div 
+                                                            className="text-xs mt-2 font-mono break-all"
+                                                            style={{ 
+                                                                color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
                                                             {themeSettings.background.color}
                                                         </div>
                                                     </div>
@@ -924,48 +1016,27 @@ const ThemeSettingDrawer = ({
                                                 {themeSettings?.background?.color?.startsWith('#') && (
                                                     <div className="mt-4">
                                                         <div 
-                                                            className="w-full h-20 rounded-lg border border-default-200 flex items-center justify-center"
+                                                            className="w-full h-20 flex items-center justify-center"
                                                             style={{ 
-                                                                background: themeSettings.background.color
+                                                                background: themeSettings.background.color,
+                                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                                border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
                                                             }}
                                                         >
-                                                            <span className="text-sm font-medium px-3 py-1 rounded bg-black/10 backdrop-blur-sm">
+                                                            <span 
+                                                                className="text-sm font-medium px-3 py-1 rounded backdrop-blur-sm"
+                                                                style={{
+                                                                    backgroundColor: `color-mix(in srgb, var(--theme-foreground, #11181C) 10%, transparent)`,
+                                                                    color: `var(--theme-primary-foreground, #FFFFFF)`,
+                                                                    borderRadius: `var(--borderRadius, 6px)`,
+                                                                    fontFamily: `var(--fontFamily, "Inter")`
+                                                                }}
+                                                            >
                                                                 Color Preview
                                                             </span>
                                                         </div>
                                                     </div>
                                                 )}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Opacity for Solid Colors */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                                                    </svg>
-                                                } 
-                                                title="Color Opacity" 
-                                            />
-                                            <div className="space-y-3">
-                                                <Slider
-                                                    aria-label="Color Opacity"
-                                                    size="md"
-                                                    step={5}
-                                                    minValue={0}
-                                                    maxValue={100}
-                                                    value={backgroundOpacity}
-                                                    onChange={(value) => handleBackgroundUpdate('opacity', value)}
-                                                    className="max-w-md"
-                                                    showTooltip={true}
-                                                    tooltipProps={{
-                                                        content: `${backgroundOpacity}%`
-                                                    }}
-                                                />
-                                                <div className="text-sm text-default-500">
-                                                    Current: {backgroundOpacity}%
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -978,71 +1049,54 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                                     </svg>
                                                 } 
-                                                title="Upload Image or Enter URL" 
+                                                title="Enter Image URL" 
                                             />
                                             
                                             <div className="space-y-3">
-                                                <div className="flex gap-3">
-                                                    <Input
-                                                        placeholder="Enter image URL"
-                                                        value={backgroundImage}
-                                                        onChange={(e) => handleBackgroundUpdate('image', e.target.value)}
-                                                        className="flex-1"
-                                                    />
-                                                    <Button
-                                                        variant="bordered"
-                                                        onPress={() => document.getElementById('background-file-input').click()}
-                                                    >
-                                                        Upload
-                                                    </Button>
-                                                </div>
-                                                <input
-                                                    id="background-file-input"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileUpload}
-                                                    style={{ display: 'none' }}
+                                                <Input
+                                                    placeholder="Enter image URL"
+                                                    value={backgroundImage}
+                                                    onChange={(e) => handleBackgroundUpdate('image', e.target.value)}
+                                                    className="w-full"
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`
+                                                    }}
                                                 />
                                                 
                                                 {backgroundImage && (
                                                     <div className="space-y-2">
-                                                        <div className="w-full h-32 rounded-lg border border-default-200 overflow-hidden">
+                                                        <div 
+                                                            className="w-full h-32 overflow-hidden"
+                                                            style={{
+                                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                                border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`
+                                                            }}
+                                                        >
                                                             <img 
                                                                 src={backgroundImage} 
                                                                 alt="Background preview" 
                                                                 className="w-full h-full object-cover"
-                                                                onLoad={() => console.log('Image preview loaded successfully')}
                                                                 onError={(e) => {
-                                                                    console.error('Image preview failed to load:', e);
                                                                     e.target.style.display = 'none';
                                                                 }}
                                                             />
                                                         </div>
-                                                        <div className="text-xs text-default-500 flex items-center gap-2">
-                                                            <CheckCircleIcon className="w-4 h-4 text-success" />
+                                                        <div 
+                                                            className="text-xs flex items-center gap-2"
+                                                            style={{ 
+                                                                color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
+                                                            <CheckCircleIcon 
+                                                                className="w-4 h-4"
+                                                                style={{ color: `var(--theme-success, #17C964)` }}
+                                                            />
                                                             <span>Image loaded ({backgroundImage.length} characters)</span>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="light"
-                                                                onPress={() => {
-                                                                    console.log('Current background settings:', {
-                                                                        type: backgroundType,
-                                                                        image: backgroundImage ? `${backgroundImage.substring(0, 50)}... (${backgroundImage.length} chars)` : 'No image',
-                                                                        size: backgroundSize,
-                                                                        position: backgroundPosition,
-                                                                        repeat: backgroundRepeat,
-                                                                        opacity: backgroundOpacity,
-                                                                        blur: backgroundBlur
-                                                                    });
-                                                                    console.log('ThemeSettings from context:', themeSettings);
-                                                                }}
-                                                            >
-                                                                Debug
-                                                            </Button>
                                                         </div>
                                                     </div>
                                                 )}
@@ -1053,7 +1107,7 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                                     </svg>
                                                 } 
@@ -1067,9 +1121,27 @@ const ThemeSettingDrawer = ({
                                                         color={backgroundSize === option.value ? 'primary' : 'default'}
                                                         onPress={() => handleBackgroundUpdate('size', option.value)}
                                                         className="flex flex-col gap-1 h-auto py-3"
+                                                        style={{
+                                                            borderRadius: `var(--borderRadius, 8px)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                            border: backgroundSize !== option.value ? `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)` : undefined
+                                                        }}
                                                     >
-                                                        <span className="font-medium">{option.label}</span>
-                                                        <span className="text-xs text-default-500">{option.description}</span>
+                                                        <span 
+                                                            className="font-medium"
+                                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                        >
+                                                            {option.label}
+                                                        </span>
+                                                        <span 
+                                                            className="text-xs"
+                                                            style={{ 
+                                                                color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
+                                                            {option.description}
+                                                        </span>
                                                     </Button>
                                                 ))}
                                             </div>
@@ -1079,7 +1151,7 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                                     </svg>
                                                 } 
@@ -1093,6 +1165,11 @@ const ThemeSettingDrawer = ({
                                                         color={backgroundPosition === option.value ? 'primary' : 'default'}
                                                         onPress={() => handleBackgroundUpdate('position', option.value)}
                                                         size="sm"
+                                                        style={{
+                                                            borderRadius: `var(--borderRadius, 8px)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                            border: backgroundPosition !== option.value ? `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)` : undefined
+                                                        }}
                                                     >
                                                         {option.label}
                                                     </Button>
@@ -1104,7 +1181,7 @@ const ThemeSettingDrawer = ({
                                         <div>
                                             <SectionHeader 
                                                 icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                     </svg>
                                                 } 
@@ -1118,73 +1195,15 @@ const ThemeSettingDrawer = ({
                                                         color={backgroundRepeat === option.value ? 'primary' : 'default'}
                                                         onPress={() => handleBackgroundUpdate('repeat', option.value)}
                                                         size="sm"
+                                                        style={{
+                                                            borderRadius: `var(--borderRadius, 8px)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                            border: backgroundRepeat !== option.value ? `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)` : undefined
+                                                        }}
                                                     >
                                                         {option.label}
                                                     </Button>
                                                 ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Background Opacity */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                                                    </svg>
-                                                } 
-                                                title="Background Opacity" 
-                                            />
-                                            <div className="space-y-3">
-                                                <Slider
-                                                    aria-label="Background Opacity"
-                                                    size="md"
-                                                    step={5}
-                                                    minValue={0}
-                                                    maxValue={100}
-                                                    value={backgroundOpacity}
-                                                    onChange={(value) => handleBackgroundUpdate('opacity', value)}
-                                                    className="max-w-md"
-                                                    showTooltip={true}
-                                                    tooltipProps={{
-                                                        content: `${backgroundOpacity}%`
-                                                    }}
-                                                />
-                                                <div className="text-sm text-default-500">
-                                                    Current: {backgroundOpacity}%
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Background Blur */}
-                                        <div>
-                                            <SectionHeader 
-                                                icon={
-                                                    <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                } 
-                                                title="Background Blur" 
-                                            />
-                                            <div className="space-y-3">
-                                                <Slider
-                                                    aria-label="Background Blur"
-                                                    size="md"
-                                                    step={1}
-                                                    minValue={0}
-                                                    maxValue={20}
-                                                    value={backgroundBlur}
-                                                    onChange={(value) => handleBackgroundUpdate('blur', value)}
-                                                    className="max-w-md"
-                                                    showTooltip={true}
-                                                    tooltipProps={{
-                                                        content: `${backgroundBlur}px`
-                                                    }}
-                                                />
-                                                <div className="text-sm text-default-500">
-                                                    Current: {backgroundBlur}px
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1221,8 +1240,6 @@ const ThemeSettingDrawer = ({
                                                         handleBackgroundUpdate('type', 'color');
                                                         handleBackgroundUpdate('color', '#ffffff');
                                                         handleBackgroundUpdate('image', '');
-                                                        handleBackgroundUpdate('opacity', 100);
-                                                        handleBackgroundUpdate('blur', 0);
                                                     }}
                                                 >
                                                     Reset Background
@@ -1255,16 +1272,6 @@ const ThemeSettingDrawer = ({
                                                         backgroundRepeat: backgroundType === 'image' ? (backgroundRepeat || 'no-repeat') : undefined
                                                     }}
                                                 >
-                                                    {/* Overlay for opacity and blur preview */}
-                                                    {(backgroundOpacity < 100 || backgroundBlur > 0) && (
-                                                        <div 
-                                                            className="absolute inset-0"
-                                                            style={{
-                                                                backgroundColor: `rgba(0, 0, 0, ${1 - (backgroundOpacity || 100) / 100})`,
-                                                                backdropFilter: `blur(${backgroundBlur || 0}px)`
-                                                            }}
-                                                        />
-                                                    )}
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <span className="text-sm font-medium px-3 py-1 rounded bg-black/20 text-white backdrop-blur-sm">
                                                             Preview
@@ -1279,10 +1286,6 @@ const ThemeSettingDrawer = ({
                                                     {backgroundType === 'image' && backgroundImage && (
                                                         <div>Image: <span className="font-medium">{backgroundImage.length > 50 ? backgroundImage.substring(0, 50) + '...' : backgroundImage}</span></div>
                                                     )}
-                                                    <div>Opacity: <span className="font-medium">{backgroundOpacity}%</span></div>
-                                                    {backgroundType === 'image' && backgroundBlur > 0 && (
-                                                        <div>Blur: <span className="font-medium">{backgroundBlur}px</span></div>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -1293,12 +1296,17 @@ const ThemeSettingDrawer = ({
 
                         {/* Layout Tab */}
                         <Tab key="layout" title="Layout">
-                            <div className="p-6 space-y-6">
+                            <div 
+                                className="p-6 space-y-6"
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`
+                                }}
+                            >
                                 {/* Font Family Section */}
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 20V4c0-1.1.9-2 2-2h3.5c1.8 0 3.5 1 3.5 3.5s-1.7 3.5-3.5 3.5H8v1h2.5c1.8 0 3.5 1 3.5 3.5s-1.7 3.5-3.5 3.5H8z" />
                                             </svg>
                                         } 
@@ -1309,18 +1317,45 @@ const ThemeSettingDrawer = ({
                                         {fontOptions.map((font) => (
                                             <button
                                                 key={font.name}
-                                                className={`p-4 rounded-lg border-2 transition-all hover:bg-default-50 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                className={`p-4 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                     (themeSettings?.layout?.fontFamily || 'Inter') === font.value 
-                                                        ? 'border-primary bg-primary/5' 
-                                                        : 'border-default-200 bg-white'
+                                                        ? 'ring-2' 
+                                                        : ''
                                                 }`}
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                    border: `var(--borderWidth, 2px) solid ${
+                                                        (themeSettings?.layout?.fontFamily || 'Inter') === font.value 
+                                                            ? 'var(--theme-primary, #006FEE)' 
+                                                            : 'var(--theme-divider, #E4E4E7)'
+                                                    }`,
+                                                    background: `linear-gradient(135deg, 
+                                                        var(--theme-content1, #FAFAFA) 20%, 
+                                                        var(--theme-content2, #F4F4F5) 10%, 
+                                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                                    ringColor: 'var(--theme-primary, #006FEE)'
+                                                }}
                                                 onClick={() => handleLayoutChange('fontFamily', font.value)}
                                             >
                                                 <div className="text-center">
-                                                    <div className="text-xl font-bold mb-1" style={{ fontFamily: font.value }}>
+                                                    <div 
+                                                        className="text-xl font-bold mb-1" 
+                                                        style={{ 
+                                                            fontFamily: font.value,
+                                                            color: `var(--theme-foreground, #11181C)`
+                                                        }}
+                                                    >
                                                         Ag12
                                                     </div>
-                                                    <div className="text-xs text-default-500">{font.name}</div>
+                                                    <div 
+                                                        className="text-xs"
+                                                        style={{ 
+                                                            color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`
+                                                        }}
+                                                    >
+                                                        {font.name}
+                                                    </div>
                                                 </div>
                                             </button>
                                         ))}
@@ -1331,7 +1366,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12a3 3 0 003-3m-3 3a3 3 0 003 3m-3-3H3m6 0l6-6m6 6a3 3 0 01-3 3m3-3a3 3 0 01-3-3m3 3H15" />
                                             </svg>
                                         } 
@@ -1342,19 +1377,43 @@ const ThemeSettingDrawer = ({
                                         {radiusValues.map((radius) => (
                                             <button
                                                 key={radius.name}
-                                                className={`p-4 rounded-lg border-2 transition-all hover:bg-default-50 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                className={`p-4 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                     (themeSettings?.layout?.borderRadius || '8px') === radius.value 
-                                                        ? 'border-primary bg-primary/5' 
-                                                        : 'border-default-200 bg-white'
+                                                        ? 'ring-2' 
+                                                        : ''
                                                 }`}
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                    border: `var(--borderWidth, 2px) solid ${
+                                                        (themeSettings?.layout?.borderRadius || '8px') === radius.value 
+                                                            ? 'var(--theme-primary, #006FEE)' 
+                                                            : 'var(--theme-divider, #E4E4E7)'
+                                                    }`,
+                                                    background: `linear-gradient(135deg, 
+                                                        var(--theme-content1, #FAFAFA) 20%, 
+                                                        var(--theme-content2, #F4F4F5) 10%, 
+                                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                                    ringColor: 'var(--theme-primary, #006FEE)'
+                                                }}
                                                 onClick={() => handleLayoutChange('borderRadius', radius.value)}
                                             >
                                                 <div className="text-center">
                                                     <div 
-                                                        className="w-6 h-6 bg-primary mx-auto mb-2"
-                                                        style={{ borderRadius: radius.value }}
+                                                        className="w-6 h-6 mx-auto mb-2"
+                                                        style={{ 
+                                                            backgroundColor: `var(--theme-primary, #006FEE)`,
+                                                            borderRadius: radius.value 
+                                                        }}
                                                     />
-                                                    <div className="text-xs text-default-500">{radius.label}</div>
+                                                    <div 
+                                                        className="text-xs"
+                                                        style={{ 
+                                                            color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`
+                                                        }}
+                                                    >
+                                                        {radius.label}
+                                                    </div>
                                                 </div>
                                             </button>
                                         ))}
@@ -1365,7 +1424,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12a3 3 0 003-3m-3 3a3 3 0 003 3m-3-3H3m6 0l6-6m6 6a3 3 0 01-3 3m3-3a3 3 0 01-3-3m3 3H15" />
                                             </svg>
                                         } 
@@ -1376,23 +1435,44 @@ const ThemeSettingDrawer = ({
                                         {borderWidthValues.map((borderWidth) => (
                                             <button
                                                 key={borderWidth.name}
-                                                className={`p-4 rounded-lg border-2 transition-all hover:bg-default-50 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                className={`p-4 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                     (themeSettings?.layout?.borderWidth || '2px') === borderWidth.value 
-                                                        ? 'border-primary bg-primary/5' 
-                                                        : 'border-default-200 bg-white'
+                                                        ? 'ring-2' 
+                                                        : ''
                                                 }`}
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                    border: `var(--borderWidth, 2px) solid ${
+                                                        (themeSettings?.layout?.borderWidth || '2px') === borderWidth.value 
+                                                            ? 'var(--theme-primary, #006FEE)' 
+                                                            : 'var(--theme-divider, #E4E4E7)'
+                                                    }`,
+                                                    background: `linear-gradient(135deg, 
+                                                        var(--theme-content1, #FAFAFA) 20%, 
+                                                        var(--theme-content2, #F4F4F5) 10%, 
+                                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                                    ringColor: 'var(--theme-primary, #006FEE)'
+                                                }}
                                                 onClick={() => handleLayoutChange('borderWidth', borderWidth.value)}
                                             >
                                                 <div className="text-center">
                                                     <div 
-                                                        className="w-6 h-6 bg-transparent mx-auto mb-2 border-primary rounded-md"
+                                                        className="w-6 h-6 bg-transparent mx-auto mb-2 rounded-md"
                                                         style={{ 
                                                             borderWidth: borderWidth.value, 
                                                             borderStyle: 'solid',
-                                                            borderColor: 'currentColor'
+                                                            borderColor: `var(--theme-primary, #006FEE)`
                                                         }}
                                                     />
-                                                    <div className="text-xs text-default-500">{borderWidth.label}</div>
+                                                    <div 
+                                                        className="text-xs"
+                                                        style={{ 
+                                                            color: `color-mix(in srgb, var(--theme-foreground, #11181C) 70%, transparent)`,
+                                                            fontFamily: `var(--fontFamily, "Inter")`
+                                                        }}
+                                                    >
+                                                        {borderWidth.label}
+                                                    </div>
                                                 </div>
                                             </button>
                                         ))}
@@ -1403,7 +1483,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>
                                         } 
@@ -1414,11 +1494,30 @@ const ThemeSettingDrawer = ({
                                         {scalingOptions.map((scale) => (
                                             <button
                                                 key={scale}
-                                                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all hover:bg-default-50 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                className={`px-3 py-2 text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                     (themeSettings?.layout?.scale || '100%') === scale 
-                                                        ? 'border-primary bg-primary text-white' 
-                                                        : 'border-default-200 bg-white text-default-700'
+                                                        ? 'ring-2' 
+                                                        : ''
                                                 }`}
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                    border: `var(--borderWidth, 2px) solid ${
+                                                        (themeSettings?.layout?.scale || '100%') === scale 
+                                                            ? 'var(--theme-primary, #006FEE)' 
+                                                            : 'var(--theme-divider, #E4E4E7)'
+                                                    }`,
+                                                    background: (themeSettings?.layout?.scale || '100%') === scale 
+                                                        ? `var(--theme-primary, #006FEE)` 
+                                                        : `linear-gradient(135deg, 
+                                                            var(--theme-content1, #FAFAFA) 20%, 
+                                                            var(--theme-content2, #F4F4F5) 10%, 
+                                                            var(--theme-content3, #F1F3F4) 20%)`,
+                                                    color: (themeSettings?.layout?.scale || '100%') === scale 
+                                                        ? `var(--theme-primary-foreground, #FFFFFF)` 
+                                                        : `var(--theme-foreground, #11181C)`,
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    ringColor: 'var(--theme-primary, #006FEE)'
+                                                }}
                                                 onClick={() => handleLayoutChange('scale', scale)}
                                             >
                                                 {scale}
@@ -1431,7 +1530,7 @@ const ThemeSettingDrawer = ({
                                 <div>
                                     <SectionHeader 
                                         icon={
-                                            <svg className="w-4 h-4 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: `var(--theme-foreground, #11181C)` }}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
                                             </svg>
                                         } 
@@ -1441,11 +1540,30 @@ const ThemeSettingDrawer = ({
                                         {opacityOptions.map((opacity) => (
                                             <button
                                                 key={opacity}
-                                                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all hover:bg-default-50 focus:outline-none focus:ring-2 focus:ring-primary ${
+                                                className={`px-3 py-2 text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
                                                     (themeSettings?.layout?.disabledOpacity || '0.5') === opacity 
-                                                        ? 'border-primary bg-primary text-white' 
-                                                        : 'border-default-200 bg-white text-default-700'
+                                                        ? 'ring-2' 
+                                                        : ''
                                                 }`}
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                    border: `var(--borderWidth, 2px) solid ${
+                                                        (themeSettings?.layout?.disabledOpacity || '0.5') === opacity 
+                                                            ? 'var(--theme-primary, #006FEE)' 
+                                                            : 'var(--theme-divider, #E4E4E7)'
+                                                    }`,
+                                                    background: (themeSettings?.layout?.disabledOpacity || '0.5') === opacity 
+                                                        ? `var(--theme-primary, #006FEE)` 
+                                                        : `linear-gradient(135deg, 
+                                                            var(--theme-content1, #FAFAFA) 20%, 
+                                                            var(--theme-content2, #F4F4F5) 10%, 
+                                                            var(--theme-content3, #F1F3F4) 20%)`,
+                                                    color: (themeSettings?.layout?.disabledOpacity || '0.5') === opacity 
+                                                        ? `var(--theme-primary-foreground, #FFFFFF)` 
+                                                        : `var(--theme-foreground, #11181C)`,
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    ringColor: 'var(--theme-primary, #006FEE)'
+                                                }}
                                                 onClick={() => handleLayoutChange('disabledOpacity', opacity)}
                                             >
                                                 {opacity}

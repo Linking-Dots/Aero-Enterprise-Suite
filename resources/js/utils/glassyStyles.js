@@ -1,139 +1,222 @@
-// Standardized Glassy UI Component Styles for Material UI
-// This ensures consistent styling across all Input, Select, Dropdown, and Search components
-// Matches the application theme colors: --theme-primary: #0ea5e9 (sky-500)
+/**
+ * Glassy Styles Utility - HeroUI Theme Consistent
+ * 
+ * Provides consistent glassy/glass morphism styling utilities
+ * that match the application's HeroUI theming approach
+ */
 
+// Base glassy styles using CSS custom properties
 export const glassyFormControlStyles = {
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    color: 'white',
-    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-    '& fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+    '& .MuiOutlinedInput-root': {
+        background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 80%, transparent)`,
+        backdropFilter: 'blur(16px) saturate(200%)',
+        borderRadius: `var(--borderRadius, 12px)`,
+        borderColor: `var(--theme-divider, #E4E4E7)`,
+        borderWidth: `var(--borderWidth, 2px)`,
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        '&:hover': {
+            borderColor: `color-mix(in srgb, var(--theme-primary) 50%, transparent)`,
+        },
+        '&.Mui-focused': {
+            borderColor: `var(--theme-primary)`,
+            background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 90%, transparent)`,
+        }
     },
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      '& fieldset': {
-        borderColor: 'rgba(255, 255, 255, 0.3)',
-      },
-    },
-    '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      '& fieldset': {
-        borderColor: '#0ea5e9',
-        boxShadow: '0 0 0 2px rgba(14, 165, 233, 0.15)',
-      },
-    },
-    '& input::placeholder': {
-      color: 'rgba(255, 255, 255, 0.5)',
-      opacity: 1,
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
-    '&.Mui-focused': {
-      color: '#0ea5e9',
-    },
-  },
-  '& .MuiSelect-icon': {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-};
-
-export const glassyTextFieldStyles = {
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(16px)',
-    borderRadius: '12px',
-    color: 'white',
-    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-    '& fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '&:hover fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.3)',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#0ea5e9',
-      boxShadow: '0 0 0 2px rgba(14, 165, 233, 0.15)',
-    },
-    '& input::placeholder': {
-      color: 'rgba(255, 255, 255, 0.5)',
-      opacity: 1,
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
-    '&.Mui-focused': {
-      color: '#0ea5e9',
-    },
-  },
+    '& .MuiInputLabel-root': {
+        color: `var(--theme-foreground-600)`,
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        '&.Mui-focused': {
+            color: `var(--theme-primary)`,
+        }
+    }
 };
 
 export const glassyMenuStyles = {
-  '& .MuiPaper-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-    minWidth: 160,
-  },
-  '& .MuiMenuItem-root': {
-    color: 'white',
-    backgroundColor: 'transparent',
-    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    '& .MuiPaper-root': {
+        background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 90%, transparent)`,
+        backdropFilter: 'blur(16px) saturate(200%)',
+        border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`,
+        borderRadius: `var(--borderRadius, 12px)`,
+        boxShadow: `0 8px 32px color-mix(in srgb, var(--theme-foreground) 10%, transparent)`,
     },
-    '&.Mui-selected': {
-      backgroundColor: 'rgba(14, 165, 233, 0.2)',
-      '&:hover': {
-        backgroundColor: 'rgba(14, 165, 233, 0.3)',
-      },
-    },
-  },
+    '& .MuiMenuItem-root': {
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        color: `var(--theme-foreground)`,
+        '&:hover': {
+            background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+        },
+        '&.Mui-selected': {
+            background: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+            '&:hover': {
+                background: `color-mix(in srgb, var(--theme-primary) 30%, transparent)`,
+            }
+        }
+    }
 };
 
-export const glassyIconButtonStyles = {
-  color: 'rgba(255, 255, 255, 0.7)',
-  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  borderRadius: 2,
-  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    color: 'white',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  '&:active': {
-    backgroundColor: 'rgba(14, 165, 233, 0.2)',
-    borderColor: '#0ea5e9',
-  },
+export const glassyTextFieldStyles = {
+    '& .MuiOutlinedInput-root': {
+        background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 80%, transparent)`,
+        backdropFilter: 'blur(16px) saturate(200%)',
+        borderRadius: `var(--borderRadius, 12px)`,
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        '& fieldset': {
+            borderColor: `var(--theme-divider, #E4E4E7)`,
+            borderWidth: `var(--borderWidth, 2px)`,
+        },
+        '&:hover fieldset': {
+            borderColor: `color-mix(in srgb, var(--theme-primary) 50%, transparent)`,
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: `var(--theme-primary)`,
+        }
+    },
+    '& .MuiInputLabel-root': {
+        color: `var(--theme-foreground-600)`,
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        '&.Mui-focused': {
+            color: `var(--theme-primary)`,
+        }
+    },
+    '& .MuiInputAdornment-root': {
+        color: `var(--theme-foreground-600)`,
+    }
 };
 
-// Utility function to get consistent form control styles
-export const getFormControlStyles = (variant = 'default', customWidth) => ({
-  ...glassyFormControlStyles,
-  ...(customWidth && { width: customWidth }),
-  ...(variant === 'small' && {
-    '& .MuiOutlinedInput-root': {
-      ...glassyFormControlStyles['& .MuiOutlinedInput-root'],
-      fontSize: '0.875rem',
-    },
-  }),
-});
+// Helper functions for consistent theming
+export const getFormControlStyles = (variant = 'default') => {
+    const baseStyles = {
+        '& .MuiOutlinedInput-root': {
+            background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 80%, transparent)`,
+            backdropFilter: 'blur(16px) saturate(200%)',
+            borderRadius: `var(--borderRadius, 12px)`,
+            fontFamily: `var(--fontFamily, 'Inter')`,
+            '& fieldset': {
+                borderColor: `var(--theme-divider, #E4E4E7)`,
+                borderWidth: `var(--borderWidth, 2px)`,
+            },
+            '&:hover fieldset': {
+                borderColor: `color-mix(in srgb, var(--theme-primary) 50%, transparent)`,
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: `var(--theme-primary)`,
+            }
+        },
+        '& .MuiInputLabel-root': {
+            color: `var(--theme-foreground-600)`,
+            fontFamily: `var(--fontFamily, 'Inter')`,
+            '&.Mui-focused': {
+                color: `var(--theme-primary)`,
+            }
+        }
+    };
 
-// Utility function to get consistent text field styles
-export const getTextFieldStyles = (variant = 'default') => ({
-  ...glassyTextFieldStyles,
-  ...(variant === 'search' && {
-    '& .MuiOutlinedInput-root': {
-      ...glassyTextFieldStyles['& .MuiOutlinedInput-root'],
-      borderRadius: '12px',
-    },
-  }),
-});
+    return baseStyles;
+};
+
+export const getTextFieldStyles = (variant = 'default') => {
+    const baseStyles = {
+        '& .MuiOutlinedInput-root': {
+            background: `color-mix(in srgb, var(--theme-content1, #FAFAFA) 80%, transparent)`,
+            backdropFilter: 'blur(16px) saturate(200%)',
+            borderRadius: `var(--borderRadius, 12px)`,
+            fontFamily: `var(--fontFamily, 'Inter')`,
+            '& fieldset': {
+                borderColor: `var(--theme-divider, #E4E4E7)`,
+                borderWidth: `var(--borderWidth, 2px)`,
+            },
+            '&:hover fieldset': {
+                borderColor: `color-mix(in srgb, var(--theme-primary) 50%, transparent)`,
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: `var(--theme-primary)`,
+            }
+        },
+        '& .MuiInputLabel-root': {
+            color: `var(--theme-foreground-600)`,
+            fontFamily: `var(--fontFamily, 'Inter')`,
+            '&.Mui-focused': {
+                color: `var(--theme-primary)`,
+            }
+        },
+        '& .MuiInputAdornment-root': {
+            color: `var(--theme-foreground-600)`,
+        }
+    };
+
+    // Add variant-specific styles
+    if (variant === 'search') {
+        baseStyles['& .MuiOutlinedInput-root']['& fieldset'].borderColor = `color-mix(in srgb, var(--theme-primary) 30%, transparent)`;
+    }
+
+    return baseStyles;
+};
+
+// Card styles for consistent theming
+export const getCardStyles = (variant = 'default') => {
+    return {
+        background: `linear-gradient(to bottom right, 
+            var(--theme-content1, #FAFAFA) 20%, 
+            var(--theme-content2, #F4F4F5) 10%, 
+            var(--theme-content3, #F1F3F4) 20%)`,
+        backdropFilter: 'blur(16px) saturate(200%)',
+        borderColor: `var(--theme-divider, #E4E4E7)`,
+        borderWidth: `var(--borderWidth, 2px)`,
+        borderRadius: `var(--borderRadius, 12px)`,
+        fontFamily: `var(--fontFamily, 'Inter')`,
+    };
+};
+
+// Button styles for consistent theming
+export const getButtonStyles = (color = 'primary', variant = 'solid') => {
+    const baseStyles = {
+        fontFamily: `var(--fontFamily, 'Inter')`,
+        borderRadius: `var(--borderRadius, 12px)`,
+        borderWidth: `var(--borderWidth, 2px)`,
+    };
+
+    if (variant === 'bordered') {
+        return {
+            ...baseStyles,
+            borderColor: `color-mix(in srgb, var(--theme-${color}) 30%, transparent)`,
+            background: `color-mix(in srgb, var(--theme-${color}) 5%, transparent)`,
+            color: `var(--theme-${color})`,
+            '&:hover': {
+                background: `color-mix(in srgb, var(--theme-${color}) 10%, transparent)`,
+            }
+        };
+    }
+
+    if (variant === 'flat') {
+        return {
+            ...baseStyles,
+            background: `color-mix(in srgb, var(--theme-${color}) 15%, transparent)`,
+            color: `var(--theme-${color})`,
+            border: 'none',
+            '&:hover': {
+                background: `color-mix(in srgb, var(--theme-${color}) 25%, transparent)`,
+            }
+        };
+    }
+
+    // Default solid variant
+    return {
+        ...baseStyles,
+        background: `linear-gradient(135deg, var(--theme-${color}), var(--theme-${color}-600))`,
+        color: `var(--theme-${color}-foreground, white)`,
+        border: 'none',
+        '&:hover': {
+            opacity: 0.9,
+        }
+    };
+};
+
+export default {
+    glassyFormControlStyles,
+    glassyMenuStyles,
+    glassyTextFieldStyles,
+    getFormControlStyles,
+    getTextFieldStyles,
+    getCardStyles,
+    getButtonStyles
+};

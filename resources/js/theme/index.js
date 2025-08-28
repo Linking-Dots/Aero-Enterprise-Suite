@@ -17,13 +17,7 @@ export const heroUIThemes = {
     },
     background: {
       type: 'color',
-      color: '#ffffff',
-      image: '',
-      size: 'cover',
-      position: 'center',
-      repeat: 'no-repeat',
-      opacity: 100,
-      blur: 0
+      color: '#ffffff'
     },
     colors: {
       background: '#FFFFFF',
@@ -131,13 +125,7 @@ export const heroUIThemes = {
     },
     background: {
       type: 'color',
-      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      image: '',
-      size: 'cover',
-      position: 'center',
-      repeat: 'no-repeat',
-      opacity: 95,
-      blur: 0
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     colors: {
       background: '#F8FAFC',
@@ -185,13 +173,7 @@ export const heroUIThemes = {
     },
     background: {
       type: 'color',
-      color: 'linear-gradient(45deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%)',
-      image: '',
-      size: 'cover',
-      position: 'center',
-      repeat: 'no-repeat',
-      opacity: 90,
-      blur: 0
+      color: 'linear-gradient(45deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%)'
     },
     colors: {
       background: '#FAFAFA',
@@ -239,13 +221,7 @@ export const heroUIThemes = {
     },
     background: {
       type: 'color',
-      color: 'linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #CD853F 100%)',
-      image: '',
-      size: 'cover',
-      position: 'center',
-      repeat: 'no-repeat',
-      opacity: 85,
-      blur: 2
+      color: 'linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #CD853F 100%)'
     },
     colors: {
       background: '#FEF7ED',
@@ -284,6 +260,10 @@ export const heroUIThemes = {
   },
   emerald: {
     name: 'Emerald',
+    background: {
+      type: 'color',
+      color: '#ffffff'
+    },
     colors: {
       background: '#FFFFFF',
       foreground: '#11181C',
@@ -360,8 +340,8 @@ export const borderWidthOptions = [
 // Scaling options
 export const scalingOptions = ['90%', '95%', '100%', '105%', '110%'];
 
-// Disable opacity options
-export const opacityOptions = ['0.2', '0.4', '0.6', '0.8'];
+// Opacity options for disabled elements
+export const opacityOptions = ['0.3', '0.4', '0.5', '0.6', '0.7'];
 
 /**
  * Get theme configuration by name
@@ -405,7 +385,6 @@ export const generateHeroUIConfig = (theme, isDark = false) => {
  * Apply theme to document
  */
 export const applyThemeToDocument = (theme) => {
-  console.log('applyThemeToDocument called with theme:', theme);
   const root = document.documentElement;
   const isDark = theme.mode === 'dark';
   
@@ -455,135 +434,59 @@ export const applyThemeToDocument = (theme) => {
     });
   }
   
-  // Apply background settings with persistence check
+  // Apply simplified background settings
   if (theme.background) {
-    console.log('Applying background settings:', theme.background);
     const body = document.body;
     
-    // Store background settings in a data attribute for persistence
-    body.setAttribute('data-background-settings', JSON.stringify(theme.background));
+    // Clean up any existing overlays
+    const overlay = document.getElementById('background-overlay');
+    if (overlay) overlay.remove();
     
-    if (theme.background.type === 'image' && theme.background.image) {
-      console.log('Setting image background:', theme.background.image);
-      // Apply image background
-      body.style.backgroundImage = `url(${theme.background.image})`;
-      body.style.backgroundSize = theme.background.size || 'cover';
-      body.style.backgroundPosition = theme.background.position || 'center';
-      body.style.backgroundRepeat = theme.background.repeat || 'no-repeat';
-      body.style.backgroundAttachment = 'fixed';
-      body.style.backgroundColor = '';
-      console.log('Applied background styles:', {
-        backgroundImage: body.style.backgroundImage,
-        backgroundSize: body.style.backgroundSize,
-        backgroundPosition: body.style.backgroundPosition,
-        backgroundRepeat: body.style.backgroundRepeat
-      });
+    if (theme.background.type === 'color' && theme.background.color) {
+      // Reset any image properties
+      body.style.setProperty('background-image', '', 'important');
+      body.style.setProperty('background-size', '', 'important');
+      body.style.setProperty('background-position', '', 'important');
+      body.style.setProperty('background-repeat', '', 'important');
+      body.style.setProperty('background-attachment', '', 'important');
       
-      // Apply opacity and blur through overlay
-      let overlay = document.getElementById('background-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'background-overlay';
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.pointerEvents = 'none';
-        overlay.style.zIndex = '-1';
-        body.appendChild(overlay);
-      }
-      
-      const opacity = (theme.background.opacity || 100) / 100;
-      const blur = theme.background.blur || 0;
-      overlay.style.backdropFilter = blur > 0 ? `blur(${blur}px)` : 'none';
-      overlay.style.backgroundColor = `rgba(0, 0, 0, ${1 - opacity})`;
-      
-    } else if (theme.background.type === 'color' && theme.background.color) {
-      // Apply solid color background
-      body.style.backgroundImage = '';
-      body.style.backgroundSize = '';
-      body.style.backgroundPosition = '';
-      body.style.backgroundRepeat = '';
-      body.style.backgroundAttachment = '';
-      
-      // Apply color with opacity
-      const color = theme.background.color;
-      const opacity = (theme.background.opacity || 100) / 100;
-      
-      if (color.startsWith('linear-gradient') || color.startsWith('radial-gradient')) {
-        // Handle gradient backgrounds with overlay for opacity
-        body.style.background = color;
-        body.style.backgroundColor = '';
-        body.style.opacity = '';
-        
-        // Create overlay for gradient opacity if needed
-        if (opacity < 1) {
-          let overlay = document.getElementById('background-overlay');
-          if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'background-overlay';
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.pointerEvents = 'none';
-            overlay.style.zIndex = '-1';
-            body.appendChild(overlay);
-          }
-          overlay.style.backgroundColor = `rgba(255, 255, 255, ${1 - opacity})`;
-          overlay.style.backdropFilter = 'none';
-        } else {
-          // Remove overlay if opacity is 100%
-          const overlay = document.getElementById('background-overlay');
-          if (overlay) {
-            overlay.remove();
-          }
-        }
+      // Apply color/gradient background - avoid shorthand background property
+      if (theme.background.color.includes('gradient')) {
+        // For gradients, we need to use background-image instead of background
+        body.style.setProperty('background-image', theme.background.color, 'important');
+        body.style.setProperty('background-color', '', 'important');
       } else {
-        // Handle solid colors with rgba for proper opacity
-        body.style.background = '';
-        body.style.opacity = '';
-        
-        if (opacity < 1) {
-          // Convert hex to rgba if needed
-          let rgba = color;
-          if (color.startsWith('#')) {
-            const hex = color.replace('#', '');
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            rgba = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-          }
-          body.style.backgroundColor = rgba;
-        } else {
-          body.style.backgroundColor = color;
-        }
-        
-        // Remove image overlay if it exists
-        const overlay = document.getElementById('background-overlay');
-        if (overlay) {
-          overlay.remove();
-        }
+        body.style.setProperty('background-color', theme.background.color, 'important');
+        body.style.setProperty('background-image', '', 'important');
       }
+    } else if (theme.background.type === 'image' && theme.background.image) {
+      // Reset color properties
+      body.style.setProperty('background-color', '', 'important');
       
+      // Validate the image URL/data
+      if (theme.background.image.startsWith('data:image/') || 
+          theme.background.image.startsWith('http://') || 
+          theme.background.image.startsWith('https://') ||
+          theme.background.image.startsWith('/') ||
+          theme.background.image.includes('.')) {
+        
+        // Apply image background using individual properties only
+        body.style.setProperty('background-image', `url("${theme.background.image}")`, 'important');
+        body.style.setProperty('background-size', theme.background.size || 'cover', 'important');
+        body.style.setProperty('background-position', theme.background.position || 'center', 'important');
+        body.style.setProperty('background-repeat', theme.background.repeat || 'no-repeat', 'important');
+        body.style.setProperty('background-attachment', 'fixed', 'important');
+      } else {
+        console.error('Invalid image URL/data:', theme.background.image);
+      }
     } else {
-      // Reset to default
-      body.style.backgroundImage = '';
-      body.style.backgroundSize = '';
-      body.style.backgroundPosition = '';
-      body.style.backgroundRepeat = '';
-      body.style.backgroundAttachment = '';
-      body.style.backgroundColor = '';
-      body.style.background = '';
-      body.style.opacity = '';
-      
-      // Remove overlay
-      const overlay = document.getElementById('background-overlay');
-      if (overlay) {
-        overlay.remove();
-      }
+      // Reset to default - clear all background properties
+      body.style.setProperty('background-image', '', 'important');
+      body.style.setProperty('background-size', '', 'important');
+      body.style.setProperty('background-position', '', 'important');
+      body.style.setProperty('background-repeat', '', 'important');
+      body.style.setProperty('background-attachment', '', 'important');
+      body.style.setProperty('background-color', '', 'important');
     }
   }
 
@@ -600,30 +503,6 @@ export const applyThemeToDocument = (theme) => {
   }
 };
 
-/**
- * Restore theme on page load from stored data attributes
- */
-export const restoreThemeFromDOM = () => {
-  const body = document.body;
-  const storedBackground = body.getAttribute('data-background-settings');
-  
-  if (storedBackground) {
-    try {
-      const backgroundSettings = JSON.parse(storedBackground);
-      console.log('Restoring background from DOM:', backgroundSettings);
-      
-      // Reapply background settings
-      const savedTheme = localStorage.getItem('heroui-theme-settings');
-      if (savedTheme) {
-        const theme = JSON.parse(savedTheme);
-        applyThemeToDocument(theme);
-      }
-    } catch (error) {
-      console.warn('Failed to restore background from DOM:', error);
-    }
-  }
-};
-
 export default {
   heroUIThemes,
   darkModeColors,
@@ -631,9 +510,7 @@ export default {
   radiusOptions,
   borderWidthOptions,
   scalingOptions,
-  opacityOptions,
   getTheme,
   generateHeroUIConfig,
-  applyThemeToDocument,
-  restoreThemeFromDOM
+  applyThemeToDocument
 };

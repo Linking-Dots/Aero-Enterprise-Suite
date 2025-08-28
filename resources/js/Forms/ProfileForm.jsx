@@ -9,12 +9,14 @@ import {
     ModalFooter,
     Select,
     SelectItem,
-    Spinner
+    Spinner,
+    Card,
+    CardBody,
+    CardHeader,
+    Divider
 } from "@heroui/react";
 import React, {useEffect, useState} from "react";
 import { X, Camera } from 'lucide-react';
-import GlassDialog from "@/Components/GlassDialog.jsx";
-import useTheme, { alpha } from "@/theme";
 import {toast} from "react-toastify";
 
 const ProfileForm = ({user, allUsers, departments, designations,setUser, open, closeModal }) => {
@@ -49,7 +51,6 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
     const [allDesignations, setAllDesignations] = useState(designations);
     const [allReportTo, setAllReportTo] = useState(allUsers);
 
-    const theme = useTheme();
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
@@ -121,10 +122,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                         },
                         icon: false,
                         style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                           
+                            background: 'var(--theme-content1, #FFFFFF)',
+                            border: '1px solid var(--theme-divider, #E4E4E7)',
+                            color: 'var(--theme-foreground, #11181C)',
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
                         }
                     },
                     success: {
@@ -139,10 +142,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                         },
                         icon: '🟢',
                         style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                           
+                            background: 'var(--theme-content1, #FFFFFF)',
+                            border: '1px solid var(--theme-success, #17C964)',
+                            color: 'var(--theme-foreground, #11181C)',
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
                         }
                     },
                     error: {
@@ -155,10 +160,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                         },
                         icon: '🔴',
                         style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                            
+                            background: 'var(--theme-content1, #FFFFFF)',
+                            border: '1px solid var(--theme-danger, #F31260)',
+                            color: 'var(--theme-foreground, #11181C)',
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
                         }
                     }
                 }
@@ -249,10 +256,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 toast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Profile information updated successfully', {
                     icon: '🟢',
                     style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                   
+                        background: 'var(--theme-content1, #FFFFFF)',
+                        border: '1px solid var(--theme-success, #17C964)',
+                        color: 'var(--theme-foreground, #11181C)',
+                        borderRadius: 'var(--borderRadius, 12px)',
+                        fontFamily: 'var(--fontFamily, "Inter")'
                     }
                 });
                 closeModal();
@@ -269,10 +278,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     toast.error(error.response.data.error || 'Failed to update profile information.', {
                         icon: '🔴',
                         style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                        
+                            background: 'var(--theme-content1, #FFFFFF)',
+                            border: '1px solid var(--theme-danger, #F31260)',
+                            color: 'var(--theme-foreground, #11181C)',
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
                         }
                     });
                 } else {
@@ -280,10 +291,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     toast.error('An unexpected error occurred. Please try again later.', {
                         icon: '🔴',
                         style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                 
+                            background: 'var(--theme-content1, #FFFFFF)',
+                            border: '1px solid var(--theme-danger, #F31260)',
+                            color: 'var(--theme-foreground, #11181C)',
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
                         }
                     });
                 }
@@ -293,10 +306,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 toast.error('No response received from the server. Please check your internet connection.', {
                     icon: '🔴',
                     style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                  
+                        background: 'var(--theme-content1, #FFFFFF)',
+                        border: '1px solid var(--theme-danger, #F31260)',
+                        color: 'var(--theme-foreground, #11181C)',
+                        borderRadius: 'var(--borderRadius, 12px)',
+                        fontFamily: 'var(--fontFamily, "Inter")'
                     }
                 });
                 console.error(error.request);
@@ -305,10 +320,12 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 toast.error('An error occurred while setting up the request.', {
                     icon: '🔴',
                     style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                   
+                        background: 'var(--theme-content1, #FFFFFF)',
+                        border: '1px solid var(--theme-danger, #F31260)',
+                        color: 'var(--theme-foreground, #11181C)',
+                        borderRadius: 'var(--borderRadius, 12px)',
+                        fontFamily: 'var(--fontFamily, "Inter")'
                     }
                 });
                 console.error('Error', error.message);
@@ -320,214 +337,327 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
 
 
     return (
-        <GlassDialog
-            open={open}
-            onClose={closeModal}
+        <Modal 
+            isOpen={open} 
+            onOpenChange={closeModal}
+            size="5xl"
+            scrollBehavior="inside"
+            backdrop="blur"
+            classNames={{
+                backdrop: "bg-black/30",
+                base: "max-h-[90vh]",
+                body: "p-0",
+                header: "p-0",
+                footer: "p-0"
+            }}
         >
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Information</h3>
-                <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={closeModal}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={20} />
-                </Button>
-            </div>
-            <form onSubmit={handleSubmit}>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-full flex items-center justify-center">
-                            <div
-                                className="relative inline-block"
-                                onMouseEnter={() => setHover(true)}
-                                onMouseLeave={() => setHover(false)}
-                            >
-                                <Avatar
-                                    src={selectedImage || user.profile_image}
-                                    alt={changedUserData.name || initialUserData.name}
-                                    className="w-24 h-24"
-                                />
-                                {hover && (
-                                    <>
-                                        <div
-                                            className="absolute top-0 left-0 w-full h-full rounded-full flex justify-center items-center cursor-pointer"
-                                            style={{
-                                                backgroundColor: alpha(theme.colors.black, 0.5),
-                                            }}
-                                        >
-                                            <Button
-                                                isIconOnly
-                                                variant="light"
-                                                className="text-white"
-                                            >
-                                                <Camera size={20} />
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-                                <input
-                                    accept="image/*"
-                                    style={{display: 'none'}}
-                                    id="upload-button"
-                                    type="file"
-                                    onChange={handleImageChange}
-                                />
-                                <label htmlFor="upload-button">
-                                    <div
-                                        className="absolute w-full h-full top-0 left-0 rounded-full cursor-pointer"
-                                    />
-                                </label>
-                            </div>
-
-                        </div>
-                        <div>
-                            <Input
-                                label="Name"
-                                value={changedUserData.name || initialUserData.name || ''}
-                                onChange={(e) => handleChange('name', e.target.value)}
-                                isInvalid={Boolean(errors.name)}
-                                errorMessage={errors.name}
-                            />
-                        </div>
-                        <div>
-                            <Select
-                                label="Gender"
-                                selectedKeys={changedUserData.gender || initialUserData.gender ? [changedUserData.gender || initialUserData.gender] : []}
-                                onSelectionChange={(keys) => handleChange('gender', Array.from(keys)[0])}
-                                isInvalid={Boolean(errors.gender)}
-                                errorMessage={errors.gender}
-                            >
-                                <SelectItem key="Male" value="Male">Male</SelectItem>
-                                <SelectItem key="Female" value="Female">Female</SelectItem>
-                            </Select>
-                        </div>
-                        <div>
-                            <Input
-                                label="Birth Date"
-                                type="date"
-                                value={changedUserData.birthday || initialUserData.birthday || ''}
-                                onChange={(e) => handleChange('birthday', e.target.value)}
-                                isInvalid={Boolean(errors.birthday)}
-                                errorMessage={errors.birthday}
-                            />
-                        </div>
-                        <div>
-                            <Input
-                                label="Joining Date"
-                                type="date"
-                                value={changedUserData.date_of_joining || initialUserData.date_of_joining || ''}
-                                onChange={(e) => handleChange('date_of_joining', e.target.value)}
-                                isInvalid={Boolean(errors.date_of_joining)}
-                                errorMessage={errors.date_of_joining}
-                            />
-                        </div>
-
-                        <div className="col-span-full">
-                            <Input
-                                label="Address"
-                                value={changedUserData.address || initialUserData.address}
-                                onChange={(e) => handleChange('address', e.target.value)}
-                                isInvalid={Boolean(errors.address)}
-                                errorMessage={errors.address}
-                            />
-                        </div>
-                        <div>
-                            <Input
-                                label="Employee ID"
-                                value={changedUserData.employee_id || initialUserData.employee_id || ''}
-                                onChange={(e) => handleChange('employee_id', e.target.value)}
-                                isInvalid={Boolean(errors.employee_id)}
-                                errorMessage={errors.employee_id}
-                            />
-                        </div>
-                        <div>
-                            <Input
-                                label="Phone Number"
-                                value={changedUserData.phone || initialUserData.phone}
-                                onChange={(e) => handleChange('phone', e.target.value)}
-                                isInvalid={Boolean(errors.phone)}
-                                errorMessage={errors.phone}
-                            />
-                        </div>
-                        <div>
-                            <Input
-                                label="Email Address"
-                                value={changedUserData.email || initialUserData.email}
-                                onChange={(e) => handleChange('email', e.target.value)}
-                                isInvalid={Boolean(errors.email)}
-                                errorMessage={errors.email}
-                            />
-                        </div>
-                        <div>
-                            <Select
-                                label="Department"
-                                selectedKeys={changedUserData.department || initialUserData.department ? [String(changedUserData.department || initialUserData.department)] : []}
-                                onSelectionChange={(keys) => handleChange('department', Array.from(keys)[0])}
-                                isInvalid={Boolean(errors.department)}
-                                errorMessage={errors.department}
-                            >
-                                {departments.map((dept) => (
-                                    <SelectItem key={dept.id} value={dept.id}>
-                                        {dept.name}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                        <div>
-                            <Select
-                                label="Designation"
-                                selectedKeys={changedUserData.designation || initialUserData.designation ? [String(changedUserData.designation || initialUserData.designation)] : []}
-                                onSelectionChange={(keys) => handleChange('designation', Array.from(keys)[0])}
-                                isInvalid={Boolean(errors.designation)}
-                                errorMessage={errors.designation}
-                                isDisabled={!user.department}
-                            >
-                                {allDesignations.map((desig) => (
-                                    <SelectItem key={desig.id} value={desig.id}>
-                                        {desig.title}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                        <div>
-                            <Select
-                                label="Reports To"
-                                selectedKeys={changedUserData.report_to || initialUserData.report_to ? [String(changedUserData.report_to || initialUserData.report_to)] : []}
-                                onSelectionChange={(keys) => handleChange('report_to', Array.from(keys)[0])}
-                                isInvalid={Boolean(errors.report_to)}
-                                errorMessage={errors.report_to}
-                                isDisabled={user.report_to === 'na'}
-                            >
-                                <SelectItem key="na" value="na">--</SelectItem>
-                                {allReportTo.map((pers) => (
-                                    <SelectItem key={pers.id} value={pers.id}>
-                                        {pers.name}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
-                    <Button
-                        isDisabled={!dataChanged}
-                        className="rounded-full px-6"
-                        variant="bordered"
-                        color="primary"
-                        type="submit"
-                        isLoading={processing}
+            <ModalContent
+                style={{
+                    background: `linear-gradient(135deg, 
+                        var(--theme-content1, #FAFAFA) 20%, 
+                        var(--theme-content2, #F4F4F5) 10%, 
+                        var(--theme-content3, #F1F3F4) 20%)`,
+                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                    borderWidth: `var(--borderWidth, 2px)`,
+                    borderRadius: `var(--borderRadius, 12px)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    transform: `scale(var(--scale, 1))`,
+                }}
+            >
+                <ModalHeader className="p-0">
+                    <div 
+                        className="flex items-center justify-between p-6 border-b w-full"
+                        style={{
+                            borderColor: 'var(--theme-divider, #E4E4E7)',
+                            color: 'var(--theme-foreground, #11181C)'
+                        }}
                     >
-                        Submit
-                    </Button>
-                </div>
-            </form>
-        </GlassDialog>
+                        <h3 
+                            className="text-lg font-semibold"
+                            style={{ 
+                                color: 'var(--theme-foreground, #11181C)',
+                                fontFamily: 'var(--fontFamily, "Inter")'
+                            }}
+                        >
+                            Profile Information
+                        </h3>
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            onPress={closeModal}
+                            style={{
+                                color: 'var(--theme-foreground-600, #71717A)',
+                                borderRadius: 'var(--borderRadius, 12px)'
+                            }}
+                        >
+                            <X size={20} />
+                        </Button>
+                    </div>
+                </ModalHeader>
+                
+                <ModalBody className="p-0">
+                    <form onSubmit={handleSubmit}>
+                        <div className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="col-span-full flex items-center justify-center">
+                                    <div
+                                        className="relative inline-block"
+                                        onMouseEnter={() => setHover(true)}
+                                        onMouseLeave={() => setHover(false)}
+                                    >
+                                        <Avatar
+                                            src={selectedImage || user.profile_image}
+                                            alt={changedUserData.name || initialUserData.name}
+                                            className="w-24 h-24"
+                                        />
+                                                {hover && (
+                                                    <>
+                                                        <div
+                                                            className="absolute top-0 left-0 w-full h-full rounded-full flex justify-center items-center cursor-pointer"
+                                                            style={{
+                                                                background: 'color-mix(in srgb, var(--theme-default, #71717A) 50%, transparent)',
+                                                                borderRadius: 'var(--borderRadius, 12px)',
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                isIconOnly
+                                                                variant="light"
+                                                                className="text-white"
+                                                            >
+                                                                <Camera size={20} />
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                        <input
+                                            accept="image/*"
+                                            style={{display: 'none'}}
+                                            id="upload-button"
+                                            type="file"
+                                            onChange={handleImageChange}
+                                        />
+                                        <label htmlFor="upload-button">
+                                            <div
+                                                className="absolute w-full h-full top-0 left-0 rounded-full cursor-pointer"
+                                            />
+                                        </label>
+                                    </div>
 
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Name"
+                                        value={changedUserData.name || initialUserData.name || ''}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        isInvalid={Boolean(errors.name)}
+                                        errorMessage={errors.name}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Gender"
+                                        selectedKeys={changedUserData.gender || initialUserData.gender ? [changedUserData.gender || initialUserData.gender] : []}
+                                        onSelectionChange={(keys) => handleChange('gender', Array.from(keys)[0])}
+                                        isInvalid={Boolean(errors.gender)}
+                                        errorMessage={errors.gender}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    >
+                                        <SelectItem key="Male" value="Male">Male</SelectItem>
+                                        <SelectItem key="Female" value="Female">Female</SelectItem>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Birth Date"
+                                        type="date"
+                                        value={changedUserData.birthday || initialUserData.birthday || ''}
+                                        onChange={(e) => handleChange('birthday', e.target.value)}
+                                        isInvalid={Boolean(errors.birthday)}
+                                        errorMessage={errors.birthday}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Joining Date"
+                                        type="date"
+                                        value={changedUserData.date_of_joining || initialUserData.date_of_joining || ''}
+                                        onChange={(e) => handleChange('date_of_joining', e.target.value)}
+                                        isInvalid={Boolean(errors.date_of_joining)}
+                                        errorMessage={errors.date_of_joining}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
 
-    )
-        ;
+                                <div className="col-span-full">
+                                    <Input
+                                        label="Address"
+                                        value={changedUserData.address || initialUserData.address}
+                                        onChange={(e) => handleChange('address', e.target.value)}
+                                        isInvalid={Boolean(errors.address)}
+                                        errorMessage={errors.address}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Employee ID"
+                                        value={changedUserData.employee_id || initialUserData.employee_id || ''}
+                                        onChange={(e) => handleChange('employee_id', e.target.value)}
+                                        isInvalid={Boolean(errors.employee_id)}
+                                        errorMessage={errors.employee_id}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Phone Number"
+                                        value={changedUserData.phone || initialUserData.phone}
+                                        onChange={(e) => handleChange('phone', e.target.value)}
+                                        isInvalid={Boolean(errors.phone)}
+                                        errorMessage={errors.phone}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Input
+                                        label="Email Address"
+                                        value={changedUserData.email || initialUserData.email}
+                                        onChange={(e) => handleChange('email', e.target.value)}
+                                        isInvalid={Boolean(errors.email)}
+                                        errorMessage={errors.email}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Department"
+                                        selectedKeys={changedUserData.department || initialUserData.department ? [String(changedUserData.department || initialUserData.department)] : []}
+                                        onSelectionChange={(keys) => handleChange('department', Array.from(keys)[0])}
+                                        isInvalid={Boolean(errors.department)}
+                                        errorMessage={errors.department}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    >
+                                        {departments.map((dept) => (
+                                            <SelectItem key={dept.id} value={dept.id}>
+                                                {dept.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Designation"
+                                        selectedKeys={changedUserData.designation || initialUserData.designation ? [String(changedUserData.designation || initialUserData.designation)] : []}
+                                        onSelectionChange={(keys) => handleChange('designation', Array.from(keys)[0])}
+                                        isInvalid={Boolean(errors.designation)}
+                                        errorMessage={errors.designation}
+                                        isDisabled={!user.department}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    >
+                                        {allDesignations.map((desig) => (
+                                            <SelectItem key={desig.id} value={desig.id}>
+                                                {desig.title}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Select
+                                        label="Reports To"
+                                        selectedKeys={changedUserData.report_to || initialUserData.report_to ? [String(changedUserData.report_to || initialUserData.report_to)] : []}
+                                        onSelectionChange={(keys) => handleChange('report_to', Array.from(keys)[0])}
+                                        isInvalid={Boolean(errors.report_to)}
+                                        errorMessage={errors.report_to}
+                                        isDisabled={user.report_to === 'na'}
+                                        variant="bordered"
+                                        style={{
+                                            borderRadius: 'var(--borderRadius, 12px)',
+                                            fontFamily: 'var(--fontFamily, "Inter")'
+                                        }}
+                                    >
+                                        <SelectItem key="na" value="na">--</SelectItem>
+                                        {allReportTo.map((pers) => (
+                                            <SelectItem key={pers.id} value={pers.id}>
+                                                {pers.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <ModalFooter className="p-0">
+                            <div 
+                                className="flex items-center justify-center p-6 border-t w-full"
+                                style={{
+                                    borderColor: 'var(--theme-divider, #E4E4E7)'
+                                }}
+                            >
+                                <Button
+                                    isDisabled={!dataChanged}
+                                    className="rounded-full px-6"
+                                    variant="bordered"
+                                    color="primary"
+                                    type="submit"
+                                    isLoading={processing}
+                                    style={{
+                                        borderColor: 'var(--theme-primary, #006FEE)',
+                                        color: 'var(--theme-primary, #006FEE)',
+                                        borderRadius: 'var(--borderRadius, 12px)',
+                                        fontFamily: 'var(--fontFamily, "Inter")'
+                                    }}
+                                >
+                                    Submit
+                                </Button>
+                            </div>
+                        </ModalFooter>
+                    </form>
+                </ModalBody>
+            </ModalContent>
+        </Modal>
+    );
 };
 
 export default ProfileForm;

@@ -13,9 +13,23 @@ import {
     CalendarDaysIcon 
 } from '@heroicons/react/24/outline';
 
-import GlassCard from '@/Components/GlassCard';
 import { Calendar } from 'lucide-react';
 import axios from 'axios';
+
+// Theme utility function
+const getThemeRadius = () => {
+    if (typeof window === 'undefined') return 'lg';
+    
+    const rootStyles = getComputedStyle(document.documentElement);
+    const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+    
+    const radiusValue = parseInt(borderRadius);
+    if (radiusValue === 0) return 'none';
+    if (radiusValue <= 4) return 'sm';
+    if (radiusValue <= 8) return 'md';
+    if (radiusValue <= 12) return 'lg';
+    return 'xl';
+};
 
 const BulkCalendar = ({ 
     selectedDates = [], 
@@ -239,12 +253,6 @@ const BulkCalendar = ({
         };
     }, [selectedDates, finalExistingLeaves, finalPublicHolidays, minDate, maxDate, loading]);
 
-    // Get date cell classes - simplified since we're using Tailwind classes directly
-    const getDateCellClasses = useCallback((dayData, status) => {
-        // This function is kept for compatibility but classes are now applied directly in JSX
-        return {};
-    }, [theme, loading]);
-
     const monthYear = currentDate.toLocaleDateString('en-US', { 
         month: 'long', 
         year: 'numeric' 
@@ -253,12 +261,27 @@ const BulkCalendar = ({
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
-        <GlassCard className="w-full">
-            <CardHeader className="pb-4">
+        <Card 
+            radius={getThemeRadius()}
+            className="w-full shadow-sm border border-divider/50"
+            style={{
+                borderRadius: `var(--borderRadius, 12px)`,
+                fontFamily: `var(--fontFamily, "Inter")`,
+                background: `linear-gradient(135deg, 
+                    color-mix(in srgb, var(--theme-content1) 90%, transparent) 40%, 
+                    color-mix(in srgb, var(--theme-content2) 80%, transparent) 60%)`,
+            }}
+        >
+            <CardHeader className="pb-3 px-4 pt-4">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-primary" />
-                        <h3 className="text-lg font-semibold">
+                        <CalendarDaysIcon 
+                            className="w-4 h-4 sm:w-5 sm:h-5" 
+                            style={{ color: 'var(--theme-primary)' }}
+                        />
+                        <h3 className="text-base sm:text-lg font-semibold" style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
                             {monthYear}
                         </h3>
                         {fetchFromAPI && loadedYear && (
@@ -266,9 +289,15 @@ const BulkCalendar = ({
                                 size="sm" 
                                 variant="bordered" 
                                 color="primary" 
-                                className="ml-2 text-xs"
+                                className="ml-2 text-xs hidden sm:flex"
+                                radius={getThemeRadius()}
+                                style={{
+                                    borderColor: `var(--theme-primary)`,
+                                    color: `var(--theme-primary)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             >
-                                Data: {loadedYear}
+                                {loadedYear}
                             </Chip>
                         )}
                     </div>
@@ -279,15 +308,24 @@ const BulkCalendar = ({
                             variant="light"
                             onClick={goToPreviousMonth}
                             isDisabled={loading}
+                            radius={getThemeRadius()}
+                            className="min-w-8 h-8"
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         >
-                            <ChevronLeftIcon className="w-4 h-4" />
+                            <ChevronLeftIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                             size="sm"
                             variant="light"
                             onClick={goToToday}
                             isDisabled={loading}
-                            className="px-3 py-1 text-xs"
+                            radius={getThemeRadius()}
+                            className="px-2 py-1 text-xs hidden sm:flex"
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         >
                             Today
                         </Button>
@@ -297,29 +335,46 @@ const BulkCalendar = ({
                             variant="light"
                             onClick={goToNextMonth}
                             isDisabled={loading}
+                            radius={getThemeRadius()}
+                            className="min-w-8 h-8"
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         >
-                            <ChevronRightIcon className="w-4 h-4" />
+                            <ChevronRightIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                     </div>
                 </div>
             </CardHeader>
-            <CardBody className="pt-0">
+            <CardBody className="pt-0 px-4 pb-4" style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}>
                 {loading && (
-                    <div className="flex justify-center items-center py-6 bg-default-100 rounded-lg mb-6">
-                        <Spinner size="sm" />
-                        <span className="ml-2 text-sm text-default-600">
+                    <div className="flex justify-center items-center py-4 rounded-lg mb-4" style={{
+                        background: `var(--theme-content2, #F4F4F5)`,
+                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                    }}>
+                        <Spinner size="sm" color="primary" />
+                        <span className="ml-2 text-xs sm:text-sm" style={{
+                            color: `var(--theme-foreground-600, #71717A)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
                             Loading calendar data for {currentDate.getFullYear()}...
                         </span>
                     </div>
                 )}
                 
-                {/* Legend */}
-                <div className="flex flex-wrap gap-2 mb-6">
+                {/* Compact Legend */}
+                <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
                     <Chip 
                         size="sm" 
                         color="primary" 
                         variant="solid"
-                        className="font-medium"
+                        radius={getThemeRadius()}
+                        className="text-xs font-medium"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Selected
                     </Chip>
@@ -327,13 +382,23 @@ const BulkCalendar = ({
                         size="sm" 
                         color="danger" 
                         variant="solid"
+                        radius={getThemeRadius()}
+                        className="text-xs"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
-                        Existing Leave
+                        Leave
                     </Chip>
                     <Chip 
                         size="sm" 
                         color="warning" 
                         variant="solid"
+                        radius={getThemeRadius()}
+                        className="text-xs"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Holiday
                     </Chip>
@@ -341,7 +406,11 @@ const BulkCalendar = ({
                         size="sm" 
                         color="secondary" 
                         variant="solid"
-                        className="font-medium"
+                        radius={getThemeRadius()}
+                        className="text-xs font-medium hidden sm:flex"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Today
                     </Chip>
@@ -349,47 +418,96 @@ const BulkCalendar = ({
                         size="sm" 
                         color="default" 
                         variant="bordered"
+                        radius={getThemeRadius()}
+                        className="text-xs hidden sm:flex"
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Weekend
                     </Chip>
                 </div>
                 
-                {/* Week days header */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
+                {/* Week days header - compact */}
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
                     {weekDays.map(day => (
                         <div 
                             key={day} 
-                            className="text-center py-2 text-sm font-medium text-default-600"
+                            className="flex items-center justify-center w-8 h-6 sm:w-10 sm:h-8 text-xs sm:text-sm font-medium"
+                            style={{
+                                color: `var(--theme-foreground-600, #71717A)`,
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         >
                             {day}
                         </div>
                     ))}
                 </div>
                 
-                {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-1">
+                {/* Calendar grid - responsive */}
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                     {calendarDays.map((dayData, index) => {
                         const status = getDateStatus(dayData);
-                        const cellStyles = getDateCellClasses(dayData, status);
                         
                         return (
                             <div
                                 key={index}
                                 onClick={() => handleDateClick(dayData)}
                                 className={`
-                                    relative flex items-center justify-center w-10 h-10 min-h-10
-                                    rounded-lg transition-all duration-200 text-sm select-none
+                                    relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 min-h-8 sm:min-h-10
+                                    rounded-md transition-all duration-200 text-xs sm:text-sm select-none
                                     ${status.selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
-                                    ${!dayData.isCurrentMonth ? 'opacity-30 text-default-400' : ''}
-                                    ${loading ? 'opacity-50 pointer-events-none bg-default-100' : ''}
-                                    ${status.isSelected ? 'bg-primary text-primary-foreground font-bold border-2 border-primary-600 shadow-lg scale-105 z-10' : ''}
-                                    ${status.hasExistingLeave && !status.isSelected ? 'bg-danger text-danger-foreground border-2 border-danger-600 font-medium cursor-not-allowed' : ''}
-                                    ${status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave ? 'bg-warning text-warning-foreground border-2 border-warning-600 font-medium cursor-not-allowed' : ''}
-                                    ${status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday ? 'bg-secondary-200 text-secondary-800 font-semibold border-2 border-secondary-500 shadow-md' : ''}
-                                    ${status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday ? 'text-default-500 bg-default-50 border border-default-200 opacity-70' : ''}
-                                    ${!status.selectable && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'text-default-400 cursor-not-allowed bg-default-100 opacity-60' : ''}
-                                    ${status.selectable && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'text-default-900 border border-transparent hover:bg-primary-50 hover:text-primary hover:border-primary-200 hover:scale-105' : ''}
+                                    ${!dayData.isCurrentMonth ? 'opacity-30' : ''}
+                                    ${loading ? 'opacity-50 pointer-events-none' : ''}
+                                    ${status.isSelected ? 'font-bold border-2 shadow-md scale-105 z-10' : ''}
+                                    ${status.hasExistingLeave && !status.isSelected ? 'border-2 font-medium cursor-not-allowed' : ''}
+                                    ${status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave ? 'border-2 font-medium cursor-not-allowed' : ''}
+                                    ${status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday ? 'font-semibold border-2 shadow-sm' : ''}
+                                    ${status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday ? 'border opacity-70' : ''}
+                                    ${!status.selectable && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'cursor-not-allowed opacity-60' : ''}
+                                    ${status.selectable && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend ? 'border border-transparent hover:scale-105' : ''}
                                 `}
+                                style={{
+                                    backgroundColor: status.isSelected 
+                                        ? 'var(--theme-primary)' 
+                                        : status.hasExistingLeave && !status.isSelected 
+                                        ? 'var(--theme-danger)' 
+                                        : status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave
+                                        ? 'var(--theme-warning)'
+                                        : status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday
+                                        ? 'var(--theme-secondary-200)'
+                                        : status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday
+                                        ? 'var(--theme-content2)'
+                                        : loading
+                                        ? 'var(--theme-content2)'
+                                        : 'transparent',
+                                    color: status.isSelected 
+                                        ? 'var(--theme-primary-foreground)' 
+                                        : status.hasExistingLeave && !status.isSelected 
+                                        ? 'var(--theme-danger-foreground)' 
+                                        : status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave
+                                        ? 'var(--theme-warning-foreground)'
+                                        : status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday
+                                        ? 'var(--theme-secondary-800)'
+                                        : status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday
+                                        ? 'var(--theme-foreground-500)'
+                                        : !status.selectable && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday && !status.isWeekend
+                                        ? 'var(--theme-foreground-400)'
+                                        : 'var(--theme-foreground-900)',
+                                    borderColor: status.isSelected 
+                                        ? 'var(--theme-primary-600)' 
+                                        : status.hasExistingLeave && !status.isSelected 
+                                        ? 'var(--theme-danger-600)' 
+                                        : status.isPublicHoliday && !status.isSelected && !status.hasExistingLeave
+                                        ? 'var(--theme-warning-600)'
+                                        : status.isToday && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday
+                                        ? 'var(--theme-secondary-500)'
+                                        : status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && !status.isToday
+                                        ? 'var(--theme-divider)'
+                                        : 'transparent',
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                                 role="button"
                                 tabIndex={status.selectable ? 0 : -1}
                                 title={status.hasExistingLeave ? 'Existing leave - cannot select' : 
@@ -405,30 +523,46 @@ const BulkCalendar = ({
                             >
                                 {dayData.date}
                                 
-                                {/* Weekend indicator */}
+                                {/* Weekend indicator - hidden on mobile */}
                                 {status.isWeekend && !status.isSelected && !status.hasExistingLeave && !status.isPublicHoliday && (
-                                    <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-default-500 opacity-50" />
+                                    <div 
+                                        className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full opacity-50 hidden sm:block"
+                                        style={{ backgroundColor: 'var(--theme-foreground-500)' }}
+                                    />
                                 )}
                             </div>
                         );
                     })}
                 </div>
                 
-                {/* Selection summary */}
+                {/* Selection summary - compact */}
                 {selectedDates.length > 0 && (
-                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 relative overflow-hidden">
+                    <div className="mt-4 p-3 sm:p-4 rounded-lg relative overflow-hidden" style={{
+                        background: `linear-gradient(135deg, 
+                            color-mix(in srgb, var(--theme-primary) 10%, transparent) 20%, 
+                            color-mix(in srgb, var(--theme-primary) 5%, transparent) 80%)`,
+                        border: `1px solid color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
                         <div className="relative z-10">
-                            <p className="text-sm font-semibold text-primary-700 mb-2">
+                            <p className="text-xs sm:text-sm font-semibold mb-2" style={{
+                                color: `var(--theme-primary)`,
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 📅 {selectedDates.length} date{selectedDates.length !== 1 ? 's' : ''} selected
                             </p>
                             <div className="flex flex-wrap gap-1">
-                                {selectedDates.slice(0, 12).map(date => (
+                                {selectedDates.slice(0, 8).map(date => (
                                     <Chip 
                                         key={date} 
                                         size="sm" 
                                         color="primary"
                                         variant="solid"
-                                        className="font-medium text-xs"
+                                        radius={getThemeRadius()}
+                                        className="text-xs font-medium"
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
                                     >
                                         {new Date(date).toLocaleDateString('en-US', { 
                                             month: 'short', 
@@ -436,25 +570,34 @@ const BulkCalendar = ({
                                         })}
                                     </Chip>
                                 ))}
-                                {selectedDates.length > 12 && (
+                                {selectedDates.length > 8 && (
                                     <Chip 
                                         size="sm" 
                                         color="primary"
                                         variant="bordered"
-                                        className="font-medium"
+                                        radius={getThemeRadius()}
+                                        className="text-xs font-medium"
+                                        style={{
+                                            borderColor: `var(--theme-primary)`,
+                                            color: `var(--theme-primary)`,
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
                                     >
-                                        +{selectedDates.length - 12} more
+                                        +{selectedDates.length - 8} more
                                     </Chip>
                                 )}
                             </div>
                         </div>
                         
                         {/* Background decoration */}
-                        <div className="absolute -top-2 -right-2 w-15 h-15 rounded-full bg-primary-200 opacity-30" />
+                        <div 
+                            className="absolute -top-2 -right-2 w-12 h-12 rounded-full opacity-30"
+                            style={{ backgroundColor: `var(--theme-primary)` }}
+                        />
                     </div>
                 )}
             </CardBody>
-        </GlassCard>
+        </Card>
     );
 };
 

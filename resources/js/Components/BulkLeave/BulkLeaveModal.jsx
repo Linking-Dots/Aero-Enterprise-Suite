@@ -6,19 +6,24 @@ import {
     Select,
     SelectItem,
     Switch,
-    Spinner
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
 } from "@heroui/react";
 import { X } from 'lucide-react';
 import { 
     CalendarDaysIcon, 
     ExclamationTriangleIcon,
-    CheckCircleIcon 
+    CheckCircleIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
 
 import { usePage } from '@inertiajs/react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import GlassDialog from "@/Components/GlassDialog.jsx";
 import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
 import BulkCalendar from './BulkCalendar';
 import BulkValidationPreview from './BulkValidationPreview';
@@ -35,6 +40,21 @@ const BulkLeaveModal = ({
     publicHolidays = []
 }) => {
     const { auth } = usePage().props;
+
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
     
     // Form state
@@ -194,23 +214,9 @@ const BulkLeaveModal = ({
         }
         
         if (!reason.trim() || reason.trim().length < 5) {
-            const toastPromise = new Promise((resolve, reject) => {
-                reject('Please provide a reason for leave (at least 5 characters)');
-            });
-            
+            const toastPromise = Promise.reject('Please provide a reason for leave (at least 5 characters)');
             toast.promise(toastPromise, {
-                error: {
-                    render({ data }) {
-                        return <>{data}</>;
-                    },
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    },
-                },
+                error: 'Please provide a reason for leave (at least 5 characters)'
             });
             return;
         }
@@ -277,23 +283,9 @@ const BulkLeaveModal = ({
 
         const conflictCount = validationResults.filter(r => r.status === 'conflict').length;
         if (conflictCount > 0 && !allowPartialSuccess) {
-            const toastPromise = new Promise((resolve, reject) => {
-                reject('Please resolve conflicts or enable partial success mode');
-            });
-            
+            const toastPromise = Promise.reject('Please resolve conflicts or enable partial success mode');
             toast.promise(toastPromise, {
-                error: {
-                    render({ data }) {
-                        return <>{data}</>;
-                    },
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    },
-                },
+                error: 'Please resolve conflicts or enable partial success mode'
             });
             return;
         }
@@ -356,60 +348,20 @@ const BulkLeaveModal = ({
         toast.promise(
             promise,
             {
-                pending: {
-                    render() {
-                        return (
-                                <div className="flex items-center">
-                                    <Spinner size="sm" />
-                                    <span className="ml-2">Creating bulk leave requests...</span>
-                                </div>
-                        );
-                    },
-                    icon: false,
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    },
-                },
+                pending: 'Creating bulk leave requests...',
                 success: {
                     render({ data }) {
-                        return (
-                            <>
-                                {data.map((message, index) => (
-                                    <div key={index}>{message}</div>
-                                ))}
-                            </>
-                        );
-                    },
-                    icon: '🟢',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    },
+                        return data.join(', ');
+                    }
                 },
                 error: {
                     render({ data }) {
-                        return (
-                            <>
-                                {data}
-                            </>
-                        );
-                    },
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    },
-                },
+                        return data;
+                    }
+                }
             }
         );
-    }, [hasValidated, validationResults, allowPartialSuccess, selectedUserId, selectedDates, selectedLeaveType, reason, onSuccess, onClose, leaveTypes, theme]);
+    }, [hasValidated, validationResults, allowPartialSuccess, selectedUserId, selectedDates, selectedLeaveType, reason, onSuccess, onClose, leaveTypes]);
 
     // Check if form is valid for validation
     const canValidate = selectedDates.length > 0 && selectedLeaveType && reason.trim().length >= 5;
@@ -419,57 +371,85 @@ const BulkLeaveModal = ({
                      (validationResults.filter(r => r.status === 'conflict').length === 0 || allowPartialSuccess);
 
     return (
-        <GlassDialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-            <div className="flex items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 flex-1">
-                    <CalendarDaysIcon style={{ width: 24, height: 24, color: theme.colors.primary }} />
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Add Bulk Leave
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            Select multiple dates and create leave requests in batch
-                        </p>
-                    </div>
-                </div>
-                <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={onClose}
-                    isDisabled={isSubmitting}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={20} />
-                </Button>
-            </div>
-            
-            <div className="py-6 px-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Modal 
+            isOpen={open} 
+            onClose={onClose}
+            size="5xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "backdrop-blur-md max-h-[95vh] my-2",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+                header: "border-b border-divider flex-shrink-0",
+                body: "overflow-y-auto max-h-[calc(95vh-160px)]",
+                footer: "border-t border-divider flex-shrink-0",
+                closeButton: "hover:bg-white/5 active:bg-white/10"
+            }}
+            style={{
+                border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`,
+                borderRadius: `var(--borderRadius, 12px)`,
+                fontFamily: `var(--fontFamily, "Inter")`,
+                transform: `scale(var(--scale, 1))`,
+            }}
+        >
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader className="flex flex-col gap-1 py-4" style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <div className="flex items-center gap-2">
+                                <CalendarDaysIcon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: 'var(--theme-primary)' }} />
+                                <div>
+                                    <span className="text-lg font-semibold" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
+                                        Add Bulk Leave
+                                    </span>
+                                    <p className="text-sm text-default-500 mt-0.5" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
+                                        Select multiple dates and create leave requests in batch
+                                    </p>
+                                </div>
+                            </div>
+                        </ModalHeader>
+                        
+                        <ModalBody className="py-4 px-4 sm:py-6 sm:px-6 overflow-y-auto" style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                     {/* Left Column: Calendar */}
                     <div>
-                        <div className="sticky top-0">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                <CalendarDaysIcon style={{ width: 20, height: 20 }} />
-                                Select Dates
-                            </h3>
-                            <BulkCalendar
-                                selectedDates={selectedDates}
-                                onDatesChange={(dates) => {
-                                    setSelectedDates(dates);
-                                    setHasValidated(false); // Reset validation when dates change
-                                }}
-                                userId={selectedUserId}
-                                fetchFromAPI={true} // Enable API-driven data fetching
-                            />
-                        </div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{
+                            color: `var(--theme-foreground-900, #18181B)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <CalendarDaysIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
+                            Select Dates
+                        </h3>
+                        <BulkCalendar
+                            selectedDates={selectedDates}
+                            onDatesChange={(dates) => {
+                                setSelectedDates(dates);
+                                setHasValidated(false); // Reset validation when dates change
+                            }}
+                            userId={selectedUserId}
+                            fetchFromAPI={true} // Enable API-driven data fetching
+                        />
                     </div>
                     
                     {/* Right Column: Form and Validation */}
                     <div>
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-4">
                             {/* Form Controls */}
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{
+                                    color: `var(--theme-foreground-900, #18181B)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
+                                    <UserIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
                                     Leave Details
                                 </h3>
                                 
@@ -490,7 +470,6 @@ const BulkLeaveModal = ({
                                             departments={departments}
                                             showSearch={true}
                                             error={errors}
-                                            theme={theme}
                                             variant="outlined"
                                             showAllOption={false}
                                             autoSelectFirstDepartment={false} // Let our initialization effect handle this
@@ -503,15 +482,27 @@ const BulkLeaveModal = ({
                                     <div>
                                         <Select
                                             label="Leave Type"
-                                            selectedKeys={selectedLeaveType ? [selectedLeaveType] : []}
+                                            placeholder="Select Leave Type"
+                                            selectionMode="single"
+                                            selectedKeys={selectedLeaveType ? new Set([selectedLeaveType]) : new Set()}
                                             onSelectionChange={(keys) => {
                                                 const value = Array.from(keys)[0];
-                                                setSelectedLeaveType(value);
+                                                setSelectedLeaveType(value || '');
                                                 setHasValidated(false);
                                             }}
                                             isDisabled={isSubmitting || isValidating || loadingLeaveTypes}
                                             isInvalid={Boolean(errors.leave_type_id)}
                                             errorMessage={errors.leave_type_id}
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={getThemeRadius()}
+                                            classNames={{
+                                                trigger: "min-h-unit-10",
+                                                value: "text-small"
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
                                         >
                                             {loadingLeaveTypes ? (
                                                 <SelectItem key="loading" isDisabled>
@@ -539,6 +530,7 @@ const BulkLeaveModal = ({
                                                             value={type.type}
                                                             isDisabled={isDisabled}
                                                             title={isDisabled ? 'No remaining leaves available' : ''}
+                                                            textValue={type.type}
                                                         >
                                                             <div className="flex justify-between w-full">
                                                                 <span>{type.type}</span>
@@ -577,6 +569,16 @@ const BulkLeaveModal = ({
                                                 return `${remaining || 0} remaining of ${totalDays || 0} total`;
                                             })()}
                                             isReadOnly
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={getThemeRadius()}
+                                            classNames={{
+                                                input: "text-small",
+                                                inputWrapper: "min-h-unit-10"
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
                                         />
                                     )}
 
@@ -598,6 +600,16 @@ const BulkLeaveModal = ({
                                         }
                                         maxLength={500}
                                         isDisabled={isSubmitting || isValidating}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
                                     />
 
                                     {/* Options */}
@@ -624,15 +636,29 @@ const BulkLeaveModal = ({
                             {selectedDates.length > 0 && (
                                 <div 
                                     className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+                                    style={{
+                                        borderRadius: `var(--borderRadius, 12px)`,
+                                        border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`,
+                                        background: `linear-gradient(135deg, 
+                                            color-mix(in srgb, var(--theme-content1) 30%, transparent) 20%, 
+                                            color-mix(in srgb, var(--theme-content2) 20%, transparent) 10%)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 >
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
                                         Selected Dates Summary
                                     </p>
-                                    <p className="text-base font-medium text-gray-900 dark:text-white">
+                                    <p className="text-base font-medium text-gray-900 dark:text-white" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
                                         <strong>{selectedDates.length}</strong> date{selectedDates.length !== 1 ? 's' : ''} selected
                                     </p>
                                     {selectedLeaveType && (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400" style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}>
                                             Leave type: {selectedLeaveType}
                                         </p>
                                     )}
@@ -648,45 +674,70 @@ const BulkLeaveModal = ({
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 gap-4">
-                <Button
-                    variant="bordered"
-                    onPress={onClose}
-                    isDisabled={isSubmitting}
-                    className="rounded-full"
-                >
-                    Cancel
-                </Button>
-                
-                <div className="flex gap-2">
-                    <Button
-                        variant="bordered"
-                        color="primary"
-                        onPress={handleValidate}
-                        isLoading={isValidating}
-                        isDisabled={!canValidate || isSubmitting}
-                        startContent={!isValidating && <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />}
-                        className="rounded-full"
-                    >
-                        {isValidating ? 'Validating...' : 'Validate Dates'}
-                    </Button>
-                    
-                    <Button
-                        variant="solid"
-                        color="primary"
-                        onPress={handleSubmit}
-                        isLoading={isSubmitting}
-                        isDisabled={!canSubmit || isValidating}
-                        startContent={!isSubmitting && <CheckCircleIcon style={{ width: 16, height: 16 }} />}
-                        className="rounded-full"
-                    >
-                        {isSubmitting ? 'Creating...' : `Create ${selectedDates.length} Leave Request${selectedDates.length !== 1 ? 's' : ''}`}
-                    </Button>
-                </div>
-            </div>
-        </GlassDialog>
+                        </ModalBody>
+                        
+                        <ModalFooter className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-3 sm:py-4" style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <Button 
+                                variant="light" 
+                                onPress={onClose}
+                                isDisabled={isSubmitting}
+                                radius={getThemeRadius()}
+                                className="w-full sm:w-auto order-2 sm:order-1"
+                                style={{
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            
+                            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
+                                <Button
+                                    variant="bordered"
+                                    color="primary"
+                                    onPress={handleValidate}
+                                    isLoading={isValidating}
+                                    isDisabled={!canValidate || isSubmitting}
+                                    startContent={!isValidating && <ExclamationTriangleIcon className="w-4 h-4" />}
+                                    radius={getThemeRadius()}
+                                    className="w-full sm:w-auto"
+                                    style={{
+                                        borderRadius: `var(--borderRadius, 8px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
+                                >
+                                    <span className="truncate">
+                                        {isValidating ? 'Validating...' : 'Validate Dates'}
+                                    </span>
+                                </Button>
+                                
+                                <Button
+                                    variant="solid"
+                                    color="primary"
+                                    onPress={handleSubmit}
+                                    isLoading={isSubmitting}
+                                    isDisabled={!canSubmit || isValidating}
+                                    startContent={!isSubmitting && <CheckCircleIcon className="w-4 h-4" />}
+                                    radius={getThemeRadius()}
+                                    className="w-full sm:w-auto"
+                                    style={{
+                                        borderRadius: `var(--borderRadius, 8px)`,
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
+                                >
+                                    <span className="truncate">
+                                        {isSubmitting ? 'Creating...' : `Create ${selectedDates.length} Leave${selectedDates.length !== 1 ? 's' : ''}`}
+                                    </span>
+                                </Button>
+                            </div>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
     );
 };
 

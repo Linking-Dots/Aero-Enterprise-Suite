@@ -11,7 +11,7 @@ import {
     Button
 } from '@heroui/react';
 import GlassCard from '@/Components/GlassCard';
-import useTheme, { getThemePrimaryColor } from '@/theme';
+import useTheme from '@/theme';
 import { toast } from "react-toastify"; // Assuming GlassCard is a custom component
 
 

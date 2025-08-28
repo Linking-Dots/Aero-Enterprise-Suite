@@ -12,8 +12,7 @@ import {
     Select,
     SelectItem
 } from "@heroui/react";
-import useTheme, { getThemePrimaryColor } from '@/theme';
-import { getTextFieldStyles } from '@/utils/glassyStyles.js';
+
 import {
     UserIcon,
     MagnifyingGlassIcon,
@@ -89,7 +88,6 @@ const projects = [
 const UserProfile = ({ title, allUsers, report_to, departments, designations }) => {
     const { auth } = usePage().props;
     const { isDark } = useTheme();
-    const primaryColor = getThemePrimaryColor();
     
     // Custom media queries
     const [isMobile, setIsMobile] = useState(false);
@@ -891,21 +889,20 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
                     className="flex flex-col sm:flex-row gap-4"
                 >
                     <div className="flex-1">
-                        <TextField
+                        <Input
                             label="Search Profile Sections"
                             placeholder="Search sections, fields, or content..."
                             value={filters.search}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <MagnifyingGlassIcon className="w-4 h-4" />
-                                    </InputAdornment>
-                                ),
+                            startContent={
+                                <MagnifyingGlassIcon className="w-4 h-4" style={{ color: 'var(--theme-foreground-400, #71717A)' }} />
+                            }
+                            variant="bordered"
+                            size={isMobile ? "sm" : "md"}
+                            style={{
+                                borderRadius: 'var(--borderRadius, 12px)',
+                                fontFamily: 'var(--fontFamily, "Inter")'
                             }}
-                            fullWidth
-                            size={isMobile ? "small" : "medium"}
-                            sx={getTextFieldStyles('search')}
                         />
                     </div>
 

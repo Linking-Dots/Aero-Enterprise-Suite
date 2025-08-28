@@ -20,8 +20,7 @@ import {
   DropdownMenu,
   DropdownItem
 } from "@heroui/react";
-import useTheme, { getThemePrimaryColor } from '@/theme';
-import { getFormControlStyles, getTextFieldStyles } from '@/utils/glassyStyles.js';
+
 import { 
   UserPlusIcon,
   UsersIcon,
@@ -62,8 +61,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const UsersList = ({ title, roles }) => {
-  const { isDark } = useTheme();
-  const primaryColor = getThemePrimaryColor();
+
   
   // Custom media queries
   const [isMobile, setIsMobile] = useState(false);
@@ -992,20 +990,19 @@ const UsersList = ({ title, roles }) => {
                 {/* View Controls */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="flex-1">
-                    <TextField
+                    <Input
                       placeholder="Search by name, email or phone..."
                       value={filters.search}
                       onChange={(e) => handleFilterChange('search', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MagnifyingGlassIcon className="w-4 h-4" />
-                          </InputAdornment>
-                        ),
+                      startContent={
+                        <MagnifyingGlassIcon className="w-4 h-4" style={{ color: 'var(--theme-foreground-400, #71717A)' }} />
+                      }
+                      variant="bordered"
+                      size={isMobile ? "sm" : "md"}
+                      style={{
+                        borderRadius: 'var(--borderRadius, 12px)',
+                        fontFamily: 'var(--fontFamily, "Inter")'
                       }}
-                      fullWidth
-                      size={isMobile ? "small" : "medium"}
-                      sx={getTextFieldStyles('search')}
                     />
                   </div>
 
@@ -1047,40 +1044,63 @@ const UsersList = ({ title, roles }) => {
 
                 {/* Filters Section */}
                 {showFilters && (
-                  <Fade in={true} timeout={300}>
-                    <div className="mb-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div 
+                      className="mb-6 p-4 backdrop-blur-md rounded-lg border"
+                      style={{
+                        background: 'color-mix(in srgb, var(--theme-content1, #FFFFFF) 5%, transparent)',
+                        borderColor: 'var(--theme-divider, #E4E4E7)',
+                        borderRadius: 'var(--borderRadius, 12px)'
+                      }}
+                    >
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <FormControl fullWidth size="small" sx={getFormControlStyles()}>
-                          <InputLabel>Status</InputLabel>
-                          <Select
-                            value={filters.status}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                          >
-                            <MenuItem value="all">All Statuses</MenuItem>
-                            <MenuItem value="active">Active Only</MenuItem>
-                            <MenuItem value="inactive">Inactive Only</MenuItem>
-                          </Select>
-                        </FormControl>
+                        <Select
+                          label="Status"
+                          selectedKeys={filters.status ? [filters.status] : []}
+                          onSelectionChange={(keys) => handleFilterChange('status', Array.from(keys)[0])}
+                          variant="bordered"
+                          size="sm"
+                          style={{
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
+                          }}
+                        >
+                          <SelectItem key="all" value="all">All Statuses</SelectItem>
+                          <SelectItem key="active" value="active">Active Only</SelectItem>
+                          <SelectItem key="inactive" value="inactive">Inactive Only</SelectItem>
+                        </Select>
 
-                        <FormControl fullWidth size="small" sx={getFormControlStyles()}>
-                          <InputLabel>Role</InputLabel>
-                          <Select
-                            value={filters.role}
-                            onChange={(e) => handleFilterChange('role', e.target.value)}
-                          >
-                            <MenuItem value="all">All Roles</MenuItem>
-                            {roles?.map(role => (
-                              <MenuItem key={role.toLowerCase()} value={role.toLowerCase()}>
-                                {role}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                        <Select
+                          label="Role"
+                          selectedKeys={filters.role ? [filters.role] : []}
+                          onSelectionChange={(keys) => handleFilterChange('role', Array.from(keys)[0])}
+                          variant="bordered"
+                          size="sm"
+                          style={{
+                            borderRadius: 'var(--borderRadius, 12px)',
+                            fontFamily: 'var(--fontFamily, "Inter")'
+                          }}
+                        >
+                          <SelectItem key="all" value="all">All Roles</SelectItem>
+                          {roles?.map(role => (
+                            <SelectItem key={role.toLowerCase()} value={role.toLowerCase()}>
+                              {role}
+                            </SelectItem>
+                          ))}
+                        </Select>
                       </div>
 
                       {/* Active Filters */}
                       {(filters.search || filters.status !== 'all' || filters.role !== 'all') && (
-                        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/10">
+                        <div 
+                          className="flex flex-wrap gap-2 mt-4 pt-4 border-t"
+                          style={{ borderColor: 'var(--theme-divider, #E4E4E7)' }}
+                        >
                           {filters.search && (
                             <Chip
                               variant="flat"
@@ -1114,7 +1134,7 @@ const UsersList = ({ title, roles }) => {
                         </div>
                       )}
                     </div>
-                  </Fade>
+                  </motion.div>
                 )}
 
                 {/* Content Area */}

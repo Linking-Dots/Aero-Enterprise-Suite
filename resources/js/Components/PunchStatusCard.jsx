@@ -224,14 +224,71 @@ const PunchStatusCard = React.memo(() => {
         productivity: Math.min(100, (parseFloat(attendanceState.realtimeWorkTime.split(':')[0]) / 8) * 100)
     }), [attendanceState.todayPunches, attendanceState.realtimeWorkTime]);
 
-    // ===== LOCATION UTILITIES =====
-    const getLocationOptions = useCallback((isHighAccuracy = false, timeoutMs = 10000) => ({
-        enableHighAccuracy: isHighAccuracy,
-        timeout: timeoutMs,
-        maximumAge: isHighAccuracy ? 30000 : 300000
-    }), []);
+    // ===== LOCATION UTILITIES - SIMPLIFIED APPROACH =====
+    const getLocationData = useCallback(() => {
+        return new Promise((resolve, reject) => {
+            // Simple check for geolocation support
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation is not supported by this browser'));
+                return;
+            }
 
-    const checkLocationConnectionStatus = useCallback(() => {
+            // Standard geolocation options
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 60000
+            };
+
+            // Single, straightforward geolocation request
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const locationData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    // Update connection status on success
+                    setSystemState(prev => ({
+                        ...prev,
+                        connectionStatus: { ...prev.connectionStatus, location: true }
+                    }));
+                    
+                    resolve(locationData);
+                },
+                (error) => {
+                    // Update connection status on error
+                    setSystemState(prev => ({
+                        ...prev,
+                        connectionStatus: { ...prev.connectionStatus, location: false }
+                    }));
+                    
+                    // Simple error handling
+                    let message = 'Unable to get your location. ';
+                    switch (error.code) {
+                        case 1: // PERMISSION_DENIED
+                            message += 'Please allow location access and try again.';
+                            break;
+                        case 2: // POSITION_UNAVAILABLE
+                            message += 'Please enable GPS and try again.';
+                            break;
+                        case 3: // TIMEOUT
+                            message += 'Location request timed out. Please try again.';
+                            break;
+                        default:
+                            message += 'Please try again.';
+                    }
+                    
+                    reject(new Error(message));
+                },
+                options
+            );
+        });
+    }, []);
+
+    const checkLocationStatus = useCallback(() => {
+        // Simple status check without making actual location requests
         if (!navigator.geolocation) {
             setSystemState(prev => ({
                 ...prev,
@@ -240,72 +297,33 @@ const PunchStatusCard = React.memo(() => {
             return;
         }
 
-        navigator.geolocation.getCurrentPosition(
-            () => {
-                setSystemState(prev => ({
-                    ...prev,
-                    connectionStatus: { ...prev.connectionStatus, location: true }
-                }));
-            },
-            (error) => {
-                console.warn('Location check failed:', error);
-                setSystemState(prev => ({
-                    ...prev,
-                    connectionStatus: { ...prev.connectionStatus, location: false }
-                }));
-            },
-            getLocationOptions(false, 8000)
-        );
-    }, [getLocationOptions]);
-
-    const fetchLocationData = useCallback(() => {
-        if (!navigator.geolocation) {
-            throw new Error('Geolocation is not supported by this browser');
-        }
-
-        return new Promise((resolve, reject) => {
-            const requestLocation = (attempt = 1) => {
-                const maxAttempts = 3;
-                const settings = attempt === 1 
-                    ? getLocationOptions(false, 12000)
-                    : attempt === 2 
-                    ? getLocationOptions(true, 15000)
-                    : getLocationOptions(false, 20000);
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        
-                        setSystemState(prev => ({
-                            ...prev,
-                            connectionStatus: { ...prev.connectionStatus, location: true }
-                        }));
-                        
-                        resolve(locationData);
-                    },
-                    (error) => {
-                        setSystemState(prev => ({
-                            ...prev,
-                            connectionStatus: { ...prev.connectionStatus, location: false }
-                        }));
-                        
-                        if (attempt < maxAttempts && (error.code === 3 || error.code === 2)) {
-                            setTimeout(() => requestLocation(attempt + 1), 1000);
-                        } else {
-                            reject(error);
+        // Quick permission check if available
+        if (navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' })
+                .then((result) => {
+                    setSystemState(prev => ({
+                        ...prev,
+                        connectionStatus: { 
+                            ...prev.connectionStatus, 
+                            location: result.state === 'granted' 
                         }
-                    },
-                    settings
-                );
-            };
-
-            requestLocation();
-        });
-    }, [getLocationOptions]);
+                    }));
+                })
+                .catch(() => {
+                    // Fallback: assume location might be available
+                    setSystemState(prev => ({
+                        ...prev,
+                        connectionStatus: { ...prev.connectionStatus, location: true }
+                    }));
+                });
+        } else {
+            // If permissions API not available, assume location might be available
+            setSystemState(prev => ({
+                ...prev,
+                connectionStatus: { ...prev.connectionStatus, location: true }
+            }));
+        }
+    }, []);
 
     // ===== CORE FUNCTIONS =====
     const calculateRealtimeWorkTime = useCallback((currentTime) => {
@@ -420,9 +438,11 @@ const PunchStatusCard = React.memo(() => {
         setAttendanceState(prev => ({ ...prev, loading: true }));
 
         try {
-            const locationData = await fetchLocationData();
+            // Simple, straightforward location request
+            const locationData = await getLocationData();
             const deviceFingerprint = getDeviceFingerprint();
 
+            // Get IP address
             let currentIp = 'Unknown';
             try {
                 const ipResponse = await axios.get(route('getClientIp'));
@@ -431,6 +451,7 @@ const PunchStatusCard = React.memo(() => {
                 console.warn('Could not fetch IP address:', ipError);
             }
 
+            // Update session info
             setSystemState(prev => ({
                 ...prev,
                 sessionInfo: {
@@ -440,7 +461,8 @@ const PunchStatusCard = React.memo(() => {
                 }
             }));
 
-            const context = {
+            // Prepare punch data
+            const punchData = {
                 lat: locationData.latitude,
                 lng: locationData.longitude,
                 accuracy: locationData.accuracy,
@@ -451,7 +473,8 @@ const PunchStatusCard = React.memo(() => {
                 timestamp: new Date().toISOString(),
             };
 
-            const response = await axios.post(route('attendance.punch'), context);
+            // Submit punch
+            const response = await axios.post(route('attendance.punch'), punchData);
 
             if (response.data.status === 'success') {
                 toast.success(response.data.message, {
@@ -490,24 +513,16 @@ const PunchStatusCard = React.memo(() => {
                     }));
                 }
 
+                // Refresh data after a short delay
                 setTimeout(fetchCurrentStatus, 1000);
             } else {
                 toast.error(response.data.message);
             }
         } catch (error) {
-            console.error('Error during punch operation:', error);
+            console.error('Punch operation failed:', error);
             
-            let errorMessage = 'Unable to record attendance. Please try again.';
-            
-            if (error.code === 1) {
-                errorMessage = 'Location access is required for attendance. Please allow location permissions and try again.';
-            } else if (error.code === 2) {
-                errorMessage = 'Your location could not be determined. Please enable GPS and try again.';
-            } else if (error.code === 3) {
-                errorMessage = 'Location request timed out. Please check your connection and try again.';
-            } else if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            }
+            // Simple error message handling
+            const errorMessage = error.message || 'Unable to record attendance. Please try again.';
             
             toast.error(errorMessage, {
                 style: {
@@ -519,7 +534,7 @@ const PunchStatusCard = React.memo(() => {
         } finally {
             setAttendanceState(prev => ({ ...prev, loading: false }));
         }
-    }, [attendanceState.userOnLeave, attendanceState.currentStatus, fetchLocationData, getDeviceFingerprint, fetchCurrentStatus]);
+    }, [attendanceState.userOnLeave, attendanceState.currentStatus, getLocationData, getDeviceFingerprint, fetchCurrentStatus]);
 
     const toggleSection = useCallback((section) => {
         setUiState(prev => ({
@@ -657,11 +672,13 @@ const PunchStatusCard = React.memo(() => {
     }, []); // Remove all dependencies to prevent recreation
 
     useEffect(() => {
+        // Initial data fetch
         fetchCurrentStatus();
-        checkLocationConnectionStatus();
+        checkLocationStatus();
 
+        // Simple event handlers
         const handleFocus = () => {
-            checkLocationConnectionStatus();
+            checkLocationStatus();
             setSystemState(prev => ({
                 ...prev,
                 connectionStatus: { ...prev.connectionStatus, network: navigator.onLine }
@@ -682,16 +699,18 @@ const PunchStatusCard = React.memo(() => {
             }));
         };
 
+        // Add event listeners
         window.addEventListener('focus', handleFocus);
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
+        // Cleanup
         return () => {
             window.removeEventListener('focus', handleFocus);
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []); // Remove dependencies to prevent infinite loop
+    }, [fetchCurrentStatus, checkLocationStatus]);
 
     // ===== RENDER =====
     return (
@@ -883,20 +902,38 @@ const PunchStatusCard = React.memo(() => {
 
                         {/* Connection Status */}
                         <div className="flex justify-center gap-2 mb-4">
-                            <Tooltip content={`Location: ${systemState.connectionStatus.location ? 'Connected' : 'Required'}`}>
+                            <Tooltip content={
+                                systemState.connectionStatus.location 
+                                    ? 'Location: Connected' 
+                                    : 'Location: Required - Click to retry'
+                            }>
                                 <Chip 
                                     size="sm" 
                                     variant={systemState.connectionStatus.location ? 'flat' : 'bordered'}
                                     color={systemState.connectionStatus.location ? 'success' : 'danger'}
                                     startContent={<MapPinIcon className="w-3 h-3" />}
-                                    className="cursor-pointer text-xs"
+                                    className="cursor-pointer text-xs transition-all hover:scale-105"
                                     style={{
                                         borderRadius: `var(--borderRadius, 8px)`,
                                         fontFamily: `var(--fontFamily, 'Inter')`,
+                                        borderColor: !systemState.connectionStatus.location 
+                                            ? 'var(--theme-danger)' 
+                                            : 'transparent',
+                                        background: !systemState.connectionStatus.location 
+                                            ? 'color-mix(in srgb, var(--theme-danger) 10%, transparent)'
+                                            : 'color-mix(in srgb, var(--theme-success) 10%, transparent)',
                                     }}
                                     onClick={() => {
                                         if (!systemState.connectionStatus.location) {
-                                            checkLocationConnectionStatus();
+                                            checkLocationStatus();
+                                            toast.info('Checking location permissions...', {
+                                                style: {
+                                                    backdropFilter: 'blur(16px) saturate(200%)',
+                                                    background: 'var(--theme-primary)',
+                                                    color: 'var(--theme-primary-foreground)',
+                                                },
+                                                autoClose: 3000,
+                                            });
                                         }
                                     }}
                                 >
@@ -975,6 +1012,80 @@ const PunchStatusCard = React.memo(() => {
                         {/* Expandable Today's Activity */}
                         <div className="border-t border-divider">
                             <Accordion>
+                                {/* Location Troubleshooting */}
+                                {!systemState.connectionStatus.location && (
+                                    <AccordionItem 
+                                        key="location-help"
+                                        aria-label="Location Help"
+                                        startContent={<ExclamationTriangleIcon className="w-5 h-5" style={{ color: 'var(--theme-warning)' }} />}
+                                        title={
+                                            <span 
+                                                className="font-semibold text-sm"
+                                                style={{ color: 'var(--theme-warning)' }}
+                                            >
+                                                Location Required
+                                            </span>
+                                        }
+                                        subtitle={
+                                            <span 
+                                                className="text-xs"
+                                                style={{ color: 'var(--theme-warning-600)' }}
+                                            >
+                                                Help & Troubleshooting
+                                            </span>
+                                        }
+                                    >
+                                        <div className="space-y-3">
+                                            <Card 
+                                                className="p-3"
+                                                style={{
+                                                    background: `color-mix(in srgb, var(--theme-warning) 10%, transparent)`,
+                                                    borderColor: `color-mix(in srgb, var(--theme-warning) 20%, transparent)`,
+                                                    borderWidth: `var(--borderWidth, 1px)`,
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                }}
+                                            >
+                                                <h4 
+                                                    className="font-semibold text-sm mb-2"
+                                                    style={{ color: 'var(--theme-warning)' }}
+                                                >
+                                                    How to Enable Location:
+                                                </h4>
+                                                <ul className="text-xs space-y-1 list-disc list-inside">
+                                                    <li>Click the location icon (🌍) in your browser's address bar</li>
+                                                    <li>Select "Allow" or "Always allow" for location access</li>
+                                                    <li>Refresh the page if needed</li>
+                                                    <li>Make sure GPS is enabled on your device</li>
+                                                </ul>
+                                            </Card>
+                                            
+                                            <Button
+                                                color="warning"
+                                                variant="flat"
+                                                fullWidth
+                                                startContent={<ArrowPathIcon className="w-4 h-4" />}
+                                                onPress={() => {
+                                                    checkLocationStatus();
+                                                    toast.info('Retrying location access...', {
+                                                        style: {
+                                                            backdropFilter: 'blur(16px) saturate(200%)',
+                                                            background: 'var(--theme-primary)',
+                                                            color: 'var(--theme-primary-foreground)',
+                                                        },
+                                                    });
+                                                }}
+                                                className="font-semibold"
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                    fontFamily: `var(--fontFamily, 'Inter')`,
+                                                }}
+                                            >
+                                                Retry Location Access
+                                            </Button>
+                                        </div>
+                                    </AccordionItem>
+                                )}
+
                                 <AccordionItem 
                                     key="activity"
                                     aria-label="Today's Activity"
