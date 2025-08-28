@@ -42,7 +42,7 @@ import axios from 'axios';
 
 import { AbsentUsersInlineCard } from '@/Components/TimeSheet/AbsentUsersInlineCard';
 
-const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, externalFilterData, externalEmployee }) => {
+const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, externalFilterData, externalEmployee, onMarkAsPresent }) => {
     const { auth } = usePage().props;
     const { url } = usePage();
    
@@ -1223,6 +1223,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                                 selectedDate={selectedDate}
                                                 getUserLeave={getUserLeave}
                                                 isLoaded={isLoaded}
+                                                onMarkAsPresent={onMarkAsPresent}
                                             />
                                         </div>
                                     )}

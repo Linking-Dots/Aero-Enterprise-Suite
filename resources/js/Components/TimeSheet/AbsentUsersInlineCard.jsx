@@ -17,6 +17,7 @@ import {
     CheckCircleIcon,
     XCircleIcon,
     ChevronDownIcon,
+    UserPlusIcon,
 
    
 } from '@heroicons/react/24/outline';
@@ -26,7 +27,7 @@ import PageHeader from '@/Components/PageHeader';
 
 
 // Inline AbsentUsersCard component for the combined layout
-export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, getUserLeave, isLoaded = false }) => {
+export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, getUserLeave, isLoaded = false, onMarkAsPresent }) => {
     const [visibleUsersCount, setVisibleUsersCount] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -309,92 +310,114 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                                     e.currentTarget.style.background = `color-mix(in srgb, var(--theme-content1) 80%, transparent)`;
                                 }}
                             >
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                        <Avatar 
-                                            src={user.profile_image_url || user.profile_image} 
-                                            name={user.name}
-                                            isBordered
-                                            size="sm"
-                                            showFallback
-                                            radius={getThemeRadius()}
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p 
-                                                className="truncate text-sm font-medium text-foreground"
-                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
-                                            >
-                                                {user.name}
-                                            </p>
-                                            {user.employee_id && (
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <Avatar 
+                                                src={user.profile_image_url || user.profile_image} 
+                                                name={user.name}
+                                                isBordered
+                                                size="sm"
+                                                showFallback
+                                                radius={getThemeRadius()}
+                                            />
+                                            <div className="flex-1 min-w-0">
                                                 <p 
-                                                    className="block text-xs text-default-500"
+                                                    className="truncate text-sm font-medium text-foreground"
                                                     style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                 >
-                                                    ID: {user.employee_id}
+                                                    {user.name}
                                                 </p>
-                                            )}
-                                            {userLeave ? (
-                                                <div className="flex flex-col gap-1 mt-1">
+                                                {user.employee_id && (
                                                     <p 
-                                                        className="flex items-center gap-1 text-xs text-default-500"
+                                                        className="block text-xs text-default-500"
                                                         style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                     >
-                                                        <CalendarDaysIcon className="w-3 h-3" />
-                                                        <span className="truncate">
-                                                            {userLeave.from_date === userLeave.to_date 
-                                                                ? userLeave.from_date 
-                                                                : `${userLeave.from_date} - ${userLeave.to_date}`
-                                                            }
-                                                        </span>
+                                                        ID: {user.employee_id}
                                                     </p>
+                                                )}
+                                                {userLeave ? (
+                                                    <div className="flex flex-col gap-1 mt-1">
+                                                        <p 
+                                                            className="flex items-center gap-1 text-xs text-default-500"
+                                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                        >
+                                                            <CalendarDaysIcon className="w-3 h-3" />
+                                                            <span className="truncate">
+                                                                {userLeave.from_date === userLeave.to_date 
+                                                                    ? userLeave.from_date 
+                                                                    : `${userLeave.from_date} - ${userLeave.to_date}`
+                                                                }
+                                                            </span>
+                                                        </p>
+                                                        <p 
+                                                            className="flex items-center gap-1 text-xs"
+                                                            style={{ 
+                                                                color: getLeaveStatusColor(userLeave.status),
+                                                                fontFamily: `var(--fontFamily, "Inter")`
+                                                            }}
+                                                        >
+                                                            {getLeaveStatusIcon(userLeave.status)}
+                                                            <span className="truncate">{userLeave.leave_type} Leave</span>
+                                                        </p>
+                                                    </div>
+                                                ) : (
                                                     <p 
-                                                        className="flex items-center gap-1 text-xs"
+                                                        className="flex items-center gap-1 mt-1 text-xs"
+                                                        style={{ 
+                                                            color: 'var(--theme-danger)',
+                                                            fontFamily: `var(--fontFamily, "Inter")`
+                                                        }}
+                                                    >
+                                                        <ExclamationTriangleIcon className="w-3 h-3" />
+                                                        <span className="truncate">Absent without leave</span>
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {userLeave && (
+                                            <div 
+                                                className="px-1.5 py-0.5 ml-2 flex-shrink-0"
+                                                style={{
+                                                    background: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 15%, transparent)`,
+                                                    borderColor: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 30%, transparent)`,
+                                                    borderWidth: `var(--borderWidth, 1px)`,
+                                                    borderRadius: `var(--borderRadius, 6px)`,
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    {getLeaveStatusIcon(userLeave.status)}
+                                                    <span 
+                                                        className="font-semibold text-xs"
                                                         style={{ 
                                                             color: getLeaveStatusColor(userLeave.status),
                                                             fontFamily: `var(--fontFamily, "Inter")`
                                                         }}
                                                     >
-                                                        {getLeaveStatusIcon(userLeave.status)}
-                                                        <span className="truncate">{userLeave.leave_type} Leave</span>
-                                                    </p>
+                                                        {userLeave.status}
+                                                    </span>
                                                 </div>
-                                            ) : (
-                                                <p 
-                                                    className="flex items-center gap-1 mt-1 text-xs"
-                                                    style={{ 
-                                                        color: 'var(--theme-danger)',
-                                                        fontFamily: `var(--fontFamily, "Inter")`
-                                                    }}
-                                                >
-                                                    <ExclamationTriangleIcon className="w-3 h-3" />
-                                                    <span className="truncate">Absent without leave</span>
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {userLeave && (
-                                        <div 
-                                            className="px-1.5 py-0.5 ml-2 flex-shrink-0"
-                                            style={{
-                                                background: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 15%, transparent)`,
-                                                borderColor: `color-mix(in srgb, ${getLeaveStatusColor(userLeave.status)} 30%, transparent)`,
-                                                borderWidth: `var(--borderWidth, 1px)`,
-                                                borderRadius: `var(--borderRadius, 6px)`,
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-1">
-                                                {getLeaveStatusIcon(userLeave.status)}
-                                                <span 
-                                                    className="font-semibold text-xs"
-                                                    style={{ 
-                                                        color: getLeaveStatusColor(userLeave.status),
-                                                        fontFamily: `var(--fontFamily, "Inter")`
-                                                    }}
-                                                >
-                                                    {userLeave.status}
-                                                </span>
                                             </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Mark Present Button */}
+                                    {onMarkAsPresent && (
+                                        <div className="flex justify-end">
+                                            <Button
+                                                color="primary"
+                                                variant="flat"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                startContent={<UserPlusIcon className="w-3 h-3" />}
+                                                onPress={() => onMarkAsPresent(user)}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
+                                                className="text-xs"
+                                            >
+                                                Mark Present
+                                            </Button>
                                         </div>
                                     )}
                                 </div>

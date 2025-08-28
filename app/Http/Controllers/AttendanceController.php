@@ -16,10 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Throwable;
-
-// Barryvdh\DomPDF\Facade as PDF
 
 class AttendanceController extends Controller
 {
@@ -37,6 +35,14 @@ class AttendanceController extends Controller
             'title' => 'Attendances',
         ]);
     }
+
+    public function index3(): \Inertia\Response
+    {
+        return Inertia::render('TimeSheet', [
+            'title' => 'Time Sheet',
+        ]);
+    }
+
 
     public function paginate(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -463,7 +469,7 @@ class AttendanceController extends Controller
                 'locations' => $locations,
             ]);
         } catch (\Throwable $e) {
-            \Log::error('Error fetching user locations: '.$e->getMessage(), [
+            Log::error('Error fetching user locations: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -1437,6 +1443,227 @@ class AttendanceController extends Controller
                 'success' => false,
                 'message' => 'Failed to check for updates.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Check for timesheet updates
+     *
+     * @param  string  $date  The date to check for updates (Y-m-d format)
+     * @param  string  $month  The month to check for updates (YYYY-MM format)
+     */
+    /**
+     * Mark user as present for a specific date (Admin function)
+     * This creates attendance record with punch in/out for users who were absent
+     */
+    public function markAsPresent(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+                'date' => 'required|date',
+                'punch_in_time' => 'nullable|date_format:H:i',
+                'punch_out_time' => 'nullable|date_format:H:i',
+                'reason' => 'nullable|string|max:255',
+                'location' => 'nullable|string',
+            ]);
+
+            $userId = $validatedData['user_id'];
+            $date = Carbon::parse($validatedData['date'])->format('Y-m-d');
+            $punchInTime = $validatedData['punch_in_time'] ?? '09:00';
+            $punchOutTime = $validatedData['punch_out_time'] ?? null;
+            $reason = $validatedData['reason'] ?? 'Marked present by administrator';
+            $location = $validatedData['location'] ?? null;
+
+            // Check if the user already has attendance for this date
+            $existingAttendance = Attendance::where('user_id', $userId)
+                ->whereDate('date', $date)
+                ->first();
+
+            if ($existingAttendance) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User already has attendance record for this date.',
+                ], 422);
+            }
+
+            // Verify the user exists and is an employee
+            $user = User::find($userId);
+            if (! $user || ! $user->hasRole('Employee')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid user or user is not an employee.',
+                ], 422);
+            }
+
+            // Create the attendance record with punch in
+            $attendanceData = [
+                'user_id' => $userId,
+                'date' => $date,
+                'punchin' => Carbon::parse($date.' '.$punchInTime),
+                'punchin_location' => $location ? json_encode(['manual' => true, 'reason' => $reason]) : null,
+            ];
+
+            // Add punch out if provided
+            if ($punchOutTime) {
+                $attendanceData['punchout'] = Carbon::parse($date.' '.$punchOutTime);
+                $attendanceData['punchout_location'] = $location ? json_encode(['manual' => true, 'reason' => $reason]) : null;
+            }
+
+            $attendance = Attendance::create($attendanceData);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "User {$user->name} marked as present for ".Carbon::parse($date)->format('M d, Y'),
+                'data' => [
+                    'attendance' => $attendance,
+                    'user' => $user->only(['id', 'name', 'employee_id']),
+                ],
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error marking user as present: '.$e->getMessage(), [
+                'user_id' => $request->get('user_id'),
+                'date' => $request->get('date'),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while marking user as present.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Mark multiple users as present (Bulk operation)
+     */
+    public function bulkMarkAsPresent(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'user_ids' => 'required|array|min:1',
+                'user_ids.*' => 'required|integer|exists:users,id',
+                'date' => 'required|date',
+                'punch_in_time' => 'nullable|date_format:H:i',
+                'punch_out_time' => 'nullable|date_format:H:i',
+                'reason' => 'nullable|string|max:255',
+                'location' => 'nullable|string',
+            ]);
+
+            $userIds = $validatedData['user_ids'];
+            $date = Carbon::parse($validatedData['date'])->format('Y-m-d');
+            $punchInTime = $validatedData['punch_in_time'] ?? '09:00';
+            $punchOutTime = $validatedData['punch_out_time'] ?? null;
+            $reason = $validatedData['reason'] ?? 'Bulk marked present by administrator';
+            $location = $validatedData['location'] ?? null;
+
+            $results = [
+                'successful' => [],
+                'failed' => [],
+                'skipped' => [],
+            ];
+
+            DB::beginTransaction();
+
+            try {
+                foreach ($userIds as $userId) {
+                    // Check if user already has attendance
+                    $existingAttendance = Attendance::where('user_id', $userId)
+                        ->whereDate('date', $date)
+                        ->first();
+
+                    if ($existingAttendance) {
+                        $user = User::find($userId);
+                        $results['skipped'][] = [
+                            'user_id' => $userId,
+                            'name' => $user->name ?? 'Unknown',
+                            'reason' => 'Already has attendance record',
+                        ];
+
+                        continue;
+                    }
+
+                    // Verify user is an employee
+                    $user = User::find($userId);
+                    if (! $user || ! $user->hasRole('Employee')) {
+                        $results['failed'][] = [
+                            'user_id' => $userId,
+                            'name' => $user->name ?? 'Unknown',
+                            'reason' => 'Invalid user or not an employee',
+                        ];
+
+                        continue;
+                    }
+
+                    // Create attendance record
+                    $attendanceData = [
+                        'user_id' => $userId,
+                        'date' => $date,
+                        'punchin' => Carbon::parse($date.' '.$punchInTime),
+                        'punchin_location' => $location ? json_encode(['manual' => true, 'bulk' => true, 'reason' => $reason]) : null,
+                    ];
+
+                    if ($punchOutTime) {
+                        $attendanceData['punchout'] = Carbon::parse($date.' '.$punchOutTime);
+                        $attendanceData['punchout_location'] = $location ? json_encode(['manual' => true, 'bulk' => true, 'reason' => $reason]) : null;
+                    }
+
+                    $attendance = Attendance::create($attendanceData);
+
+                    $results['successful'][] = [
+                        'user_id' => $userId,
+                        'name' => $user->name,
+                        'attendance_id' => $attendance->id,
+                    ];
+                }
+
+                DB::commit();
+
+                $totalProcessed = count($userIds);
+                $successCount = count($results['successful']);
+                $failedCount = count($results['failed']);
+                $skippedCount = count($results['skipped']);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => "Bulk mark present completed. {$successCount} successful, {$failedCount} failed, {$skippedCount} skipped out of {$totalProcessed} users.",
+                    'data' => $results,
+                    'summary' => [
+                        'total' => $totalProcessed,
+                        'successful' => $successCount,
+                        'failed' => $failedCount,
+                        'skipped' => $skippedCount,
+                    ],
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error in bulk mark as present: '.$e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
             ], 500);
         }
     }

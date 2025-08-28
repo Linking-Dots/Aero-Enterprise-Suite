@@ -511,7 +511,7 @@ export default function Login({
     // ===== RENDER =====
     return (
         <>
-            <Head title="Sign In - Enterprise ERP" />
+            <Head title="Sign In" />
             
             {/* Main Login Container - Transparent to show theme background */}
             <div 

@@ -283,6 +283,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:letters.view'])->get('/letters', [LetterController::class, 'index'])->name('letters');    // Attendance management routes
     Route::middleware(['permission:attendance.view'])->group(function () {
         Route::get('/attendances', [AttendanceController::class, 'index1'])->name('attendances');
+        Route::get('/timesheet', [AttendanceController::class, 'index3'])->name('timesheet'); // New TimeSheet page route
         Route::get('/attendances-admin-paginate', [AttendanceController::class, 'paginate'])->name('attendancesAdmin.paginate');
         Route::get('/attendance/locations-today', [AttendanceController::class, 'getUserLocationsForDate'])->name('getUserLocationsForDate');
         Route::get('/admin/get-present-users-for-date', [AttendanceController::class, 'getPresentUsersForDate'])->name('admin.getPresentUsersForDate');
@@ -293,6 +294,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('check-user-locations-updates');
         Route::get('check-timesheet-updates/{date}/{month?}', [AttendanceController::class, 'checkTimesheetUpdates'])
             ->name('check-timesheet-updates');
+    });
+
+    // Attendance management routes (admin actions)
+    Route::middleware(['permission:attendance.manage'])->group(function () {
+        Route::post('/attendance/mark-as-present', [AttendanceController::class, 'markAsPresent'])->name('attendance.mark-as-present');
+        Route::post('/attendance/bulk-mark-as-present', [AttendanceController::class, 'bulkMarkAsPresent'])->name('attendance.bulk-mark-as-present');
     });
 
     // Employee attendance stats route
