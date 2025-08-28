@@ -59,7 +59,7 @@ import ProfileAvatar from './ProfileAvatar';
  * location-based validation, and enterprise-grade security features.
  * 
  * @features
- * - Real-time attendance tracking with location validation
+ * - Real-time attendance tracking with simplified location validation
  * - Role-based access control integration
  * - Progressive Web App (PWA) ready with offline capabilities
  * - Enterprise security with device fingerprinting
@@ -67,27 +67,10 @@ import ProfileAvatar from './ProfileAvatar';
  * - Performance optimized with memoization and efficient state management
  * 
  * @author Emam Hosen - Final Year CSE Project
- * @version 2.0.0
+ * @version 3.0.0 - Simplified Location Management
  */
 
 // ===== UTILITY FUNCTIONS =====
-
-/**
- * Alpha function for color opacity - HeroUI compatible
- */
-const alpha = (color, opacity) => {
-    if (color.startsWith('hsl')) {
-        return color.replace(')', `, ${opacity})`).replace('hsl', 'hsla');
-    }
-    if (color.startsWith('#')) {
-        const hex = color.replace('#', '');
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    }
-    return color.replace(/[\d.]+\)$/, `${opacity})`);
-};
 
 /**
  * Debounce utility for performance optimization
@@ -137,6 +120,16 @@ const useDeviceType = () => {
 };
 
 /**
+ * GPS Status Types
+ */
+const GPS_STATUS = {
+    CHECKING: 'checking',
+    ACTIVE: 'active',
+    DENIED: 'denied',
+    INACTIVE: 'inactive'
+};
+
+/**
  * Main PunchStatusCard Component
  */
 const PunchStatusCard = React.memo(() => {
@@ -152,7 +145,16 @@ const PunchStatusCard = React.memo(() => {
         totalWorkTime: '00:00:00',
         realtimeWorkTime: '00:00:00',
         userOnLeave: null,
-        loading: false
+        loading: false,
+        lastRefresh: null
+    });
+
+    // Location state - simplified
+    const [locationState, setLocationState] = useState({
+        status: GPS_STATUS.CHECKING,
+        coordinates: null,
+        error: null,
+        lastUpdate: null
     });
 
     // UI state
@@ -169,7 +171,6 @@ const PunchStatusCard = React.memo(() => {
     const [systemState, setSystemState] = useState({
         currentTime: new Date(),
         connectionStatus: {
-            location: false,
             network: true,
             device: true
         },
@@ -179,6 +180,123 @@ const PunchStatusCard = React.memo(() => {
             timestamp: null
         }
     });
+
+    // ===== LOCATION MANAGEMENT - SIMPLIFIED =====
+
+    /**
+     * Core location getter - Single unified function
+     */
+    const getLocation = useCallback(() => {
+        return new Promise((resolve, reject) => {
+            // Check browser support
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation is not supported by this browser'));
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 30000 // Allow 30 seconds cache
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const locationData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date(position.timestamp)
+                    };
+                    resolve(locationData);
+                },
+                (error) => {
+                    let message = 'Location unavailable';
+                    switch (error.code) {
+                        case 1: // PERMISSION_DENIED
+                            message = 'Location access denied. Please allow location permission in your browser settings.';
+                            break;
+                        case 2: // POSITION_UNAVAILABLE
+                            message = 'Location unavailable. Please ensure GPS is enabled.';
+                            break;
+                        case 3: // TIMEOUT
+                            message = 'Location request timed out. Please try again.';
+                            break;
+                        default:
+                            message = 'Unable to retrieve location. Please try again.';
+                    }
+                    reject(new Error(message));
+                },
+                options
+            );
+        });
+    }, []);
+
+    /**
+     * Check location permission and update GPS status
+     */
+    const checkLocationPermission = useCallback(async () => {
+        setLocationState(prev => ({ ...prev, status: GPS_STATUS.CHECKING, error: null }));
+
+        try {
+            const coordinates = await getLocation();
+            setLocationState({
+                status: GPS_STATUS.ACTIVE,
+                coordinates,
+                error: null,
+                lastUpdate: new Date()
+            });
+        } catch (error) {
+            const isPermissionDenied = error.message.includes('denied') || error.message.includes('Permission');
+            setLocationState({
+                status: isPermissionDenied ? GPS_STATUS.DENIED : GPS_STATUS.INACTIVE,
+                coordinates: null,
+                error: error.message,
+                lastUpdate: new Date()
+            });
+        }
+    }, [getLocation]);
+
+    /**
+     * Request location permission reset (for denied status)
+     */
+    const requestLocationPermissionReset = useCallback(async () => {
+        if (locationState.status !== GPS_STATUS.DENIED) return;
+
+        try {
+            setLocationState(prev => ({ ...prev, status: GPS_STATUS.CHECKING, error: null }));
+            const coordinates = await getLocation();
+            
+            setLocationState({
+                status: GPS_STATUS.ACTIVE,
+                coordinates,
+                error: null,
+                lastUpdate: new Date()
+            });
+
+            toast.success('Location access granted successfully!', {
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-success)',
+                    color: 'var(--theme-success-foreground)',
+                }
+            });
+        } catch (error) {
+            setLocationState(prev => ({
+                ...prev,
+                status: GPS_STATUS.DENIED,
+                error: 'Location access still denied. Please check your browser settings.'
+            }));
+
+            toast.error('Please enable location in your browser settings manually.', {
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-danger)',
+                    color: 'var(--theme-danger-foreground)',
+                }
+            });
+        }
+    }, [locationState.status, getLocation]);
 
     // ===== MEMOIZED VALUES =====
     const statusConfig = useMemo(() => {
@@ -224,168 +342,123 @@ const PunchStatusCard = React.memo(() => {
         productivity: Math.min(100, (parseFloat(attendanceState.realtimeWorkTime.split(':')[0]) / 8) * 100)
     }), [attendanceState.todayPunches, attendanceState.realtimeWorkTime]);
 
-    // ===== LOCATION UTILITIES - SIMPLIFIED APPROACH =====
-    const getLocationData = useCallback(() => {
-        return new Promise((resolve, reject) => {
-            // Simple check for geolocation support
-            if (!navigator.geolocation) {
-                reject(new Error('Geolocation is not supported by this browser'));
-                return;
-            }
-
-            // Standard geolocation options
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 60000
-            };
-
-            // Single, straightforward geolocation request
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const locationData = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    
-                    // Update connection status on success
-                    setSystemState(prev => ({
-                        ...prev,
-                        connectionStatus: { ...prev.connectionStatus, location: true }
-                    }));
-                    
-                    resolve(locationData);
-                },
-                (error) => {
-                    // Update connection status on error
-                    setSystemState(prev => ({
-                        ...prev,
-                        connectionStatus: { ...prev.connectionStatus, location: false }
-                    }));
-                    
-                    // Simple error handling
-                    let message = 'Unable to get your location. ';
-                    switch (error.code) {
-                        case 1: // PERMISSION_DENIED
-                            message += 'Please allow location access and try again.';
-                            break;
-                        case 2: // POSITION_UNAVAILABLE
-                            message += 'Please enable GPS and try again.';
-                            break;
-                        case 3: // TIMEOUT
-                            message += 'Location request timed out. Please try again.';
-                            break;
-                        default:
-                            message += 'Please try again.';
-                    }
-                    
-                    reject(new Error(message));
-                },
-                options
-            );
-        });
-    }, []);
-
-    const checkLocationStatus = useCallback(() => {
-        // Simple status check without making actual location requests
-        if (!navigator.geolocation) {
-            setSystemState(prev => ({
-                ...prev,
-                connectionStatus: { ...prev.connectionStatus, location: false }
-            }));
-            return;
+    const gpsChipConfig = useMemo(() => {
+        switch (locationState.status) {
+            case GPS_STATUS.CHECKING:
+                return {
+                    color: 'default',
+                    variant: 'flat',
+                    text: 'Checking',
+                    clickable: false,
+                    tooltip: 'Checking location permissions...'
+                };
+            case GPS_STATUS.ACTIVE:
+                return {
+                    color: 'success',
+                    variant: 'flat',
+                    text: 'GPS',
+                    clickable: false,
+                    tooltip: `Location: Active (±${Math.round(locationState.coordinates?.accuracy || 0)}m)`
+                };
+            case GPS_STATUS.DENIED:
+                return {
+                    color: 'danger',
+                    variant: 'bordered',
+                    text: 'GPS',
+                    clickable: true,
+                    tooltip: 'Location access denied. Click to retry.'
+                };
+            case GPS_STATUS.INACTIVE:
+                return {
+                    color: 'warning',
+                    variant: 'bordered',
+                    text: 'GPS',
+                    clickable: true,
+                    tooltip: 'Location unavailable. Click to retry.'
+                };
+            default:
+                return {
+                    color: 'default',
+                    variant: 'flat',
+                    text: 'GPS',
+                    clickable: false,
+                    tooltip: 'Location status unknown'
+                };
         }
-
-        // Quick permission check if available
-        if (navigator.permissions) {
-            navigator.permissions.query({ name: 'geolocation' })
-                .then((result) => {
-                    setSystemState(prev => ({
-                        ...prev,
-                        connectionStatus: { 
-                            ...prev.connectionStatus, 
-                            location: result.state === 'granted' 
-                        }
-                    }));
-                })
-                .catch(() => {
-                    // Fallback: assume location might be available
-                    setSystemState(prev => ({
-                        ...prev,
-                        connectionStatus: { ...prev.connectionStatus, location: true }
-                    }));
-                });
-        } else {
-            // If permissions API not available, assume location might be available
-            setSystemState(prev => ({
-                ...prev,
-                connectionStatus: { ...prev.connectionStatus, location: true }
-            }));
-        }
-    }, []);
+    }, [locationState.status, locationState.coordinates?.accuracy]);
 
     // ===== CORE FUNCTIONS =====
-    const calculateRealtimeWorkTime = useCallback((currentTime) => {
-        setAttendanceState(prev => {
-            let totalSeconds = 0;
 
-            prev.todayPunches.forEach((punch) => {
-                if (punch.punchin_time) {
-                    let punchInTime;
+    /**
+     * Calculate real-time work time
+     */
+    const calculateRealtimeWorkTime = useCallback(() => {
+        const currentTime = new Date();
+        let totalSeconds = 0;
+
+        attendanceState.todayPunches.forEach((punch) => {
+            if (punch.punchin_time) {
+                let punchInTime;
+                
+                // Handle different time formats
+                if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
+                    const today = new Date();
+                    const [hours, minutes, seconds] = punch.punchin_time.split(':');
+                    punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                        parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                } else {
+                    punchInTime = new Date(punch.punchin_time);
+                }
+
+                if (isNaN(punchInTime.getTime())) return;
+
+                if (punch.punchout_time) {
+                    let punchOutTime;
                     
-                    if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
+                    if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
                         const today = new Date();
-                        const [hours, minutes, seconds] = punch.punchin_time.split(':');
-                        punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                        const [hours, minutes, seconds] = punch.punchout_time.split(':');
+                        punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
                             parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
                     } else {
-                        punchInTime = new Date(punch.punchin_time);
+                        punchOutTime = new Date(punch.punchout_time);
                     }
 
-                    if (isNaN(punchInTime.getTime())) return;
+                    if (isNaN(punchOutTime.getTime())) return;
 
-                    if (punch.punchout_time) {
-                        let punchOutTime;
-                        
-                        if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
-                            const today = new Date();
-                            const [hours, minutes, seconds] = punch.punchout_time.split(':');
-                            punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                                parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                        } else {
-                            punchOutTime = new Date(punch.punchout_time);
-                        }
-
-                        if (isNaN(punchOutTime.getTime())) return;
-
-                        const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
-                        if (sessionSeconds > 0) totalSeconds += sessionSeconds;
-                    } else {
-                        const sessionSeconds = Math.floor((currentTime - punchInTime) / 1000);
-                        if (sessionSeconds > 0) totalSeconds += sessionSeconds;
-                    }
+                    const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
+                    if (sessionSeconds > 0) totalSeconds += sessionSeconds;
+                } else {
+                    // Active session - calculate from punch in to now
+                    const sessionSeconds = Math.floor((currentTime - punchInTime) / 1000);
+                    if (sessionSeconds > 0) totalSeconds += sessionSeconds;
                 }
-            });
-
-            if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            return {
-                ...prev,
-                realtimeWorkTime: formattedTime
-            };
+            }
         });
-    }, []); // Remove dependency to prevent recreation
 
+        if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        setAttendanceState(prev => ({
+            ...prev,
+            realtimeWorkTime: formattedTime
+        }));
+    }, [attendanceState.todayPunches]);
+
+    /**
+     * Fetch current attendance status - Always fetch latest data
+     */
     const fetchCurrentStatus = useCallback(async () => {
         try {
-            const response = await axios.get(route('attendance.current-user-punch'));
+            // Add timestamp to prevent caching
+            const response = await axios.get(route('attendance.current-user-punch'), {
+                params: { t: Date.now() }
+            });
             const data = response.data;
 
             setAttendanceState(prev => ({
@@ -393,6 +466,7 @@ const PunchStatusCard = React.memo(() => {
                 todayPunches: data.punches || [],
                 totalWorkTime: data.total_production_time || '00:00:00',
                 userOnLeave: data.isUserOnLeave,
+                lastRefresh: new Date(),
                 currentStatus: (() => {
                     if (data.punches && data.punches.length > 0) {
                         const lastPunch = data.punches[data.punches.length - 1];
@@ -405,13 +479,12 @@ const PunchStatusCard = React.memo(() => {
         } catch (error) {
             console.error('Error fetching current status:', error);
             toast.error('Failed to fetch attendance status');
-            setAttendanceState(prev => ({
-                ...prev,
-                realtimeWorkTime: '00:00:00'
-            }));
         }
-    }, []); // Remove calculateRealtimeWorkTime dependency to prevent loop
+    }, []);
 
+    /**
+     * Get device fingerprint for security
+     */
     const getDeviceFingerprint = useCallback(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -429,17 +502,27 @@ const PunchStatusCard = React.memo(() => {
         };
     }, []);
 
+    /**
+     * Handle punch action - Main attendance function
+     */
     const handlePunch = useCallback(async () => {
+        // Check if user is on leave
         if (attendanceState.userOnLeave) {
             toast.warning('You are on leave today. Cannot punch in/out.');
+            return;
+        }
+
+        // Check if location is active
+        if (locationState.status !== GPS_STATUS.ACTIVE) {
+            toast.error('Location access required for attendance. Please enable GPS and try again.');
             return;
         }
 
         setAttendanceState(prev => ({ ...prev, loading: true }));
 
         try {
-            // Simple, straightforward location request
-            const locationData = await getLocationData();
+            // Get fresh location data for the punch
+            const coordinates = await getLocation();
             const deviceFingerprint = getDeviceFingerprint();
 
             // Get IP address
@@ -456,16 +539,16 @@ const PunchStatusCard = React.memo(() => {
                 ...prev,
                 sessionInfo: {
                     ip: currentIp,
-                    accuracy: locationData?.accuracy ? `${Math.round(locationData.accuracy)}m` : 'N/A',
+                    accuracy: coordinates.accuracy ? `${Math.round(coordinates.accuracy)}m` : 'N/A',
                     timestamp: new Date().toLocaleString()
                 }
             }));
 
             // Prepare punch data
             const punchData = {
-                lat: locationData.latitude,
-                lng: locationData.longitude,
-                accuracy: locationData.accuracy,
+                lat: coordinates.latitude,
+                lng: coordinates.longitude,
+                accuracy: coordinates.accuracy,
                 ip: currentIp,
                 wifi_ssid: 'Unknown',
                 device_fingerprint: JSON.stringify(deviceFingerprint),
@@ -490,38 +573,16 @@ const PunchStatusCard = React.memo(() => {
                     sessionDialogOpen: true
                 }));
 
-                // Optimistic UI update
-                const now = new Date();
-                if (attendanceState.currentStatus === 'not_punched' || attendanceState.currentStatus === 'punched_out') {
-                    setAttendanceState(prev => ({
-                        ...prev,
-                        currentStatus: 'punched_in',
-                        todayPunches: [...prev.todayPunches, {
-                            punchin_time: now.toISOString(),
-                            punchout_time: null
-                        }]
-                    }));
-                } else if (attendanceState.currentStatus === 'punched_in') {
-                    setAttendanceState(prev => ({
-                        ...prev,
-                        currentStatus: 'punched_out',
-                        todayPunches: prev.todayPunches.map((punch, index) => 
-                            index === prev.todayPunches.length - 1 && !punch.punchout_time
-                                ? { ...punch, punchout_time: now.toISOString() }
-                                : punch
-                        )
-                    }));
-                }
-
-                // Refresh data after a short delay
-                setTimeout(fetchCurrentStatus, 1000);
+                // Immediately fetch latest data after successful punch
+                setTimeout(() => {
+                    fetchCurrentStatus();
+                }, 500);
             } else {
                 toast.error(response.data.message);
             }
         } catch (error) {
             console.error('Punch operation failed:', error);
             
-            // Simple error message handling
             const errorMessage = error.message || 'Unable to record attendance. Please try again.';
             
             toast.error(errorMessage, {
@@ -534,18 +595,24 @@ const PunchStatusCard = React.memo(() => {
         } finally {
             setAttendanceState(prev => ({ ...prev, loading: false }));
         }
-    }, [attendanceState.userOnLeave, attendanceState.currentStatus, getLocationData, getDeviceFingerprint, fetchCurrentStatus]);
+    }, [attendanceState.userOnLeave, locationState.status, getLocation, getDeviceFingerprint, fetchCurrentStatus]);
 
-    const toggleSection = useCallback((section) => {
-        setUiState(prev => ({
-            ...prev,
-            expandedSections: {
-                ...prev.expandedSections,
-                [section]: !prev.expandedSections[section]
-            }
-        }));
-    }, []);
+    /**
+     * Handle GPS chip click
+     */
+    const handleGpsChipClick = useCallback(() => {
+        if (!gpsChipConfig.clickable) return;
 
+        if (locationState.status === GPS_STATUS.DENIED) {
+            requestLocationPermissionReset();
+        } else if (locationState.status === GPS_STATUS.INACTIVE) {
+            checkLocationPermission();
+        }
+    }, [gpsChipConfig.clickable, locationState.status, requestLocationPermissionReset, checkLocationPermission]);
+
+    /**
+     * Format time utility
+     */
     const formatTime = useCallback((timeString) => {
         if (!timeString) return '--:--';
 
@@ -572,6 +639,9 @@ const PunchStatusCard = React.memo(() => {
         }
     }, []);
 
+    /**
+     * Format location utility
+     */
     const formatLocation = useCallback((locationData) => {
         if (!locationData) return 'Location not available';
 
@@ -602,94 +672,41 @@ const PunchStatusCard = React.memo(() => {
     }, []);
 
     // ===== EFFECTS =====
+
+    /**
+     * Real-time clock and work time calculation
+     */
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date();
-            setSystemState(prev => ({ ...prev, currentTime: now }));
-
-            // Check status and calculate work time
-            setAttendanceState(prev => {
-                if (prev.currentStatus === 'punched_in' && prev.todayPunches.length > 0) {
-                    // Calculate work time directly within setState
-                    let totalSeconds = 0;
-
-                    prev.todayPunches.forEach((punch) => {
-                        if (punch.punchin_time) {
-                            let punchInTime;
-                            
-                            if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
-                                const today = new Date();
-                                const [hours, minutes, seconds] = punch.punchin_time.split(':');
-                                punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                                    parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                            } else {
-                                punchInTime = new Date(punch.punchin_time);
-                            }
-
-                            if (isNaN(punchInTime.getTime())) return;
-
-                            if (punch.punchout_time) {
-                                let punchOutTime;
-                                
-                                if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
-                                    const today = new Date();
-                                    const [hours, minutes, seconds] = punch.punchout_time.split(':');
-                                    punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                                        parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                                } else {
-                                    punchOutTime = new Date(punch.punchout_time);
-                                }
-
-                                if (isNaN(punchOutTime.getTime())) return;
-
-                                const sessionSeconds = Math.floor((punchOutTime - punchInTime) / 1000);
-                                if (sessionSeconds > 0) totalSeconds += sessionSeconds;
-                            } else {
-                                const sessionSeconds = Math.floor((now - punchInTime) / 1000);
-                                if (sessionSeconds > 0) totalSeconds += sessionSeconds;
-                            }
-                        }
-                    });
-
-                    if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-
-                    const hours = Math.floor(totalSeconds / 3600);
-                    const minutes = Math.floor((totalSeconds % 3600) / 60);
-                    const seconds = totalSeconds % 60;
-
-                    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    
-                    return {
-                        ...prev,
-                        realtimeWorkTime: formattedTime
-                    };
-                }
-                return prev;
-            });
+            setSystemState(prev => ({ ...prev, currentTime: new Date() }));
+            
+            // Only calculate if we have active session
+            if (attendanceState.currentStatus === 'punched_in' && attendanceState.todayPunches.length > 0) {
+                calculateRealtimeWorkTime();
+            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []); // Remove all dependencies to prevent recreation
+    }, [attendanceState.currentStatus, attendanceState.todayPunches.length, calculateRealtimeWorkTime]);
 
+    /**
+     * Initial setup and data fetching
+     */
     useEffect(() => {
-        // Initial data fetch
+        // Fetch initial attendance data
         fetchCurrentStatus();
-        checkLocationStatus();
+        
+        // Check location permission
+        checkLocationPermission();
 
-        // Simple event handlers
-        const handleFocus = () => {
-            checkLocationStatus();
-            setSystemState(prev => ({
-                ...prev,
-                connectionStatus: { ...prev.connectionStatus, network: navigator.onLine }
-            }));
-        };
-
+        // Network status handlers
         const handleOnline = () => {
             setSystemState(prev => ({
                 ...prev,
                 connectionStatus: { ...prev.connectionStatus, network: true }
             }));
+            // Refresh data when coming back online
+            fetchCurrentStatus();
         };
 
         const handleOffline = () => {
@@ -699,18 +716,35 @@ const PunchStatusCard = React.memo(() => {
             }));
         };
 
+        const handleFocus = () => {
+            // Refresh data when window regains focus
+            fetchCurrentStatus();
+            checkLocationPermission();
+        };
+
         // Add event listeners
-        window.addEventListener('focus', handleFocus);
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
+        window.addEventListener('focus', handleFocus);
 
         // Cleanup
         return () => {
-            window.removeEventListener('focus', handleFocus);
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchCurrentStatus, checkLocationStatus]);
+    }, [fetchCurrentStatus, checkLocationPermission]);
+
+    /**
+     * Auto-refresh attendance data every 30 seconds
+     */
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+            fetchCurrentStatus();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(refreshInterval);
+    }, [fetchCurrentStatus]);
 
     // ===== RENDER =====
     return (
@@ -732,7 +766,6 @@ const PunchStatusCard = React.memo(() => {
                         borderWidth: `var(--borderWidth, 2px)`,
                         borderRadius: `var(--borderRadius, 8px)`,
                         fontFamily: `var(--fontFamily, 'Inter')`,
-                        transform: `scale(var(--scale, 1))`,
                         opacity: attendanceState.loading ? `var(--disabledOpacity, 0.5)` : '1',
                     }}
                 >
@@ -799,12 +832,22 @@ const PunchStatusCard = React.memo(() => {
                         </div>
 
                         {/* Status Chip */}
-                        <div className="flex justify-center mb-4">
+                        <div 
+                            className="flex justify-center mb-4"
+                            
+                        >
                             <Chip
                                 color={statusConfig.color}
                                 variant="flat"
                                 startContent={statusConfig.icon}
                                 className="px-4 py-2 font-semibold text-sm"
+                                style={{
+                                    background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                    borderColor: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                                    borderWidth: `var(--borderWidth, 2px)`,
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, 'Inter')`,
+                                }}
                             >
                                 {statusConfig.text}
                             </Chip>
@@ -876,12 +919,16 @@ const PunchStatusCard = React.memo(() => {
                             size="lg"
                             fullWidth
                             onPress={handlePunch}
-                            isDisabled={attendanceState.loading || attendanceState.userOnLeave}
+                            isDisabled={
+                                attendanceState.loading || 
+                                attendanceState.userOnLeave || 
+                                locationState.status !== GPS_STATUS.ACTIVE
+                            }
                             isLoading={attendanceState.loading}
                             startContent={!attendanceState.loading && statusConfig.icon}
                             className="mb-4 font-semibold"
                             style={{
-                                background: attendanceState.userOnLeave 
+                                background: (attendanceState.userOnLeave || locationState.status !== GPS_STATUS.ACTIVE)
                                     ? 'var(--theme-default, #71717A)'
                                     : statusConfig.color === 'primary' 
                                         ? `linear-gradient(135deg, var(--theme-primary, #006FEE), var(--theme-primary-600, #005BC4))`
@@ -894,7 +941,8 @@ const PunchStatusCard = React.memo(() => {
                                 borderRadius: `var(--borderRadius, 8px)`,
                                 borderWidth: `var(--borderWidth, 2px)`,
                                 fontFamily: `var(--fontFamily, 'Inter')`,
-                                opacity: (attendanceState.loading || attendanceState.userOnLeave) ? `var(--disabledOpacity, 0.5)` : '1',
+                                opacity: (attendanceState.loading || attendanceState.userOnLeave || locationState.status !== GPS_STATUS.ACTIVE) 
+                                    ? `var(--disabledOpacity, 0.5)` : '1',
                             }}
                         >
                             {attendanceState.loading ? 'Processing...' : statusConfig.action}
@@ -902,42 +950,24 @@ const PunchStatusCard = React.memo(() => {
 
                         {/* Connection Status */}
                         <div className="flex justify-center gap-2 mb-4">
-                            <Tooltip content={
-                                systemState.connectionStatus.location 
-                                    ? 'Location: Connected' 
-                                    : 'Location: Required - Click to retry'
-                            }>
+                            <Tooltip content={gpsChipConfig.tooltip}>
                                 <Chip 
                                     size="sm" 
-                                    variant={systemState.connectionStatus.location ? 'flat' : 'bordered'}
-                                    color={systemState.connectionStatus.location ? 'success' : 'danger'}
-                                    startContent={<MapPinIcon className="w-3 h-3" />}
-                                    className="cursor-pointer text-xs transition-all hover:scale-105"
+                                    variant={gpsChipConfig.variant}
+                                    color={gpsChipConfig.color}
+                                    startContent={
+                                        locationState.status === GPS_STATUS.CHECKING ? 
+                                            <Spinner size="sm" className="w-3 h-3" /> :
+                                            <MapPinIcon className="w-3 h-3" />
+                                    }
+                                    className={`text-xs transition-all ${gpsChipConfig.clickable ? 'cursor-pointer hover:scale-105' : ''}`}
                                     style={{
                                         borderRadius: `var(--borderRadius, 8px)`,
                                         fontFamily: `var(--fontFamily, 'Inter')`,
-                                        borderColor: !systemState.connectionStatus.location 
-                                            ? 'var(--theme-danger)' 
-                                            : 'transparent',
-                                        background: !systemState.connectionStatus.location 
-                                            ? 'color-mix(in srgb, var(--theme-danger) 10%, transparent)'
-                                            : 'color-mix(in srgb, var(--theme-success) 10%, transparent)',
                                     }}
-                                    onClick={() => {
-                                        if (!systemState.connectionStatus.location) {
-                                            checkLocationStatus();
-                                            toast.info('Checking location permissions...', {
-                                                style: {
-                                                    backdropFilter: 'blur(16px) saturate(200%)',
-                                                    background: 'var(--theme-primary)',
-                                                    color: 'var(--theme-primary-foreground)',
-                                                },
-                                                autoClose: 3000,
-                                            });
-                                        }
-                                    }}
+                                    onClick={gpsChipConfig.clickable ? handleGpsChipClick : undefined}
                                 >
-                                    GPS
+                                    {gpsChipConfig.text}
                                 </Chip>
                             </Tooltip>
 
@@ -973,6 +1003,30 @@ const PunchStatusCard = React.memo(() => {
                                 </Chip>
                             </Tooltip>
                         </div>
+
+                        {/* Location Error Message */}
+                        {locationState.error && locationState.status !== GPS_STATUS.ACTIVE && (
+                            <Card 
+                                className="p-3 mb-4"
+                                style={{
+                                    background: `color-mix(in srgb, var(--theme-danger) 10%, transparent)`,
+                                    borderColor: `color-mix(in srgb, var(--theme-danger) 20%, transparent)`,
+                                    borderWidth: `var(--borderWidth, 1px)`,
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, 'Inter')`,
+                                }}
+                            >
+                                <div className="flex items-start gap-2">
+                                    <ExclamationTriangleIcon 
+                                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                                        style={{ color: 'var(--theme-danger)' }}
+                                    />
+                                    <div className="text-xs" style={{ color: 'var(--theme-danger-foreground)' }}>
+                                        {locationState.error}
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
 
                         {/* Leave Status Alert */}
                         {attendanceState.userOnLeave && (
@@ -1012,80 +1066,6 @@ const PunchStatusCard = React.memo(() => {
                         {/* Expandable Today's Activity */}
                         <div className="border-t border-divider">
                             <Accordion>
-                                {/* Location Troubleshooting */}
-                                {!systemState.connectionStatus.location && (
-                                    <AccordionItem 
-                                        key="location-help"
-                                        aria-label="Location Help"
-                                        startContent={<ExclamationTriangleIcon className="w-5 h-5" style={{ color: 'var(--theme-warning)' }} />}
-                                        title={
-                                            <span 
-                                                className="font-semibold text-sm"
-                                                style={{ color: 'var(--theme-warning)' }}
-                                            >
-                                                Location Required
-                                            </span>
-                                        }
-                                        subtitle={
-                                            <span 
-                                                className="text-xs"
-                                                style={{ color: 'var(--theme-warning-600)' }}
-                                            >
-                                                Help & Troubleshooting
-                                            </span>
-                                        }
-                                    >
-                                        <div className="space-y-3">
-                                            <Card 
-                                                className="p-3"
-                                                style={{
-                                                    background: `color-mix(in srgb, var(--theme-warning) 10%, transparent)`,
-                                                    borderColor: `color-mix(in srgb, var(--theme-warning) 20%, transparent)`,
-                                                    borderWidth: `var(--borderWidth, 1px)`,
-                                                    borderRadius: `var(--borderRadius, 8px)`,
-                                                }}
-                                            >
-                                                <h4 
-                                                    className="font-semibold text-sm mb-2"
-                                                    style={{ color: 'var(--theme-warning)' }}
-                                                >
-                                                    How to Enable Location:
-                                                </h4>
-                                                <ul className="text-xs space-y-1 list-disc list-inside">
-                                                    <li>Click the location icon (🌍) in your browser's address bar</li>
-                                                    <li>Select "Allow" or "Always allow" for location access</li>
-                                                    <li>Refresh the page if needed</li>
-                                                    <li>Make sure GPS is enabled on your device</li>
-                                                </ul>
-                                            </Card>
-                                            
-                                            <Button
-                                                color="warning"
-                                                variant="flat"
-                                                fullWidth
-                                                startContent={<ArrowPathIcon className="w-4 h-4" />}
-                                                onPress={() => {
-                                                    checkLocationStatus();
-                                                    toast.info('Retrying location access...', {
-                                                        style: {
-                                                            backdropFilter: 'blur(16px) saturate(200%)',
-                                                            background: 'var(--theme-primary)',
-                                                            color: 'var(--theme-primary-foreground)',
-                                                        },
-                                                    });
-                                                }}
-                                                className="font-semibold"
-                                                style={{
-                                                    borderRadius: `var(--borderRadius, 8px)`,
-                                                    fontFamily: `var(--fontFamily, 'Inter')`,
-                                                }}
-                                            >
-                                                Retry Location Access
-                                            </Button>
-                                        </div>
-                                    </AccordionItem>
-                                )}
-
                                 <AccordionItem 
                                     key="activity"
                                     aria-label="Today's Activity"
@@ -1110,7 +1090,17 @@ const PunchStatusCard = React.memo(() => {
                                     <div className="space-y-2">
                                         {attendanceState.todayPunches.length > 0 ? (
                                             attendanceState.todayPunches.map((punch, index) => (
-                                                <Card key={index} className="p-3">
+                                                <Card 
+                                                    key={index}
+                                                    className="p-3"
+                                                    style={{
+                                                        background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                                        borderColor: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                                                        borderWidth: `var(--borderWidth, 2px)`,
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                        fontFamily: `var(--fontFamily, 'Inter')`,
+                                                    }}
+                                                >
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
                                                             <Avatar 
@@ -1150,8 +1140,13 @@ const PunchStatusCard = React.memo(() => {
                                         ) : (
                                             <Card 
                                                 className="p-4 text-center"
+                                               
                                                 style={{
-                                                    background: `color-mix(in srgb, var(--theme-primary) 5%, transparent)`,
+                                                    background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                                    borderColor: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                                                    borderWidth: `var(--borderWidth, 2px)`,
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                    fontFamily: `var(--fontFamily, 'Inter')`,
                                                 }}
                                             >
                                                 <InformationCircleIcon 
@@ -1187,9 +1182,13 @@ const PunchStatusCard = React.memo(() => {
                     footer: "border-t-[1px] border-divider",
                 }}
                 style={{
+                    background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                    borderColor: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                    borderWidth: `var(--borderWidth, 2px)`,
                     borderRadius: `var(--borderRadius, 8px)`,
                     fontFamily: `var(--fontFamily, 'Inter')`,
                 }}
+             
             >
                 <ModalContent>
                     {(onClose) => (
@@ -1300,46 +1299,47 @@ export default PunchStatusCard;
 
 /**
  * =========================
- * IMPLEMENTATION NOTES
+ * IMPLEMENTATION NOTES v3.0.0
  * =========================
  * 
- * This revised PunchStatusCard component implements enterprise-grade features:
+ * This completely redesigned PunchStatusCard implements the requested simplified location management:
  * 
- * 1. **HeroUI Integration**:
- *    - Uses HeroUI theming tokens (var(--theme-*))
- *    - Consistent with Header.jsx styling approach
- *    - Responsive design with HeroUI components
+ * 1. **Simplified Location Management**:
+ *    - Single `getLocation()` function for all location requests
+ *    - Clear GPS status states: CHECKING, ACTIVE, DENIED, INACTIVE
+ *    - Unified permission checking with `checkLocationPermission()`
+ *    - Simple retry mechanism with `requestLocationPermissionReset()`
  * 
- * 2. **Performance Optimizations**:
- *    - React.memo for preventing unnecessary re-renders
- *    - useCallback and useMemo for expensive calculations
- *    - Debounced resize handlers
- *    - Optimistic UI updates
+ * 2. **Enhanced Data Freshness**:
+ *    - Always fetches latest punch data with cache-busting timestamp
+ *    - Auto-refresh every 30 seconds
+ *    - Immediate refresh after successful punch
+ *    - Window focus refresh for real-time updates
  * 
- * 3. **Enterprise Features**:
- *    - Real-time attendance tracking
- *    - Location-based validation with retry mechanisms
+ * 3. **Improved UX**:
+ *    - GPS chip shows clear status and is clickable when needed
+ *    - Punch button disabled until GPS is active
+ *    - Real-time work time calculation
+ *    - Better error messaging
+ * 
+ * 4. **Enterprise Features**:
  *    - Device fingerprinting for security
- *    - Role-based access control ready
  *    - Comprehensive error handling
+ *    - Network status monitoring
+ *    - Leave status integration
  * 
- * 4. **Code Quality**:
- *    - Modular state management
+ * 5. **Performance Optimizations**:
+ *    - React.memo for preventing unnecessary re-renders
+ *    - useCallback and useMemo for expensive operations
+ *    - Debounced resize handlers
+ *    - Efficient state management
+ * 
+ * 6. **Clean Code Practices**:
  *    - Clear separation of concerns
+ *    - Modular state management
  *    - Comprehensive error handling
- *    - Accessibility features
- *    - Professional styling
+ *    - Professional styling with HeroUI theming
  * 
- * 5. **Security Features**:
- *    - Device fingerprinting
- *    - Location validation
- *    - IP tracking
- *    - Session management
- * 
- * 6. **UX Improvements**:
- *    - Progressive location accuracy
- *    - Real-time status updates
- *    - Intuitive error messages
- *    - Responsive design
- *    - Smooth animations
+ * The component now provides a streamlined, enterprise-grade attendance tracking experience
+ * with simplified location management and always-fresh data.
  */
