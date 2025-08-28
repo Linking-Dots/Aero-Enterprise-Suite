@@ -999,7 +999,7 @@ const DesktopHeader = React.memo(({
               boxShadow: `0 8px 32px color-mix(in srgb, var(--theme-primary, #006FEE) 10%, transparent)`
             }}
           >
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl px-4">
               <div className="flex items-center justify-between py-4 gap-6 min-h-[72px]">
                 
                 {/* Left Section: Logo and Menu Toggle */}
@@ -1399,7 +1399,7 @@ const DesktopHeader = React.memo(({
                 </motion.div>
 
                 {/* Right Section: Enhanced Actions & Profile */}
-                <div className="flex items-center gap-4 ml-auto">
+                <div className="flex items-center ml-auto">
                   {/* Quick Actions */}
                   <Button
                     isIconOnly

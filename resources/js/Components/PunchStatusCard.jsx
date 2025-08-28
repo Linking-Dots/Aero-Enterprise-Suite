@@ -395,19 +395,26 @@ const PunchStatusCard = React.memo(() => {
     const calculateRealtimeWorkTime = useCallback(() => {
         const currentTime = new Date();
         let totalSeconds = 0;
+        let hasActivePunch = false;
 
         attendanceState.todayPunches.forEach((punch) => {
             if (punch.punchin_time) {
                 let punchInTime;
                 
-                // Handle different time formats
-                if (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T')) {
-                    const today = new Date();
-                    const [hours, minutes, seconds] = punch.punchin_time.split(':');
-                    punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                        parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                } else {
+                // Handle different time formats - try parsing as ISO date first
+                try {
                     punchInTime = new Date(punch.punchin_time);
+                    
+                    // If invalid or string with just time format
+                    if (isNaN(punchInTime.getTime()) || (typeof punch.punchin_time === 'string' && punch.punchin_time.includes(':') && !punch.punchin_time.includes('T'))) {
+                        const today = new Date();
+                        const [hours, minutes, seconds] = punch.punchin_time.split(':');
+                        punchInTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                            parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                    }
+                } catch (error) {
+                    console.warn('Invalid punch in time format:', punch.punchin_time);
+                    return;
                 }
 
                 if (isNaN(punchInTime.getTime())) return;
@@ -415,13 +422,19 @@ const PunchStatusCard = React.memo(() => {
                 if (punch.punchout_time) {
                     let punchOutTime;
                     
-                    if (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T')) {
-                        const today = new Date();
-                        const [hours, minutes, seconds] = punch.punchout_time.split(':');
-                        punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                            parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
-                    } else {
+                    try {
                         punchOutTime = new Date(punch.punchout_time);
+                        
+                        // If invalid or string with just time format
+                        if (isNaN(punchOutTime.getTime()) || (typeof punch.punchout_time === 'string' && punch.punchout_time.includes(':') && !punch.punchout_time.includes('T'))) {
+                            const today = new Date();
+                            const [hours, minutes, seconds] = punch.punchout_time.split(':');
+                            punchOutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                        }
+                    } catch (error) {
+                        console.warn('Invalid punch out time format:', punch.punchout_time);
+                        return;
                     }
 
                     if (isNaN(punchOutTime.getTime())) return;
@@ -430,11 +443,21 @@ const PunchStatusCard = React.memo(() => {
                     if (sessionSeconds > 0) totalSeconds += sessionSeconds;
                 } else {
                     // Active session - calculate from punch in to now
+                    hasActivePunch = true;
                     const sessionSeconds = Math.floor((currentTime - punchInTime) / 1000);
                     if (sessionSeconds > 0) totalSeconds += sessionSeconds;
                 }
             }
         });
+
+        // If no active punch and we have backend total time, use that instead
+        if (!hasActivePunch && attendanceState.totalWorkTime && attendanceState.totalWorkTime !== '00:00:00') {
+            setAttendanceState(prev => ({
+                ...prev,
+                realtimeWorkTime: attendanceState.totalWorkTime
+            }));
+            return;
+        }
 
         if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
 
@@ -448,7 +471,7 @@ const PunchStatusCard = React.memo(() => {
             ...prev,
             realtimeWorkTime: formattedTime
         }));
-    }, [attendanceState.todayPunches]);
+    }, [attendanceState.todayPunches, attendanceState.totalWorkTime]);
 
     /**
      * Fetch current attendance status - Always fetch latest data
@@ -465,6 +488,7 @@ const PunchStatusCard = React.memo(() => {
                 ...prev,
                 todayPunches: data.punches || [],
                 totalWorkTime: data.total_production_time || '00:00:00',
+                realtimeWorkTime: data.total_production_time || '00:00:00',
                 userOnLeave: data.isUserOnLeave,
                 lastRefresh: new Date(),
                 currentStatus: (() => {
