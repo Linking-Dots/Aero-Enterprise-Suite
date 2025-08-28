@@ -401,8 +401,8 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                                         )}
                                     </div>
                                     
-                                    {/* Mark Present Button */}
-                                    {onMarkAsPresent && (
+                                    {/* Mark Present Button - Only show for users without leave */}
+                                    {onMarkAsPresent && !userLeave && (
                                         <div className="flex justify-end">
                                             <Button
                                                 color="primary"
@@ -410,7 +410,7 @@ export const AbsentUsersInlineCard = React.memo(({ absentUsers, selectedDate, ge
                                                 size="sm"
                                                 radius={getThemeRadius()}
                                                 startContent={<UserPlusIcon className="w-3 h-3" />}
-                                                onPress={() => onMarkAsPresent(user)}
+                                                onPress={() => onMarkAsPresent(user, selectedDate)}
                                                 style={{
                                                     fontFamily: `var(--fontFamily, "Inter")`,
                                                 }}

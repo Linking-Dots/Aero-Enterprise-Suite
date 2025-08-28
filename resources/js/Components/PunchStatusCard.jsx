@@ -1103,25 +1103,117 @@ const PunchStatusCard = React.memo(() => {
                                                 >
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
-                                                            <Avatar 
-                                                                size="sm" 
-                                                                style={{ backgroundColor: 'var(--theme-primary)' }}
-                                                            >
-                                                                <ClockIcon className="w-3 h-3" />
-                                                            </Avatar>
-                                                            <div>
-                                                                <div className="flex items-center gap-2 text-xs font-medium">
-                                                                    <span>In: {formatTime(punch.punchin_time)}</span>
-                                                                    {punch.punchout_time && (
-                                                                        <span>Out: {formatTime(punch.punchout_time)}</span>
-                                                                    )}
+                                                            
+                                                            {/* Two-column grid for punch details */}
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                {/* Punch In Column */}
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div 
+                                                                            className="w-2 h-2 rounded-full bg-success"
+                                                                            style={{ backgroundColor: 'var(--theme-success)' }}
+                                                                        />
+                                                                        <span 
+                                                                            className="text-xs font-semibold"
+                                                                            style={{ color: 'var(--theme-success)' }}
+                                                                        >
+                                                                            Check In
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="pl-4 space-y-1">
+                                                                        <div 
+                                                                            className="text-sm font-mono font-medium"
+                                                                            style={{ color: 'var(--theme-foreground)' }}
+                                                                        >
+                                                                            {formatTime(punch.punchin_time)}
+                                                                        </div>
+                                                                        <div className="flex items-start gap-1">
+                                                                            <MapPinIcon 
+                                                                                className="w-3 h-3 mt-0.5 flex-shrink-0"
+                                                                                style={{ color: 'var(--theme-foreground-500)' }}
+                                                                            />
+                                                                            <span 
+                                                                                className="text-xs leading-tight"
+                                                                                style={{ color: 'var(--theme-foreground-600)' }}
+                                                                            >
+                                                                                {formatLocation(punch.punchin_location)}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div 
-                                                                    className="text-xs"
-                                                                    style={{ color: 'var(--theme-foreground-600)' }}
-                                                                >
-                                                                    📍 {formatLocation(punch.punchin_location || punch.location)}
-                                                                </div>
+
+                                                                {/* Punch Out Column */}
+                                                                {punch.punchout_time ? (
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div 
+                                                                                className="w-2 h-2 rounded-full"
+                                                                                style={{ backgroundColor: 'var(--theme-primary)' }}
+                                                                            />
+                                                                            <span 
+                                                                                className="text-xs font-semibold"
+                                                                                style={{ color: 'var(--theme-primary)' }}
+                                                                            >
+                                                                                Check Out
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="pl-4 space-y-1">
+                                                                            <div 
+                                                                                className="text-sm font-mono font-medium"
+                                                                                style={{ color: 'var(--theme-foreground)' }}
+                                                                            >
+                                                                                {formatTime(punch.punchout_time)}
+                                                                            </div>
+                                                                            <div className="flex items-start gap-1">
+                                                                                <MapPinIcon 
+                                                                                    className="w-3 h-3 mt-0.5 flex-shrink-0"
+                                                                                    style={{ color: 'var(--theme-foreground-500)' }}
+                                                                                />
+                                                                                <span 
+                                                                                    className="text-xs leading-tight"
+                                                                                    style={{ color: 'var(--theme-foreground-600)' }}
+                                                                                >
+                                                                                    {formatLocation(punch.punchout_location)}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div 
+                                                                                className="w-2 h-2 rounded-full border-2"
+                                                                                style={{ borderColor: 'var(--theme-warning)' }}
+                                                                            />
+                                                                            <span 
+                                                                                className="text-xs font-semibold"
+                                                                                style={{ color: 'var(--theme-warning)' }}
+                                                                            >
+                                                                                Active Session
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="pl-4 space-y-1">
+                                                                            <div 
+                                                                                className="text-sm font-mono font-medium"
+                                                                                style={{ color: 'var(--theme-warning)' }}
+                                                                            >
+                                                                                --:--
+                                                                            </div>
+                                                                            <div className="flex items-start gap-1">
+                                                                                <ClockIcon 
+                                                                                    className="w-3 h-3 mt-0.5 flex-shrink-0"
+                                                                                    style={{ color: 'var(--theme-warning)' }}
+                                                                                />
+                                                                                <span 
+                                                                                    className="text-xs leading-tight"
+                                                                                    style={{ color: 'var(--theme-warning-600)' }}
+                                                                                >
+                                                                                    In progress
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         {punch.duration && (

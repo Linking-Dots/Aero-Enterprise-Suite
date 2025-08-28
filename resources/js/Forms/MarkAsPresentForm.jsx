@@ -11,19 +11,25 @@ import {
     ModalBody,
     ModalFooter,
     Divider,
-    User
+    User,
+    Tabs,
+    Tab,
+    Card,
+    CardBody
 } from "@heroui/react";
 import {
     UserPlusIcon,
     ClockIcon,
     CalendarDaysIcon,
     InformationCircleIcon,
-    MapPinIcon
+    MapPinIcon,
+    ShieldCheckIcon
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { format } from 'date-fns';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import LocationPickerMap from '@/Components/LocationPickerMap';
 
 const MarkAsPresentForm = ({ 
     open, 
@@ -55,33 +61,92 @@ const MarkAsPresentForm = ({
         punch_in_time: '09:00',
         punch_out_time: '',
         reason: '',
-        location: 'Office - Manually marked present by admin'
+        location: 'Office - Manually marked present by admin',
+        // New fields for punch alignment
+        coordinates: null,
+        ip: 'Unknown',
+        device_fingerprint: null,
+        user_agent: navigator.userAgent
     });
     
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
+    // Get device fingerprint for security (same as PunchStatusCard)
+    const getDeviceFingerprint = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Device fingerprint', 2, 2);
+
+        return {
+            userAgent: navigator.userAgent,
+            screen: `${screen.width}x${screen.height}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            language: navigator.language,
+            canvasFingerprint: canvas.toDataURL(),
+            timestamp: Date.now()
+        };
+    };
+
+    // Get IP address
+    const getClientIp = async () => {
+        try {
+            const response = await axios.get(route('getClientIp'));
+            return response.data.ip;
+        } catch (error) {
+            console.warn('Could not fetch IP address:', error);
+            return 'Unknown';
+        }
+    };
+
     // Initialize form data
     useEffect(() => {
-        if (currentUser) {
-            setFormData(prev => ({
-                ...prev,
-                user_id: currentUser.id,
-                date: selectedDate,
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                user_id: '',
-                date: selectedDate,
-                punch_in_time: '09:00',
-                punch_out_time: '',
-                reason: '',
-                location: 'Office - Manually marked present by admin'
-            }));
+        const initializeForm = async () => {
+            // Get IP address and device fingerprint
+            const ip = await getClientIp();
+            const deviceFingerprint = getDeviceFingerprint();
+
+            if (currentUser) {
+                setFormData(prev => ({
+                    ...prev,
+                    user_id: currentUser.id,
+                    date: selectedDate,
+                    ip,
+                    device_fingerprint: JSON.stringify(deviceFingerprint)
+                }));
+            } else {
+                setFormData(prev => ({
+                    ...prev,
+                    user_id: '',
+                    date: selectedDate,
+                    punch_in_time: '09:00',
+                    punch_out_time: '',
+                    reason: '',
+                    location: 'Office - Manually marked present by admin',
+                    ip,
+                    device_fingerprint: JSON.stringify(deviceFingerprint)
+                }));
+            }
+        };
+
+        if (open) {
+            initializeForm();
         }
         setErrors({});
     }, [currentUser, selectedDate, open]);
+
+    // Handle location change from map
+    const handleLocationChange = (locationData) => {
+        setFormData(prev => ({
+            ...prev,
+            coordinates: locationData,
+            location: locationData.source === 'manual' 
+                ? `Manual: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`
+                : `GPS: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)} (±${Math.round(locationData.accuracy)}m)`
+        }));
+    };
 
     // Filter out employees who already have attendance
     const availableUsers = useMemo(() => {
@@ -129,13 +194,31 @@ const MarkAsPresentForm = ({
         setErrors({});
 
         try {
+            // Ensure we have location data
+            if (!formData.coordinates) {
+                toast.error('Please select a location on the map before submitting.');
+                setProcessing(false);
+                return;
+            }
+
+            // Prepare submit data aligned with punch requirements
             const submitData = {
-                user_id: formData.user_id,
+                user_id: parseInt(formData.user_id),
                 date: formData.date,
                 punch_in_time: formData.punch_in_time,
                 punch_out_time: formData.punch_out_time || null,
                 reason: formData.reason || 'Marked present by administrator',
-                location: formData.location
+                location: formData.location,
+                // Additional punch data for consistency
+                lat: formData.coordinates.latitude,
+                lng: formData.coordinates.longitude,
+                accuracy: formData.coordinates.accuracy || 10,
+                ip: formData.ip,
+                device_fingerprint: formData.device_fingerprint,
+                user_agent: formData.user_agent,
+                timestamp: new Date().toISOString(),
+                wifi_ssid: 'Unknown', // Default for manual entries
+                manual_entry: true // Flag to indicate this is a manual entry
             };
 
             const response = await axios.post(route('attendance.mark-as-present'), submitData);
