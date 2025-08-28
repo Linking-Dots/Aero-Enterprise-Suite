@@ -6,12 +6,28 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Get version from package.json or environment variable
+// Get version from .env, environment variable, or package.json
 const getVersion = () => {
     try {
         // Try to get version from environment variable first
         if (process.env.APP_VERSION) {
             return process.env.APP_VERSION;
+        }
+        
+        // Try to read from .env file
+        try {
+            const envPath = path.join(__dirname, '../.env');
+            const envContent = fs.readFileSync(envPath, 'utf8');
+            const lines = envContent.split('\n');
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('APP_VERSION=')) {
+                    const version = trimmedLine.split('=')[1].trim();
+                    return version;
+                }
+            }
+        } catch (envError) {
+            console.warn('Could not read .env file, trying package.json');
         }
         
         // Fallback to package.json version
