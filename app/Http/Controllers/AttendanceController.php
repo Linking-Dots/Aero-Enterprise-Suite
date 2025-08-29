@@ -219,7 +219,7 @@ class AttendanceController extends Controller
                     $symbol = '√';
                     $remarks = $totalMinutes > 0 ? 'Present on Holiday' : ((now()->toDateString() === $date) ? 'Currently Working' : 'Not Punched Out');
                     $punchIn = $first->punchin;
-                    $punchOut = $last->punchout;
+                    $punchOut = $last ? $last->punchout : null;
                 } else {
                     $symbol = '#';
                     $remarks = 'Holiday';
@@ -249,7 +249,7 @@ class AttendanceController extends Controller
                 $symbol = '√';
                 $remarks = $totalMinutes > 0 ? 'Present' : ($date->isToday() ? 'Currently Working' : 'Not Punched Out');
                 $punchIn = $first->punchin;
-                $punchOut = $last->punchout;
+                $punchOut = $last ? $last->punchout : null;
             } elseif ($holiday && ! $attendancesForDate->isNotEmpty()) {
                 $symbol = '#';
                 $remarks = 'Holiday';
