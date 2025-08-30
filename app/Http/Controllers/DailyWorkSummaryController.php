@@ -2,18 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DailySummary;
 use App\Models\DailyWork;
 use App\Models\DailyWorkSummary;
 use App\Models\Jurisdiction;
-use App\Models\Tasks;
 use App\Models\User;
+use App\Services\DailyWork\DailyWorkSummaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DailyWorkSummaryController extends Controller
 {
+    private DailyWorkSummaryService $summaryService;
+
+    public function __construct(DailyWorkSummaryService $summaryService)
+    {
+        $this->summaryService = $summaryService;
+    }
+
     public function index()
     {
         // Get the authenticated user
@@ -76,7 +82,7 @@ class DailyWorkSummaryController extends Controller
             $date = $summary->date;
             $completed = 0;
             $rfiSubmissions = 0;
-            $totalTasks = $summary->totalTasks;
+            $totalTasks = $summary->totalDailyWorks;
 
             // Calculate total tasks for the current date
             if (isset($tasksByDate[$date])) {
@@ -110,19 +116,18 @@ class DailyWorkSummaryController extends Controller
 
     public function filterSummary(Request $request)
     {
-
         // Get the authenticated user
         $user = User::with('designation')->find(Auth::id());
         $userDesignationTitle = $user->designation?->title;
         try {
             // Query tasks based on date range
-            $tasksQuery = Tasks::query();
-            $summaryQuery = DailySummary::query();
+            $tasksQuery = DailyWork::query();
+            $summaryQuery = DailyWorkSummary::query();
             // Check if the user has the 'Supervision Engineer' designation
             if ($userDesignationTitle === 'Supervision Engineer') {
                 // If user has the 'Supervision Engineer' designation, get the daily summaries based on the incharge column
-                $tasksQuery->where('incharge', $user->user_name);
-                $summaryQuery->where('incharge', $user->user_name);
+                $tasksQuery->where('incharge', $user->id);
+                $summaryQuery->where('incharge', $user->id);
             }
 
             // Query tasks based on date range
@@ -159,11 +164,11 @@ class DailyWorkSummaryController extends Controller
                 foreach ($mergedSummaries as &$merged) {
                     if ($merged['date'] == $date) {
                         // If the date is found, merge the current summary into it
-                        $merged['totalTasks'] += $summary['totalTasks'];
-                        $merged['totalResubmission'] += $summary['totalResubmission'];
-                        $merged['embankmentTasks'] += $summary['embankmentTasks'];
-                        $merged['structureTasks'] += $summary['structureTasks'];
-                        $merged['pavementTasks'] += $summary['pavementTasks'];
+                        $merged['totalDailyWorks'] += $summary['totalDailyWorks'];
+                        $merged['resubmissions'] += $summary['resubmissions'];
+                        $merged['embankment'] += $summary['embankment'];
+                        $merged['structure'] += $summary['structure'];
+                        $merged['pavement'] += $summary['pavement'];
 
                         // Set found flag to true
                         $found = true;
@@ -189,7 +194,7 @@ class DailyWorkSummaryController extends Controller
                 $date = $summary->date;
                 $completed = 0;
                 $rfiSubmissions = 0;
-                $totalTasks = $summary->totalTasks;
+                $totalTasks = $summary->totalDailyWorks;
 
                 // Calculate total tasks for the current date
                 if (isset($tasksByDate[$date])) {
@@ -234,5 +239,31 @@ class DailyWorkSummaryController extends Controller
         //        ];
         //        $team = Auth::team();
         //        return view('task/add',compact('team', 'settings'));
+    }
+
+    /**
+     * Refresh summaries for a date range
+     */
+    public function refresh(Request $request)
+    {
+        $request->validate([
+            'startDate' => 'required|date',
+            'endDate' => 'required|date|after_or_equal:startDate',
+        ]);
+
+        try {
+            $this->summaryService->refreshSummariesForDateRange(
+                $request->startDate,
+                $request->endDate
+            );
+
+            return response()->json([
+                'message' => 'Summaries refreshed successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to refresh summaries: '.$e->getMessage(),
+            ], 500);
+        }
     }
 }

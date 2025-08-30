@@ -1,19 +1,18 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-    BriefcaseIcon, 
+    MapPinIcon, 
     PlusIcon,
     ChartBarIcon,
-    DocumentArrowUpIcon,
-    DocumentArrowDownIcon,
     MagnifyingGlassIcon,
     CheckCircleIcon,
     ClockIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    UserIcon
 } from "@heroicons/react/24/outline";
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
-import DailyWorksTable from '@/Tables/DailyWorksTable.jsx';
+import WorkLocationsTable from '@/Tables/WorkLocationsTable.jsx';
 import { 
     Card, 
     CardHeader, 
@@ -25,14 +24,12 @@ import {
 } from "@heroui/react";
 import StatsCards from "@/Components/StatsCards.jsx";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
-import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
-import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
-import DailyWorksDownloadForm from "@/Forms/DailyWorksDownloadForm.jsx";
-import DailyWorksUploadForm from "@/Forms/DailyWorksUploadForm.jsx";
+import WorkLocationForm from "@/Forms/WorkLocationForm.jsx";
+import DeleteWorkLocationForm from "@/Forms/DeleteWorkLocationForm.jsx";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
+const WorkLocations = React.memo(({ auth, title, jurisdictions, users }) => {
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -52,99 +49,45 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         return 'full';
     };
 
-    const [data, setData] = useState([]);
+    const [data, setData] = useState(jurisdictions || []);
     const [loading, setLoading] = useState(false);
-    const [totalRows, setTotalRows] = useState(0);
-    const [lastPage, setLastPage] = useState(0);
-    const [filteredData, setFilteredData] = useState([]);
     const [currentRow, setCurrentRow] = useState();
-    const [taskIdToDelete, setTaskIdToDelete] = useState(null);
+    const [locationIdToDelete, setLocationIdToDelete] = useState(null);
     const [openModalType, setOpenModalType] = useState(null);
     const [search, setSearch] = useState('');
-    const [perPage, setPerPage] = useState(30);
-    const [currentPage, setCurrentPage] = useState(1);
-    
-    const [filterData, setFilterData] = useState({
-        status: 'all',
-        incharge: 'all',
-        startDate: overallStartDate,
-        endDate: overallEndDate
-    });
-
-    const fetchData = async (page, perPage, filterData) => {
-        setLoading(true);
-        try {
-            const response = await axios.get(route('dailyWorks.paginate'), {
-                params: {
-                    page,
-                    perPage,
-                    search: search,
-                    status: filterData.status !== 'all' ? filterData.status : '',
-                    inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
-                    startDate: filterData.startDate,
-                    endDate: filterData.endDate,
-                }
-            });
-
-            setData(response.data.data);
-            setTotalRows(response.data.total);
-            setLastPage(response.data.last_page);
-            setLoading(false);
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to fetch data.', {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                }
-            });
-            setLoading(false);
-        }
-    };
 
     const handleSearch = useCallback((event) => {
         setSearch(event.target.value);
     }, []);
 
-    const handlePageChange = useCallback((page) => {
-        setCurrentPage(page);
-    }, []);
-
     const handleDelete = () => {
         const promise = new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch(`/delete-daily-work`, {
-                    method: 'DELETE',
+                const response = await fetch(`/work-locations/delete`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify({
-                        id: taskIdToDelete,
-                        page: currentPage,
-                        perPage,
+                        id: locationIdToDelete,
                     }),
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    setData(result.data);
-                    setTotalRows(result.total);
-                    setLastPage(result.last_page);
-                    resolve('Daily work deleted successfully!');
+                    setData(result.work_locations);
+                    resolve('Work location deleted successfully!');
                 } else {
-                    reject('Failed to delete daily work. Please try again.');
+                    reject('Failed to delete work location. Please try again.');
                 }
             } catch (error) {
-                reject('Failed to delete daily work. Please try again.');
+                reject('Failed to delete work location. Please try again.');
             }
         });
 
         toast.promise(promise, {
-            pending: 'Deleting daily work...',
+            pending: 'Deleting work location...',
             success: {
                 render({ data }) {
                     return <>{data}</>;
@@ -158,14 +101,14 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         });
     };
 
-    const handleClickOpen = useCallback((taskId, modalType) => {
-        setTaskIdToDelete(taskId);
+    const handleClickOpen = useCallback((locationId, modalType) => {
+        setLocationIdToDelete(locationId);
         setOpenModalType(modalType);
     }, []);
 
     const handleClose = useCallback(() => {
         setOpenModalType(null);
-        setTaskIdToDelete(null);
+        setLocationIdToDelete(null);
     }, []);
 
     const openModal = useCallback((modalType) => {
@@ -178,120 +121,92 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
 
     // Statistics
     const stats = useMemo(() => {
-        const totalWorks = data.length || totalRows;
-        const completedWorks = data.filter(work => work.status === 'completed').length;
-        const pendingWorks = data.filter(work => work.status === 'new' || work.status === 'resubmission').length;
-        const emergencyWorks = data.filter(work => work.status === 'emergency').length;
+        const totalLocations = data.length;
+        const activeLocations = data.filter(location => location.incharge_user).length;
+        const pendingLocations = data.filter(location => !location.incharge_user).length;
 
         return [
             {
-                title: 'Total',
-                value: totalWorks,
+                title: 'Total Locations',
+                value: totalLocations,
                 icon: <ChartBarIcon className="w-5 h-5" />,
                 color: 'text-blue-600',
-                description: 'All work logs'
+                description: 'All work locations'
             },
             {
-                title: 'Completed',
-                value: completedWorks,
+                title: 'Active',
+                value: activeLocations,
                 icon: <CheckCircleIcon className="w-5 h-5" />,
                 color: 'text-green-600',
-                description: 'Finished tasks'
+                description: 'With assigned staff'
             },
             {
                 title: 'Pending',
-                value: pendingWorks,
+                value: pendingLocations,
                 icon: <ClockIcon className="w-5 h-5" />,
                 color: 'text-orange-600',
-                description: 'In progress'
+                description: 'Needs assignment'
             },
             {
-                title: 'Emergency',
-                value: emergencyWorks,
-                icon: <ExclamationTriangleIcon className="w-5 h-5" />,
-                color: 'text-red-600',
-                description: 'Urgent tasks'
+                title: 'Staff',
+                value: users?.length || 0,
+                icon: <UserIcon className="w-5 h-5" />,
+                color: 'text-purple-600',
+                description: 'Available staff'
             }
         ];
-    }, [data, totalRows]);
+    }, [data, users]);
 
     // Action buttons configuration
     const actionButtons = [
-        ...(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer' ? [{
-            label: "Add Work",
+        ...(auth.roles.includes('Administrator') || auth.permissions.includes('jurisdiction.create') ? [{
+            label: "Add Location",
             icon: <PlusIcon className="w-4 h-4" />,
-            onPress: () => openModal('addDailyWork'),
+            onPress: () => openModal('addWorkLocation'),
             className: "bg-linear-to-r from-blue-500 to-purple-500 text-white font-medium"
         }] : []),
-        ...(auth.roles.includes('Administrator') ? [
-            {
-                label: "Import",
-                icon: <DocumentArrowUpIcon className="w-4 h-4" />,
-                variant: "flat",
-                color: "warning",
-                onPress: () => openModal('importDailyWorks'),
-                className: "bg-linear-to-r from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30"
-            },
-            {
-                label: "Export",
-                icon: <DocumentArrowDownIcon className="w-4 h-4" />,
-                variant: "flat", 
-                color: "success",
-                onPress: () => openModal('exportDailyWorks'),
-                className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
-            }
-        ] : [])
     ];
 
-    useEffect(() => {
-        fetchData(currentPage, perPage, filterData);
-    }, [currentPage, perPage, search, filterData]);
+    // Filter data based on search
+    const filteredData = useMemo(() => {
+        if (!search) return data;
+        return data.filter(location => 
+            location.location?.toLowerCase().includes(search.toLowerCase()) ||
+            location.start_chainage?.toLowerCase().includes(search.toLowerCase()) ||
+            location.end_chainage?.toLowerCase().includes(search.toLowerCase()) ||
+            location.incharge_user?.name?.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [data, search]);
 
     return (
         <>
             <Head title={title} />
 
             {/* Modals */}
-            {openModalType === 'addDailyWork' && (
-                <DailyWorkForm
+            {openModalType === 'addWorkLocation' && (
+                <WorkLocationForm
                     modalType="add"
-                    open={openModalType === 'addDailyWork'}
+                    open={openModalType === 'addWorkLocation'}
                     setData={setData}
                     closeModal={closeModal}
+                    users={users}
                 />
             )}
-            {openModalType === 'editDailyWork' && (
-                <DailyWorkForm
+            {openModalType === 'editWorkLocation' && (
+                <WorkLocationForm
                     modalType="update"
-                    open={openModalType === 'editDailyWork'}
+                    open={openModalType === 'editWorkLocation'}
                     currentRow={currentRow}
                     setData={setData}
                     closeModal={closeModal}
+                    users={users}
                 />
             )}
-            {openModalType === 'deleteDailyWork' && (
-                <DeleteDailyWorkForm
-                    open={openModalType === 'deleteDailyWork'}
+            {openModalType === 'deleteWorkLocation' && (
+                <DeleteWorkLocationForm
+                    open={openModalType === 'deleteWorkLocation'}
                     handleClose={handleClose}
                     handleDelete={handleDelete}
-                    setData={setData}
-                />
-            )}
-            {openModalType === 'importDailyWorks' && (
-                <DailyWorksUploadForm
-                    open={openModalType === 'importDailyWorks'}
-                    closeModal={closeModal}
-                    setData={setData}
-                    setTotalRows={setTotalRows}
-                />
-            )}
-            {openModalType === 'exportDailyWorks' && (
-                <DailyWorksDownloadForm
-                    open={openModalType === 'exportDailyWorks'}
-                    closeModal={closeModal}
-                    filterData={filterData}
-                    search={search}
-                    users={users}
                 />
             )}
 
@@ -343,7 +258,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                                     borderRadius: `var(--borderRadius, 12px)`,
                                                 }}
                                             >
-                                                <BriefcaseIcon 
+                                                <MapPinIcon 
                                                     className={`
                                                         ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
                                                     `}
@@ -361,7 +276,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                                         fontFamily: `var(--fontFamily, "Inter")`,
                                                     }}
                                                 >
-                                                    Project Work Management
+                                                    Work Locations Management
                                                 </h4>
                                                 <p 
                                                     className={`
@@ -373,7 +288,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                                         fontFamily: `var(--fontFamily, "Inter")`,
                                                     }}
                                                 >
-                                                    Track daily work progress and project activities
+                                                    Manage jurisdictions and work location assignments
                                                 </p>
                                             </div>
                                         </div>
@@ -413,7 +328,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                 <div className="w-full sm:w-auto sm:min-w-[300px]">
                                     <Input
                                         type="text"
-                                        placeholder="Search by description, location, or notes..."
+                                        placeholder="Search by location, chainage, or incharge..."
                                         value={search}
                                         onChange={(e) => handleSearch(e)}
                                         variant="bordered"
@@ -436,7 +351,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                 </div>
                             </div>
 
-                            {/* Daily Works Table */}
+                            {/* Work Locations Table */}
                             <Card 
                                 radius={getThemeRadius()}
                                 className="bg-content2/50 backdrop-blur-md border border-divider/30"
@@ -448,27 +363,16 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                 }}
                             >
                                 <CardBody className="p-4">
-                                    <DailyWorksTable
+                                    <WorkLocationsTable
+                                        allData={filteredData}
                                         setData={setData}
-                                        filteredData={filteredData}
-                                        setFilteredData={setFilteredData}
-                                        reports={reports}
-                                        setCurrentRow={setCurrentRow}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        onPageChange={handlePageChange}
+                                        loading={loading}
                                         setLoading={setLoading}
                                         handleClickOpen={handleClickOpen}
                                         openModal={openModal}
-                                        juniors={allData.juniors}
-                                        totalRows={totalRows}
-                                        lastPage={lastPage}
-                                        loading={loading}
-                                        allData={data}
-                                        allInCharges={allData.allInCharges}
-                                        jurisdictions={jurisdictions}
+                                        setCurrentRow={setCurrentRow}
                                         users={users}
-                                        reports_with_daily_works={reports_with_daily_works}
+                                        auth={auth}
                                     />
                                 </CardBody>
                             </Card>
@@ -480,6 +384,6 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
     );
 });
 
-DailyWorks.layout = (page) => <App>{page}</App>;
+WorkLocations.layout = (page) => <App>{page}</App>;
 
-export default DailyWorks;
+export default WorkLocations;

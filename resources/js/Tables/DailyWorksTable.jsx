@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
 import {
@@ -85,6 +85,28 @@ const DailyWorksTable = ({
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
+
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
+    // Handle refresh functionality
+    const handleRefresh = useCallback(() => {
+        router.reload({ only: ['allData', 'reports_with_daily_works'], onSuccess: () => {
+            toast.success('Daily works data refreshed successfully');
+        }});
+    }, []);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [updatingWorkId, setUpdatingWorkId] = useState(null);
@@ -588,7 +610,7 @@ const DailyWorksTable = ({
         }
     };
 
-    // Mobile card component - matching Leave page pattern
+    // Mobile card component - comprehensive matching table data
     const MobileDailyWorkCard = ({ work }) => {
         const inchargeUser = getUserInfo(work.incharge);
         const assignedUser = getUserInfo(work.assigned);
@@ -605,16 +627,56 @@ const DailyWorksTable = ({
                     borderColor: 'var(--theme-divider)',
                 }}
             >
-                <CardBody className="p-4">
-                    <div className="flex items-start justify-between mb-3">
+                <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between w-full">
                         <div className="flex items-center gap-3 flex-1">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-primary">
-                                    {work.number}
-                                </span>
-                                <span className="text-xs text-default-500">
-                                    {formatDate(work.date)}
-                                </span>
+                            <div className="p-2 rounded-lg bg-primary/10">
+                                <DocumentIcon className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    {work.status === 'completed' && work.file ? (
+                                        <Link
+                                            isExternal
+                                            href={work.file}
+                                            color="success"
+                                            size="sm"
+                                            className="font-bold"
+                                        >
+                                            {work.number}
+                                        </Link>
+                                    ) : work.status === 'completed' && !work.file ? (
+                                        <Link
+                                            href="#"
+                                            color="danger"
+                                            size="sm"
+                                            className="font-bold"
+                                            onPress={async () => {
+                                                const pdfFile = await captureDocument(work.number);
+                                                if (pdfFile) {
+                                                    await uploadImage(work.id, pdfFile);
+                                                }
+                                            }}
+                                        >
+                                            {work.number}
+                                        </Link>
+                                    ) : (
+                                        <span className="text-sm font-bold text-primary">
+                                            {work.number}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CalendarDaysIcon className="w-3 h-3 text-default-400" />
+                                    <span className="text-xs text-default-500">
+                                        {formatDate(work.date)}
+                                    </span>
+                                </div>
+                                {work.reports?.map(report => (
+                                    <span key={report.ref_no} className="text-xs text-default-400 block">
+                                        • {report.ref_no}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -656,24 +718,28 @@ const DailyWorksTable = ({
                             )}
                         </div>
                     </div>
+                </CardHeader>
 
-                    <Divider className="my-3" />
+                <Divider />
 
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            {getWorkTypeIcon(work.type, "w-4 h-4")}
-                            <span className="text-sm font-medium capitalize">
-                                {work.type || 'Standard Work'}
-                            </span>
+                <CardBody className="pt-3">
+                    <div className="space-y-3">
+                        {/* Work Type and Status */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                {getWorkTypeIcon(work.type, "w-4 h-4")}
+                                <span className="text-sm font-medium capitalize">
+                                    {work.type || 'Standard Work'}
+                                </span>
+                            </div>
+                            {work.resubmission_count > 0 && (
+                                <Chip size="sm" variant="flat" color="warning">
+                                    {work.resubmission_count} resubmissions
+                                </Chip>
+                            )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <MapPinIcon className="w-4 h-4 text-default-500" />
-                            <span className="text-sm text-default-500">
-                                {work.location || 'Location not specified'}
-                            </span>
-                        </div>
-
+                        {/* Description */}
                         {work.description && (
                             <div className="flex items-start gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-default-500 mt-0.5 shrink-0" />
@@ -683,6 +749,25 @@ const DailyWorksTable = ({
                             </div>
                         )}
 
+                        {/* Location and Side */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <MapPinIcon className="w-4 h-4 text-default-500" />
+                                <span className="text-sm text-default-500">
+                                    {work.location || 'Location not specified'}
+                                </span>
+                            </div>
+                            {work.side && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-default-400">Side:</span>
+                                    <Chip size="sm" variant="flat" color="default" className="capitalize">
+                                        {work.side}
+                                    </Chip>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Jurisdiction */}
                         <div className="flex items-center gap-2">
                             <BuildingOfficeIcon className="w-4 h-4 text-default-500" />
                             <span className="text-sm text-default-500">
@@ -690,15 +775,7 @@ const DailyWorksTable = ({
                             </span>
                         </div>
 
-                        {work.side && (
-                            <div className="flex items-center gap-2">
-                                <MapPinIcon className="w-4 h-4 text-default-500" />
-                                <span className="text-sm text-default-500">
-                                    Road Side: {work.side}
-                                </span>
-                            </div>
-                        )}
-
+                        {/* Layer Quantity */}
                         {work.qty_layer && (
                             <div className="flex items-center gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-default-500" />
@@ -708,72 +785,178 @@ const DailyWorksTable = ({
                             </div>
                         )}
 
-                        {userIsAdmin && inchargeUser.name !== 'Unassigned' && (
+                        {/* Inspection Details */}
+                        <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <UserIcon className="w-4 h-4 text-default-500" />
+                                <DocumentCheckIcon className="w-4 h-4 text-default-500" />
+                                <span className="text-xs font-medium text-default-600">Inspection Results:</span>
+                            </div>
+                            <Input
+                                size="sm"
+                                variant="bordered"
+                                placeholder="Enter inspection details..."
+                                value={work.inspection_details || ''}
+                                onChange={(e) => handleChange(work.id, work.number, 'inspection_details', e.target.value)}
+                                classNames={{
+                                    input: "text-xs",
+                                    inputWrapper: "bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
+                                }}
+                                style={{
+                                    fontFamily: 'var(--font-family)',
+                                }}
+                            />
+                        </div>
+
+                        {/* Timing Information */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <ClockIcon className="w-4 h-4 text-default-500" />
                                 <span className="text-sm text-default-500">
-                                    In-charge: {inchargeUser.name}
+                                    Planned: {work.planned_time || 'Not set'}
                                 </span>
                             </div>
-                        )}
-
-                        {userIsAdmin && inchargeUser.name === 'Unassigned' && (
                             <div className="flex items-center gap-2">
-                                <UserIcon className="w-4 h-4 text-default-500" />
-                                <Chip size="sm" variant="flat" color="default">
-                                    No In-charge
-                                </Chip>
+                                <CheckCircleIcon className="w-4 h-4 text-default-500" />
+                                <span className="text-xs font-medium text-default-600">Completion Time:</span>
                             </div>
-                        )}
+                            <Input
+                                size="sm"
+                                type="datetime-local"
+                                variant="bordered"
+                                value={work.completion_time
+                                    ? new Date(work.completion_time).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)
+                                    : ''
+                                }
+                                onChange={(e) => handleChange(work.id, work.number, 'completion_time', e.target.value)}
+                                classNames={{
+                                    input: "text-xs",
+                                    inputWrapper: "bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
+                                }}
+                                style={{
+                                    fontFamily: 'var(--font-family)',
+                                }}
+                            />
+                        </div>
 
-                        {userIsSE && assignedUser.name !== 'Unassigned' && (
-                            <div className="flex items-center gap-2">
-                                <UserIcon className="w-4 h-4 text-default-500" />
-                                <span className="text-sm text-default-500">
-                                    Assigned: {assignedUser.name}
-                                </span>
+                        {/* Personnel Information */}
+                        <div className="space-y-2">
+                            {/* In-charge */}
+                            {userIsAdmin && (
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <UserIcon className="w-4 h-4 text-default-500" />
+                                        <span className="text-xs font-medium text-default-600">In-charge:</span>
+                                    </div>
+                                    {inchargeUser.name !== 'Unassigned' ? (
+                                        <User
+                                            size="sm"
+                                            name={inchargeUser.name}
+                                            description="In-charge"
+                                            avatarProps={{
+                                                size: "sm",
+                                                src: inchargeUser.profile_image_url || inchargeUser.profile_image,
+                                            }}
+                                            classNames={{
+                                                name: "text-xs font-medium",
+                                                description: "text-xs text-default-400"
+                                            }}
+                                        />
+                                    ) : (
+                                        <Chip size="sm" variant="flat" color="default">
+                                            No In-charge
+                                        </Chip>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Assigned To */}
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <UserIcon className="w-4 h-4 text-default-500" />
+                                    <span className="text-xs font-medium text-default-600">Assigned to:</span>
+                                </div>
+                                {assignedUser.name !== 'Unassigned' ? (
+                                    <User
+                                        size="sm"
+                                        name={assignedUser.name}
+                                        description="Assigned"
+                                        avatarProps={{
+                                            size: "sm",
+                                            src: assignedUser.profile_image_url || assignedUser.profile_image,
+                                        }}
+                                        classNames={{
+                                            name: "text-xs font-medium",
+                                            description: "text-xs text-default-400"
+                                        }}
+                                    />
+                                ) : (
+                                    <Chip size="sm" variant="flat" color="default">
+                                        Unassigned
+                                    </Chip>
+                                )}
                             </div>
-                        )}
+                        </div>
 
-                        {userIsSE && assignedUser.name === 'Unassigned' && (
-                            <div className="flex items-center gap-2">
-                                <UserIcon className="w-4 h-4 text-default-500" />
-                                <Chip size="sm" variant="flat" color="default">
-                                    Unassigned
-                                </Chip>
+                        {/* RFI Submission Date (Admin only) */}
+                        {userIsAdmin && (
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <CalendarDaysIcon className="w-4 h-4 text-default-500" />
+                                    <span className="text-xs font-medium text-default-600">RFI Submission Date:</span>
+                                </div>
+                                <Input
+                                    size="sm"
+                                    type="date"
+                                    variant="bordered"
+                                    value={work.rfi_submission_date ? 
+                                        new Date(work.rfi_submission_date).toISOString().slice(0, 10) : ''
+                                    }
+                                    onChange={(e) => handleChange(work.id, work.number, 'rfi_submission_date', e.target.value)}
+                                    classNames={{
+                                        input: "text-xs",
+                                        inputWrapper: "bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
+                                    }}
+                                    style={{
+                                        fontFamily: 'var(--font-family)',
+                                    }}
+                                />
                             </div>
                         )}
                     </div>
 
+                    {/* Status Update Buttons */}
                     {(userIsAdmin || userIsSE) && (
                         <>
-                            <Divider className="my-3" />
-                            <div className="flex gap-2 flex-wrap">
-                                {Object.keys(statusConfig).map((status) => (
-                                    <Button
-                                        key={status}
-                                        size="sm"
-                                        variant={work.status === status ? "solid" : "bordered"}
-                                        color={statusConfig[status].color}
-                                        isLoading={updatingWorkId === work.id}
-                                        onPress={() => updateWorkStatus(work, status)}
-                                        startContent={
-                                            updatingWorkId !== work.id ? 
-                                            React.createElement(statusConfig[status].icon, {
-                                                className: "w-3 h-3"
-                                            }) : null
-                                        }
-                                        classNames={{
-                                            base: "flex-1 min-w-[80px]"
-                                        }}
-                                        radius="sm"
-                                        style={{
-                                            fontFamily: 'var(--font-family)',
-                                        }}
-                                    >
-                                        {statusConfig[status].label}
-                                    </Button>
-                                ))}
+                            <Divider className="my-4" />
+                            <div className="space-y-2">
+                                <span className="text-xs font-medium text-default-600">Quick Status Update:</span>
+                                <div className="flex gap-2 flex-wrap">
+                                    {Object.keys(statusConfig).map((status) => (
+                                        <Button
+                                            key={status}
+                                            size="sm"
+                                            variant={work.status === status ? "solid" : "bordered"}
+                                            color={statusConfig[status].color}
+                                            isLoading={updatingWorkId === work.id}
+                                            onPress={() => updateWorkStatus(work, status)}
+                                            startContent={
+                                                updatingWorkId !== work.id ? 
+                                                React.createElement(statusConfig[status].icon, {
+                                                    className: "w-3 h-3"
+                                                }) : null
+                                            }
+                                            classNames={{
+                                                base: "flex-1 min-w-[80px]"
+                                            }}
+                                            radius="sm"
+                                            style={{
+                                                fontFamily: 'var(--font-family)',
+                                            }}
+                                        >
+                                            {statusConfig[status].label}
+                                        </Button>
+                                    ))}
+                                </div>
                             </div>
                         </>
                     )}
@@ -1289,6 +1472,15 @@ const DailyWorksTable = ({
                             total={lastPage}
                             onChange={handlePageChange}
                             size="sm"
+                            radius={getThemeRadius()}
+                            classNames={{
+                                wrapper: "bg-content1/80 backdrop-blur-md border-divider/50",
+                                item: "bg-content1/50 border-divider/30",
+                                cursor: "bg-primary/20 backdrop-blur-md"
+                            }}
+                            style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
                         />
                     </div>
                 )}
@@ -1298,6 +1490,26 @@ const DailyWorksTable = ({
 
     return (
         <div className="max-h-[84vh] overflow-y-auto">
+            {/* Table Header with Refresh Button */}
+            <div className="flex items-center justify-between mb-4 px-2">
+                <h3 className="text-lg font-semibold text-default-700">Daily Works</h3>
+                <Button
+                    variant="flat"
+                    color="primary"
+                    size="sm"
+                    radius={getThemeRadius()}
+                    style={{
+                        backgroundColor: 'rgba(var(--color-primary), 0.1)',
+                        borderColor: 'rgba(var(--color-primary), 0.3)',
+                        color: 'var(--color-text)'
+                    }}
+                    onClick={handleRefresh}
+                    startContent={<ArrowPathIcon className="w-4 h-4" />}
+                >
+                    Refresh
+                </Button>
+            </div>
+            
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
@@ -1367,10 +1579,16 @@ const DailyWorksTable = ({
                         total={lastPage}
                         onChange={handlePageChange}
                         size={isMediumScreen ? "sm" : "md"}
+                        radius={getThemeRadius()}
+                        classNames={{
+                            wrapper: "bg-content1/80 backdrop-blur-md border-divider/50",
+                            item: "bg-content1/50 border-divider/30",
+                            cursor: "bg-primary/20 backdrop-blur-md"
+                        }}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     />
-                    <div className="ml-4 text-xs text-gray-500">
-                        Page {currentPage} of {lastPage} (Total: {totalRows} records)
-                    </div>
                 </div>
             )}
         </div>

@@ -3,8 +3,8 @@
 namespace App\Services\DailyWork;
 
 use App\Imports\DailyWorkImport;
-use App\Models\DailySummary;
 use App\Models\DailyWork;
+use App\Models\DailyWorkSummary;
 use App\Models\Jurisdiction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -96,11 +96,12 @@ class DailyWorkImportService
         }
 
         $inCharge = $jurisdiction->incharge;
-        $inChargeName = User::find($inCharge)->user_name;
+        $inChargeUser = User::find($inCharge);
+        $inChargeName = $inChargeUser ? $inChargeUser->user_name : 'unknown';
 
         // Initialize incharge summary if not exists
-        if (! isset($inChargeSummary[$inChargeName])) {
-            $inChargeSummary[$inChargeName] = [
+        if (! isset($inChargeSummary[$inCharge])) {
+            $inChargeSummary[$inCharge] = [
                 'totalDailyWorks' => 0,
                 'resubmissions' => 0,
                 'embankment' => 0,
@@ -110,16 +111,16 @@ class DailyWorkImportService
         }
 
         // Update summary counters
-        $inChargeSummary[$inChargeName]['totalDailyWorks']++;
-        $this->updateTypeCounter($inChargeSummary[$inChargeName], $importedDailyWork[2]);
+        $inChargeSummary[$inCharge]['totalDailyWorks']++;
+        $this->updateTypeCounter($inChargeSummary[$inCharge], $importedDailyWork[2]);
 
         // Handle existing or new daily work
         $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
 
         if ($existingDailyWork) {
-            $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inChargeName], $inChargeName);
+            $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge], $inCharge);
         } else {
-            $this->createNewDailyWork($importedDailyWork, $inChargeName);
+            $this->createNewDailyWork($importedDailyWork, $inCharge);
         }
 
         return ['processed' => true, 'summary' => $inChargeSummary];
@@ -209,7 +210,7 @@ class DailyWorkImportService
     /**
      * Handle resubmission of existing daily work
      */
-    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary, string $inChargeName): void
+    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary, int $inChargeId): void
     {
         $summary['resubmissions']++;
         $resubmissionCount = $existingDailyWork->resubmission_count ?? 0;
@@ -223,7 +224,8 @@ class DailyWorkImportService
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
-            'incharge' => $inChargeName,
+            'incharge' => $inChargeId,
+            'assigned' => $inChargeId, // Default assigned to same as incharge
             'resubmission_count' => $resubmissionCount,
             'resubmission_date' => $resubmissionDate,
         ]);
@@ -232,7 +234,7 @@ class DailyWorkImportService
     /**
      * Create new daily work
      */
-    private function createNewDailyWork(array $importedDailyWork, string $inChargeName): void
+    private function createNewDailyWork(array $importedDailyWork, int $inChargeId): void
     {
         DailyWork::create([
             'date' => $importedDailyWork[0],
@@ -241,7 +243,8 @@ class DailyWorkImportService
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
-            'incharge' => $inChargeName,
+            'incharge' => $inChargeId,
+            'assigned' => $inChargeId, // Default assigned to same as incharge
         ]);
     }
 
@@ -278,11 +281,11 @@ class DailyWorkImportService
      */
     private function createDailySummaries(array $inChargeSummary, string $date): void
     {
-        foreach ($inChargeSummary as $inChargeName => $summary) {
-            DailySummary::updateOrCreate(
-                ['date' => $date, 'incharge' => $inChargeName],
+        foreach ($inChargeSummary as $inChargeId => $summary) {
+            DailyWorkSummary::updateOrCreate(
+                ['date' => $date, 'incharge' => $inChargeId],
                 [
-                    'total_daily_works' => $summary['totalDailyWorks'],
+                    'totalDailyWorks' => $summary['totalDailyWorks'],
                     'resubmissions' => $summary['resubmissions'],
                     'embankment' => $summary['embankment'],
                     'structure' => $summary['structure'],

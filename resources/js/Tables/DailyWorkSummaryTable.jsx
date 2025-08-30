@@ -11,6 +11,7 @@ const alpha = (color, opacity) => {
     const b = parseInt(hex.substring(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
+
 import {
     Table,
     TableHeader,
@@ -23,7 +24,8 @@ import {
     CardBody,
     Divider,
     ScrollShadow,
-    Progress
+    Progress,
+    Button
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -45,12 +47,27 @@ import {
 import GlassCard from "@/Components/GlassCard";
 
 
-const DailyWorkSummaryTable = ({ filteredData }) => {
+const DailyWorkSummaryTable = ({ filteredData, onRefresh }) => {
     const { auth } = usePage().props;
     const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
+
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -100,15 +117,30 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
         const pending = summary.totalDailyWorks - summary.completed;
 
         return (
-            <GlassCard className="mb-2" shadow="sm">
-                <CardBody className="p-3">
+            <Card 
+                className="mb-2" 
+                shadow="sm"
+                radius={getThemeRadius()}
+                style={{
+                    border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
+                    borderRadius: `var(--borderRadius, 12px)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}
+            >
+                <CardBody className="p-3" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-primary">
+                                <span className="text-sm font-bold text-primary" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     {formatDate(summary.date)}
                                 </span>
-                                <span className="text-xs text-default-500">
+                                <span className="text-xs text-default-500" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     {summary.totalDailyWorks} total works
                                 </span>
                             </div>
@@ -119,6 +151,10 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                                 variant="flat"
                                 color={getPercentageColor(parseFloat(completionPercentage))}
                                 startContent={getPercentageIcon(parseFloat(completionPercentage))}
+                                radius={getThemeRadius()}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             >
                                 {completionPercentage}%
                             </Chip>
@@ -131,10 +167,14 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                     <div className="space-y-3 mb-3">
                         <div>
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs">
+                                <span className="text-xs" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     Completion Progress
                                 </span>
-                                <span className="text-xs font-medium">
+                                <span className="text-xs font-medium" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     {summary.completed}/{summary.totalDailyWorks}
                                 </span>
                             </div>
@@ -142,6 +182,7 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                                 value={parseFloat(completionPercentage)}
                                 color={getPercentageColor(parseFloat(completionPercentage))}
                                 size="sm"
+                                radius={getThemeRadius()}
                                 className="w-full"
                             />
                         </div>
@@ -149,10 +190,14 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                         {summary.rfiSubmissions > 0 && (
                             <div>
                                 <div className="flex justify-between items-center mb-1">
-                                    <span className="text-xs text-default-600">
+                                    <span className="text-xs text-default-600" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
                                         RFI Submission
                                     </span>
-                                    <span className="text-xs font-medium">
+                                    <span className="text-xs font-medium" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
                                         {summary.rfiSubmissions}/{summary.completed}
                                     </span>
                                 </div>
@@ -160,6 +205,7 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                                     value={parseFloat(rfiSubmissionPercentage)}
                                     color={getPercentageColor(parseFloat(rfiSubmissionPercentage))}
                                     size="sm"
+                                    radius={getThemeRadius()}
                                     className="w-full"
                                 />
                             </div>
@@ -168,32 +214,50 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
 
                     {/* Work type breakdown */}
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg" style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                        }}>
                             {getWorkTypeIcon("embankment", summary.embankment)}
-                            <span className="text-xs mt-1 text-default-600">
+                            <span className="text-xs mt-1 text-default-600" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 Embankment
                             </span>
-                            <span className="text-xs font-medium">
+                            <span className="text-xs font-medium" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 {summary.embankment}
                             </span>
                         </div>
                         
-                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg" style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                        }}>
                             {getWorkTypeIcon("structure", summary.structure)}
-                            <span className="text-xs mt-1 text-default-600">
+                            <span className="text-xs mt-1 text-default-600" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 Structure
                             </span>
-                            <span className="text-xs font-medium">
+                            <span className="text-xs font-medium" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 {summary.structure}
                             </span>
                         </div>
                         
-                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-white/5 rounded-lg" style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                        }}>
                             {getWorkTypeIcon("pavement", summary.pavement)}
-                            <span className="text-xs mt-1 text-default-600">
+                            <span className="text-xs mt-1 text-default-600" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 Pavement
                             </span>
-                            <span className="text-xs font-medium">
+                            <span className="text-xs font-medium" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 {summary.pavement}
                             </span>
                         </div>
@@ -204,15 +268,19 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                     <div className="flex justify-between text-xs">
                         <div className="flex items-center gap-1">
                             <ArrowPathSolid className="w-3 h-3 text-warning" />
-                            <span>Resubmissions: {summary.resubmissions}</span>
+                            <span style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>Resubmissions: {summary.resubmissions}</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <ClockSolid className="w-3 h-3 text-danger" />
-                            <span>Pending: {pending}</span>
+                            <span style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>Pending: {pending}</span>
                         </div>
                     </div>
                 </CardBody>
-            </GlassCard>
+            </Card>
         );
     };
 
@@ -385,18 +453,86 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
 
     if (isMobile) {
         return (
-            <div className="space-y-4">
+            <div className="space-y-4" style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}>
+                {onRefresh && (
+                    <div className="flex justify-end mb-4">
+                        <Button
+                            size="sm"
+                            variant="bordered"
+                            color="primary"
+                            radius={getThemeRadius()}
+                            startContent={<ArrowPathIcon className="w-4 h-4" />}
+                            onPress={onRefresh}
+                            style={{
+                                borderRadius: `var(--borderRadius, 8px)`,
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
+                        >
+                            Refresh Summary
+                        </Button>
+                    </div>
+                )}
                 <ScrollShadow className="max-h-[70vh]">
-                    {filteredData?.map((summary, index) => (
-                        <MobileSummaryCard key={index} summary={summary} />
-                    ))}
+                    {filteredData?.length > 0 ? (
+                        filteredData.map((summary, index) => (
+                            <MobileSummaryCard key={index} summary={summary} />
+                        ))
+                    ) : (
+                        <Card
+                            className="text-center py-8"
+                            radius={getThemeRadius()}
+                            style={{
+                                border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
+                                borderRadius: `var(--borderRadius, 12px)`,
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}
+                        >
+                            <CardBody>
+                                <ChartBarIcon className="w-12 h-12 text-default-300 mb-4 mx-auto" />
+                                <h6 className="text-lg font-semibold text-default-600 mb-2" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
+                                    No summary data found
+                                </h6>
+                                <p className="text-sm text-default-500" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
+                                    No work summary available for the selected period
+                                </p>
+                            </CardBody>
+                        </Card>
+                    )}
                 </ScrollShadow>
             </div>
         );
     }
 
     return (
-        <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
+        <div style={{ 
+            maxHeight: "70vh", 
+            overflowY: "auto",
+            fontFamily: `var(--fontFamily, "Inter")`,
+        }}>
+            {onRefresh && (
+                <div className="flex justify-end mb-4">
+                    <Button
+                        size="sm"
+                        variant="bordered"
+                        color="primary"
+                        radius={getThemeRadius()}
+                        startContent={<ArrowPathIcon className="w-4 h-4" />}
+                        onPress={onRefresh}
+                        style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        Refresh Summary
+                    </Button>
+                </div>
+            )}
             <ScrollShadow className="max-h-[70vh]">
                 <Table
                     isStriped
@@ -404,6 +540,7 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                     isCompact
                     isHeaderSticky
                     removeWrapper
+                    radius={getThemeRadius()}
                     aria-label="Daily Work Summary Table"
                     classNames={{
                         wrapper: "min-h-[200px]",
@@ -414,16 +551,26 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                         td: "py-2 px-3 text-sm",
                         th: "py-2 px-3 text-xs font-semibold"
                     }}
+                    style={{
+                        border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
                 >
                     <TableHeader columns={columns}>
                         {(column) => (
                             <TableColumn 
                                 key={column.uid} 
                                 className="bg-default-100/80 backdrop-blur-md"
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             >
                                 <div className="flex items-center gap-1">
                                     {column.icon && <column.icon className="w-3 h-3" />}
-                                    <span className="text-xs font-semibold">{column.name}</span>
+                                    <span className="text-xs font-semibold" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>{column.name}</span>
                                 </div>
                             </TableColumn>
                         )}
@@ -433,17 +580,23 @@ const DailyWorkSummaryTable = ({ filteredData }) => {
                         emptyContent={
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <ChartBarIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <h6 className="text-lg font-semibold text-default-600 mb-2">
+                                <h6 className="text-lg font-semibold text-default-600 mb-2" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     No summary data found
                                 </h6>
-                                <p className="text-sm text-default-500">
+                                <p className="text-sm text-default-500" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     No work summary available for the selected period
                                 </p>
                             </div>
                         }
                     >
                         {(summary) => (
-                            <TableRow key={summary.date}>
+                            <TableRow key={summary.date} style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 {(columnKey) => renderCell(summary, columnKey)}
                             </TableRow>
                         )}

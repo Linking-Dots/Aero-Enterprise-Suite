@@ -36,6 +36,7 @@ import {
   ClockIcon,
   DocumentTextIcon as DocumentTextIconLegacy, // Legacy document text icon
   ShoppingBagIcon as ShoppingBagIconLegacy, // Legacy shopping bag icon
+  MapPinIcon,
 
 } from '@heroicons/react/24/outline';
 
@@ -58,6 +59,9 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('daily-works.view') ? [
         { name: 'Daily Works', icon: <DocumentTextIcon  />, route: 'daily-works' },
         { name: 'Daily Work Summary', icon: <ChartBarSquareIcon  />, route: 'daily-works-summary' },
+      ] : []),
+      ...(permissions.includes('jurisdiction.view') ? [
+        { name: 'Work Locations', icon: <MapPinIcon  />, route: 'jurisdiction' },
       ] : []),
       ...(permissions.includes('attendance.own.view') ? [
         { name: 'Attendance', icon: <CalendarDaysIcon  />, route: 'attendance-employee' }
