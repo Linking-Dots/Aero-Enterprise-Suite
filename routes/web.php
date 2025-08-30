@@ -134,9 +134,7 @@ Route::middleware($middlewareStack)->group(function () {
         Route::delete('/delete-daily-work', [DailyWorkController::class, 'delete'])->name('dailyWorks.delete');
     });
 
-    Route::middleware(['permission:daily-works.import'])->group(function () {
-        Route::post('/daily-works-import', [DailyWorkController::class, 'import'])->name('dailyWorks.import');
-    });
+  
 
     Route::middleware(['permission:daily-works.export'])->group(function () {
         Route::post('/daily-works/export', [DailyWorkController::class, 'export'])->name('dailyWorks.export');
