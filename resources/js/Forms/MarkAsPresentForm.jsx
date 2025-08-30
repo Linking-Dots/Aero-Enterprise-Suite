@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePage } from '@inertiajs/react';
 import {
     Button,
     Input,
@@ -11,19 +12,26 @@ import {
     ModalBody,
     ModalFooter,
     Divider,
-    User
+    User,
+    Tabs,
+    Tab,
+    Card,
+    CardBody
 } from "@heroui/react";
 import {
     UserPlusIcon,
     ClockIcon,
     CalendarDaysIcon,
     InformationCircleIcon,
-    MapPinIcon
+    MapPinIcon,
+    ShieldCheckIcon
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { format } from 'date-fns';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import LocationPickerMap from '@/Components/LocationPickerMap';
+
 
 const MarkAsPresentForm = ({ 
     open, 
@@ -33,6 +41,9 @@ const MarkAsPresentForm = ({
     refreshTimeSheet,
     currentUser = null
 }) => {
+    // Get auth user from Inertia page props
+    const { props: { auth } } = usePage();
+    
     // Helper function to convert theme borderRadius to HeroUI radius values
     const getThemeRadius = () => {
         if (typeof window === 'undefined') return 'lg';
@@ -55,7 +66,8 @@ const MarkAsPresentForm = ({
         punch_in_time: '09:00',
         punch_out_time: '',
         reason: '',
-        location: 'Office - Manually marked present by admin'
+        location: 'Office - Manually marked present by admin',
+        coordinates: null
     });
     
     const [errors, setErrors] = useState({});
@@ -67,7 +79,7 @@ const MarkAsPresentForm = ({
             setFormData(prev => ({
                 ...prev,
                 user_id: currentUser.id,
-                date: selectedDate,
+                date: selectedDate
             }));
         } else {
             setFormData(prev => ({
@@ -76,12 +88,22 @@ const MarkAsPresentForm = ({
                 date: selectedDate,
                 punch_in_time: '09:00',
                 punch_out_time: '',
-                reason: '',
-                location: 'Office - Manually marked present by admin'
             }));
         }
-        setErrors({});
-    }, [currentUser, selectedDate, open]);
+    }, [currentUser, selectedDate]); // Add dependency array to prevent infinite re-renders
+            
+       
+
+    // Handle location change from map
+    const handleLocationChange = useCallback((locationData) => {
+        setFormData(prev => ({
+            ...prev,
+            coordinates: locationData,
+            location: locationData.source === 'manual' 
+                ? `Manual: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`
+                : `GPS: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)} (±${Math.round(locationData.accuracy)}m)`
+        }));
+    }, []);
 
     // Filter out employees who already have attendance
     const availableUsers = useMemo(() => {
@@ -129,13 +151,24 @@ const MarkAsPresentForm = ({
         setErrors({});
 
         try {
+            // Ensure we have location data
+            if (!formData.coordinates) {
+                toast.error('Please select a location on the map before submitting.');
+                setProcessing(false);
+                return;
+            }
+
+            // Prepare submit data using the same format as regular punch function
             const submitData = {
-                user_id: formData.user_id,
+                user_id: parseInt(formData.user_id),
                 date: formData.date,
                 punch_in_time: formData.punch_in_time,
                 punch_out_time: formData.punch_out_time || null,
-                reason: formData.reason || 'Marked present by administrator',
-                location: formData.location
+            
+                // Location data in the same format as punch function
+                lat: formData.coordinates.latitude,
+                lng: formData.coordinates.longitude,
+                address: formData.location || `Manually marked present by ${auth.user?.name || 'Administrator'}`
             };
 
             const response = await axios.post(route('attendance.mark-as-present'), submitData);
@@ -158,7 +191,7 @@ const MarkAsPresentForm = ({
     };
 
     // Get selected user details
-    const selectedUser = availableUsers.find(user => user.id == formData.user_id);
+    const selectedUser = currentUser || availableUsers.find(user => user.id == formData.user_id);
 
     return (
         <Modal 
@@ -168,11 +201,11 @@ const MarkAsPresentForm = ({
             radius={getThemeRadius()}
             scrollBehavior="inside"
             classNames={{
-                base: "backdrop-blur-md mx-2 my-2 sm:mx-4 sm:my-8 max-h-[95vh]",
+                base: "backdrop-blur-md mx-2 my-2 sm:mx-4 sm:my-4 max-h-[90vh]",
                 backdrop: "bg-black/50 backdrop-blur-sm",
-                header: "border-b border-divider",
-                body: "overflow-y-auto",
-                footer: "border-t border-divider",
+                header: "border-b border-divider flex-shrink-0",
+                body: "overflow-y-auto max-h-[calc(90vh-8rem)]",
+                footer: "border-t border-divider flex-shrink-0",
                 closeButton: "hover:bg-white/5 active:bg-white/10"
             }}
             style={{
@@ -206,64 +239,89 @@ const MarkAsPresentForm = ({
                                 <div className="space-y-6">
                                     {/* Employee Selection Section */}
                                     <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <UserPlusIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
-                            <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
-                                Employee Selection
-                            </h3>
-                        </div>                                        <div className="grid grid-cols-1 gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <UserPlusIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
+                                            <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
+                                                Employee Selection
+                                            </h3>
+                                        </div>                                        
+                                        <div className="grid grid-cols-1 gap-4">
                                             {/* Employee Selection */}
-                                            <Select
-                                                label="Select Employee"
-                                                placeholder="Choose an employee to mark as present"
-                                                selectedKeys={formData.user_id ? new Set([formData.user_id.toString()]) : new Set()}
-                                                onSelectionChange={(keys) => {
-                                                    const value = Array.from(keys)[0];
-                                                    handleFieldChange('user_id', value || '');
-                                                }}
-                                                isInvalid={Boolean(errors.user_id)}
-                                                errorMessage={errors.user_id}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                classNames={{
-                                                    trigger: "min-h-unit-12",
-                                                    value: "text-small"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
-                                                renderValue={(items) => {
-                                                    return items.map((item) => {
-                                                        const user = availableUsers.find(u => u.id.toString() === item.key);
-                                                        return user ? (
-                                                            <div key={item.key} className="flex items-center gap-2">
-                                                                <span>{user.name}</span>
-                                                                <span className="text-xs text-default-500">({user.employee_id})</span>
-                                                            </div>
-                                                        ) : null;
-                                                    });
-                                                }}
-                                            >
-                                                {availableUsers.map((user) => (
-                                                    <SelectItem 
-                                                        key={user.id.toString()} 
-                                                        value={user.id.toString()}
-                                                        textValue={`${user.name} (${user.employee_id})`}
-                                                    >
-                                                        <User
-                                                            avatarProps={{
-                                                                size: "sm",
-                                                                src: user.profile_image_url,
-                                                                showFallback: true,
-                                                                name: user.name,
-                                                            }}
-                                                            description={`ID: ${user.employee_id}`}
-                                                            name={user.name}
-                                                        />
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
+                                            {currentUser ? (
+                                                // Show selected user when passed as prop
+                                                <div 
+                                                    className="p-3 rounded-lg border"
+                                                    style={{
+                                                        backgroundColor: 'var(--theme-content2)',
+                                                        borderColor: 'var(--theme-divider)',
+                                                        borderRadius: `var(--borderRadius, 8px)`,
+                                                    }}
+                                                >
+                                                    <User
+                                                        avatarProps={{
+                                                            size: "sm",
+                                                            src: currentUser.profile_image_url,
+                                                            showFallback: true,
+                                                            name: currentUser.name,
+                                                        }}
+                                                        description={`Employee ID: ${currentUser.employee_id}`}
+                                                        name={currentUser.name}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                // Show dropdown when no user is preselected
+                                                <Select
+                                                    label="Select Employee"
+                                                    placeholder="Choose an employee to mark as present"
+                                                    selectedKeys={formData.user_id ? new Set([formData.user_id.toString()]) : new Set()}
+                                                    onSelectionChange={(keys) => {
+                                                        const value = Array.from(keys)[0];
+                                                        handleFieldChange('user_id', value || '');
+                                                    }}
+                                                    isInvalid={Boolean(errors.user_id)}
+                                                    errorMessage={errors.user_id}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        trigger: "min-h-unit-12",
+                                                        value: "text-small"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                    renderValue={(items) => {
+                                                        return items.map((item) => {
+                                                            const user = availableUsers.find(u => u.id.toString() === item.key);
+                                                            return user ? (
+                                                                <div key={item.key} className="flex items-center gap-2">
+                                                                    <span>{user.name}</span>
+                                                                    <span className="text-xs text-default-500">({user.employee_id})</span>
+                                                                </div>
+                                                            ) : null;
+                                                        });
+                                                    }}
+                                                >
+                                                    {availableUsers.map((user) => (
+                                                        <SelectItem 
+                                                            key={user.id.toString()} 
+                                                            value={user.id.toString()}
+                                                            textValue={`${user.name} (${user.employee_id})`}
+                                                        >
+                                                            <User
+                                                                avatarProps={{
+                                                                    size: "sm",
+                                                                    src: user.profile_image_url,
+                                                                    showFallback: true,
+                                                                    name: user.name,
+                                                                }}
+                                                                description={`ID: ${user.employee_id}`}
+                                                                name={user.name}
+                                                            />
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+                                            )}
 
                                             {/* Date Display */}
                                             <Input
@@ -354,55 +412,20 @@ const MarkAsPresentForm = ({
 
                                     <Divider style={{ background: `var(--theme-divider)` }} />
 
-                                    {/* Additional Information Section */}
+                                    {/* Additional Information Section with Location & Security */}
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2">
-                                            <InformationCircleIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
+                                            <MapPinIcon className="w-5 h-5" style={{ color: 'var(--theme-primary)' }} />
                                             <h3 className="text-base font-semibold" style={{ color: 'var(--theme-foreground)' }}>
-                                                Additional Information
+                                                Location & Security Information
                                             </h3>
                                         </div>
-                                        
-                                        <div className="grid grid-cols-1 gap-4">
-                                            {/* Location */}
-                                            <Input
-                                                label="Location"
-                                                value={formData.location}
-                                                onValueChange={(value) => handleFieldChange('location', value)}
-                                                isInvalid={Boolean(errors.location)}
-                                                errorMessage={errors.location}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
-                                                classNames={{
-                                                    input: "text-small",
-                                                    inputWrapper: "min-h-unit-10"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
-                                            />
 
-                                            {/* Reason */}
-                                            <Textarea
-                                                label="Reason (Optional)"
-                                                placeholder="Reason for manually marking as present..."
-                                                value={formData.reason}
-                                                onValueChange={(value) => handleFieldChange('reason', value)}
-                                                isInvalid={Boolean(errors.reason)}
-                                                errorMessage={errors.reason}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                minRows={3}
-                                                maxRows={5}
-                                                classNames={{
-                                                    input: "text-small"
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
+                                        {/* Location Picker Map */}
+                                        <div className="space-y-4 py-4">
+                                            <LocationPickerMap
+                                                onLocationChange={handleLocationChange}
+                                                initialLocation={formData.coordinates}
                                             />
                                         </div>
                                     </div>

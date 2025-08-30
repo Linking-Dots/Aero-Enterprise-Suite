@@ -999,7 +999,7 @@ const DesktopHeader = React.memo(({
               boxShadow: `0 8px 32px color-mix(in srgb, var(--theme-primary, #006FEE) 10%, transparent)`
             }}
           >
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl px-4">
               <div className="flex items-center justify-between py-4 gap-6 min-h-[72px]">
                 
                 {/* Left Section: Logo and Menu Toggle */}
@@ -1078,6 +1078,7 @@ const DesktopHeader = React.memo(({
 
                 {/* Center Section: Original Horizontal Navigation Menu */}
                 <motion.div
+                  className="flex-1 flex justify-center"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{
                     opacity: !internalSidebarOpen ? 1 : 0,
@@ -1086,7 +1087,7 @@ const DesktopHeader = React.memo(({
                   transition={{ duration: 0.3 }}
                   style={{ overflow: 'hidden' }}
                 >
-                  <div className="flex-grow mx-8">
+                  <div className="mx-8">
                     <div className={`grid gap-2 ${
                       isTablet ? 'grid-cols-2' : 'grid-cols-4'
                     }`}>
@@ -1399,7 +1400,7 @@ const DesktopHeader = React.memo(({
                 </motion.div>
 
                 {/* Right Section: Enhanced Actions & Profile */}
-                <div className="flex items-center gap-4 ml-auto">
+                <div className="flex items-center gap-4 flex-shrink-0">
                   {/* Quick Actions */}
                   <Button
                     isIconOnly

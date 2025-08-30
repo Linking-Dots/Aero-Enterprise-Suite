@@ -9,6 +9,7 @@ use App\Models\HRM\AttendanceSetting;
 use App\Models\HRM\Holiday;
 use App\Models\HRM\LeaveSetting;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Throwable;
 
 class AttendanceController extends Controller
@@ -42,7 +42,6 @@ class AttendanceController extends Controller
             'title' => 'Time Sheet',
         ]);
     }
-
 
     public function paginate(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -220,7 +219,7 @@ class AttendanceController extends Controller
                     $symbol = '√';
                     $remarks = $totalMinutes > 0 ? 'Present on Holiday' : ((now()->toDateString() === $date) ? 'Currently Working' : 'Not Punched Out');
                     $punchIn = $first->punchin;
-                    $punchOut = $last->punchout;
+                    $punchOut = $last ? $last->punchout : null;
                 } else {
                     $symbol = '#';
                     $remarks = 'Holiday';
@@ -250,7 +249,7 @@ class AttendanceController extends Controller
                 $symbol = '√';
                 $remarks = $totalMinutes > 0 ? 'Present' : ($date->isToday() ? 'Currently Working' : 'Not Punched Out');
                 $punchIn = $first->punchin;
-                $punchOut = $last->punchout;
+                $punchOut = $last ? $last->punchout : null;
             } elseif ($holiday && ! $attendancesForDate->isNotEmpty()) {
                 $symbol = '#';
                 $remarks = 'Holiday';
@@ -1460,7 +1459,7 @@ class AttendanceController extends Controller
     public function markAsPresent(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            // Validate the incoming request data
+            // Enhanced validation to include punch data for consistency
             $validatedData = $request->validate([
                 'user_id' => 'required|integer|exists:users,id',
                 'date' => 'required|date',
@@ -1468,6 +1467,10 @@ class AttendanceController extends Controller
                 'punch_out_time' => 'nullable|date_format:H:i',
                 'reason' => 'nullable|string|max:255',
                 'location' => 'nullable|string',
+                // Location data in the same format as punch function
+                'lat' => 'nullable|numeric|between:-90,90',
+                'lng' => 'nullable|numeric|between:-180,180',
+                'address' => 'nullable|string|max:255',
             ]);
 
             $userId = $validatedData['user_id'];
@@ -1498,18 +1501,26 @@ class AttendanceController extends Controller
                 ], 422);
             }
 
+            // Prepare location data using the same format as regular punch function
+            $locationData = [
+                'lat' => $validatedData['lat'] ?? 0,
+                'lng' => $validatedData['lng'] ?? 0,
+                'address' => $validatedData['address'] ?? $location ?? 'Manually marked present by '.(Auth::user()?->name ?? 'Administrator'),
+                'timestamp' => now()->toISOString(),
+            ];
+
             // Create the attendance record with punch in
             $attendanceData = [
                 'user_id' => $userId,
                 'date' => $date,
                 'punchin' => Carbon::parse($date.' '.$punchInTime),
-                'punchin_location' => $location ? json_encode(['manual' => true, 'reason' => $reason]) : null,
+                'punchin_location' => json_encode($locationData),
             ];
 
             // Add punch out if provided
             if ($punchOutTime) {
                 $attendanceData['punchout'] = Carbon::parse($date.' '.$punchOutTime);
-                $attendanceData['punchout_location'] = $location ? json_encode(['manual' => true, 'reason' => $reason]) : null;
+                $attendanceData['punchout_location'] = json_encode($locationData);
             }
 
             $attendance = Attendance::create($attendanceData);
@@ -1520,6 +1531,10 @@ class AttendanceController extends Controller
                 'data' => [
                     'attendance' => $attendance,
                     'user' => $user->only(['id', 'name', 'employee_id']),
+                    'location_info' => isset($validatedData['lat']) ? [
+                        'coordinates' => "{$validatedData['lat']}, {$validatedData['lng']}",
+                        'accuracy' => $validatedData['accuracy'] ?? 10,
+                    ] : ['address' => $locationData['address']],
                 ],
             ]);
 
@@ -1538,7 +1553,7 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while marking user as present.',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

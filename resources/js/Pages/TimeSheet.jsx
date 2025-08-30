@@ -82,9 +82,15 @@ const TimeSheet = ({ title, allUsers }) => {
         setUpdateTimeSheet(prev => prev + 1);
     }, []);
     
-    const handleMarkAsPresent = useCallback((user) => {
-        handleModalOpen('mark_as_present', [], user);
-    }, [handleModalOpen]);
+    const handleMarkAsPresent = useCallback((user, selectedDate) => {
+        // Set the current user and pass the selected date to the modal
+        setModalState({
+            type: 'mark_as_present',
+            selectedUsers: [],
+            currentUser: user,
+            selectedDate: selectedDate
+        });
+    }, []);
 
     // Statistics - Mock data for now, will be populated by TimeSheetTable
     const statsData = useMemo(() => {
@@ -129,12 +135,12 @@ const TimeSheet = ({ title, allUsers }) => {
     const modalProps = useMemo(() => ({
         open: Boolean(modalState.type),
         closeModal: handleModalClose,
-        selectedDate,
+        selectedDate: modalState.selectedDate || selectedDate,
         allUsers,
         refreshTimeSheet,
         selectedUsers: modalState.selectedUsers,
         currentUser: modalState.currentUser
-    }), [modalState.type, handleModalClose, selectedDate, allUsers, refreshTimeSheet, modalState.selectedUsers, modalState.currentUser]);
+    }), [modalState.type, handleModalClose, modalState.selectedDate, selectedDate, allUsers, refreshTimeSheet, modalState.selectedUsers, modalState.currentUser]);
 
     // Check permissions
     const canManageAttendance = auth.permissions?.includes('attendance.view') || false;

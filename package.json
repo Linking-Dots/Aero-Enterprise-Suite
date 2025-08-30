@@ -1,10 +1,13 @@
 {
      "private": true,
      "type": "module",
+     "version": "1.2.3",
      "scripts": {
           "dev": "vite",
-          "build": "vite build",
+          "build": "npm run version:sync && vite build && npm run pwa:update",
           "test": "vitest",
+          "version:sync": "node tools/sync-version.js",
+          "pwa:update": "node tools/update-pwa-version.js",
           "performance:baseline": "node tools/performance/scripts/establish-baseline.js",
           "performance:test": "playwright test --config=tools/performance/performance.test.config.cjs",
           "performance:report": "node tools/performance/scripts/generate-report.js",
