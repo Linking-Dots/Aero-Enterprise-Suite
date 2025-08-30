@@ -27,6 +27,19 @@ class DailyWorkPaginationService
         $query = $this->buildBaseQuery($user);
         $query = $this->applyFilters($query, $search, $statusFilter, $inChargeFilter, $startDate, $endDate);
 
+        // If no page parameter is provided (mobile mode), return all data for the date
+        if (!$request->has('page') && !$request->has('perPage')) {
+            $allData = $query->orderBy('date', 'desc')->get();
+            // Create a manual paginator with all data on page 1
+            return new LengthAwarePaginator(
+                $allData,
+                $allData->count(),
+                $allData->count() ?: 1, // perPage = total count to show all on one page
+                1,
+                ['path' => $request->url(), 'pageName' => 'page']
+            );
+        }
+
         return $query->orderBy('date', 'desc')->paginate($perPage, ['*'], 'page', $page);
     }
 
@@ -70,7 +83,8 @@ class DailyWorkPaginationService
             return DailyWork::with('reports')->where('assigned', $user->id);
         }
 
-        if ($user->hasRole('Administrator')) {
+        // Super Administrator and Administrator get all data
+        if ($user->hasRole('Super Administrator') || $user->hasRole('Administrator')) {
             return DailyWork::with('reports');
         }
 
@@ -132,6 +146,10 @@ class DailyWorkPaginationService
             return 'Asst. Quality Control Inspector';
         }
 
+        if ($user->hasRole('Super Administrator')) {
+            return 'Super Administrator';
+        }
+
         if ($user->hasRole('Administrator')) {
             return 'Administrator';
         }
@@ -154,7 +172,7 @@ class DailyWorkPaginationService
             ];
         }
 
-        if ($user->hasRole('Administrator')) {
+        if ($user->hasRole('Super Administrator') || $user->hasRole('Administrator')) {
             return [
                 'allInCharges' => User::whereHas('designation', function ($q) {
                     $q->where('title', 'Supervision Engineer');

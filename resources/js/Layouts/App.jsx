@@ -284,6 +284,9 @@ const App = React.memo(({ children }) => {
         console.error('Background session check failed:', error);
       }
     };
+
+    checkSession();
+
     const initialTimeout = setTimeout(() => {
       checkSession();
       sessionCheckRef.current = setInterval(checkSession, 30000);

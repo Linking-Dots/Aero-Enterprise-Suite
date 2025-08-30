@@ -29,7 +29,7 @@ import {
 import App from "@/Layouts/App.jsx";
 import DailyWorkSummaryTable from '@/Tables/DailyWorkSummaryTable.jsx';
 import StatsCards from "@/Components/StatsCards.jsx";
-import DailyWorkSummaryDownloadForm from "@/Forms/DailyWorkSummaryDownloadForm.jsx";
+import EnhancedDailyWorkSummaryExportForm from "@/Forms/EnhancedDailyWorkSummaryExportForm.jsx";
 import { motion } from 'framer-motion';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import dayjs from 'dayjs';
@@ -229,10 +229,11 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
 
             {/* Modals */}
             {openModalType === 'exportDailyWorkSummary' && (
-                <DailyWorkSummaryDownloadForm
+                <EnhancedDailyWorkSummaryExportForm
                     open={openModalType === 'exportDailyWorkSummary'}
                     closeModal={closeModal}
                     filteredData={filteredData}
+                    inCharges={inCharges}
                 />
             )}
 

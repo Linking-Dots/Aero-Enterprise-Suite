@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { 
     BriefcaseIcon, 
     PlusIcon,
@@ -9,7 +11,8 @@ import {
     MagnifyingGlassIcon,
     CheckCircleIcon,
     ClockIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    CalendarIcon
 } from "@heroicons/react/24/outline";
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
@@ -27,10 +30,10 @@ import StatsCards from "@/Components/StatsCards.jsx";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
 import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
-import DailyWorksDownloadForm from "@/Forms/DailyWorksDownloadForm.jsx";
+import EnhancedDailyWorksExportForm from "@/Forms/EnhancedDailyWorksExportForm.jsx";
 import DailyWorksUploadForm from "@/Forms/DailyWorksUploadForm.jsx";
-import axios from "axios";
-import { toast } from "react-toastify";
+
+
 
 const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
@@ -64,6 +67,13 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
     const [perPage, setPerPage] = useState(30);
     const [currentPage, setCurrentPage] = useState(1);
     
+    // Date state management
+    const [selectedDate, setSelectedDate] = useState(overallEndDate); // Set to last date
+    const [dateRange, setDateRange] = useState({
+        start: overallStartDate,
+        end: overallEndDate
+    });
+    
     const [filterData, setFilterData] = useState({
         status: 'all',
         incharge: 'all',
@@ -71,20 +81,32 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         endDate: overallEndDate
     });
 
-    const fetchData = async (page, perPage, filterData) => {
+    const fetchData = async (page, perPage, filterData, dateFilter = null) => {
         setLoading(true);
         try {
-            const response = await axios.get(route('dailyWorks.paginate'), {
-                params: {
-                    page,
-                    perPage,
-                    search: search,
-                    status: filterData.status !== 'all' ? filterData.status : '',
-                    inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
-                    startDate: filterData.startDate,
-                    endDate: filterData.endDate,
-                }
-            });
+            const params = {
+                search: search,
+                status: filterData.status !== 'all' ? filterData.status : '',
+                inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+            };
+
+            // Handle date filtering based on mobile/desktop view
+            if (isMobile || (page === undefined && perPage === undefined)) {
+                // Mobile: No pagination, fetch all data for selected date
+                params.startDate = dateFilter || selectedDate;
+                params.endDate = dateFilter || selectedDate;
+                // Don't include page and perPage for mobile to get all data
+            } else {
+                // Desktop: With pagination, use date range
+                params.page = page;
+                params.perPage = perPage;
+                params.startDate = dateRange.start;
+                params.endDate = dateRange.end;
+            }
+
+            const response = await axios.get('/daily-works-paginate', { params });
+
+     
 
             setData(response.data.data);
             setTotalRows(response.data.total);
@@ -112,6 +134,39 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
     const handlePageChange = useCallback((page) => {
         setCurrentPage(page);
     }, []);
+
+    // Date change handlers
+    const handleDateChange = useCallback((date) => {
+        // Ensure date is within bounds
+        const constrainedDate = date < overallStartDate ? overallStartDate : 
+                               (date > overallEndDate ? overallEndDate : date);
+        
+        setSelectedDate(constrainedDate);
+        if (isMobile) {
+            // In mobile, immediately fetch data for the selected date (no pagination)
+            fetchData(undefined, undefined, filterData, constrainedDate);
+        }
+    }, [isMobile, perPage, filterData, overallStartDate, overallEndDate]);
+
+    const handleDateRangeChange = useCallback((range) => {
+        // Ensure dates are within bounds
+        const constrainedRange = {
+            start: range.start < overallStartDate ? overallStartDate : (range.start > overallEndDate ? overallEndDate : range.start),
+            end: range.end < overallStartDate ? overallStartDate : (range.end > overallEndDate ? overallEndDate : range.end)
+        };
+        
+        // Ensure start date is not after end date
+        if (constrainedRange.start > constrainedRange.end) {
+            constrainedRange.end = constrainedRange.start;
+        }
+        
+        setDateRange(constrainedRange);
+        if (!isMobile) {
+            // In desktop, immediately fetch data for the selected range
+            setCurrentPage(1); // Reset to first page when changing date range
+            fetchData(1, perPage, filterData);
+        }
+    }, [isMobile, perPage, filterData, overallStartDate, overallEndDate]);
 
     const handleDelete = () => {
         const promise = new Promise(async (resolve, reject) => {
@@ -176,54 +231,128 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         setOpenModalType(null);
     }, []);
 
-    // Statistics
-    const stats = useMemo(() => {
-        const totalWorks = data.length || totalRows;
-        const completedWorks = data.filter(work => work.status === 'completed').length;
-        const pendingWorks = data.filter(work => work.status === 'new' || work.status === 'resubmission').length;
-        const emergencyWorks = data.filter(work => work.status === 'emergency').length;
+    // Statistics - Fetch comprehensive data from API
+    const [apiStats, setApiStats] = useState(null);
+    const [statsLoading, setStatsLoading] = useState(false);
 
-        return [
-            {
-                title: 'Total',
-                value: totalWorks,
-                icon: <ChartBarIcon className="w-5 h-5" />,
-                color: 'text-blue-600',
-                description: 'All work logs'
-            },
-            {
-                title: 'Completed',
-                value: completedWorks,
-                icon: <CheckCircleIcon className="w-5 h-5" />,
-                color: 'text-green-600',
-                description: 'Finished tasks'
-            },
-            {
-                title: 'Pending',
-                value: pendingWorks,
-                icon: <ClockIcon className="w-5 h-5" />,
-                color: 'text-orange-600',
-                description: 'In progress'
-            },
-            {
-                title: 'Emergency',
-                value: emergencyWorks,
-                icon: <ExclamationTriangleIcon className="w-5 h-5" />,
-                color: 'text-red-600',
-                description: 'Urgent tasks'
-            }
-        ];
-    }, [data, totalRows]);
+    // Fetch comprehensive statistics from API
+    const fetchStatistics = useCallback(async () => {
+        setStatsLoading(true);
+        try {
+            const response = await axios.get('/daily-works/statistics');
+            setApiStats(response.data);
+        } catch (error) {
+            console.error('Error fetching statistics:', error);
+            toast.error('Failed to load statistics');
+        } finally {
+            setStatsLoading(false);
+        }
+    }, []);
+
+    // Load statistics on component mount
+    useEffect(() => {
+        fetchStatistics();
+    }, [fetchStatistics]);
+
+    // Enhanced statistics using API data with fallback to local data
+    const stats = useMemo(() => {
+        if (apiStats) {
+            // Use comprehensive API statistics
+            return [
+                {
+                    title: 'Total Works',
+                    value: apiStats.overview?.totalWorks || 0,
+                    icon: <ChartBarIcon className="w-5 h-5" />,
+                    color: 'text-blue-600',
+                    description: `All daily works ${auth.roles?.includes('Super Administrator') || auth.roles?.includes('Administrator') ? '(System-wide)' : '(Your works)'}`
+                },
+                {
+                    title: 'Completed',
+                    value: apiStats.overview?.completedWorks || 0,
+                    icon: <CheckCircleIcon className="w-5 h-5" />,
+                    color: 'text-green-600',
+                    description: `${apiStats.performanceIndicators?.completionRate || 0}% completion rate`
+                },
+                {
+                    title: 'In Progress',
+                    value: apiStats.overview?.inProgressWorks || 0,
+                    icon: <ClockIcon className="w-5 h-5" />,
+                    color: 'text-orange-600',
+                    description: 'Currently active'
+                },
+                {
+                    title: 'Quality Rate',
+                    value: `${apiStats.performanceIndicators?.qualityRate || 0}%`,
+                    icon: <DocumentArrowUpIcon className="w-5 h-5" />,
+                    color: 'text-purple-600',
+                    description: `${apiStats.qualityMetrics?.passedInspections || 0} passed inspections`
+                },
+                {
+                    title: 'RFI Submissions',
+                    value: apiStats.qualityMetrics?.rfiSubmissions || 0,
+                    icon: <DocumentArrowDownIcon className="w-5 h-5" />,
+                    color: 'text-indigo-600',
+                    description: `${apiStats.performanceIndicators?.rfiRate || 0}% of total works`
+                },
+                {
+                    title: 'This Month',
+                    value: apiStats.recentActivity?.thisMonthWorks || 0,
+                    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
+                    color: 'text-cyan-600',
+                    description: 'Current month activity'
+                }
+            ];
+        } else {
+            // Fallback to basic local statistics
+            const totalWorks = data.length || totalRows;
+            const completedWorks = data.filter(work => work.status === 'completed').length;
+            const pendingWorks = data.filter(work => work.status === 'new' || work.status === 'resubmission').length;
+            const emergencyWorks = data.filter(work => work.status === 'emergency').length;
+
+            return [
+                {
+                    title: 'Total',
+                    value: totalWorks,
+                    icon: <ChartBarIcon className="w-5 h-5" />,
+                    color: 'text-blue-600',
+                    description: 'All work logs'
+                },
+                {
+                    title: 'Completed',
+                    value: completedWorks,
+                    icon: <CheckCircleIcon className="w-5 h-5" />,
+                    color: 'text-green-600',
+                    description: 'Finished tasks'
+                },
+                {
+                    title: 'Pending',
+                    value: pendingWorks,
+                    icon: <ClockIcon className="w-5 h-5" />,
+                    color: 'text-orange-600',
+                    description: 'In progress'
+                },
+                {
+                    title: 'Emergency',
+                    value: emergencyWorks,
+                    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
+                    color: 'text-red-600',
+                    description: 'Urgent tasks'
+                }
+            ];
+        }
+    }, [data, totalRows, apiStats, auth.roles]);
+
+    console.log(auth)
 
     // Action buttons configuration
     const actionButtons = [
-        ...(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer' ? [{
+        ...(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator') || auth.designation === 'Supervision Engineer' ? [{
             label: "Add Work",
             icon: <PlusIcon className="w-4 h-4" />,
             onPress: () => openModal('addDailyWork'),
             className: "bg-linear-to-r from-blue-500 to-purple-500 text-white font-medium"
         }] : []),
-        ...(auth.roles.includes('Administrator') ? [
+        ...(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator') ? [
             {
                 label: "Import",
                 icon: <DocumentArrowUpIcon className="w-4 h-4" />,
@@ -244,8 +373,14 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
     ];
 
     useEffect(() => {
-        fetchData(currentPage, perPage, filterData);
-    }, [currentPage, perPage, search, filterData]);
+        if (isMobile) {
+            // Mobile: No pagination, fetch all data for selected date
+            fetchData(undefined, undefined, filterData);
+        } else {
+            // Desktop: With pagination
+            fetchData(currentPage, perPage, filterData);
+        }
+    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile]);
 
     return (
         <>
@@ -286,12 +421,12 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 />
             )}
             {openModalType === 'exportDailyWorks' && (
-                <DailyWorksDownloadForm
+                <EnhancedDailyWorksExportForm
                     open={openModalType === 'exportDailyWorks'}
                     closeModal={closeModal}
                     filterData={filterData}
-                    search={search}
                     users={users}
+                    inCharges={allData.allInCharges}
                 />
             )}
 
@@ -406,7 +541,21 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                         
                         <CardBody className="pt-6">
                             {/* Quick Stats */}
-                            <StatsCards stats={stats} />
+                            <div className="relative">
+                                {statsLoading && (
+                                    <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                                        <div className="flex flex-col items-center space-y-2">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Loading statistics...</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <StatsCards 
+                                    stats={stats} 
+                                    onRefresh={fetchStatistics}
+                                    isLoading={statsLoading}
+                                />
+                            </div>
                             
                             {/* Search Section */}
                             <div className="mb-6">
@@ -436,6 +585,97 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                 </div>
                             </div>
 
+                            {/* Date Selector Section */}
+                            <div className="mb-6">
+                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                    <div className="flex items-center gap-2">
+                                        <CalendarIcon className="w-5 h-5 text-default-500" />
+                                        <span className="text-sm font-medium text-foreground">
+                                            {isMobile ? 'Select Date:' : 'Date Range:'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isMobile ? (
+                                        // Mobile: Single date picker for current date
+                                        <div className="w-full sm:w-auto">
+                                            <Input
+                                                type="date"
+                                                value={selectedDate}
+                                                onChange={(e) => handleDateChange(e.target.value)}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                min={overallStartDate}
+                                                max={overallEndDate}
+                                                classNames={{
+                                                    input: "text-foreground",
+                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                 focus-within:bg-content2/90 border-divider/50 
+                                                                 hover:border-divider data-[focus]:border-primary`,
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        // Desktop: Date range picker
+                                        <div className="flex gap-2 items-center">
+                                            <Input
+                                                type="date"
+                                                label="Start Date"
+                                                value={dateRange.start}
+                                                onChange={(e) => handleDateRangeChange({
+                                                    ...dateRange,
+                                                    start: e.target.value
+                                                })}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                min={overallStartDate}
+                                                max={overallEndDate}
+                                                classNames={{
+                                                    input: "text-foreground",
+                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                 focus-within:bg-content2/90 border-divider/50 
+                                                                 hover:border-divider data-[focus]:border-primary`,
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                }}
+                                            />
+                                            <span className="text-default-500">to</span>
+                                            <Input
+                                                type="date"
+                                                label="End Date"
+                                                value={dateRange.end}
+                                                onChange={(e) => handleDateRangeChange({
+                                                    ...dateRange,
+                                                    end: e.target.value
+                                                })}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                min={overallStartDate}
+                                                max={overallEndDate}
+                                                classNames={{
+                                                    input: "text-foreground",
+                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                 focus-within:bg-content2/90 border-divider/50 
+                                                                 hover:border-divider data-[focus]:border-primary`,
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Daily Works Table */}
                             <Card 
                                 radius={getThemeRadius()}
@@ -458,6 +698,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                         setCurrentPage={setCurrentPage}
                                         onPageChange={handlePageChange}
                                         setLoading={setLoading}
+                                        refreshStatistics={fetchStatistics}
                                         handleClickOpen={handleClickOpen}
                                         openModal={openModal}
                                         juniors={allData.juniors}
@@ -469,6 +710,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                                         jurisdictions={jurisdictions}
                                         users={users}
                                         reports_with_daily_works={reports_with_daily_works}
+                                        isMobile={isMobile}
                                     />
                                 </CardBody>
                             </Card>

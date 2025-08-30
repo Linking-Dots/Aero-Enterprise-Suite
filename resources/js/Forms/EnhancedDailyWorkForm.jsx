@@ -90,11 +90,8 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
                 break;
                 
             case 'qty_layer':
-                if (dailyWorkData.type === 'Embankment' && !value.trim()) {
-                    newErrors.qty_layer = 'Layer number is required for Embankment work.';
-                } else {
-                    delete newErrors.qty_layer;
-                }
+                // No validation needed - field is optional
+                delete newErrors.qty_layer;
                 break;
         }
 
@@ -343,9 +340,9 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
                                 onChange={handleChange}
                                 isInvalid={isFieldInvalid('qty_layer')}
                                 errorMessage={getFieldError('qty_layer')}
-                                isRequired={dailyWorkData.type === 'Embankment'}
-                                placeholder={dailyWorkData.type === 'Embankment' ? 'Layer 1' : 'Quantity or layer info'}
-                                description={dailyWorkData.type === 'Embankment' ? 'Required for embankment work' : 'Optional quantity or layer information'}
+                                isRequired={false}
+                                placeholder={dailyWorkData.type === 'Embankment' ? 'Layer 1 (optional)' : 'Quantity or layer info'}
+                                description="Optional quantity or layer information"
                             />
                         </div>
 

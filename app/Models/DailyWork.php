@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Services\DailyWork\DailyWorkSummaryService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -16,6 +15,7 @@ class DailyWork extends Model implements HasMedia
         'date',
         'number',
         'status',
+        'inspection_result',
         'type',
         'description',
         'location',
@@ -31,36 +31,19 @@ class DailyWork extends Model implements HasMedia
         'rfi_submission_date',
     ];
 
-    protected static function booted()
-    {
-        static::created(function ($dailyWork) {
-            app(DailyWorkSummaryService::class)
-                ->generateSummaryForDate($dailyWork->date, $dailyWork->incharge);
-        });
+    protected $casts = [
+        'date' => 'date',
+        'completion_time' => 'datetime',
+        'rfi_submission_date' => 'date',
+        'resubmission_count' => 'integer',
+    ];
 
-        static::updated(function ($dailyWork) {
-            app(DailyWorkSummaryService::class)
-                ->generateSummaryForDate($dailyWork->date, $dailyWork->incharge);
-
-            // Also update summary for old incharge if it changed
-            if ($dailyWork->isDirty('incharge') && $dailyWork->getOriginal('incharge')) {
-                app(DailyWorkSummaryService::class)
-                    ->generateSummaryForDate($dailyWork->date, $dailyWork->getOriginal('incharge'));
-            }
-        });
-
-        static::deleted(function ($dailyWork) {
-            app(DailyWorkSummaryService::class)
-                ->generateSummaryForDate($dailyWork->date, $dailyWork->incharge);
-        });
-    }
-
+    // Relationships
     public function reports()
     {
         return $this->belongsToMany(Report::class, 'daily_work_has_report', 'daily_work_id', 'report_id');
     }
 
-    // Add relationships
     public function inchargeUser()
     {
         return $this->belongsTo(User::class, 'incharge');
@@ -69,5 +52,57 @@ class DailyWork extends Model implements HasMedia
     public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned');
+    }
+
+    // Scopes
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', '!=', 'completed');
+    }
+
+    public function scopeWithRFI($query)
+    {
+        return $query->whereNotNull('rfi_submission_date');
+    }
+
+    public function scopeResubmissions($query)
+    {
+        return $query->where('resubmission_count', '>', 0);
+    }
+
+    public function scopeByType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeByIncharge($query, $inchargeId)
+    {
+        return $query->where('incharge', $inchargeId);
+    }
+
+    public function scopeByDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('date', [$startDate, $endDate]);
+    }
+
+    // Accessors
+    public function getIsCompletedAttribute()
+    {
+        return $this->status === 'completed';
+    }
+
+    public function getHasRfiSubmissionAttribute()
+    {
+        return ! is_null($this->rfi_submission_date);
+    }
+
+    public function getIsResubmissionAttribute()
+    {
+        return $this->resubmission_count > 0;
     }
 }
