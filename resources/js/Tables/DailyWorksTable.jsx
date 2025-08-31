@@ -979,6 +979,64 @@ const DailyWorksTable = ({
             return groups;
         }, [works]);
 
+        // Mobile Loading Skeleton
+        const MobileLoadingSkeleton = () => {
+            return (
+                <div className="space-y-2">
+                    {/* Tab skeleton */}
+                    <div className="flex overflow-x-auto border-b border-divider mb-3 scrollbar-hide">
+                        {workTypes.map((type) => (
+                            <div key={type.key} className="flex items-center gap-2 px-3 py-2.5 min-w-fit">
+                                <Skeleton className="w-6 h-6 rounded" />
+                                <Skeleton className="w-16 h-4 rounded" />
+                                <Skeleton className="w-6 h-5 rounded-full" />
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* Card skeletons */}
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <Card
+                            key={index}
+                            radius={getThemeRadius()}
+                            className="mb-2 bg-content1/98 backdrop-blur-sm border border-divider/30"
+                        >
+                            <CardHeader className="pb-2 px-3 py-3 flex flex-col relative">
+                                {/* Status chip skeleton */}
+                                <div className="flex flex-row justify-end mb-2 w-full">
+                                    <Skeleton className="w-24 h-6 rounded-full" />
+                                </div>
+                                
+                                {/* Main content skeleton */}
+                                <div className="flex flex-row items-start gap-3 w-full pr-10">
+                                    <Skeleton className="w-8 h-8 rounded-lg" />
+                                    <div className="min-w-0 flex-1 flex flex-col space-y-2">
+                                        <Skeleton className="w-32 h-4 rounded" />
+                                        <div className="flex flex-row items-center gap-2">
+                                            <Skeleton className="w-3 h-3 rounded" />
+                                            <Skeleton className="w-20 h-3 rounded" />
+                                        </div>
+                                        <div className="flex flex-row items-center gap-2">
+                                            <Skeleton className="w-3 h-3 rounded" />
+                                            <Skeleton className="w-40 h-3 rounded" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Dropdown button skeleton */}
+                                <Skeleton className="absolute bottom-2 right-3 w-8 h-8 rounded-full" />
+                            </CardHeader>
+                        </Card>
+                    ))}
+                </div>
+            );
+        };
+
+        // Show loading skeleton when loading
+        if (loading) {
+            return <MobileLoadingSkeleton />;
+        }
+
         // Individual work accordion item component
         const WorkAccordionItem = ({ work, index, isExpanded, onToggle }) => {
             const inchargeUser = getUserInfo(work.incharge);
@@ -2174,6 +2232,87 @@ const DailyWorksTable = ({
         );
     }
 
+    // Desktop Table Loading Skeleton
+    const DesktopLoadingSkeleton = () => {
+        return (
+            <div className="max-h-[84vh] overflow-y-auto">
+                {/* Header skeleton */}
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <Skeleton className="w-32 h-6 rounded" />
+                    <Skeleton className="w-20 h-8 rounded" />
+                </div>
+                
+                <ScrollShadow className="max-h-[70vh]">
+                    <div className="border border-divider rounded-lg overflow-hidden">
+                        {/* Table header skeleton */}
+                        <div className="bg-default-100/80 backdrop-blur-md border-b border-divider">
+                            <div className="flex">
+                                {columns.map((column, index) => (
+                                    <div key={index} className="flex-1 p-3 flex items-center justify-center gap-1">
+                                        <Skeleton className="w-3 h-3 rounded" />
+                                        <Skeleton className="w-16 h-4 rounded" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Table body skeleton */}
+                        <div className="divide-y divide-divider">
+                            {Array.from({ length: 8 }).map((_, rowIndex) => (
+                                <div key={rowIndex} className="flex bg-content1 hover:bg-content2/50">
+                                    {columns.map((column, colIndex) => (
+                                        <div key={colIndex} className="flex-1 p-3 flex items-center justify-center">
+                                            {column.uid === 'status' ? (
+                                                <Skeleton className="w-32 h-8 rounded" />
+                                            ) : column.uid === 'description' ? (
+                                                <div className="w-full space-y-1">
+                                                    <Skeleton className="w-full h-3 rounded" />
+                                                    <Skeleton className="w-3/4 h-3 rounded" />
+                                                </div>
+                                            ) : column.uid === 'incharge' || column.uid === 'assigned' ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Skeleton className="w-8 h-8 rounded-full" />
+                                                    <Skeleton className="w-20 h-4 rounded" />
+                                                </div>
+                                            ) : column.uid === 'completion_time' || column.uid === 'rfi_submission_date' ? (
+                                                <Skeleton className="w-32 h-8 rounded" />
+                                            ) : column.uid === 'actions' ? (
+                                                <div className="flex gap-1">
+                                                    <Skeleton className="w-8 h-8 rounded" />
+                                                    <Skeleton className="w-8 h-8 rounded" />
+                                                </div>
+                                            ) : column.uid === 'side' || column.uid === 'resubmission_count' ? (
+                                                <Skeleton className="w-16 h-6 rounded-full" />
+                                            ) : (
+                                                <Skeleton className="w-20 h-4 rounded" />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollShadow>
+                
+                {/* Pagination skeleton */}
+                <div className="py-4 flex justify-center">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Show loading skeleton when loading
+    if (loading) {
+        return <DesktopLoadingSkeleton />;
+    }
+
     return (
         <div className="max-h-[84vh] overflow-y-auto">
             {/* Table Header with Refresh Button */}
@@ -2197,75 +2336,71 @@ const DailyWorksTable = ({
             </div>
             
             <ScrollShadow className="max-h-[70vh]">
-                <Skeleton className="rounded-lg" isLoaded={!loading}>
-                    <Table
-                        selectionMode="none"
-                        isCompact
-                        removeWrapper
-                        isStriped
-                        aria-label="Daily Works Management Table"
-                        isHeaderSticky
-                        radius={getThemeRadius()}
-                        classNames={{
-                            base: "max-h-[520px] overflow-auto",
-                            table: "min-h-[200px] w-full",
-                            thead: "z-10",
-                            tbody: "overflow-y-auto",
-                            th: "bg-default-100 text-default-700 font-semibold",
-                            td: "text-default-600",
-                        }}
-                        style={{
-                            borderRadius: `var(--borderRadius, 12px)`,
-                            fontFamily: `var(--fontFamily, "Inter")`,
-                        }}
-                    >
-                        <TableHeader columns={columns}>
-                            {(column) => (
-                                <TableColumn 
-                                    key={column.uid} 
-                                    align={column.uid === "description" ? "start" : "center"}
-                                    className={`bg-default-100/80 backdrop-blur-md ${column.width || ''}`}
-                                    style={{
-                                        minWidth: column.uid === "description" ? "240px" : 
-                                                column.uid === "location" ? "192px" :
-                                                column.uid === "number" ? "128px" :
-                                                column.uid === "status" ? "192px" :
-                                                "auto"
-                                    }}
-                                >
-                                    <div className={`flex items-center gap-1 ${column.uid === "description" ? "justify-start" : "justify-center"}`}>
-                                        {column.icon && <column.icon className="w-3 h-3" />}
-                                        <span className="text-xs font-semibold">{column.name}</span>
-                                    </div>
-                                </TableColumn>
-                            )}
-                        </TableHeader>
-                        <TableBody 
-                            items={allData || []}
-                            emptyContent={
-                                <div className="flex flex-col items-center justify-center py-8 text-center">
-                                    <DocumentTextIcon className="w-12 h-12 text-default-300 mb-4" />
-                                    <h6 className="text-lg font-medium text-default-600">
-                                        No daily works found
-                                    </h6>
-                                    <span className="text-sm text-default-500">
-                                        No work logs available for the selected period
-                                    </span>
+                <Table
+                    selectionMode="none"
+                    isCompact
+                    removeWrapper
+                    isStriped
+                    aria-label="Daily Works Management Table"
+                    isHeaderSticky
+                    radius={getThemeRadius()}
+                    classNames={{
+                        base: "max-h-[520px] overflow-auto",
+                        table: "min-h-[200px] w-full",
+                        thead: "z-10",
+                        tbody: "overflow-y-auto",
+                        th: "bg-default-100 text-default-700 font-semibold",
+                        td: "text-default-600",
+                    }}
+                    style={{
+                        borderRadius: `var(--borderRadius, 12px)`,
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}
+                >
+                    <TableHeader columns={columns}>
+                        {(column) => (
+                            <TableColumn 
+                                key={column.uid} 
+                                align={column.uid === "description" ? "start" : "center"}
+                                className={`bg-default-100/80 backdrop-blur-md ${column.width || ''}`}
+                                style={{
+                                    minWidth: column.uid === "description" ? "240px" : 
+                                            column.uid === "location" ? "192px" :
+                                            column.uid === "number" ? "128px" :
+                                            column.uid === "status" ? "192px" :
+                                            "auto"
+                                }}
+                            >
+                                <div className={`flex items-center gap-1 ${column.uid === "description" ? "justify-start" : "justify-center"}`}>
+                                    {column.icon && <column.icon className="w-3 h-3" />}
+                                    <span className="text-xs font-semibold">{column.name}</span>
                                 </div>
-                            }
-                            isLoading={loading}
-                            loadingContent={<CircularProgress size={40} />}
-                        >
-                            {(work) => (
-                                <TableRow 
-                                    key={work.id} 
-                                >
-                                    {(columnKey) => renderCell(work, columnKey)}
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </Skeleton>
+                            </TableColumn>
+                        )}
+                    </TableHeader>
+                    <TableBody 
+                        items={allData || []}
+                        emptyContent={
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                <DocumentTextIcon className="w-12 h-12 text-default-300 mb-4" />
+                                <h6 className="text-lg font-medium text-default-600">
+                                    No daily works found
+                                </h6>
+                                <span className="text-sm text-default-500">
+                                    No work logs available for the selected period
+                                </span>
+                            </div>
+                        }
+                    >
+                        {(work) => (
+                            <TableRow 
+                                key={work.id} 
+                            >
+                                {(columnKey) => renderCell(work, columnKey)}
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
             </ScrollShadow>
             {!isMobile && totalRows > 30 && (
                 <div className="py-4 flex justify-center">

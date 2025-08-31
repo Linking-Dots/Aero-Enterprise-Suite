@@ -3,15 +3,6 @@ import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage } from "@inertiajs/react";
 
-// Alpha utility function for creating transparent colors
-const alpha = (color, opacity) => {
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
 import {
     Table,
     TableHeader,
@@ -25,7 +16,8 @@ import {
     Divider,
     ScrollShadow,
     Progress,
-    Button
+    Button,
+    Skeleton
 } from "@heroui/react";
 import {
     CalendarDaysIcon,
@@ -44,29 +36,65 @@ import {
     ClockIcon as ClockSolid,
     ArrowPathIcon as ArrowPathSolid
 } from '@heroicons/react/24/solid';
-import GlassCard from "@/Components/GlassCard";
 
 
-const DailyWorkSummaryTable = ({ filteredData, onRefresh }) => {
-    const { auth } = usePage().props;
-    const theme = useTheme(false, "OCEAN"); // Using default theme - you may want to get dark mode from context
-    const isLargeScreen = useMediaQuery('(min-width: 1025px)');
-    const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
-    const isMobile = useMediaQuery('(max-width: 640px)');
-
-    // Helper function to convert theme borderRadius to HeroUI radius values
+const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => {
+    const { theme } = useTheme();
+    const isMobile = useMediaQuery('(max-width: 1024px)');
+    
+    // Theme radius helper function (same as DailyWorksTable)
     const getThemeRadius = () => {
         if (typeof window === 'undefined') return 'lg';
         
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        const radiusValue = parseInt(getComputedStyle(document.documentElement)
+            .getPropertyValue('--borderRadius')?.trim() || '12');
         
-        const radiusValue = parseInt(borderRadius);
         if (radiusValue === 0) return 'none';
         if (radiusValue <= 4) return 'sm';
         if (radiusValue <= 8) return 'md';
         if (radiusValue <= 16) return 'lg';
         return 'full';
+    };
+
+    // Desktop Table Loading Skeleton (matching DailyWorksTable)
+    const DesktopLoadingSkeleton = () => {
+        return (
+            <div className="max-h-[84vh] overflow-y-auto">
+                {/* Header skeleton */}
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <Skeleton className="w-32 h-6 rounded" />
+                    <Skeleton className="w-20 h-8 rounded" />
+                </div>
+                
+                <ScrollShadow className="max-h-[70vh]">
+                    <div className="border border-divider rounded-lg overflow-hidden">
+                        {/* Table header skeleton */}
+                        <div className="bg-default-100/80 backdrop-blur-md border-b border-divider">
+                            <div className="flex">
+                                {columns.map((column, index) => (
+                                    <div key={index} className="flex-1 p-3">
+                                        <Skeleton className="w-20 h-4 rounded" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Table body skeleton */}
+                        <div className="divide-y divide-divider">
+                            {Array.from({ length: 8 }).map((_, index) => (
+                                <div key={index} className="flex hover:bg-default-50/50 transition-colors">
+                                    {columns.map((column, colIndex) => (
+                                        <div key={colIndex} className="flex-1 p-3">
+                                            <Skeleton className="w-full h-4 rounded" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollShadow>
+            </div>
+        );
     };
 
     const formatDate = (dateString) => {
@@ -509,50 +537,32 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh }) => {
         );
     }
 
+    // Show loading skeleton when loading  
+    if (loading) {
+        return <DesktopLoadingSkeleton />;
+    }
+
     return (
-        <div style={{ 
-            maxHeight: "70vh", 
-            overflowY: "auto",
-            fontFamily: `var(--fontFamily, "Inter")`,
-        }}>
-            {onRefresh && (
-                <div className="flex justify-end mb-4">
-                    <Button
-                        size="sm"
-                        variant="bordered"
-                        color="primary"
-                        radius={getThemeRadius()}
-                        startContent={<ArrowPathIcon className="w-4 h-4" />}
-                        onPress={onRefresh}
-                        style={{
-                            borderRadius: `var(--borderRadius, 8px)`,
-                            fontFamily: `var(--fontFamily, "Inter")`,
-                        }}
-                    >
-                        Refresh Summary
-                    </Button>
-                </div>
-            )}
+        <div className="max-h-[84vh] overflow-y-auto">
+            
             <ScrollShadow className="max-h-[70vh]">
                 <Table
-                    isStriped
                     selectionMode="none"
                     isCompact
-                    isHeaderSticky
                     removeWrapper
-                    radius={getThemeRadius()}
+                    isStriped
                     aria-label="Daily Work Summary Table"
+                    isHeaderSticky
+                    radius={getThemeRadius()}
                     classNames={{
-                        wrapper: "min-h-[200px]",
-                        table: "min-h-[300px]",
-                        thead: "[&>tr]:first:shadow-small bg-default-100/80",
-                        tbody: "divide-y divide-default-200/50",
-                        tr: "group hover:bg-default-50/50 transition-colors h-12",
-                        td: "py-2 px-3 text-sm",
-                        th: "py-2 px-3 text-xs font-semibold"
+                        base: "max-h-[520px] overflow-auto",
+                        table: "min-h-[200px] w-full",
+                        thead: "z-10",
+                        tbody: "overflow-y-auto",
+                        th: "bg-default-100 text-default-700 font-semibold",
+                        td: "text-default-600",
                     }}
                     style={{
-                        border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
                         borderRadius: `var(--borderRadius, 12px)`,
                         fontFamily: `var(--fontFamily, "Inter")`,
                     }}
@@ -561,16 +571,17 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh }) => {
                         {(column) => (
                             <TableColumn 
                                 key={column.uid} 
-                                className="bg-default-100/80 backdrop-blur-md"
+                                align={column.uid === "date" ? "start" : "center"}
+                                className={`bg-default-100/80 backdrop-blur-md ${column.width || ''}`}
                                 style={{
-                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    minWidth: column.uid === "date" ? "128px" : 
+                                            column.uid === "incharge" ? "192px" :
+                                            "auto"
                                 }}
                             >
-                                <div className="flex items-center gap-1">
+                                <div className={`flex items-center gap-1 ${column.uid === "date" ? "justify-start" : "justify-center"}`}>
                                     {column.icon && <column.icon className="w-3 h-3" />}
-                                    <span className="text-xs font-semibold" style={{
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}>{column.name}</span>
+                                    <span className="text-xs font-semibold">{column.name}</span>
                                 </div>
                             </TableColumn>
                         )}
@@ -580,23 +591,19 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh }) => {
                         emptyContent={
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <ChartBarIcon className="w-12 h-12 text-default-300 mb-4" />
-                                <h6 className="text-lg font-semibold text-default-600 mb-2" style={{
-                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                }}>
+                                <h6 className="text-lg font-medium text-default-600">
                                     No summary data found
                                 </h6>
-                                <p className="text-sm text-default-500" style={{
-                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                }}>
+                                <span className="text-sm text-default-500">
                                     No work summary available for the selected period
-                                </p>
+                                </span>
                             </div>
                         }
                     >
                         {(summary) => (
-                            <TableRow key={summary.date} style={{
-                                fontFamily: `var(--fontFamily, "Inter")`,
-                            }}>
+                            <TableRow 
+                                key={summary.date} 
+                            >
                                 {(columnKey) => renderCell(summary, columnKey)}
                             </TableRow>
                         )}

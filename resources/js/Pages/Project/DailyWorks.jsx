@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -24,7 +24,8 @@ import {
     Input, 
     Button,
     Spinner,
-    ScrollShadow
+    ScrollShadow,
+    Skeleton
 } from "@heroui/react";
 import StatsCards from "@/Components/StatsCards.jsx";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
@@ -57,6 +58,8 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [modeSwitch, setModeSwitch] = useState(false); // Track mode switching
     const [totalRows, setTotalRows] = useState(0);
     const [lastPage, setLastPage] = useState(0);
     const [filteredData, setFilteredData] = useState([]);
@@ -81,297 +84,211 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         endDate: overallEndDate
     });
     
-    // State for overall date range (to be updated after import)
-    const [overallDateRange, setOverallDateRange] = useState({
-        start: overallStartDate,
-        end: overallEndDate
-    });
-    
-    // Force refresh trigger to overcome caching
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-    const fetchData = async (page, perPage, filterData, dateFilter = null) => {
+    // Simple data fetching optimized for mobile vs desktop
+    const fetchData = async () => {
+        // Prevent multiple simultaneous requests
+        if (loading) return;
+        
         setLoading(true);
         try {
             const params = {
                 search: search,
                 status: filterData.status !== 'all' ? filterData.status : '',
                 inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
-                _t: Date.now(), // Cache busting parameter
+                startDate: isMobile ? selectedDate : dateRange.start,
+                endDate: isMobile ? selectedDate : dateRange.end,
             };
 
-            // Handle date filtering based on mobile/desktop view
-            if (isMobile || (page === undefined && perPage === undefined)) {
-                // Mobile: No pagination, fetch all data for selected date
-                params.startDate = dateFilter || selectedDate;
-                params.endDate = dateFilter || selectedDate;
-                // Don't include page and perPage for mobile to get all data
+            // Mobile: fetch all data without pagination for selected date
+            if (isMobile) {
+                params.page = 1;
+                params.perPage = 1000; // Large number to get all data
             } else {
-                // Desktop: With pagination, use date range
-                params.page = page;
+                // Desktop: use pagination for date range
+                params.page = currentPage;
                 params.perPage = perPage;
-                params.startDate = dateRange.start;
-                params.endDate = dateRange.end;
             }
 
+            console.log('Fetching data with params:', params);
             const response = await axios.get('/daily-works-paginate', { params });
-
-     
-
-            setData(response.data.data);
-            setTotalRows(response.data.total);
-            setLastPage(response.data.last_page);
-            setLoading(false);
+            
+            setData(Array.isArray(response.data.data) ? response.data.data : []);
+            setTotalRows(response.data.total || 0);
+            setLastPage(response.data.last_page || 1);
+            
+            console.log(`Loaded ${response.data.data?.length || 0} items in ${isMobile ? 'mobile' : 'desktop'} mode`);
         } catch (error) {
-            console.error(error);
-            toast.error('Failed to fetch data.', {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                }
-            });
-            setLoading(false);
-        }
-    };
-
-    // Function to fetch updated metadata (date ranges) from server
-    const fetchUpdatedMetadata = async () => {
-        try {
-            const response = await axios.get('/daily-works-all');
-            
-            // Calculate new overall date range from the response
-            if (response.data && response.data.length > 0) {
-                const dates = response.data.map(item => item.date);
-                const newStartDate = dates.reduce((min, date) => date < min ? date : min);
-                const newEndDate = dates.reduce((max, date) => date > max ? date : max);
-                
-                // Update overall date range state
-                setOverallDateRange({
-                    start: newStartDate,
-                    end: newEndDate
-                });
-                
-                // Update date range filter if current range is outside new bounds
-                setDateRange(prevRange => ({
-                    start: prevRange.start < newStartDate ? newStartDate : 
-                           (prevRange.start > newEndDate ? newEndDate : prevRange.start),
-                    end: prevRange.end < newStartDate ? newStartDate : 
-                         (prevRange.end > newEndDate ? newEndDate : prevRange.end)
-                }));
-                
-                // Update selected date if outside new bounds
-                setSelectedDate(prevDate => 
-                    prevDate < newStartDate ? newStartDate :
-                    (prevDate > newEndDate ? newEndDate : prevDate)
-                );
-                
-                // Update filter data with new date bounds
-                setFilterData(prevFilter => ({
-                    ...prevFilter,
-                    startDate: prevFilter.startDate < newStartDate ? newStartDate : 
-                              (prevFilter.startDate > newEndDate ? newEndDate : prevFilter.startDate),
-                    endDate: prevFilter.endDate < newStartDate ? newStartDate : 
-                            (prevFilter.endDate > newEndDate ? newEndDate : prevFilter.endDate)
-                }));
-            }
-        } catch (error) {
-            console.error('Failed to fetch updated metadata:', error);
-        }
-    };
-
-    // Optimistic update function for immediate UI response
-    const optimisticUpdate = useCallback((importedData) => {
-        if (importedData && importedData.length > 0) {
-            // Immediate UI update with imported data
-            setData(prevData => [...importedData, ...prevData]);
-            setTotalRows(prevTotal => prevTotal + importedData.length);
-            
-            // Update date ranges optimistically
-            const importedDates = importedData.map(item => item.date);
-            const newMinDate = Math.min(...importedDates);
-            const newMaxDate = Math.max(...importedDates);
-            
-            setOverallDateRange(prevRange => ({
-                start: newMinDate < prevRange.start ? newMinDate : prevRange.start,
-                end: newMaxDate > prevRange.end ? newMaxDate : prevRange.end
-            }));
-            
-            // Show immediate success feedback
-            toast.success(`${importedData.length} daily works imported successfully!`, {
-                icon: '⚡',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                }
-            });
-        }
-    }, []);
-
-    // Smart refresh function - only refreshes what's necessary
-    const smartRefresh = useCallback(async (skipLoading = false) => {
-        if (!skipLoading) setLoading(true);
-        
-        try {
-            // Use Promise.all for parallel execution
-            const [metadataResponse, dataResponse] = await Promise.all([
-                axios.get('/daily-works-all', { params: { _t: Date.now() } }),
-                axios.get('/daily-works-paginate', { 
-                    params: {
-                        page: currentPage,
-                        perPage: perPage,
-                        search: search,
-                        status: filterData.status !== 'all' ? filterData.status : '',
-                        inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
-                        startDate: isMobile ? selectedDate : dateRange.start,
-                        endDate: isMobile ? selectedDate : dateRange.end,
-                        _t: Date.now()
-                    }
-                })
-            ]);
-
-            // Update metadata if changed
-            if (metadataResponse.data && metadataResponse.data.length > 0) {
-                const dates = metadataResponse.data.map(item => item.date);
-                const newStartDate = dates.reduce((min, date) => date < min ? date : min);
-                const newEndDate = dates.reduce((max, date) => date > max ? date : max);
-                
-                setOverallDateRange(prevRange => {
-                    if (prevRange.start !== newStartDate || prevRange.end !== newEndDate) {
-                        return { start: newStartDate, end: newEndDate };
-                    }
-                    return prevRange;
-                });
-            }
-
-            // Update table data
-            setData(dataResponse.data.data);
-            setTotalRows(dataResponse.data.total);
-            setLastPage(dataResponse.data.last_page);
-            
-        } catch (error) {
-            console.error('Smart refresh failed:', error);
-            toast.error('Failed to refresh data', {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                }
-            });
+            console.error('Error fetching data:', error);
+            setData([]);
+            toast.error('Failed to fetch data.');
         } finally {
-            if (!skipLoading) setLoading(false);
+            setLoading(false);
         }
-    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile]);
+    };
 
-    // Enhanced refresh function for post-import updates
-    const refreshDataAndMetadata = useCallback(async (importedData = null) => {
-        // Immediate optimistic update if we have imported data
-        if (importedData) {
-            optimisticUpdate(importedData);
-            
-            // Then do a smart refresh in the background without showing loading
-            setTimeout(() => {
-                smartRefresh(true); // Skip loading spinner for smoother UX
-            }, 100);
-        } else {
-            // Regular refresh with loading indicator
-            await smartRefresh();
-        }
-        
-        // Force refresh trigger for any remaining cached components
-        setRefreshTrigger(prev => prev + 1);
-    }, [optimisticUpdate, smartRefresh]);
+    // Enhanced refresh function that handles mobile/desktop modes
+    const refreshData = () => {
+        console.log(`Refreshing data in ${isMobile ? 'mobile' : 'desktop'} mode`);
+        setCurrentPage(1); // Reset to first page
+        fetchData();
+        fetchStatistics(); // Also refresh statistics
+    };
 
-    // Debounced search for better performance
-    const handleSearch = useCallback((event) => {
-        const searchValue = event.target.value;
-        setSearch(searchValue);
-        
-        // Debounce the search to avoid too many requests
-        clearTimeout(window.searchTimeout);
-        window.searchTimeout = setTimeout(() => {
-            smartRefresh(true); // Immediate search without loading spinner
-        }, 300);
-    }, [smartRefresh]);
+    // Enhanced event handlers for mobile/desktop differences
+    const handleSearch = (event) => {
+        setSearch(event.target.value);
+        setCurrentPage(1);
+        // Simple debounced search
+        setTimeout(() => fetchData(), 100);
+    };
 
-    const handlePageChange = useCallback((page) => {
+    const handlePageChange = (page) => {
         setCurrentPage(page);
-        // No need for immediate refresh here as useEffect will handle it
-    }, []);
-
-    // Immediate filter update handler
-    const handleFilterChange = useCallback((newFilterData) => {
-        setFilterData(newFilterData);
-        setCurrentPage(1); // Reset to first page when filters change
-        // The useEffect will trigger smartRefresh automatically
-    }, []);
-
-    // Date change handlers with immediate updates
-    const handleDateChange = useCallback((date) => {
-        // Ensure date is within bounds
-        const constrainedDate = date < overallDateRange.start ? overallDateRange.start : 
-                               (date > overallDateRange.end ? overallDateRange.end : date);
-        
-        setSelectedDate(constrainedDate);
-        if (isMobile) {
-            // In mobile, immediately fetch data for the selected date (no pagination)
-            smartRefresh(true); // Use smart refresh without loading spinner for immediate response
-        }
-    }, [isMobile, overallDateRange.start, overallDateRange.end, smartRefresh]);
-
-    const handleDateRangeChange = useCallback((range) => {
-        // Ensure dates are within bounds
-        const constrainedRange = {
-            start: range.start < overallDateRange.start ? overallDateRange.start : (range.start > overallDateRange.end ? overallDateRange.end : range.start),
-            end: range.end < overallDateRange.start ? overallDateRange.start : (range.end > overallDateRange.end ? overallDateRange.end : range.end)
-        };
-        
-        // Ensure start date is not after end date
-        if (constrainedRange.start > constrainedRange.end) {
-            constrainedRange.end = constrainedRange.start;
-        }
-        
-        setDateRange(constrainedRange);
+        // Only relevant for desktop mode
         if (!isMobile) {
-            // In desktop, immediately fetch data for the selected range
-            setCurrentPage(1); // Reset to first page when changing date range
-            smartRefresh(true); // Use smart refresh for immediate response
+            fetchData();
         }
-    }, [isMobile, overallDateRange.start, overallDateRange.end, smartRefresh]);
+    };
+
+    const handleFilterChange = (newFilterData) => {
+        setFilterData(newFilterData);
+        setCurrentPage(1);
+        fetchData();
+    };
+
+    const handleDateChange = (date) => {
+        setSelectedDate(date);
+        // Mobile mode: refetch when date changes
+        if (isMobile) {
+            setCurrentPage(1);
+            fetchData();
+        }
+    };
+
+    const handleDateRangeChange = (range) => {
+        setDateRange(range);
+        // Desktop mode: refetch when date range changes
+        if (!isMobile) {
+            setCurrentPage(1);
+            fetchData();
+        }
+    };
+
+    // Fetch additional items if needed after deletion
+    const fetchAdditionalItemsIfNeeded = async () => {
+        if (data && data.length < perPage && totalRows > data.length) {
+            const itemsNeeded = Math.min(perPage - data.length, totalRows - data.length);
+            if (itemsNeeded <= 0) return;
+            
+            setLoading(true);
+            try {
+                const params = {
+                    search: search,
+                    status: filterData.status !== 'all' ? filterData.status : '',
+                    inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                    startDate: isMobile ? selectedDate : dateRange.start,
+                    endDate: isMobile ? selectedDate : dateRange.end,
+                    page: currentPage + 1,
+                    perPage: itemsNeeded,
+                };
+
+                const response = await axios.get('/daily-works-paginate', { params });
+                
+                if (response.status === 200 && response.data.data) {
+                    setData(prevData => {
+                        const newItems = response.data.data;
+                        return [...prevData, ...newItems];
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching additional items:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
 
     const handleDelete = () => {
+        console.log('Delete function called with taskId:', taskIdToDelete);
+        
+        if (!taskIdToDelete) {
+            toast.error('No task selected for deletion');
+            return;
+        }
+        
+        setDeleteLoading(true);
+        
         const promise = new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch(`/delete-daily-work`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify({
+                console.log('Sending delete request for task:', taskIdToDelete);
+                
+                // Use axios for delete operation with automatic CSRF handling
+                const response = await axios.delete('/delete-daily-work', {
+                    data: {
                         id: taskIdToDelete,
                         page: currentPage,
                         perPage,
-                    }),
+                    }
                 });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    setData(result.data);
-                    setTotalRows(result.total);
-                    setLastPage(result.last_page);
-                    resolve('Daily work deleted successfully!');
+                console.log('Delete successful:', response.data);
+                
+                // Optimistic update - immediately remove from local state
+                const newTotal = Math.max(0, totalRows - 1);
+                const remainingOnCurrentPage = data.filter(item => item.id !== taskIdToDelete).length;
+
+                if (remainingOnCurrentPage === 0 && newTotal > 0 && currentPage > 1) {
+                    // Navigate to previous page if current page becomes empty
+                    const targetPage = currentPage - 1;
+                    setCurrentPage(targetPage);
+                    // The useEffect will trigger fetchData for the new page
                 } else {
-                    reject('Failed to delete daily work. Please try again.');
+                    // Optimistic update - remove item from local state immediately
+                    setData(prevData => prevData.filter(item => item.id !== taskIdToDelete));
+                    setTotalRows(newTotal);
+                    
+                    // Calculate new last page
+                    const newLastPage = Math.ceil(newTotal / perPage);
+                    setLastPage(newLastPage);
+                    
+                    // Fill page if needed
+                    setTimeout(() => fetchAdditionalItemsIfNeeded(), 100);
                 }
+                
+                // Close the modal and reset state
+                handleClose();
+                
+                // Update statistics only
+                fetchStatistics();
+                
+                resolve('Daily work deleted successfully!');
+                
             } catch (error) {
-                reject('Failed to delete daily work. Please try again.');
+                console.error('Delete error:', error);
+                
+                // On error, refresh data to restore correct state
+                fetchData();
+                
+                if (error.response) {
+                    const status = error.response.status;
+                    const errorData = error.response.data;
+                    
+                    if (status === 403) {
+                        reject('You do not have permission to delete daily works.');
+                    } else if (status === 404) {
+                        reject('Daily work not found.');
+                    } else if (status === 422 && errorData.message) {
+                        reject(errorData.message);
+                    } else {
+                        reject(`Failed to delete daily work. Status: ${status}`);
+                    }
+                } else if (error.request) {
+                    reject('Network error. Please check your connection.');
+                } else {
+                    reject(`Failed to delete daily work: ${error.message}`);
+                }
+            } finally {
+                setDeleteLoading(false);
             }
         });
 
@@ -390,30 +307,79 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         });
     };
 
-    const handleClickOpen = useCallback((taskId, modalType) => {
+    const handleClickOpen = (taskId, modalType) => {
         setTaskIdToDelete(taskId);
         setOpenModalType(modalType);
-    }, []);
+    };
 
-    const handleClose = useCallback(() => {
+    const handleClose = () => {
         setOpenModalType(null);
         setTaskIdToDelete(null);
-    }, []);
+    };
 
-    const openModal = useCallback((modalType) => {
+    const openModal = (modalType) => {
         setOpenModalType(modalType);
-    }, []);
+    };
 
-    const closeModal = useCallback(() => {
+    const closeModal = () => {
         setOpenModalType(null);
-    }, []);
+    };
 
-    // Statistics - Fetch comprehensive data from API
+    // Optimized success callbacks for forms
+    const handleAddSuccess = (newItem) => {
+        console.log('Add success callback:', newItem);
+        
+        if (newItem) {
+            // Optimistic update - add to local state immediately
+            setData(prevData => [newItem, ...prevData]);
+            setTotalRows(prev => prev + 1);
+            
+            // Update last page calculation
+            const newLastPage = Math.ceil((totalRows + 1) / perPage);
+            setLastPage(newLastPage);
+            
+            // Update statistics
+            fetchStatistics();
+        } else {
+            // Fallback: refresh current page only
+            fetchData();
+        }
+        closeModal();
+    };
+
+    const handleEditSuccess = (updatedItem) => {
+        console.log('Edit success callback:', updatedItem);
+        
+        if (updatedItem) {
+            // Optimistic update - update item in local state immediately
+            setData(prevData => 
+                prevData.map(item => 
+                    item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+                )
+            );
+            
+            // Update statistics only if status changed
+            if (updatedItem.status) {
+                fetchStatistics();
+            }
+        } else {
+            // Fallback: refresh current page only
+            fetchData();
+        }
+        closeModal();
+    };
+
+    const handleImportSuccess = () => {
+        // Import might add multiple items, so full refresh is needed
+        refreshData();
+        closeModal();
+    };
+
+    // Simple statistics
     const [apiStats, setApiStats] = useState(null);
     const [statsLoading, setStatsLoading] = useState(false);
 
-    // Fetch comprehensive statistics from API
-    const fetchStatistics = useCallback(async () => {
+    const fetchStatistics = async () => {
         setStatsLoading(true);
         try {
             const response = await axios.get('/daily-works/statistics');
@@ -424,145 +390,113 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         } finally {
             setStatsLoading(false);
         }
-    }, []);
+    };
 
-    // Load statistics on component mount
-    useEffect(() => {
-        fetchStatistics();
-    }, [fetchStatistics]);
-
-    // Enhanced statistics using API data with fallback to local data
-    const stats = useMemo(() => {
-        if (apiStats) {
-            // Use comprehensive API statistics
-            return [
-                {
-                    title: 'Total Works',
-                    value: apiStats.overview?.totalWorks || 0,
-                    icon: <ChartBarIcon className="w-5 h-5" />,
-                    color: 'text-blue-600',
-                    description: `All daily works ${auth.roles?.includes('Super Administrator') || auth.roles?.includes('Administrator') ? '(System-wide)' : '(Your works)'}`
-                },
-                {
-                    title: 'Completed',
-                    value: apiStats.overview?.completedWorks || 0,
-                    icon: <CheckCircleIcon className="w-5 h-5" />,
-                    color: 'text-green-600',
-                    description: `${apiStats.performanceIndicators?.completionRate || 0}% completion rate`
-                },
-                {
-                    title: 'In Progress',
-                    value: apiStats.overview?.inProgressWorks || 0,
-                    icon: <ClockIcon className="w-5 h-5" />,
-                    color: 'text-orange-600',
-                    description: 'Currently active'
-                },
-                {
-                    title: 'Quality Rate',
-                    value: `${apiStats.performanceIndicators?.qualityRate || 0}%`,
-                    icon: <DocumentArrowUpIcon className="w-5 h-5" />,
-                    color: 'text-purple-600',
-                    description: `${apiStats.qualityMetrics?.passedInspections || 0} passed inspections`
-                },
-                {
-                    title: 'RFI Submissions',
-                    value: apiStats.qualityMetrics?.rfiSubmissions || 0,
-                    icon: <DocumentArrowDownIcon className="w-5 h-5" />,
-                    color: 'text-indigo-600',
-                    description: `${apiStats.performanceIndicators?.rfiRate || 0}% of total works`
-                },
-                {
-                    title: 'This Month',
-                    value: apiStats.recentActivity?.thisMonthWorks || 0,
-                    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
-                    color: 'text-cyan-600',
-                    description: 'Current month activity'
-                }
-            ];
-        } else {
-            // Fallback to basic local statistics
-            const totalWorks = data.length || totalRows;
-            const completedWorks = data.filter(work => work.status === 'completed').length;
-            const pendingWorks = data.filter(work => work.status === 'new' || work.status === 'resubmission').length;
-            const emergencyWorks = data.filter(work => work.status === 'emergency').length;
-
-            return [
-                {
-                    title: 'Total',
-                    value: totalWorks,
-                    icon: <ChartBarIcon className="w-5 h-5" />,
-                    color: 'text-blue-600',
-                    description: 'All work logs'
-                },
-                {
-                    title: 'Completed',
-                    value: completedWorks,
-                    icon: <CheckCircleIcon className="w-5 h-5" />,
-                    color: 'text-green-600',
-                    description: 'Finished tasks'
-                },
-                {
-                    title: 'Pending',
-                    value: pendingWorks,
-                    icon: <ClockIcon className="w-5 h-5" />,
-                    color: 'text-orange-600',
-                    description: 'In progress'
-                },
-                {
-                    title: 'Emergency',
-                    value: emergencyWorks,
-                    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
-                    color: 'text-red-600',
-                    description: 'Urgent tasks'
-                }
-            ];
+    // Simple statistics calculation
+    const stats = apiStats ? [
+        {
+            title: 'Total Works',
+            value: apiStats.overview?.totalWorks || 0,
+            icon: <ChartBarIcon className="w-5 h-5" />,
+            color: 'text-blue-600',
+            description: `All daily works`
+        },
+        {
+            title: 'Completed',
+            value: apiStats.overview?.completedWorks || 0,
+            icon: <CheckCircleIcon className="w-5 h-5" />,
+            color: 'text-green-600',
+            description: `${apiStats.performanceIndicators?.completionRate || 0}% completion rate`
+        },
+        {
+            title: 'In Progress',
+            value: apiStats.overview?.inProgressWorks || 0,
+            icon: <ClockIcon className="w-5 h-5" />,
+            color: 'text-orange-600',
+            description: 'Currently active'
+        },
+        {
+            title: 'Quality Rate',
+            value: `${apiStats.performanceIndicators?.qualityRate || 0}%`,
+            icon: <DocumentArrowUpIcon className="w-5 h-5" />,
+            color: 'text-purple-600',
+            description: `${apiStats.qualityMetrics?.passedInspections || 0} passed inspections`
         }
-    }, [data, totalRows, apiStats, auth.roles]);
-
-    console.log(auth)
+    ] : [
+        {
+            title: 'Total',
+            value: data.length || totalRows,
+            icon: <ChartBarIcon className="w-5 h-5" />,
+            color: 'text-blue-600',
+            description: 'All work logs'
+        },
+        {
+            title: 'Completed',
+            value: data.filter(work => work.status === 'completed').length,
+            icon: <CheckCircleIcon className="w-5 h-5" />,
+            color: 'text-green-600',
+            description: 'Finished tasks'
+        },
+        {
+            title: 'Pending',
+            value: data.filter(work => work.status === 'new' || work.status === 'resubmission').length,
+            icon: <ClockIcon className="w-5 h-5" />,
+            color: 'text-orange-600',
+            description: 'In progress'
+        },
+        {
+            title: 'Emergency',
+            value: data.filter(work => work.status === 'emergency').length,
+            icon: <ExclamationTriangleIcon className="w-5 h-5" />,
+            color: 'text-red-600',
+            description: 'Urgent tasks'
+        }
+    ];
 
     // Action buttons configuration
     const actionButtons = [
-        ...(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator') || auth.designation === 'Supervision Engineer' ? [{
-            label: "Add Work",
+        {
+            label: 'Add Work',
             icon: <PlusIcon className="w-4 h-4" />,
-            onPress: () => openModal('addDailyWork'),
-            className: "bg-linear-to-r from-blue-500 to-purple-500 text-white font-medium"
-        }] : []),
-        ...(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator') ? [
-            {
-                label: "Import",
-                icon: <DocumentArrowUpIcon className="w-4 h-4" />,
-                variant: "flat",
-                color: "warning",
-                onPress: () => openModal('importDailyWorks'),
-                className: "bg-linear-to-r from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30"
-            },
-            {
-                label: "Export",
-                icon: <DocumentArrowDownIcon className="w-4 h-4" />,
-                variant: "flat", 
-                color: "success",
-                onPress: () => openModal('exportDailyWorks'),
-                className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
-            }
-        ] : [])
+            color: 'primary',
+            variant: 'solid',
+            onPress: () => openModal('addDailyWork')
+        },
+        {
+            label: 'Import',
+            icon: <DocumentArrowUpIcon className="w-4 h-4" />,
+            color: 'secondary',
+            variant: 'flat',
+            onPress: () => openModal('importDailyWorks')
+        },
+        {
+            label: 'Export',
+            icon: <DocumentArrowDownIcon className="w-4 h-4" />,
+            color: 'success',
+            variant: 'flat',
+            onPress: () => openModal('exportDailyWorks')
+        }
     ];
 
-    // Main data fetching effect with smart updates
+    // Enhanced useEffect for mobile/desktop mode switching
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (isMobile) {
-                // Mobile: No pagination, fetch all data for selected date
-                smartRefresh();
-            } else {
-                // Desktop: With pagination
-                smartRefresh();
-            }
-        }, 100); // Small delay to batch multiple state changes
+        console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`);
+        setModeSwitch(true); // Indicate mode switch is happening
+        // Reset pagination when switching modes
+        setCurrentPage(1);
+        // Force immediate refetch when switching between mobile/desktop
+        fetchData().finally(() => setModeSwitch(false));
+    }, [isMobile]); // Separate effect for mode changes
 
-        return () => clearTimeout(timeoutId);
-    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile, refreshTrigger, smartRefresh]);
+    // Data loading effect
+    useEffect(() => {
+        fetchData();
+    }, [currentPage, perPage, search, filterData, selectedDate, dateRange]);
+
+    // Load statistics on mount
+    useEffect(() => {
+        fetchStatistics();
+    }, []);
 
     return (
         <>
@@ -575,6 +509,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                     open={openModalType === 'addDailyWork'}
                     setData={setData}
                     closeModal={closeModal}
+                    onSuccess={handleAddSuccess}
                 />
             )}
             {openModalType === 'editDailyWork' && (
@@ -584,6 +519,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                     currentRow={currentRow}
                     setData={setData}
                     closeModal={closeModal}
+                    onSuccess={handleEditSuccess}
                 />
             )}
             {openModalType === 'deleteDailyWork' && (
@@ -591,6 +527,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                     open={openModalType === 'deleteDailyWork'}
                     handleClose={handleClose}
                     handleDelete={handleDelete}
+                    isLoading={deleteLoading}
                     setData={setData}
                 />
             )}
@@ -600,7 +537,8 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                     closeModal={closeModal}
                     setData={setData}
                     setTotalRows={setTotalRows}
-                    refreshData={refreshDataAndMetadata}
+                    refreshData={refreshData}
+                    onSuccess={handleImportSuccess}
                 />
             )}
             {openModalType === 'exportDailyWorks' && (
@@ -725,14 +663,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                         <CardBody className="pt-6">
                             {/* Quick Stats */}
                             <div className="relative">
-                                {statsLoading && (
-                                    <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-                                        <div className="flex flex-col items-center space-y-2">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">Loading statistics...</span>
-                                        </div>
-                                    </div>
-                                )}
                                 <StatsCards 
                                     stats={stats} 
                                     onRefresh={fetchStatistics}
@@ -740,66 +670,81 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                 />
                             </div>
                             
-                            {/* Search Section */}
+                            {/* Search Section with Loading Skeleton */}
                             <div className="mb-6">
                                 <div className="w-full sm:w-auto sm:min-w-[300px]">
-                                    <Input
-                                        type="text"
-                                        placeholder="Search by description, location, or notes..."
-                                        value={search}
-                                        onChange={(e) => handleSearch(e)}
-                                        variant="bordered"
-                                        size={isMobile ? "sm" : "md"}
-                                        radius={getThemeRadius()}
-                                        startContent={
-                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                        }
-                                        classNames={{
-                                            input: "text-foreground",
-                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                         focus-within:bg-content2/90 border-divider/50 
-                                                         hover:border-divider data-[focus]:border-primary`,
-                                        }}
-                                        style={{
-                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                            borderRadius: `var(--borderRadius, 12px)`,
-                                        }}
-                                    />
+                                    {loading || modeSwitch ? (
+                                        <Skeleton className="w-full h-10 rounded-lg" />
+                                    ) : (
+                                        <Input
+                                            type="text"
+                                            placeholder="Search by description, location, or notes..."
+                                            value={search}
+                                            onChange={(e) => handleSearch(e)}
+                                            variant="bordered"
+                                            size={isMobile ? "sm" : "md"}
+                                            radius={getThemeRadius()}
+                                            startContent={
+                                                <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                            }
+                                            classNames={{
+                                                input: "text-foreground",
+                                                inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                             focus-within:bg-content2/90 border-divider/50 
+                                                             hover:border-divider data-[focus]:border-primary`,
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                borderRadius: `var(--borderRadius, 12px)`,
+                                            }}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Date Selector Section */}
+                            {/* Date Selector Section with Loading Skeleton */}
                             <div className="mb-6">
-                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                    <div className="flex items-center gap-2">
-                                        <CalendarIcon className="w-5 h-5 text-default-500" />
-                                        <span className="text-sm font-medium text-foreground">
-                                            {isMobile ? 'Select Date:' : 'Date Range:'}
-                                        </span>
-                                    </div>
-                                    
-                                    {isMobile ? (
-                                        // Mobile: Single date picker for current date
+                                {loading || modeSwitch ? (
+                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                        <div className="flex items-center gap-2">
+                                            <Skeleton className="w-5 h-5 rounded" />
+                                            <Skeleton className="w-20 h-4 rounded" />
+                                        </div>
                                         <div className="w-full sm:w-auto">
-                                            <Input
-                                                type="date"
-                                                value={selectedDate}
-                                                onChange={(e) => handleDateChange(e.target.value)}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                min={overallStartDate}
-                                                max={overallEndDate}
-                                                classNames={{
-                                                    input: "text-foreground",
-                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                                 focus-within:bg-content2/90 border-divider/50 
-                                                                 hover:border-divider data-[focus]:border-primary`,
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                    borderRadius: `var(--borderRadius, 12px)`,
-                                                }}
+                                            <Skeleton className="w-full sm:w-48 h-10 rounded-lg" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                        <div className="flex items-center gap-2">
+                                            <CalendarIcon className="w-5 h-5 text-default-500" />
+                                            <span className="text-sm font-medium text-foreground">
+                                                {isMobile ? 'Select Date:' : 'Date Range:'}
+                                            </span>
+                                        </div>
+                                        
+                                        {isMobile ? (
+                                            // Mobile: Single date picker for current date
+                                            <div className="w-full sm:w-auto">
+                                                <Input
+                                                    type="date"
+                                                    value={selectedDate}
+                                                    onChange={(e) => handleDateChange(e.target.value)}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    min={overallStartDate}
+                                                    max={overallEndDate}
+                                                    classNames={{
+                                                        input: "text-foreground",
+                                                        inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                     focus-within:bg-content2/90 border-divider/50 
+                                                                     hover:border-divider data-[focus]:border-primary`,
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                        borderRadius: `var(--borderRadius, 12px)`,
+                                                    }}
                                             />
                                         </div>
                                     ) : (
@@ -855,11 +800,10 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                 }}
                                             />
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Daily Works Table */}
+                                        )}
+                                    </div>
+                                )}
+                            </div>                            {/* Daily Works Table */}
                             <Card 
                                 radius={getThemeRadius()}
                                 className="bg-content2/50 backdrop-blur-md border border-divider/30"
@@ -887,7 +831,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                         juniors={allData.juniors}
                                         totalRows={totalRows}
                                         lastPage={lastPage}
-                                        loading={loading}
+                                        loading={loading || modeSwitch}
                                         allData={data}
                                         allInCharges={allData.allInCharges}
                                         jurisdictions={jurisdictions}

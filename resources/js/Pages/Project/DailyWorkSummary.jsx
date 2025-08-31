@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Head } from "@inertiajs/react";
+import { route } from 'ziggy-js';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    DatePicker,
     ButtonGroup,
     Select,
     SelectItem,
@@ -10,7 +11,8 @@ import {
     CardHeader,
     CardBody,
     Input,
-    ScrollShadow
+    ScrollShadow,
+    Skeleton
 } from "@heroui/react";
 import { 
     CalendarIcon, 
@@ -24,20 +26,24 @@ import {
     BriefcaseIcon,
     BuildingOfficeIcon,
     DocumentTextIcon,
-    ArrowPathIcon
+    ArrowPathIcon,
+    FunnelIcon,
+    AdjustmentsHorizontalIcon
 } from "@heroicons/react/24/outline";
 import App from "@/Layouts/App.jsx";
 import DailyWorkSummaryTable from '@/Tables/DailyWorkSummaryTable.jsx';
 import StatsCards from "@/Components/StatsCards.jsx";
 import EnhancedDailyWorkSummaryExportForm from "@/Forms/EnhancedDailyWorkSummaryExportForm.jsx";
-import { motion } from 'framer-motion';
+
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import dayjs from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
+import isBetween from 'dayjs/plugin/isBetween';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 dayjs.extend(minMax);
+dayjs.extend(isBetween);
 
 const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) => {
     // Responsive handling
@@ -63,8 +69,10 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
     const [dailyWorkSummary, setDailyWorkSummary] = useState(summary);
     const [filteredData, setFilteredData] = useState(summary);
     const [loading, setLoading] = useState(false);
-    const dates = dailyWorkSummary.map(work => dayjs(work.date));
     const [openModalType, setOpenModalType] = useState(null);
+    
+    // Show/Hide advanced filters panel
+    const [showFilters, setShowFilters] = useState(false);
 
     const openModal = useCallback((modalType) => {
         setOpenModalType(modalType);
@@ -74,38 +82,64 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
         setOpenModalType(null);
     }, []);
 
+    // Safe date calculation
+    const dates = useMemo(() => {
+        if (!dailyWorkSummary || dailyWorkSummary.length === 0) {
+            return [];
+        }
+        return dailyWorkSummary.map(work => dayjs(work.date)).filter(date => date.isValid());
+    }, [dailyWorkSummary]);
+
+    const [filterData, setFilterData] = useState({
+        startDate: dates.length > 0 ? dayjs.min(...dates).format('YYYY-MM-DD') : dayjs().subtract(30, 'days').format('YYYY-MM-DD'),
+        endDate: dates.length > 0 ? dayjs.max(...dates).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'),
+        status: 'all',
+        incharge: 'all',
+    });
+
     // Refresh summary data
     const handleRefresh = useCallback(async () => {
         setLoading(true);
         try {
             // Get date range for refresh
-            const startDate = filterData.startDate?.format('YYYY-MM-DD') || dayjs().subtract(30, 'days').format('YYYY-MM-DD');
-            const endDate = filterData.endDate?.format('YYYY-MM-DD') || dayjs().format('YYYY-MM-DD');
+            const startDate = filterData.startDate || dayjs().subtract(30, 'days').format('YYYY-MM-DD');
+            const endDate = filterData.endDate || dayjs().format('YYYY-MM-DD');
             
             const response = await axios.post(route('daily-works-summary.refresh'), {
                 startDate,
                 endDate
             });
             
-            if (response.data && response.data.message) {
-                // Refresh the page data
-                window.location.reload();
+            if (response.data && response.data.summary) {
+                // Update local state instead of full page reload
+                setDailyWorkSummary(response.data.summary);
+                toast.success('Summary data refreshed successfully');
+            } else if (response.data && response.data.message) {
+                // Fallback: fetch updated data
+                const summaryResponse = await axios.get(route('daily-works-summary.data'), {
+                    params: { startDate, endDate }
+                });
+                
+                if (summaryResponse.data && summaryResponse.data.summary) {
+                    setDailyWorkSummary(summaryResponse.data.summary);
+                }
+                
                 toast.success('Summary data refreshed successfully');
             }
         } catch (error) {
             console.error('Failed to refresh summary:', error);
-            toast.error('Failed to refresh summary data');
+            
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error('Failed to refresh summary data');
+            }
         } finally {
             setLoading(false);
         }
     }, [filterData]);
 
-    const [filterData, setFilterData] = useState({
-        startDate: dayjs.min(...dates),
-        endDate: dayjs.max(...dates),
-        status: 'all',
-        incharge: 'all',
-    });
+   
 
     const handleFilterChange = useCallback((key, value) => {
         setFilterData(prevState => ({
@@ -177,12 +211,12 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
 
 
     useEffect(() => {
-        // Set initial startDate and endDate only if not manually changed
-        if (!filterData.startDate || !filterData.endDate) {
+        // Set initial startDate and endDate only if not manually changed and dates are available
+        if (dates.length > 0 && (!filterData.startDate || !filterData.endDate)) {
             setFilterData(prevState => ({
                 ...prevState,
-                startDate: dayjs.min(...dates),
-                endDate: dayjs.max(...dates),
+                startDate: dayjs.min(...dates).format('YYYY-MM-DD'),
+                endDate: dayjs.max(...dates).format('YYYY-MM-DD'),
             }));
         }
     }, [dates]);
@@ -190,9 +224,11 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
     useEffect(() => {
         const filteredWorks = dailyWorkSummary.filter(work => {
             const workDate = dayjs(work.date);
+            const startDate = dayjs(filterData.startDate);
+            const endDate = dayjs(filterData.endDate);
 
             return (
-                workDate.isBetween(filterData.startDate, filterData.endDate, null, '[]') &&
+                workDate.isBetween(startDate, endDate, null, '[]') &&
                 (filterData.incharge === 'all' || !filterData.incharge || work.incharge === filterData.incharge)
             );
         });
@@ -353,107 +389,171 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                             fontFamily: `var(--fontFamily, "Inter")`,
                         }}>
                             {/* Quick Stats */}
-                            <StatsCards stats={stats} />
+                            <StatsCards stats={stats} isLoading={loading} />
                             
-                            {/* Filters Section */}
-                            <Card 
-                                className="mb-6"
-                                radius={getThemeRadius()}
-                                style={{
-                                    border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
-                                    borderRadius: `var(--borderRadius, 12px)`,
-                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                    backgroundColor: 'var(--theme-content2)',
-                                }}
-                            >
-                                <CardBody className="p-4">
-                                    <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
-                                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center flex-1">
-                                            <div className="flex items-center gap-2 mb-2 sm:mb-0">
-                                                <CalendarIcon className="w-5 h-5 text-default-400" />
-                                                <span className="text-sm text-default-600 whitespace-nowrap" style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}>
-                                                    Date Range:
-                                                </span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                                                <DatePicker
-                                                    label="Start date"
-                                                    value={filterData.startDate}
-                                                    onChange={(value) => handleFilterChange('startDate', value)}
-                                                    size="sm"
-                                                    variant="bordered"
-                                                    radius={getThemeRadius()}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                />
-                                                <span className="text-sm text-default-500 px-2" style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}>
-                                                    to
-                                                </span>
-                                                <DatePicker
-                                                    label="End date"
-                                                    value={filterData.endDate}
-                                                    onChange={(value) => handleFilterChange('endDate', value)}
-                                                    size="sm"
-                                                    variant="bordered"
-                                                    radius={getThemeRadius()}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                />
-                                            </div>
+                            {/* Unified Filters Section */}
+                            <div className="mb-6">
+                                <div className="flex flex-col gap-4">
+                                    {/* Filter Controls Row */}
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FunnelIcon className="w-5 h-5 text-default-500" />
+                                            <span className="text-sm font-medium text-foreground" style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}>
+                                                Quick Filters:
+                                            </span>
                                         </div>
-
-                                        {(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer') && (
-                                            <div className="flex gap-2 items-center">
-                                                <UserIcon className="w-5 h-5 text-default-400" />
-                                                <Select
-                                                    label="In Charge"
-                                                    selectedKeys={filterData.incharge ? [String(filterData.incharge)] : ["all"]}
-                                                    onSelectionChange={(keys) => {
-                                                        const value = Array.from(keys)[0];
-                                                        handleFilterChange('incharge', value === "all" ? "all" : value);
-                                                    }}
-                                                    size="sm"
-                                                    variant="bordered"
-                                                    radius={getThemeRadius()}
-                                                    className="min-w-48"
+                                        <div className="flex gap-2 items-end">
+                                            <ButtonGroup 
+                                                variant="bordered" 
+                                                radius={getThemeRadius()}
+                                                className="bg-white/5"
+                                            >
+                                                <Button
+                                                    isIconOnly={isMobile}
+                                                    color={showFilters ? 'primary' : 'default'}
+                                                    onPress={() => setShowFilters(!showFilters)}
+                                                    className={showFilters ? 'bg-primary/20' : 'bg-white/5'}
                                                     style={{
                                                         fontFamily: `var(--fontFamily, "Inter")`,
                                                     }}
                                                 >
-                                                    <SelectItem key="all" value="all">All</SelectItem>
-                                                    {inCharges.map(inCharge => (
-                                                        <SelectItem key={inCharge.id} value={inCharge.id}>
-                                                            {inCharge.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </Select>
-                                            </div>
-                                        )}
+                                                    <AdjustmentsHorizontalIcon className="w-4 h-4" />
+                                                    {!isMobile && <span className="ml-1">Advanced Filters</span>}
+                                                </Button>
+                                            </ButtonGroup>
+                                        </div>
                                     </div>
-                                </CardBody>
-                            </Card>
+                                    
+                                    {/* Advanced Filters Panel */}
+                                    <AnimatePresence>
+                                        {showFilters && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -20 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <div className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                        {/* Date Range Filters */}
+                                                        <div className="sm:col-span-2 lg:col-span-2">
+                                                            <div className="flex flex-col gap-2">
+                                                                <label className="text-sm font-medium text-foreground" style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}>
+                                                                    Date Range
+                                                                </label>
+                                                                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                                                                    <Input
+                                                                        type="date"
+                                                                        label="Start date"
+                                                                        value={filterData.startDate}
+                                                                        onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                                                                        size="sm"
+                                                                        variant="bordered"
+                                                                        radius={getThemeRadius()}
+                                                                        classNames={{
+                                                                            input: "text-foreground",
+                                                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                                         focus-within:bg-content2/90 border-divider/50 
+                                                                                         hover:border-divider data-[focus]:border-primary`,
+                                                                        }}
+                                                                        style={{
+                                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                                        }}
+                                                                    />
+                                                                    <span className="text-sm text-default-500 px-2" style={{
+                                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                                    }}>
+                                                                        to
+                                                                    </span>
+                                                                    <Input
+                                                                        type="date"
+                                                                        label="End date"
+                                                                        value={filterData.endDate}
+                                                                        onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                                                                        size="sm"
+                                                                        variant="bordered"
+                                                                        radius={getThemeRadius()}
+                                                                        classNames={{
+                                                                            input: "text-foreground",
+                                                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                                         focus-within:bg-content2/90 border-divider/50 
+                                                                                         hover:border-divider data-[focus]:border-primary`,
+                                                                        }}
+                                                                        style={{
+                                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* In Charge Filter */}
+                                                        {(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer') && (
+                                                            <div>
+                                                                <Select
+                                                                    label="In Charge"
+                                                                    placeholder="Select in charge..."
+                                                                    selectedKeys={filterData.incharge ? [String(filterData.incharge)] : ["all"]}
+                                                                    onSelectionChange={(keys) => {
+                                                                        const value = Array.from(keys)[0];
+                                                                        handleFilterChange('incharge', value === "all" ? "all" : value);
+                                                                    }}
+                                                                    variant="bordered"
+                                                                    size="sm"
+                                                                    radius={getThemeRadius()}
+                                                                    className="w-full"
+                                                                    classNames={{
+                                                                        trigger: "text-sm",
+                                                                        value: "text-foreground",
+                                                                        listboxWrapper: "bg-content1",
+                                                                        popoverContent: "bg-content1",
+                                                                    }}
+                                                                    style={{
+                                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                                    }}
+                                                                    aria-label="Filter by in charge"
+                                                                >
+                                                                    <SelectItem key="all" value="all">All</SelectItem>
+                                                                    {inCharges.map(inCharge => (
+                                                                        <SelectItem key={inCharge.id} value={inCharge.id}>
+                                                                            {inCharge.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
 
                             {/* Daily Work Summary Table */}
                             <Card 
                                 radius={getThemeRadius()}
-                                className="bg-content2/50 backdrop-blur-md border border-divider/30"
+                                className="bg-content1/80 backdrop-blur-md border border-divider/20"
                                 style={{
                                     fontFamily: `var(--fontFamily, "Inter")`,
                                     borderRadius: `var(--borderRadius, 12px)`,
-                                    backgroundColor: 'var(--theme-content2)',
-                                    borderColor: 'var(--theme-divider)',
+                                    border: `var(--borderWidth, 1px) solid var(--theme-divider, #E4E4E7)`,
+                                    background: `linear-gradient(135deg, 
+                                        color-mix(in srgb, var(--theme-content1) 90%, transparent) 20%, 
+                                        color-mix(in srgb, var(--theme-content2) 60%, transparent) 10%)`,
                                 }}
                             >
-                                <CardBody className="p-4">
+                                <CardBody className="p-0" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>
                                     <DailyWorkSummaryTable
                                         filteredData={filteredData}
                                         onRefresh={handleRefresh}
+                                        loading={loading}
                                     />
                                 </CardBody>
                             </Card>
