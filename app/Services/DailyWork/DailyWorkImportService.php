@@ -220,12 +220,15 @@ class DailyWorkImportService
         DailyWork::create([
             'date' => ($existingDailyWork->status === 'completed' ? $existingDailyWork->date : $importedDailyWork[0]),
             'number' => $importedDailyWork[1],
-            'status' => ($existingDailyWork->status === 'completed' ? 'completed' : 'resubmission'),
+            'status' => ($existingDailyWork->status === 'completed' ? 'completed' : 'new'),
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
+            'qty_layer' => $importedDailyWork[5] ?? null,
+            'side' => $importedDailyWork[6] ?? null,
+            'planned_time' => $importedDailyWork[7] ?? null,
             'incharge' => $inChargeId,
-            'assigned' => $inChargeId, // Default assigned to same as incharge
+            'assigned' => null, // Don't auto-assign to incharge
             'resubmission_count' => $resubmissionCount,
             'resubmission_date' => $resubmissionDate,
         ]);
@@ -239,12 +242,15 @@ class DailyWorkImportService
         DailyWork::create([
             'date' => $importedDailyWork[0],
             'number' => $importedDailyWork[1],
-            'status' => 'pending',
+            'status' => 'new',
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
+            'qty_layer' => $importedDailyWork[5] ?? null,
+            'side' => $importedDailyWork[6] ?? null,
+            'planned_time' => $importedDailyWork[7] ?? null,
             'incharge' => $inChargeId,
-            'assigned' => $inChargeId, // Default assigned to same as incharge
+            'assigned' => null, // Don't auto-assign to incharge
         ]);
     }
 

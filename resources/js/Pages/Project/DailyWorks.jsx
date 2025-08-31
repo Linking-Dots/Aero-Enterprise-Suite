@@ -418,6 +418,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                     closeModal={closeModal}
                     setData={setData}
                     setTotalRows={setTotalRows}
+                    refreshData={() => fetchData(currentPage, perPage, filterData)}
                 />
             )}
             {openModalType === 'exportDailyWorks' && (

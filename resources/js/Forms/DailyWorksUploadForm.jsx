@@ -37,7 +37,7 @@ import { toast } from "react-toastify";
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 
-const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData }) => {
+const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refreshData }) => {
     // Expected Excel format data - based on actual project format
     const expectedFormat = [
         { column: 'A', field: 'Date', example: '4/27/2025', required: true, processed: true },
@@ -190,11 +190,18 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData }) => {
                 if (response.status === 200) {
                     setData(response.data.data);
                     setTotalRows(response.data.total);
+                    
+                    // Clear form data and close modal
+                    clearFile();
+                    setServerErrors({});
+                    closeModal();
+                    
+                    // Refresh parent component data if callback provided
+                    if (typeof refreshData === 'function') {
+                        refreshData();
+                    }
+                    
                     resolve(response.data.message || 'Daily works imported successfully.');
-                    setTimeout(() => {
-                        closeModal();
-                        clearFile();
-                    }, 1000);
                 }
             } catch (error) {
                 console.error('Upload error:', error);
