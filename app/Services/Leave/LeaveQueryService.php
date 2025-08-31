@@ -39,7 +39,7 @@ class LeaveQueryService
         $leaveType = $request->get('leave_type');
         $specificUserId = $request->get('user_id'); // Extract user_id if provided
 
-        $currentYear = $year ?: ($month ? Carbon::createFromFormat('Y-m', $month)->year : now()->year);
+        $currentYear = $year ?: ($month ? Carbon::createFromFormat('Y-m-d', $month.'-01')->year : now()->year);
 
         $leavesQuery = Leave::with('employee')
             ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
@@ -139,22 +139,46 @@ class LeaveQueryService
      */
     private function applyDateFilters($query, ?int $year, ?string $month, bool $isAdmin, int $userId): void
     {
-        // If a specific user_id filter is already applied (from the main query), we don't need to reapply it here
+        // Debug logging
+        Log::info('LeaveQueryService - applyDateFilters called', [
+            'year' => $year,
+            'month' => $month,
+            'isAdmin' => $isAdmin,
+            'userId' => $userId,
+        ]);
 
-        if ($year && ! $isAdmin) {
-            // For employees, filter by year and their own records
-            $query->whereYear('leaves.from_date', $year);
-        } elseif ($isAdmin && $month) {
-            // For admins, filter by month across all employees
-            $range = [
-                Carbon::createFromFormat('Y-m', $month)->startOfMonth(),
-                Carbon::createFromFormat('Y-m', $month)->endOfMonth(),
-            ];
-            $query->whereBetween('leaves.from_date', $range);
-        } elseif ($isAdmin && $year) {
-            // For admins, filter by year across all employees
+        // Priority: month filter first, then year filter
+        if ($month) {
+            // Apply month filter for both admin and employee views
+            try {
+                // Use correct Carbon parsing for Y-m format
+                $monthStart = Carbon::createFromFormat('Y-m-d', $month.'-01')->startOfMonth();
+                $monthEnd = Carbon::createFromFormat('Y-m-d', $month.'-01')->endOfMonth();
+                
+                $range = [$monthStart, $monthEnd];
+
+                Log::info('LeaveQueryService - applying month filter', [
+                    'month' => $month,
+                    'range_start' => $range[0]->toDateString(),
+                    'range_end' => $range[1]->toDateString(),
+                ]);
+
+                $query->whereBetween('leaves.from_date', $range);
+            } catch (\Exception $e) {
+                // If month format is invalid, fall back to year filtering
+                Log::warning('Invalid month format provided: '.$month);
+                if ($year) {
+                    $query->whereYear('leaves.from_date', $year);
+                }
+            }
+        } elseif ($year) {
+            // Apply year filter if no month is specified
+            Log::info('LeaveQueryService - applying year filter', ['year' => $year]);
             $query->whereYear('leaves.from_date', $year);
         }
+
+        // Note: User-specific filtering is already handled in the main query logic
+        // so we don't need to reapply user_id filters here
     }
 
     /**
@@ -373,8 +397,8 @@ class LeaveQueryService
 
         // Apply filters
         if ($month) {
-            $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $monthEnd = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+            $monthStart = Carbon::createFromFormat('Y-m-d', $month.'-01')->startOfMonth();
+            $monthEnd = Carbon::createFromFormat('Y-m-d', $month.'-01')->endOfMonth();
             $query->whereBetween('leaves.from_date', [$monthStart, $monthEnd]);
         } elseif ($year) {
             $query->whereYear('leaves.from_date', $year);

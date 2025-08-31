@@ -484,4 +484,13 @@ class DailyWorkController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function downloadTemplate()
+    {
+        try {
+            return $this->importService->downloadTemplate();
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

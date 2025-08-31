@@ -40,6 +40,21 @@ const EnhancedDailyWorksExportForm = ({
     users = [],
     inCharges = [] 
 }) => {
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [exportSettings, setExportSettings] = useState({
         format: 'excel',
         dateRange: {
@@ -210,33 +225,76 @@ const EnhancedDailyWorksExportForm = ({
             isOpen={open} 
             onClose={closeModal}
             size="4xl"
+            radius={getThemeRadius()}
             scrollBehavior="inside"
             classNames={{
-                base: "backdrop-blur-md",
-                backdrop: "bg-black/50 backdrop-blur-sm"
+                base: "backdrop-blur-md mx-2 my-2 sm:mx-4 sm:my-8 max-h-[95vh]",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+                header: "border-b border-divider",
+                body: "overflow-y-auto",
+                footer: "border-t border-divider",
+                closeButton: "hover:bg-white/5 active:bg-white/10"
+            }}
+            style={{
+                border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`,
+                borderRadius: `var(--borderRadius, 12px)`,
+                fontFamily: `var(--fontFamily, "Inter")`,
+                transform: `scale(var(--scale, 1))`,
             }}
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                        <DocumentArrowDownIcon className="w-6 h-6 text-primary" />
-                        <span>Export Daily Works</span>
+                <ModalHeader className="flex flex-col gap-1" style={{
+                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
+                    <div className="flex items-center gap-3">
+                        <div 
+                            className="p-2 rounded-lg"
+                            style={{
+                                background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                color: 'var(--theme-primary)'
+                            }}
+                        >
+                            <DocumentArrowDownIcon className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-semibold text-foreground" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
+                                Export Daily Works
+                            </h2>
+                            <p className="text-sm text-default-500">
+                                Export daily work records with customizable options
+                            </p>
+                        </div>
                     </div>
-                    <p className="text-sm text-default-500 font-normal">
-                        Export daily work records with customizable options
-                    </p>
                 </ModalHeader>
                 
-                <ModalBody>
+                <ModalBody className="py-4 px-4 sm:py-6 sm:px-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="space-y-6">
                         {/* Export Format */}
-                        <Card className="bg-default-50">
-                            <CardBody>
-                                <h4 className="font-semibold mb-3">Export Format</h4>
+                        <Card 
+                            className="bg-default-50"
+                            radius={getThemeRadius()}
+                            style={{
+                                borderRadius: `var(--borderRadius, 12px)`,
+                            }}
+                        >
+                            <CardBody style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
+                                <h4 className="font-semibold mb-3" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>Export Format</h4>
                                 <RadioGroup
                                     value={exportSettings.format}
                                     onValueChange={(value) => setExportSettings(prev => ({ ...prev, format: value }))}
                                     orientation="horizontal"
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 >
                                     {exportFormats.map((format) => (
                                         <Radio key={format.key} value={format.key}>
@@ -255,7 +313,9 @@ const EnhancedDailyWorksExportForm = ({
 
                         {/* Date Range */}
                         <div>
-                            <h4 className="font-semibold mb-3">Date Range</h4>
+                            <h4 className="font-semibold mb-3" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>Date Range</h4>
                             <DateRangePicker
                                 label="Select date range"
                                 value={exportSettings.dateRange}
@@ -265,12 +325,18 @@ const EnhancedDailyWorksExportForm = ({
                                 }))}
                                 size="sm"
                                 variant="bordered"
+                                radius={getThemeRadius()}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
 
                         {/* Filters */}
                         <div>
-                            <h4 className="font-semibold mb-3">Filters</h4>
+                            <h4 className="font-semibold mb-3" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>Filters</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Select
                                     label="Status"
@@ -281,6 +347,10 @@ const EnhancedDailyWorksExportForm = ({
                                     }))}
                                     size="sm"
                                     variant="bordered"
+                                    radius={getThemeRadius()}
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 >
                                     {statusOptions.map((status) => (
                                         <SelectItem key={status.key} value={status.key}>
@@ -298,6 +368,10 @@ const EnhancedDailyWorksExportForm = ({
                                     }))}
                                     size="sm"
                                     variant="bordered"
+                                    radius={getThemeRadius()}
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 >
                                     {typeOptions.map((type) => (
                                         <SelectItem key={type.key} value={type.key}>
@@ -315,6 +389,10 @@ const EnhancedDailyWorksExportForm = ({
                                     }))}
                                     size="sm"
                                     variant="bordered"
+                                    radius={getThemeRadius()}
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
                                 >
                                     <SelectItem key="all" value="all">All In Charges</SelectItem>
                                     {inCharges.map((inCharge) => (
@@ -328,13 +406,18 @@ const EnhancedDailyWorksExportForm = ({
 
                         {/* Column Selection */}
                         <div>
-                            <h4 className="font-semibold mb-3">Columns to Export</h4>
+                            <h4 className="font-semibold mb-3" style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>Columns to Export</h4>
                             <CheckboxGroup
                                 value={exportSettings.columns}
                                 onValueChange={(columns) => setExportSettings(prev => ({ 
                                     ...prev, 
                                     columns 
                                 }))}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     {columnOptions.map((column) => (
@@ -350,13 +433,40 @@ const EnhancedDailyWorksExportForm = ({
                         </div>
 
                         {/* Export Summary */}
-                        <Card className="bg-primary-50 border-primary-200">
-                            <CardBody>
+                        <Card 
+                            className="bg-primary-50 border-primary-200"
+                            radius={getThemeRadius()}
+                            style={{
+                                borderRadius: `var(--borderRadius, 12px)`,
+                                background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                borderColor: `color-mix(in srgb, var(--theme-primary) 20%, transparent)`,
+                            }}
+                        >
+                            <CardBody style={{
+                                fontFamily: `var(--fontFamily, "Inter")`,
+                            }}>
                                 <div className="flex items-start space-x-3">
-                                    <InformationCircleIcon className="w-5 h-5 text-primary-600 mt-0.5" />
+                                    <InformationCircleIcon 
+                                        className="w-5 h-5 mt-0.5" 
+                                        style={{ color: 'var(--theme-primary)' }}
+                                    />
                                     <div>
-                                        <h5 className="font-medium text-primary-900">Export Summary</h5>
-                                        <div className="text-sm text-primary-700 space-y-1">
+                                        <h5 
+                                            className="font-medium mb-2"
+                                            style={{ 
+                                                color: 'var(--theme-primary)',
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        >
+                                            Export Summary
+                                        </h5>
+                                        <div 
+                                            className="text-sm space-y-1"
+                                            style={{ 
+                                                color: `color-mix(in srgb, var(--theme-primary) 80%, black)`,
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        >
                                             <p>• Format: {exportFormats.find(f => f.key === exportSettings.format)?.label}</p>
                                             <p>• Columns: {exportSettings.columns.length} selected</p>
                                             <p>• Estimated records: {getEstimatedRecords()}</p>
@@ -368,11 +478,21 @@ const EnhancedDailyWorksExportForm = ({
                     </div>
                 </ModalBody>
                 
-                <ModalFooter>
+                <ModalFooter className="flex flex-col sm:flex-row justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4" style={{
+                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <Button 
-                        variant="light" 
+                        color="default"
+                        variant="bordered"
                         onPress={closeModal}
                         isDisabled={isLoading}
+                        radius={getThemeRadius()}
+                        size="sm"
+                        style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Cancel
                     </Button>
@@ -382,6 +502,12 @@ const EnhancedDailyWorksExportForm = ({
                         isLoading={isLoading}
                         startContent={!isLoading && <Download size={16} />}
                         isDisabled={exportSettings.columns.length === 0}
+                        radius={getThemeRadius()}
+                        size="sm"
+                        style={{
+                            borderRadius: `var(--borderRadius, 8px)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         {isLoading ? 'Exporting...' : 'Export Data'}
                     </Button>

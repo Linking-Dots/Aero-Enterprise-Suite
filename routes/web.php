@@ -134,8 +134,6 @@ Route::middleware($middlewareStack)->group(function () {
         Route::delete('/delete-daily-work', [DailyWorkController::class, 'delete'])->name('dailyWorks.delete');
     });
 
-  
-
     Route::middleware(['permission:daily-works.export'])->group(function () {
         Route::post('/daily-works/export', [DailyWorkController::class, 'export'])->name('dailyWorks.export');
         Route::post('/daily-works-summary/export', [DailyWorkSummaryController::class, 'exportDailySummary'])->name('daily-works-summary.export');
@@ -247,6 +245,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Daily works management routes
     Route::middleware(['permission:daily-works.import'])->post('/import-daily-works/', [DailyWorkController::class, 'import'])->name('dailyWorks.import');
+    Route::middleware(['permission:daily-works.import'])->get('/download-daily-works-template', [DailyWorkController::class, 'downloadTemplate'])->name('dailyWorks.downloadTemplate');
     Route::middleware(['permission:daily-works.delete'])->delete('/delete-daily-work', [DailyWorkController::class, 'delete'])->name('dailyWorks.delete');
 
     // Holiday management routes

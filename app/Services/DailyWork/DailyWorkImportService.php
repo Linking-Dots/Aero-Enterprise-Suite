@@ -294,4 +294,49 @@ class DailyWorkImportService
             );
         }
     }
+
+    /**
+     * Download Excel template for daily works import
+     */
+    public function downloadTemplate()
+    {
+        // Create sample data for the template
+        $templateData = [
+            ['Date', 'RFI Number', 'Work Type', 'Description', 'Location/Chainage', 'Quantity/Layer', 'Side (Optional)', 'Time (Optional)'],
+            ['4/27/2025', 'S2025-0425-9663', 'Structure', 'Isolation Barrier (Type-2, Steel Post) Installation Work', 'K05+560-K05+660', '150 MT', 'TR-R', '3:00 PM'],
+            ['4/27/2025', 'E2025-0426-14687', 'Embankment', 'Embankment Compaction and Grading Work', 'K06+100-K06+250', '2 Layers', 'TR-L', '9:00 AM'],
+            ['4/27/2025', 'P2025-0427-3180', 'Pavement', 'Asphalt Pavement Laying and Compaction', 'K07+300-K07+500', '500 SQM', 'SR-R', '4:00 PM'],
+            ['4/28/2025', 'S2025-0428-1234, E2025-0428-5678', 'Structure', 'Bridge Foundation Excavation Work', 'K08+200-K08+350', '75 MT', 'SR-L', '10:00 AM'],
+        ];
+
+        // Create a temporary file
+        $filename = 'daily_works_import_template_'.date('Y-m-d_H-i-s').'.xlsx';
+        $tempPath = storage_path('app/temp/'.$filename);
+
+        // Ensure temp directory exists
+        if (! file_exists(dirname($tempPath))) {
+            mkdir(dirname($tempPath), 0755, true);
+        }
+
+        // Create Excel file with template data
+        Excel::store(new class($templateData) implements \Maatwebsite\Excel\Concerns\FromArray
+        {
+            private $data;
+
+            public function __construct($data)
+            {
+                $this->data = $data;
+            }
+
+            public function array(): array
+            {
+                return $this->data;
+            }
+        }, 'temp/'.$filename);
+
+        // Return download response
+        return response()->download($tempPath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
+    }
 }
