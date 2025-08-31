@@ -35,7 +35,7 @@ import DailyWorksUploadForm from "@/Forms/DailyWorksUploadForm.jsx";
 
 
 
-const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
+const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, reports_with_daily_works, overallEndDate, overallStartDate }) => {
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -80,6 +80,15 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         startDate: overallStartDate,
         endDate: overallEndDate
     });
+    
+    // State for overall date range (to be updated after import)
+    const [overallDateRange, setOverallDateRange] = useState({
+        start: overallStartDate,
+        end: overallEndDate
+    });
+    
+    // Force refresh trigger to overcome caching
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const fetchData = async (page, perPage, filterData, dateFilter = null) => {
         setLoading(true);
@@ -88,6 +97,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                 search: search,
                 status: filterData.status !== 'all' ? filterData.status : '',
                 inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                _t: Date.now(), // Cache busting parameter
             };
 
             // Handle date filtering based on mobile/desktop view
@@ -127,32 +137,199 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         }
     };
 
-    const handleSearch = useCallback((event) => {
-        setSearch(event.target.value);
+    // Function to fetch updated metadata (date ranges) from server
+    const fetchUpdatedMetadata = async () => {
+        try {
+            const response = await axios.get('/daily-works-all');
+            
+            // Calculate new overall date range from the response
+            if (response.data && response.data.length > 0) {
+                const dates = response.data.map(item => item.date);
+                const newStartDate = dates.reduce((min, date) => date < min ? date : min);
+                const newEndDate = dates.reduce((max, date) => date > max ? date : max);
+                
+                // Update overall date range state
+                setOverallDateRange({
+                    start: newStartDate,
+                    end: newEndDate
+                });
+                
+                // Update date range filter if current range is outside new bounds
+                setDateRange(prevRange => ({
+                    start: prevRange.start < newStartDate ? newStartDate : 
+                           (prevRange.start > newEndDate ? newEndDate : prevRange.start),
+                    end: prevRange.end < newStartDate ? newStartDate : 
+                         (prevRange.end > newEndDate ? newEndDate : prevRange.end)
+                }));
+                
+                // Update selected date if outside new bounds
+                setSelectedDate(prevDate => 
+                    prevDate < newStartDate ? newStartDate :
+                    (prevDate > newEndDate ? newEndDate : prevDate)
+                );
+                
+                // Update filter data with new date bounds
+                setFilterData(prevFilter => ({
+                    ...prevFilter,
+                    startDate: prevFilter.startDate < newStartDate ? newStartDate : 
+                              (prevFilter.startDate > newEndDate ? newEndDate : prevFilter.startDate),
+                    endDate: prevFilter.endDate < newStartDate ? newStartDate : 
+                            (prevFilter.endDate > newEndDate ? newEndDate : prevFilter.endDate)
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch updated metadata:', error);
+        }
+    };
+
+    // Optimistic update function for immediate UI response
+    const optimisticUpdate = useCallback((importedData) => {
+        if (importedData && importedData.length > 0) {
+            // Immediate UI update with imported data
+            setData(prevData => [...importedData, ...prevData]);
+            setTotalRows(prevTotal => prevTotal + importedData.length);
+            
+            // Update date ranges optimistically
+            const importedDates = importedData.map(item => item.date);
+            const newMinDate = Math.min(...importedDates);
+            const newMaxDate = Math.max(...importedDates);
+            
+            setOverallDateRange(prevRange => ({
+                start: newMinDate < prevRange.start ? newMinDate : prevRange.start,
+                end: newMaxDate > prevRange.end ? newMaxDate : prevRange.end
+            }));
+            
+            // Show immediate success feedback
+            toast.success(`${importedData.length} daily works imported successfully!`, {
+                icon: '⚡',
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
+                }
+            });
+        }
     }, []);
+
+    // Smart refresh function - only refreshes what's necessary
+    const smartRefresh = useCallback(async (skipLoading = false) => {
+        if (!skipLoading) setLoading(true);
+        
+        try {
+            // Use Promise.all for parallel execution
+            const [metadataResponse, dataResponse] = await Promise.all([
+                axios.get('/daily-works-all', { params: { _t: Date.now() } }),
+                axios.get('/daily-works-paginate', { 
+                    params: {
+                        page: currentPage,
+                        perPage: perPage,
+                        search: search,
+                        status: filterData.status !== 'all' ? filterData.status : '',
+                        inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                        startDate: isMobile ? selectedDate : dateRange.start,
+                        endDate: isMobile ? selectedDate : dateRange.end,
+                        _t: Date.now()
+                    }
+                })
+            ]);
+
+            // Update metadata if changed
+            if (metadataResponse.data && metadataResponse.data.length > 0) {
+                const dates = metadataResponse.data.map(item => item.date);
+                const newStartDate = dates.reduce((min, date) => date < min ? date : min);
+                const newEndDate = dates.reduce((max, date) => date > max ? date : max);
+                
+                setOverallDateRange(prevRange => {
+                    if (prevRange.start !== newStartDate || prevRange.end !== newEndDate) {
+                        return { start: newStartDate, end: newEndDate };
+                    }
+                    return prevRange;
+                });
+            }
+
+            // Update table data
+            setData(dataResponse.data.data);
+            setTotalRows(dataResponse.data.total);
+            setLastPage(dataResponse.data.last_page);
+            
+        } catch (error) {
+            console.error('Smart refresh failed:', error);
+            toast.error('Failed to refresh data', {
+                icon: '🔴',
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
+                }
+            });
+        } finally {
+            if (!skipLoading) setLoading(false);
+        }
+    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile]);
+
+    // Enhanced refresh function for post-import updates
+    const refreshDataAndMetadata = useCallback(async (importedData = null) => {
+        // Immediate optimistic update if we have imported data
+        if (importedData) {
+            optimisticUpdate(importedData);
+            
+            // Then do a smart refresh in the background without showing loading
+            setTimeout(() => {
+                smartRefresh(true); // Skip loading spinner for smoother UX
+            }, 100);
+        } else {
+            // Regular refresh with loading indicator
+            await smartRefresh();
+        }
+        
+        // Force refresh trigger for any remaining cached components
+        setRefreshTrigger(prev => prev + 1);
+    }, [optimisticUpdate, smartRefresh]);
+
+    // Debounced search for better performance
+    const handleSearch = useCallback((event) => {
+        const searchValue = event.target.value;
+        setSearch(searchValue);
+        
+        // Debounce the search to avoid too many requests
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(() => {
+            smartRefresh(true); // Immediate search without loading spinner
+        }, 300);
+    }, [smartRefresh]);
 
     const handlePageChange = useCallback((page) => {
         setCurrentPage(page);
+        // No need for immediate refresh here as useEffect will handle it
     }, []);
 
-    // Date change handlers
+    // Immediate filter update handler
+    const handleFilterChange = useCallback((newFilterData) => {
+        setFilterData(newFilterData);
+        setCurrentPage(1); // Reset to first page when filters change
+        // The useEffect will trigger smartRefresh automatically
+    }, []);
+
+    // Date change handlers with immediate updates
     const handleDateChange = useCallback((date) => {
         // Ensure date is within bounds
-        const constrainedDate = date < overallStartDate ? overallStartDate : 
-                               (date > overallEndDate ? overallEndDate : date);
+        const constrainedDate = date < overallDateRange.start ? overallDateRange.start : 
+                               (date > overallDateRange.end ? overallDateRange.end : date);
         
         setSelectedDate(constrainedDate);
         if (isMobile) {
             // In mobile, immediately fetch data for the selected date (no pagination)
-            fetchData(undefined, undefined, filterData, constrainedDate);
+            smartRefresh(true); // Use smart refresh without loading spinner for immediate response
         }
-    }, [isMobile, perPage, filterData, overallStartDate, overallEndDate]);
+    }, [isMobile, overallDateRange.start, overallDateRange.end, smartRefresh]);
 
     const handleDateRangeChange = useCallback((range) => {
         // Ensure dates are within bounds
         const constrainedRange = {
-            start: range.start < overallStartDate ? overallStartDate : (range.start > overallEndDate ? overallEndDate : range.start),
-            end: range.end < overallStartDate ? overallStartDate : (range.end > overallEndDate ? overallEndDate : range.end)
+            start: range.start < overallDateRange.start ? overallDateRange.start : (range.start > overallDateRange.end ? overallDateRange.end : range.start),
+            end: range.end < overallDateRange.start ? overallDateRange.start : (range.end > overallDateRange.end ? overallDateRange.end : range.end)
         };
         
         // Ensure start date is not after end date
@@ -164,9 +341,9 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         if (!isMobile) {
             // In desktop, immediately fetch data for the selected range
             setCurrentPage(1); // Reset to first page when changing date range
-            fetchData(1, perPage, filterData);
+            smartRefresh(true); // Use smart refresh for immediate response
         }
-    }, [isMobile, perPage, filterData, overallStartDate, overallEndDate]);
+    }, [isMobile, overallDateRange.start, overallDateRange.end, smartRefresh]);
 
     const handleDelete = () => {
         const promise = new Promise(async (resolve, reject) => {
@@ -372,15 +549,20 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
         ] : [])
     ];
 
+    // Main data fetching effect with smart updates
     useEffect(() => {
-        if (isMobile) {
-            // Mobile: No pagination, fetch all data for selected date
-            fetchData(undefined, undefined, filterData);
-        } else {
-            // Desktop: With pagination
-            fetchData(currentPage, perPage, filterData);
-        }
-    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile]);
+        const timeoutId = setTimeout(() => {
+            if (isMobile) {
+                // Mobile: No pagination, fetch all data for selected date
+                smartRefresh();
+            } else {
+                // Desktop: With pagination
+                smartRefresh();
+            }
+        }, 100); // Small delay to batch multiple state changes
+
+        return () => clearTimeout(timeoutId);
+    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile, refreshTrigger, smartRefresh]);
 
     return (
         <>
@@ -418,7 +600,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
                     closeModal={closeModal}
                     setData={setData}
                     setTotalRows={setTotalRows}
-                    refreshData={() => fetchData(currentPage, perPage, filterData)}
+                    refreshData={refreshDataAndMetadata}
                 />
             )}
             {openModalType === 'exportDailyWorks' && (
@@ -721,7 +903,7 @@ const DailyWorks = React.memo(({ auth, title, allData, jurisdictions, users, rep
             </div>
         </>
     );
-});
+};
 
 DailyWorks.layout = (page) => <App>{page}</App>;
 
