@@ -148,8 +148,22 @@ class LoginController extends Controller
                     ]
                 );
 
-                throw ValidationException::withMessages([
-                    'email' => $deviceCheck['message'].'. Please contact your administrator to reset your device access.',
+                // Return Inertia response with device blocking information
+                return Inertia::render('Auth/Login', [
+                    'canResetPassword' => true,
+                    'status' => null,
+                    'deviceBlocked' => true,
+                    'deviceMessage' => $deviceCheck['message'],
+                    'blockedDeviceInfo' => $deviceCheck['blocked_by_device'] ? [
+                        'device_name' => $deviceCheck['blocked_by_device']->device_name,
+                        'browser' => $deviceCheck['blocked_by_device']->browser_name,
+                        'browser_version' => $deviceCheck['blocked_by_device']->browser_version,
+                        'platform' => $deviceCheck['blocked_by_device']->platform,
+                        'device_type' => $deviceCheck['blocked_by_device']->device_type,
+                        'ip_address' => $deviceCheck['blocked_by_device']->ip_address,
+                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity,
+                    ] : null,
+                    'errors' => [],
                 ]);
             }
         }

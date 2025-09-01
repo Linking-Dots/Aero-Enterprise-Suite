@@ -215,8 +215,8 @@ export default function Login({
         isPasswordVisible: false,
         isSubmitting: false,
         isLoaded: false,
-        showSuccessAlert: false,
-        showDeviceAlert: false
+        showSuccessAlert: !!status,
+        showDeviceAlert: !!deviceBlocked
     });
 
     // ===== VALIDATION STATE =====
@@ -468,7 +468,7 @@ export default function Login({
     useEffect(() => {
         if (deviceBlocked) {
             setUiState(prevState => ({ ...prevState, showDeviceAlert: true }));
-            toast.error('Device access blocked');
+            toast.error(deviceMessage || 'Device access blocked');
             
             const timer = setTimeout(() => {
                 dismissAlert('Device');
@@ -476,7 +476,14 @@ export default function Login({
             
             return () => clearTimeout(timer);
         }
-    }, [deviceBlocked, dismissAlert]);
+    }, [deviceBlocked, deviceMessage, dismissAlert]);
+
+    // Initialize device alert state based on props
+    useEffect(() => {
+        if (deviceBlocked) {
+            setUiState(prevState => ({ ...prevState, showDeviceAlert: true }));
+        }
+    }, [deviceBlocked]);
 
     // Cleanup on unmount
     useEffect(() => {
