@@ -360,8 +360,8 @@ export default function Login({
 
             // Submit using Inertia router
             router.post(route('login'), submissionData, {
-                preserveState: false,
-                preserveScroll: false,
+                preserveState: true,
+                preserveScroll: true,
                 onSuccess: () => {
                     toast.success('Login successful! Redirecting...', {
                         style: {
