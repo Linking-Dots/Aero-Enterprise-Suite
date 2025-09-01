@@ -375,24 +375,15 @@ export default function Login({
                     console.error('Login validation errors:', errors);
                     
                     // Handle device blocking errors
-                    if (errors.device_blocked) {
-                        // Parse device blocking data if present in errors
-                        let deviceBlockingData = null;
-                        
-                        if (errors.device_blocked_data) {
-                            try {
-                                deviceBlockingData = JSON.parse(errors.device_blocked_data);
-                            } catch (e) {
-                                console.error('Error parsing device blocking data:', e);
-                            }
-                        }
+                    if (errors.device_blocking) {
+                        console.log('Device blocking error detected:', errors.device_blocking);
                         
                         setUiState(prevState => ({
                             ...prevState,
                             showDeviceAlert: true,
                             deviceBlockingData: {
-                                message: errors.device_blocked,
-                                blockedDeviceInfo: deviceBlockingData?.blocked_device_info || null
+                                message: errors.device_blocking.device_message || 'Login blocked: Account is active on another device',
+                                blockedDeviceInfo: errors.device_blocking.blocked_device_info || null
                             }
                         }));
                         
