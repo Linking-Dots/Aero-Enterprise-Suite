@@ -161,8 +161,9 @@ class DeviceTrackingService
             ];
         }
 
-        // Check if user has ANY registered devices (active or inactive)
+        // Check if user has ANY registered devices
         // Once a device is registered, it becomes the ONLY allowed device
+        // If no devices exist (after reset), allow login from any device
         $registeredDevice = $user->devices()->first();
 
         if ($registeredDevice) {
@@ -208,11 +209,11 @@ class DeviceTrackingService
             ];
         }
 
-        // No registered devices, allow login (first time setup)
+        // No registered devices, allow login (first time setup or after admin reset)
         return [
             'allowed' => true,
             'device_id' => $deviceId,
-            'message' => 'Login allowed: First device registration',
+            'message' => 'Login allowed: No registered devices found - new device registration',
         ];
     }
 
@@ -225,38 +226,36 @@ class DeviceTrackingService
         $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
         $deviceInfo = $this->getDeviceInfo($request);
 
-        // If single device login is enabled, remove all other devices first
-        if ($user->hasSingleDeviceLoginEnabled()) {
-            // Delete all existing devices for this user to enforce single device policy
-            $user->devices()->delete();
-        }
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($user, $deviceId, $compatibleDeviceId, $sessionId, $deviceInfo) {
+            // If single device login is enabled, remove all other devices first
+            if ($user->hasSingleDeviceLoginEnabled()) {
+                // Delete all existing devices for this user to enforce single device policy
+                $user->devices()->delete();
+            }
 
-        // Check if device already exists
-        $device = $user->devices()->where('device_id', $deviceId)->first();
+            // Use updateOrCreate to handle potential race conditions
+            $device = $user->devices()->updateOrCreate(
+                [
+                    'device_id' => $deviceId,
+                ],
+                [
+                    'compatible_device_id' => $compatibleDeviceId,
+                    'session_id' => $sessionId,
+                    'last_activity' => Carbon::now(),
+                    'is_active' => true,
+                    'ip_address' => $deviceInfo['ip_address'],
+                    'device_fingerprint' => $deviceInfo['device_fingerprint'],
+                    'device_name' => $deviceInfo['device_name'],
+                    'browser_name' => $deviceInfo['browser_name'],
+                    'browser_version' => $deviceInfo['browser_version'],
+                    'platform' => $deviceInfo['platform'],
+                    'device_type' => $deviceInfo['device_type'],
+                    'user_agent' => $deviceInfo['user_agent'],
+                ]
+            );
 
-        if ($device) {
-            // Update existing device
-            $device->update([
-                'session_id' => $sessionId,
-                'last_activity' => Carbon::now(),
-                'is_active' => true,
-                'ip_address' => $deviceInfo['ip_address'],
-                'device_fingerprint' => $deviceInfo['device_fingerprint'],
-                'compatible_device_id' => $compatibleDeviceId,
-            ]);
-        } else {
-            // Create new device
-            $device = $user->devices()->create([
-                'device_id' => $deviceId,
-                'compatible_device_id' => $compatibleDeviceId,
-                'session_id' => $sessionId,
-                'last_activity' => Carbon::now(),
-                'is_active' => true,
-                ...$deviceInfo,
-            ]);
-        }
-
-        return $device;
+            return $device;
+        });
     }
 
     /**

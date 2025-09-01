@@ -296,11 +296,8 @@ class User extends Authenticatable implements HasMedia
      */
     public function resetDevices(?string $reason = null): bool
     {
-        // Deactivate all current devices
-        $this->devices()->active()->update([
-            'is_active' => false,
-            'session_id' => null,
-        ]);
+        // Delete all devices for complete reset
+        $this->devices()->delete();
 
         return $this->update([
             'device_reset_at' => now(),
