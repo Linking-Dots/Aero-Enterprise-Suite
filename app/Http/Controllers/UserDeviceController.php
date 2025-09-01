@@ -20,57 +20,18 @@ class UserDeviceController extends Controller
     /**
      * Admin: Show device management page for a specific user
      */
-    public function show(User $user)
+    public function show($userId)
     {
-        $this->authorize('viewAny', User::class); // Ensure admin permissions
+        $user = User::findOrFail($userId);
 
         // Load the current device relationship and other needed data
         $user->load('currentDevice', 'department', 'roles');
 
-        $devices = $user->devices()
-            ->orderBy('last_activity', 'desc')
-            ->get()
-            ->map(function ($device) {
-                return [
-                    'id' => $device->id,
-                    'device_name' => $device->device_name,
-                    'user_agent' => $device->user_agent,
-                    'ip_address' => $device->ip_address,
-                    'location' => $device->location,
-                    'last_seen_at' => $device->last_activity,
-                    'is_active' => $device->is_active,
-                    'created_at' => $device->created_at,
-                ];
-            });
-
         return Inertia::render('UserDeviceManagement', [
-            'title' => "Device Management - {$user->name}",
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone ?? null,
-                'profile_image_url' => $user->profile_image_url ?? null,
-                'department' => $user->department ? [
-                    'id' => $user->department->id,
-                    'name' => $user->department->name,
-                    'code' => $user->department->code ?? null,
-                ] : null,
-                'roles' => $user->roles->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                    ];
-                }),
-                'created_at' => $user->created_at,
-                'single_device_login' => $user->single_device_login,
-                'active_device' => $user->currentDevice ? [
-                    'id' => $user->currentDevice->id,
-                    'device_name' => $user->currentDevice->device_name,
-                    'last_seen_at' => $user->currentDevice->last_activity,
-                ] : null,
-            ],
-            'devices' => $devices,
+            'user' => $user,
+            'devices' => $user->devices()->get(),
+            'activeDevices' => $user->devices()->where('is_active', true)->count(),
+            'isDeviceRestrictionEnabled' => $user->single_device_login_enabled,
         ]);
     }
 
@@ -79,8 +40,6 @@ class UserDeviceController extends Controller
      */
     public function list(User $user)
     {
-        $this->authorize('viewAny', User::class); // Ensure admin permissions
-
         // Load the current device relationship and other needed data
         $user->load('currentDevice', 'department', 'roles');
 
@@ -142,7 +101,6 @@ class UserDeviceController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        $this->authorize('update', $user); // Ensure admin permissions
 
         $enabled = $request->boolean('enabled');
 
@@ -179,7 +137,6 @@ class UserDeviceController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        $this->authorize('update', $user); // Ensure admin permissions
 
         $user->resetDevices();
 
@@ -240,7 +197,6 @@ class UserDeviceController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        $this->authorize('update', $user); // Ensure admin permissions
 
         $device = $user->devices()->findOrFail($request->device_id);
 

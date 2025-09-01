@@ -6,7 +6,8 @@ import {
     CardBody, 
     CardHeader, 
     Input, 
-    Pagination 
+    Pagination,
+    Skeleton
 } from "@heroui/react";
 import {
     CalendarIcon,
@@ -71,6 +72,7 @@ const AttendanceAdmin = React.memo(({title}) => {
     const [attendanceData, setAttendanceData] = useState([]);
     const [leaveCounts, setLeaveCounts] = useState([]);
     const [leaveTypes, setLeaveTypes] = useState([]);
+    const [attendanceSettings, setAttendanceSettings] = useState(null);
 
     const [totalRows, setTotalRows] = useState(0);
     const [lastPage, setLastPage] = useState(0);
@@ -81,38 +83,42 @@ const AttendanceAdmin = React.memo(({title}) => {
 
     const [filterData, setFilterData] = useState({
         currentMonth: dayjs().format('YYYY-MM'),
-    });    // Enhanced attendance stats state
+    });
+
+    // Monthly attendance statistics state - focused on attendance metrics only
     const [attendanceStats, setAttendanceStats] = useState({
-        // Basic metrics
+        // Basic month info
+        month: '',
+        year: '',
+        
+        // Employee and day counts
         totalEmployees: 0,
         totalWorkingDays: 0,
-        totalDaysInMonth: 0,
-        holidaysCount: 0,
-        weekendsCount: 0,
-
+        totalWeekendDays: 0,
+        totalHolidays: 0,
+        
         // Attendance metrics
-        presentDays: 0,
-        absentDays: 0,
-        lateArrivals: 0,
+        totalPresentDays: 0,
+        totalAbsentDays: 0,
+        totalLateArrivals: 0,
+        totalEarlyLeaves: 0,
         attendancePercentage: 0,
-
-        // Work time metrics
-        averageWorkHours: 0,
-        overtimeHours: 0,
-        totalWorkHours: 0,
-
-        // Leave metrics
+        
+        // Leave statistics
         totalLeaveDays: 0,
-        leaveBreakdown: {},
-
-        // Today's stats
-        presentToday: 0,
-        absentToday: 0,
-        lateToday: 0,
-
-        // Meta
-        month: '',
-        generated_at: null
+        approvedLeaves: 0,
+        pendingLeaves: 0,
+        rejectedLeaves: 0,
+        
+        // Performance indicators
+        perfectAttendanceEmployees: 0,
+        averageAttendanceRate: 0,
+        mostAbsentEmployee: null,
+        bestAttendanceEmployee: null,
+        
+        // Meta information
+        lastUpdated: null,
+        generatedAt: null
     });
 
 
@@ -150,6 +156,17 @@ const AttendanceAdmin = React.memo(({title}) => {
             setLastPage(response.data.last_page);
             setLeaveTypes(response.data.leaveTypes);
             setLeaveCounts(response.data.leaveCounts);
+
+            // Fetch attendance settings for weekend configuration
+            const settingsResponse = await axios.get('/settings/attendance', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (settingsResponse.data && settingsResponse.data.attendanceSettings) {
+                setAttendanceSettings(settingsResponse.data.attendanceSettings);
+            }
 
             // Fetch stats (optional but aligned)
             const statsResponse = await axios.get(route('attendance.monthlyStats'), {
@@ -257,7 +274,7 @@ const AttendanceAdmin = React.memo(({title}) => {
     };
 
 
-    // Prepare all stats data for StatsCards component - Combined into one array
+    // Prepare all stats data for StatsCards component - Monthly attendance focused
     const allStatsData = useMemo(() => [
         {
             title: "Total Employees",
@@ -273,68 +290,76 @@ const AttendanceAdmin = React.memo(({title}) => {
             icon: <CalendarIcon/>,
             color: "text-indigo-600",
             iconBg: "bg-indigo-500/20",
-            description: `This month (${attendanceStats.month})`
+            description: `This month (${attendanceStats.month || 'Current'})`
         },
         {
-            title: "Present Today",
-            value: attendanceStats.presentToday,
+            title: "Present Days",
+            value: attendanceStats.totalPresentDays,
             icon: <CheckCircleIcon/>,
             color: "text-green-400",
             iconBg: "bg-green-500/20",
-            description: attendanceStats.presentToday > 0
-                ? `${((attendanceStats.presentToday / attendanceStats.totalEmployees) * 100).toFixed(1)}% of employees`
-                : 'No attendance yet'
+            description: "Total present days this month"
         },
         {
-            title: "Absent Today",
-            value: attendanceStats.absentToday,
+            title: "Absent Days",
+            value: attendanceStats.totalAbsentDays,
             icon: <XCircleIcon/>,
             color: "text-red-400",
             iconBg: "bg-red-500/20",
-            description: attendanceStats.absentToday > 0
-                ? `${((attendanceStats.absentToday / attendanceStats.totalEmployees) * 100).toFixed(1)}% absent`
-                : 'All present'
+            description: "Total absent days this month"
         },
         {
-            title: "Late Today",
-            value: attendanceStats.lateToday,
+            title: "Late Arrivals",
+            value: attendanceStats.totalLateArrivals,
             icon: <ExclamationTriangleIcon/>,
-            color: "text-orange-400",
-            iconBg: "bg-orange-500/20",
-            description: "Late arrivals today"
+            color: "text-warning-500",
+            iconBg: "bg-warning-500/20",
+            description: "Total late arrivals this month"
         },
         {
             title: "Attendance Rate",
-            value: `${attendanceStats.attendancePercentage}%`,
-            icon: <ChartBarIcon/>,
+            value: `${attendanceStats.attendancePercentage || 0}%`,
+            icon: <PresentationChartLineIcon/>,
             color: "text-emerald-600",
             iconBg: "bg-emerald-500/20",
-            description: "Monthly average"
-        }, {
-            title: "Avg Work Hours",
-            value: `${attendanceStats.averageWorkHours}h`,
-            icon: <ClockIcon/>,
-            color: "text-blue-400",
+            description: "Monthly attendance percentage"
+        },
+        {
+            title: "Approved Leaves",
+            value: attendanceStats.approvedLeaves,
+            icon: <ClipboardDocumentListIcon/>,
+            color: "text-blue-500",
             iconBg: "bg-blue-500/20",
-            description: "Daily average this month"
+            description: "Approved leave requests this month"
         },
         {
-            title: "Overtime",
-            value: `${attendanceStats.overtimeHours}h`,
-            icon: <ClockIcon/>,
-            color: "text-purple-400",
-            iconBg: "bg-purple-500/20",
-            description: "Total overtime this month"
+            title: "Perfect Attendance",
+            value: attendanceStats.perfectAttendanceEmployees,
+            icon: <CheckCircleIcon/>,
+            color: "text-success-500",
+            iconBg: "bg-success-500/20",
+            description: "Employees with perfect attendance"
         },
         {
-            title: "Leave Days",
+            title: "Total Leave Days",
             value: attendanceStats.totalLeaveDays,
             icon: <UserIcon/>,
             color: "text-amber-600",
             iconBg: "bg-amber-500/20",
-            description: "Total leaves this month"
+            description: "Total leave days taken this month"
         }
-    ], [attendanceStats.totalEmployees, attendanceStats.totalWorkingDays, attendanceStats.month, attendanceStats.presentToday, attendanceStats.absentToday, attendanceStats.lateToday, attendanceStats.attendancePercentage, attendanceStats.averageWorkHours, attendanceStats.overtimeHours, attendanceStats.totalLeaveDays]);
+    ], [
+        attendanceStats.totalEmployees,
+        attendanceStats.totalWorkingDays,
+        attendanceStats.month,
+        attendanceStats.totalPresentDays,
+        attendanceStats.totalAbsentDays,
+        attendanceStats.totalLateArrivals,
+        attendanceStats.attendancePercentage,
+        attendanceStats.approvedLeaves,
+        attendanceStats.perfectAttendanceEmployees,
+        attendanceStats.totalLeaveDays
+    ]);
 
 
     return (
@@ -379,91 +404,108 @@ const AttendanceAdmin = React.memo(({title}) => {
                                             {/* Main Header Content */}
                                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                 {/* Title Section */}
-                                                <div className="flex items-center gap-3 lg:gap-4">
-                                                    <div 
-                                                        className={`
-                                                            ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
-                                                            rounded-xl flex items-center justify-center
-                                                        `}
-                                                        style={{
-                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
-                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
-                                                            borderWidth: `var(--borderWidth, 2px)`,
-                                                            borderRadius: `var(--borderRadius, 12px)`,
-                                                        }}
-                                                    >
-                                                        <PresentationChartLineIcon 
-                                                            className={`
-                                                                ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
-                                                            `}
-                                                            style={{ color: 'var(--theme-primary)' }}
-                                                        />
+                                                {loading ? (
+                                                    <div className="flex items-center gap-3 lg:gap-4">
+                                                        <Skeleton className="w-12 h-12 rounded-xl" />
+                                                        <div className="min-w-0 flex-1">
+                                                            <Skeleton className="w-64 h-6 rounded mb-2" />
+                                                            <Skeleton className="w-48 h-4 rounded" />
+                                                        </div>
                                                     </div>
-                                                    <div className="min-w-0 flex-1">
-                                                        <h4 
+                                                ) : (
+                                                    <div className="flex items-center gap-3 lg:gap-4">
+                                                        <div 
                                                             className={`
-                                                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
-                                                                font-bold text-foreground
-                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                                ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                                rounded-xl flex items-center justify-center
                                                             `}
                                                             style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                                background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                                borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                                borderWidth: `var(--borderWidth, 2px)`,
+                                                                borderRadius: `var(--borderRadius, 12px)`,
                                                             }}
                                                         >
-                                                            Attendance Management
-                                                        </h4>
-                                                        <p 
-                                                            className={`
-                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
-                                                                text-default-500
-                                                                ${!isLargeScreen ? 'truncate' : ''}
-                                                            `}
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        >
-                                                            Monitor and manage employee attendance records
-                                                        </p>
+                                                            <PresentationChartLineIcon 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                                                                `}
+                                                                style={{ color: 'var(--theme-primary)' }}
+                                                            />
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <h4 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                                    font-bold text-foreground
+                                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                                `}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Attendance Management
+                                                            </h4>
+                                                            <p 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                                    text-default-500
+                                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                                `}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Monitor and manage employee attendance records
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                )}
 
                                                 {/* Action Buttons */}
-                                                <div className="flex flex-wrap gap-2 lg:gap-3">
-                                                    <Button
-                                                        size={isMobile ? "sm" : "md"}
-                                                        variant="bordered"
-                                                        startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
-                                                        onPress={exportToExcel}
-                                                        isLoading={downloading === 'excel'}
-                                                        radius={getThemeRadius()}
-                                                        style={{
-                                                            background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
-                                                            border: `1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent)`,
-                                                            color: 'var(--theme-primary)',
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                        className="min-w-0"
-                                                    >
-                                                        Excel
-                                                    </Button>
-                                                    <Button
-                                                        size={isMobile ? "sm" : "md"}
-                                                        variant="bordered"
-                                                        startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
-                                                        onPress={exportToPdf}
-                                                        isLoading={downloading === 'pdf'}
-                                                        radius={getThemeRadius()}
-                                                        style={{
-                                                            background: `color-mix(in srgb, var(--theme-danger) 10%, transparent)`,
-                                                            border: `1px solid color-mix(in srgb, var(--theme-danger) 30%, transparent)`,
-                                                            color: 'var(--theme-danger)',
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                        className="min-w-0"
-                                                    >
-                                                        PDF
-                                                    </Button>
-                                                </div>
+                                                {loading ? (
+                                                    <div className="flex flex-wrap gap-2 lg:gap-3">
+                                                        <Skeleton className="w-16 h-8 rounded" />
+                                                        <Skeleton className="w-14 h-8 rounded" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-2 lg:gap-3">
+                                                        <Button
+                                                            size={isMobile ? "sm" : "md"}
+                                                            variant="bordered"
+                                                            startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
+                                                            onPress={exportToExcel}
+                                                            isLoading={downloading === 'excel'}
+                                                            radius={getThemeRadius()}
+                                                            style={{
+                                                                background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
+                                                                border: `1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent)`,
+                                                                color: 'var(--theme-primary)',
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                            className="min-w-0"
+                                                        >
+                                                            Excel
+                                                        </Button>
+                                                        <Button
+                                                            size={isMobile ? "sm" : "md"}
+                                                            variant="bordered"
+                                                            startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
+                                                            onPress={exportToPdf}
+                                                            isLoading={downloading === 'pdf'}
+                                                            radius={getThemeRadius()}
+                                                            style={{
+                                                                background: `color-mix(in srgb, var(--theme-danger) 10%, transparent)`,
+                                                                border: `1px solid color-mix(in srgb, var(--theme-danger) 30%, transparent)`,
+                                                                color: 'var(--theme-danger)',
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                            className="min-w-0"
+                                                        >
+                                                            PDF
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -474,50 +516,68 @@ const AttendanceAdmin = React.memo(({title}) => {
                                     <StatsCards
                                         stats={allStatsData}
                                         className="mb-6"
+                                        isLoading={loading}
                                     />
 
-                                    {/* Filters Section */}
+                                    {/* Filters Section with Loading Skeleton */}
                                     <div className="mb-6">
-                                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-                                            <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                                <Input
-                                                    label="Search Employee"
-                                                    type="text"
-                                                    value={employee}
-                                                    onValueChange={handleSearch}
-                                                    placeholder="Enter employee name..."
-                                                    variant="bordered"
-                                                    size={isMobile ? "sm" : "md"}
-                                                    radius={getThemeRadius()}
-                                                    startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
-                                                    classNames={{
-                                                        inputWrapper: "border-default-200 hover:border-default-300",
-                                                    }}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                />
+                                        {loading ? (
+                                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                                                <div className="w-full sm:w-auto sm:min-w-[200px]">
+                                                    <div className="space-y-2">
+                                                        <Skeleton className="w-24 h-4 rounded" />
+                                                        <Skeleton className="w-full h-10 rounded-lg" />
+                                                    </div>
+                                                </div>
+                                                <div className="w-full sm:w-auto sm:min-w-[200px]">
+                                                    <div className="space-y-2">
+                                                        <Skeleton className="w-20 h-4 rounded" />
+                                                        <Skeleton className="w-full h-10 rounded-lg" />
+                                                    </div>
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                                                <div className="w-full sm:w-auto sm:min-w-[200px]">
+                                                    <Input
+                                                        label="Search Employee"
+                                                        type="text"
+                                                        value={employee}
+                                                        onValueChange={handleSearch}
+                                                        placeholder="Enter employee name..."
+                                                        variant="bordered"
+                                                        size={isMobile ? "sm" : "md"}
+                                                        radius={getThemeRadius()}
+                                                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                                        classNames={{
+                                                            inputWrapper: "border-default-200 hover:border-default-300",
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                        }}
+                                                    />
+                                                </div>
 
-                                            <div className="w-full sm:w-auto sm:min-w-[200px]">
-                                                <Input
-                                                    label="Month/Year"
-                                                    type="month"
-                                                    value={filterData.currentMonth}
-                                                    onValueChange={(value) => handleFilterChange('currentMonth', value)}
-                                                    variant="bordered"
-                                                    size={isMobile ? "sm" : "md"}
-                                                    radius={getThemeRadius()}
-                                                    startContent={<CalendarIcon className="w-4 h-4 text-default-400" />}
-                                                    classNames={{
-                                                        inputWrapper: "border-default-200 hover:border-default-300",
-                                                    }}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                />
+                                                <div className="w-full sm:w-auto sm:min-w-[200px]">
+                                                    <Input
+                                                        label="Month/Year"
+                                                        type="month"
+                                                        value={filterData.currentMonth}
+                                                        onValueChange={(value) => handleFilterChange('currentMonth', value)}
+                                                        variant="bordered"
+                                                        size={isMobile ? "sm" : "md"}
+                                                        radius={getThemeRadius()}
+                                                        startContent={<CalendarIcon className="w-4 h-4 text-default-400" />}
+                                                        classNames={{
+                                                            inputWrapper: "border-default-200 hover:border-default-300",
+                                                        }}
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* Attendance Table Section */}
@@ -539,28 +599,35 @@ const AttendanceAdmin = React.memo(({title}) => {
                                                 borderColor: `var(--theme-divider, #E4E4E7)`,
                                             }}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div 
-                                                    className="p-2 rounded-lg flex items-center justify-center"
-                                                    style={{
-                                                        background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
-                                                        borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
-                                                    }}
-                                                >
-                                                    <ClockIcon 
-                                                        className="w-6 h-6" 
-                                                        style={{ color: 'var(--theme-primary)' }}
-                                                    />
+                                            {loading ? (
+                                                <div className="flex items-center gap-3">
+                                                    <Skeleton className="w-8 h-8 rounded-lg" />
+                                                    <Skeleton className="w-64 h-6 rounded" />
                                                 </div>
-                                                <h1 
-                                                    className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground"
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                >
-                                                    Employee Attendance Records
-                                                </h1>
-                                            </div>
+                                            ) : (
+                                                <div className="flex items-center gap-3">
+                                                    <div 
+                                                        className="p-2 rounded-lg flex items-center justify-center"
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                        }}
+                                                    >
+                                                        <ClockIcon 
+                                                            className="w-6 h-6" 
+                                                            style={{ color: 'var(--theme-primary)' }}
+                                                        />
+                                                    </div>
+                                                    <h1 
+                                                        className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground"
+                                                        style={{
+                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                        }}
+                                                    >
+                                                        Employee Attendance Records
+                                                    </h1>
+                                                </div>
+                                            )}
                                         </CardHeader>
                                         <CardBody>
                                             <div className="max-h-[84vh] overflow-y-auto">
@@ -571,6 +638,7 @@ const AttendanceAdmin = React.memo(({title}) => {
                                                     leaveTypes={leaveTypes}
                                                     leaveCounts={leaveCounts}
                                                     loading={loading}
+                                                    attendanceSettings={attendanceSettings}
                                                 />
 
                                                 {/* Pagination */}

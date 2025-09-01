@@ -197,7 +197,8 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
             color: "primary",
             onPress: handleRefresh,
             isLoading: loading,
-            className: "bg-linear-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30"
+            className: "bg-linear-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30",
+            ariaLabel: "Refresh daily work summary data"
         },
         ...(auth.roles.includes('Administrator') || auth.designation === 'Supervision Engineer' ? [{
             label: "Export",
@@ -205,7 +206,8 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
             variant: "flat", 
             color: "success",
             onPress: () => openModal('exportDailyWorkSummary'),
-            className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30"
+            className: "bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30",
+            ariaLabel: "Export daily work summary data"
         }] : [])
     ];
 
@@ -370,6 +372,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                                                         isLoading={button.isLoading}
                                                         className={`${button.className || ''} font-medium`}
                                                         radius={getThemeRadius()}
+                                                        aria-label={button.ariaLabel || button.label}
                                                         style={{
                                                             fontFamily: `var(--fontFamily, "Inter")`,
                                                             borderRadius: `var(--borderRadius, 12px)`,
@@ -415,6 +418,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                                                     color={showFilters ? 'primary' : 'default'}
                                                     onPress={() => setShowFilters(!showFilters)}
                                                     className={showFilters ? 'bg-primary/20' : 'bg-white/5'}
+                                                    aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
                                                     style={{
                                                         fontFamily: `var(--fontFamily, "Inter")`,
                                                     }}
@@ -454,6 +458,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                                                                         size="sm"
                                                                         variant="bordered"
                                                                         radius={getThemeRadius()}
+                                                                        aria-label="Select start date for filtering daily work summary"
                                                                         classNames={{
                                                                             input: "text-foreground",
                                                                             inputWrapper: `bg-content2/50 hover:bg-content2/70 
@@ -477,6 +482,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                                                                         size="sm"
                                                                         variant="bordered"
                                                                         radius={getThemeRadius()}
+                                                                        aria-label="Select end date for filtering daily work summary"
                                                                         classNames={{
                                                                             input: "text-foreground",
                                                                             inputWrapper: `bg-content2/50 hover:bg-content2/70 

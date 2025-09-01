@@ -1249,73 +1249,43 @@ class AttendanceController extends Controller
 
             $averageWorkHours = $presentDays > 0 ? round($totalWorkMinutes / $presentDays / 60, 2) : 0;
 
-            // Today's stats (for admin dashboard)
-            $today = Carbon::today();
-            $todayStats = [];
-            if (! $userId) {
-                $todayAttendance = Attendance::whereDate('date', $today)->get();
-
-                // Count unique users who punched in today
-                $presentTodayCount = $todayAttendance
-                    ->where('punchin', '!=', null)
-                    ->pluck('user_id')
-                    ->unique()
-                    ->count();
-
-                // Count unique users who were late today (based on first punch)
-                $lateTodayCount = $todayAttendance
-                    ->where('punchin', '!=', null)
-                    ->groupBy('user_id')
-                    ->filter(function ($userRecords) {
-                        $earliestPunch = $userRecords->sortBy('punchin')->first();
-                        if (! $earliestPunch->punchin) {
-                            return false;
-                        }
-                        $punchTime = Carbon::parse($earliestPunch->punchin);
-                        $standardTime = Carbon::parse($earliestPunch->date)->setTime(9, 0, 0);
-
-                        return $punchTime->gt($standardTime);
-                    })
-                    ->count();
-
-                $todayStats = [
-                    'presentToday' => $presentTodayCount,
-                    'absentToday' => $totalEmployees - $presentTodayCount,
-                    'lateToday' => $lateTodayCount,
-                ];
-            }
+            // Monthly focused statistics without today's snapshot
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    // Basic metrics
+                    // Basic month info
+                    'month' => Carbon::create($currentYear, $currentMonth)->format('F Y'),
+                    'year' => (int) $currentYear,
+
+                    // Employee and day counts
                     'totalEmployees' => $totalEmployees,
                     'totalWorkingDays' => $totalWorkingDays,
-                    'totalDaysInMonth' => $totalDaysInMonth,
-                    'holidaysCount' => $holidaysCount,
-                    'weekendsCount' => $weekendCount,
+                    'totalWeekendDays' => $weekendCount,
+                    'totalHolidays' => $holidaysCount,
 
                     // Attendance metrics
-                    'presentDays' => $presentDays,
-                    'absentDays' => $absentDays,
-                    'lateArrivals' => $lateArrivals,
+                    'totalPresentDays' => $presentDays,
+                    'totalAbsentDays' => $absentDays,
+                    'totalLateArrivals' => $lateArrivals,
+                    'totalEarlyLeaves' => 0, // Can be calculated if needed
                     'attendancePercentage' => $attendancePercentage,
 
-                    // Work time metrics
-                    'averageWorkHours' => $averageWorkHours,
-                    'overtimeHours' => round($overtimeMinutes / 60, 2),
-                    'totalWorkHours' => round($totalWorkMinutes / 60, 2),
-
-                    // Leave metrics
+                    // Leave statistics
                     'totalLeaveDays' => $totalLeaveDays,
-                    'leaveBreakdown' => $leaveBreakdown,
+                    'approvedLeaves' => $totalLeaveDays, // Assuming all counted leaves are approved
+                    'pendingLeaves' => 0, // Can be calculated if needed
+                    'rejectedLeaves' => 0, // Can be calculated if needed
 
-                    // Today's stats (for admin)
-                    ...$todayStats,
+                    // Performance indicators
+                    'perfectAttendanceEmployees' => $totalEmployees > 0 ? max(0, $totalEmployees - $absentDays / max(1, $totalWorkingDays)) : 0,
+                    'averageAttendanceRate' => $attendancePercentage,
+                    'mostAbsentEmployee' => null, // Can be calculated if needed
+                    'bestAttendanceEmployee' => null, // Can be calculated if needed
 
-                    // Meta data
-                    'month' => Carbon::create($currentYear, $currentMonth)->format('F Y'),
-                    'generated_at' => now()->toISOString(),
+                    // Meta information
+                    'lastUpdated' => now()->toISOString(),
+                    'generatedAt' => now()->toISOString(),
                 ],
             ]);
         } catch (\Exception $e) {

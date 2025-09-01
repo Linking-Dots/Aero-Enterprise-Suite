@@ -51,6 +51,7 @@ const AttendanceAdminTable = ({
                                   currentMonth,
                                   leaveTypes,
                                   leaveCounts,
+                                  attendanceSettings,
                                   onRefresh
                               }) => {
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
@@ -59,6 +60,20 @@ const AttendanceAdminTable = ({
 
     // Get the number of days in the current month
     const daysInMonth = dayjs(`${currentYear}-${currentMonth}-01`).daysInMonth();
+
+    // Helper function to determine if a day is weekend based on attendance settings
+    const isWeekendDay = useMemo(() => {
+        return (date) => {
+            if (!attendanceSettings?.weekend_days) {
+                // Default to Saturday and Sunday if no settings available
+                const dayOfWeek = dayjs(date).day();
+                return dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+            }
+            
+            const dayName = dayjs(date).format('dddd').toLowerCase();
+            return attendanceSettings.weekend_days.includes(dayName);
+        };
+    }, [attendanceSettings?.weekend_days]);
 
     // Status mapping for different symbols with theme colors
     const statusMapping = {
@@ -104,7 +119,7 @@ const AttendanceAdminTable = ({
                 sublabel: date.format('ddd'),
                 key: `day-${day}`,
                 width: 40,
-                isWeekend: date.day() === 0 || date.day() === 6
+                isWeekend: isWeekendDay(date)
             };
         }),
         ...(leaveTypes ? leaveTypes.map((type) => ({
@@ -113,7 +128,7 @@ const AttendanceAdminTable = ({
             icon: CalendarDaysIcon,
             width: 80
         })) : [])
-    ], [daysInMonth, currentYear, currentMonth, leaveTypes]);
+    ], [daysInMonth, currentYear, currentMonth, leaveTypes, isWeekendDay]);
 
     // Helper function to get status info
     const getStatusInfo = (status) => {
@@ -135,6 +150,7 @@ const AttendanceAdminTable = ({
                                       currentYear,
                                       leaveTypes,
                                       leaveCounts,
+                                      isWeekendDay,
                                   }) => {
         return (
             <Card 
@@ -185,7 +201,7 @@ const AttendanceAdminTable = ({
                             const day = i + 1;
                             const dateKey = dayjs(`${currentYear}-${currentMonth}-${day}`).format('YYYY-MM-DD');
                             const cellData = data[dateKey];
-                            const isWeekend = dayjs(dateKey).day() === 0 || dayjs(dateKey).day() === 6;
+                            const isWeekend = isWeekendDay(dayjs(dateKey));
 
                             const status = typeof cellData === 'object' ? (cellData?.status || '▼') : '▼';
                             const statusInfo = getStatusInfo(status);
@@ -271,9 +287,150 @@ const AttendanceAdminTable = ({
 
 
     if (loading) {
+        // Mobile loading skeleton
+        if (isMobile) {
+            return (
+                <div className="space-y-4">
+                    <ScrollShadow className="max-h-[70vh]">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <Card
+                                key={index}
+                                className="mb-2"
+                                style={{
+                                    background: `color-mix(in srgb, var(--theme-content1) 85%, transparent)`,
+                                    backdropFilter: 'blur(16px)',
+                                    border: `1px solid color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+                                    borderRadius: getThemeRadius(),
+                                }}
+                            >
+                                <CardBody className="p-3">
+                                    {/* User Info Skeleton */}
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <Skeleton className="w-12 h-12 rounded-full" />
+                                        <div className="flex flex-col gap-2">
+                                            <Skeleton className="w-32 h-4 rounded" />
+                                            <Skeleton className="w-20 h-3 rounded" />
+                                        </div>
+                                    </div>
+
+                                    <Divider style={{
+                                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                                    }} />
+
+                                    {/* Attendance Grid Skeleton */}
+                                    <div className="grid grid-cols-7 gap-1 my-4">
+                                        {Array.from({ length: daysInMonth }, (_, i) => (
+                                            <div
+                                                key={i + 1}
+                                                className="flex flex-col items-center justify-center p-1 rounded text-xs"
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 6px)`,
+                                                    backgroundColor: 'color-mix(in srgb, var(--theme-content2) 30%, transparent)',
+                                                }}
+                                            >
+                                                <Skeleton className="w-4 h-3 rounded mb-1" />
+                                                <Skeleton className="w-4 h-4 rounded" />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Leave Summary Skeleton */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {Array.from({ length: 3 }).map((_, idx) => (
+                                            <Skeleton key={idx} className="w-16 h-6 rounded-full" />
+                                        ))}
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </ScrollShadow>
+                </div>
+            );
+        }
+
+        // Desktop loading skeleton
         return (
-            <div className="flex justify-center items-center h-64">
-                <Skeleton className="w-full h-full rounded-lg"/>
+            <div className="max-h-[84vh] overflow-y-auto">
+                {/* Header skeleton */}
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <Skeleton className="w-32 h-6 rounded" />
+                    <Skeleton className="w-20 h-8 rounded" />
+                </div>
+                
+                <ScrollShadow className="max-h-[70vh]">
+                    <div className="border border-divider rounded-lg overflow-hidden">
+                        {/* Table header skeleton */}
+                        <div className="bg-default-100/80 backdrop-blur-md border-b border-divider">
+                            <div className="flex">
+                                {/* Serial number column */}
+                                <div className="w-16 p-3 flex items-center justify-center">
+                                    <Skeleton className="w-8 h-4 rounded" />
+                                </div>
+                                {/* Employee column */}
+                                <div className="w-48 p-3 flex items-center gap-1">
+                                    <Skeleton className="w-4 h-4 rounded" />
+                                    <Skeleton className="w-20 h-4 rounded" />
+                                </div>
+                                {/* Day columns */}
+                                {Array.from({ length: daysInMonth }, (_, i) => (
+                                    <div key={i} className="w-10 p-3 flex flex-col items-center justify-center gap-1">
+                                        <Skeleton className="w-4 h-3 rounded" />
+                                        <Skeleton className="w-6 h-3 rounded" />
+                                    </div>
+                                ))}
+                                {/* Leave type columns */}
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={`leave-${i}`} className="w-20 p-3 flex items-center justify-center">
+                                        <Skeleton className="w-12 h-4 rounded" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Table body skeleton */}
+                        <div className="divide-y divide-divider">
+                            {Array.from({ length: 8 }).map((_, rowIndex) => (
+                                <div key={rowIndex} className="flex bg-content1 hover:bg-content2/50">
+                                    {/* Serial number */}
+                                    <div className="w-16 p-3 flex items-center justify-center">
+                                        <Skeleton className="w-6 h-4 rounded" />
+                                    </div>
+                                    {/* Employee info */}
+                                    <div className="w-48 p-3 flex items-center gap-3">
+                                        <Skeleton className="w-8 h-8 rounded-full" />
+                                        <div className="flex flex-col gap-1">
+                                            <Skeleton className="w-24 h-4 rounded" />
+                                            <Skeleton className="w-16 h-3 rounded" />
+                                        </div>
+                                    </div>
+                                    {/* Day cells */}
+                                    {Array.from({ length: daysInMonth }, (_, colIndex) => (
+                                        <div key={colIndex} className="w-10 p-3 flex items-center justify-center">
+                                            <Skeleton className="w-6 h-6 rounded" />
+                                        </div>
+                                    ))}
+                                    {/* Leave counts */}
+                                    {Array.from({ length: 3 }).map((_, colIndex) => (
+                                        <div key={`leave-${colIndex}`} className="w-20 p-3 flex items-center justify-center">
+                                            <Skeleton className="w-8 h-6 rounded" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollShadow>
+                
+                {/* Pagination skeleton */}
+                <div className="py-4 flex justify-center">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                        <Skeleton className="w-8 h-8 rounded" />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -305,6 +462,7 @@ const AttendanceAdminTable = ({
                             currentYear={currentYear}
                             leaveTypes={leaveTypes}
                             leaveCounts={leaveCounts}
+                            isWeekendDay={isWeekendDay}
                         />
                     ))}
                 </ScrollShadow>
@@ -411,7 +569,7 @@ const AttendanceAdminTable = ({
                                                 const day = parseInt(columnKey.split('-')[1]);
                                                 const dateKey = dayjs(`${currentYear}-${currentMonth}-${day}`).format('YYYY-MM-DD');
                                                 const cellData = data[dateKey];
-                                                const isWeekend = dayjs(dateKey).day() === 0 || dayjs(dateKey).day() === 6;
+                                                const isWeekend = isWeekendDay(dayjs(dateKey));
 
                                                 const status = typeof cellData === 'object' ? cellData?.status || '▼' : '▼';
                                                 const statusInfo = getStatusInfo(status);

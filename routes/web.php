@@ -195,6 +195,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/leaves', [LeaveController::class, 'index2'])->name('leaves');
         Route::get('/leave-summary', [LeaveController::class, 'leaveSummary'])->name('leave-summary');
         Route::post('/leave-update-status', [LeaveController::class, 'updateStatus'])->name('leave-update-status');
+
+        // Leave summary export routes
+        Route::get('/leave-summary/export/excel', [LeaveController::class, 'exportExcel'])->name('leave.summary.exportExcel');
+        Route::get('/leave-summary/export/pdf', [LeaveController::class, 'exportPdf'])->name('leave.summary.exportPdf');
     });
 
     // Leave bulk operations (admin only)
@@ -281,6 +285,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:users.view'])->group(function () {
         Route::get('/users/{user}/devices', [UserDeviceController::class, 'show'])->name('users.device.show');
         Route::get('/users/{user}/devices/list', [UserDeviceController::class, 'list'])->name('users.device.list');
+    });
+
+    Route::middleware(['permission:users.update'])->group(function () {
         Route::post('/users/devices/toggle', [UserDeviceController::class, 'toggleSingleDeviceLogin'])->name('users.device.toggle');
         Route::post('/users/devices/reset', [UserDeviceController::class, 'resetUserDevices'])->name('users.device.reset');
         Route::post('/users/devices/logout', [UserDeviceController::class, 'forceLogoutDevice'])->name('users.device.logout');
@@ -331,9 +338,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:attendance.settings'])->group(function () {
         Route::get('/settings/attendance', [AttendanceSettingController::class, 'index'])->name('attendance-settings.index');
         Route::post('/settings/attendance', [AttendanceSettingController::class, 'updateSettings'])->name('attendance-settings.update');
-        Route::post('settings/attendance-type', [AttendanceSettingController::class, 'storeType'])->name('attendance-types.store');
-        Route::post('settings/attendance-type/{id}', [AttendanceSettingController::class, 'updateType'])->name('attendance-types.update');
-        Route::delete('settings/attendance-type/{id}', [AttendanceSettingController::class, 'destroyType'])->name('attendance-types.destroy');
+        Route::put('settings/attendance-type/{id}', [AttendanceSettingController::class, 'updateType'])->name('attendance-types.update');
     });
 
     // HR Module Settings

@@ -7,14 +7,21 @@ use App\Models\HRM\AttendanceSetting;
 use App\Models\HRM\AttendanceType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class AttendanceSettingController extends Controller
 {
-    public function index(): Response
+    public function index()
     {
         $attendanceSettings = AttendanceSetting::first();
         $attendanceTypes = AttendanceType::all();
+
+        // Handle AJAX requests for settings data
+        if (request()->expectsJson()) {
+            return response()->json([
+                'attendanceSettings' => $attendanceSettings,
+                'attendanceTypes' => $attendanceTypes,
+            ]);
+        }
 
         return Inertia::render('Settings/AttendanceSettings', [
             'title' => 'Attendance Settings',
@@ -50,34 +57,13 @@ class AttendanceSettingController extends Controller
         ]);
     }
 
-    public function storeType(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string',
-            'slug' => 'required|string|unique:attendance_types,slug',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|string',
-            'config' => 'nullable|array',
-            'is_active' => 'boolean',
-            'priority' => 'integer',
-            'required_permissions' => 'nullable|array',
-        ]);
-        $data['config'] = $data['config'] ?? [];
-        $data['required_permissions'] = $data['required_permissions'] ?? [];
-        $type = AttendanceType::create($data);
-
-        return response()->json([
-            'message' => 'Attendance type created.',
-            'attendanceType' => $type,
-        ]);
-    }
-
     public function updateType(Request $request, $id)
     {
         $type = AttendanceType::findOrFail($id);
 
-        // Check if only config is being updated (for waypoint updates)
-        if ($request->has('config') && count($request->all()) === 1) {
+        // Check if only config is being updated (for waypoint/polygon updates)
+        $requestData = $request->except(['_token', '_method']);
+        if ($request->has('config') && count($requestData) === 1) {
             // Only update config field
             $data = $request->validate([
                 'config' => 'required|array',
@@ -85,6 +71,9 @@ class AttendanceSettingController extends Controller
                 'config.waypoints' => 'sometimes|array',
                 'config.waypoints.*.lat' => 'required_with:config.waypoints|numeric|between:-90,90',
                 'config.waypoints.*.lng' => 'required_with:config.waypoints|numeric|between:-180,180',
+                'config.polygon' => 'sometimes|array',
+                'config.polygon.*.lat' => 'required_with:config.polygon|numeric|between:-90,90',
+                'config.polygon.*.lng' => 'required_with:config.polygon|numeric|between:-180,180',
             ]);
 
             $type->update([
@@ -108,6 +97,9 @@ class AttendanceSettingController extends Controller
             'config.waypoints' => 'sometimes|array',
             'config.waypoints.*.lat' => 'required_with:config.waypoints|numeric|between:-90,90',
             'config.waypoints.*.lng' => 'required_with:config.waypoints|numeric|between:-180,180',
+            'config.polygon' => 'sometimes|array',
+            'config.polygon.*.lat' => 'required_with:config.polygon|numeric|between:-90,90',
+            'config.polygon.*.lng' => 'required_with:config.polygon|numeric|between:-180,180',
             'is_active' => 'sometimes|boolean',
             'priority' => 'sometimes|integer',
             'required_permissions' => 'nullable|array',

@@ -13,6 +13,7 @@ use App\Services\Leave\LeaveOverlapService;
 use App\Services\Leave\LeaveQueryService;
 use App\Services\Leave\LeaveSummaryService;
 use App\Services\Leave\LeaveValidationService;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -334,5 +335,43 @@ class LeaveController extends Controller
                 'details' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = [
+            'year' => $request->input('year', now()->year),
+            'department_id' => $request->input('department_id'),
+            'employee_id' => $request->input('employee_id'),
+            'status' => $request->input('status'),
+            'leave_type' => $request->input('leave_type'),
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\LeaveSummaryExport($filters),
+            'Leave_Summary_'.($filters['year'] ?? now()->year).'.xlsx'
+        );
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $filters = [
+            'year' => $request->input('year', now()->year),
+            'department_id' => $request->input('department_id'),
+            'employee_id' => $request->input('employee_id'),
+            'status' => $request->input('status'),
+            'leave_type' => $request->input('leave_type'),
+        ];
+
+        $summaryData = $this->summaryService->generateLeaveSummary($filters);
+
+        $pdf = PDF::loadView('leave_summary_pdf', [
+            'title' => 'Leave Summary - '.($filters['year'] ?? now()->year),
+            'generatedOn' => now()->format('F d, Y h:i A'),
+            'summaryData' => $summaryData,
+            'filters' => $filters,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('Leave_Summary_'.($filters['year'] ?? now()->year).'.pdf');
     }
 }

@@ -212,6 +212,7 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => 
                                 size="sm"
                                 radius={getThemeRadius()}
                                 className="w-full"
+                                aria-label={`Completion progress: ${completionPercentage}%`}
                             />
                         </div>
 
@@ -235,6 +236,7 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => 
                                     size="sm"
                                     radius={getThemeRadius()}
                                     className="w-full"
+                                    aria-label={`RFI submission progress: ${rfiSubmissionPercentage}%`}
                                 />
                             </div>
                         )}
@@ -405,6 +407,7 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => 
                                 color={getPercentageColor(parseFloat(completionPercentage))}
                                 size="sm"
                                 className="flex-1 min-w-[80px]"
+                                aria-label={`Daily work completion: ${completionPercentage}%`}
                             />
                             <Chip
                                 size="sm"
@@ -441,6 +444,7 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => 
                                         color={getPercentageColor(parseFloat(rfiSubmissionPercentage))}
                                         size="sm"
                                         className="flex-1 min-w-[80px]"
+                                        aria-label={`RFI submission percentage: ${rfiSubmissionPercentage}%`}
                                     />
                                     <Chip
                                         size="sm"
@@ -493,6 +497,7 @@ const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => 
                             radius={getThemeRadius()}
                             startContent={<ArrowPathIcon className="w-4 h-4" />}
                             onPress={onRefresh}
+                            aria-label="Refresh daily work summary table"
                             style={{
                                 borderRadius: `var(--borderRadius, 8px)`,
                                 fontFamily: `var(--fontFamily, "Inter")`,
