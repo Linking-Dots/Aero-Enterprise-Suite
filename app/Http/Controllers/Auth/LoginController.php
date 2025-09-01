@@ -148,23 +148,21 @@ class LoginController extends Controller
                     ]
                 );
 
-                // Return Inertia response with device blocking information
-                return Inertia::render('Auth/Login', [
-                    'canResetPassword' => true,
-                    'status' => null,
-                    'deviceBlocked' => true,
-                    'deviceMessage' => $deviceCheck['message'],
-                    'blockedDeviceInfo' => $deviceCheck['blocked_by_device'] ? [
+                // Return JSON response for device blocking (no re-rendering)
+                return response()->json([
+                    'device_blocked' => true,
+                    'device_message' => $deviceCheck['message'],
+                    'blocked_device_info' => $deviceCheck['blocked_by_device'] ? [
                         'device_name' => $deviceCheck['blocked_by_device']->device_name,
                         'browser' => $deviceCheck['blocked_by_device']->browser_name,
                         'browser_version' => $deviceCheck['blocked_by_device']->browser_version,
                         'platform' => $deviceCheck['blocked_by_device']->platform,
                         'device_type' => $deviceCheck['blocked_by_device']->device_type,
                         'ip_address' => $deviceCheck['blocked_by_device']->ip_address,
-                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity,
+                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity ? 
+                            $deviceCheck['blocked_by_device']->last_activity->format('M j, Y g:i A') : null,
                     ] : null,
-                    'errors' => [],
-                ]);
+                ], 422); // Unprocessable Entity status
             }
         }
 

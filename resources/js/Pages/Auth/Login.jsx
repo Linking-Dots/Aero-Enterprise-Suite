@@ -12,8 +12,13 @@ import {
     CommandLineIcon,
     ComputerDesktopIcon,
     DevicePhoneMobileIcon,
+    DeviceTabletIcon,
     XMarkIcon,
-    ArrowRightIcon
+    ArrowRightIcon,
+    ClockIcon,
+    GlobeAltIcon,
+    InformationCircleIcon,
+    LockOpenIcon
 } from '@heroicons/react/24/outline';
 import { 
     Input, 
@@ -216,7 +221,8 @@ export default function Login({
         isSubmitting: false,
         isLoaded: false,
         showSuccessAlert: !!status,
-        showDeviceAlert: !!deviceBlocked
+        showDeviceAlert: !!deviceBlocked,
+        deviceBlockingData: null
     });
 
     // ===== VALIDATION STATE =====
@@ -393,14 +399,37 @@ export default function Login({
                         }
                     });
                 },
-                onFinish: () => {
+                onFinish: (visit) => {
+                    // Handle device blocking response (JSON response)
+                    if (visit.response && visit.response.status === 422) {
+                        try {
+                            const responseData = typeof visit.response.data === 'string' 
+                                ? JSON.parse(visit.response.data) 
+                                : visit.response.data;
+                            
+                            if (responseData.device_blocked) {
+                                setUiState(prevState => ({
+                                    ...prevState,
+                                    showDeviceAlert: true,
+                                    deviceBlockingData: {
+                                        message: responseData.device_message,
+                                        blockedDeviceInfo: responseData.blocked_device_info
+                                    }
+                                }));
+                                return; // Don't clear password for device blocking
+                            }
+                        } catch (e) {
+                            console.error('Error parsing device blocking response:', e);
+                        }
+                    }
+
                     // Clean up submission state
                     setUiState(prevState => ({
                         ...prevState,
                         isSubmitting: false
                     }));
 
-                    // Clear password for security
+                    // Clear password for security (but not for device blocking)
                     setFormData(prevData => ({
                         ...prevData,
                         password: ''
@@ -700,7 +729,7 @@ export default function Login({
                                     </motion.div>
                                 )}
 
-                                {deviceBlocked && uiState.showDeviceAlert && (
+                                {(deviceBlocked || uiState.deviceBlockingData) && uiState.showDeviceAlert && (
                                     <motion.div
                                         variants={itemVariants}
                                         initial="hidden"
@@ -709,82 +738,199 @@ export default function Login({
                                         className="mb-6"
                                     >
                                         <Card
-                                            className="border-none"
+                                            className="border-none overflow-hidden"
                                             style={{
-                                                background: 'color-mix(in srgb, var(--theme-danger, #EF4444) 12%, transparent)',
-                                                borderColor: 'color-mix(in srgb, var(--theme-danger, #EF4444) 30%, transparent)',
+                                                background: `linear-gradient(135deg, 
+                                                    color-mix(in srgb, var(--theme-danger, #EF4444) 8%, transparent),
+                                                    color-mix(in srgb, var(--theme-danger, #EF4444) 4%, transparent)
+                                                )`,
+                                                borderColor: 'color-mix(in srgb, var(--theme-danger, #EF4444) 25%, transparent)',
                                                 borderWidth: 'var(--borderWidth, 2px)',
                                                 borderStyle: 'solid',
-                                                borderRadius: `var(--borderRadius, 12px)`,
+                                                borderRadius: `var(--borderRadius, 16px)`,
                                                 fontFamily: 'var(--fontFamily, "Inter")',
-                                                transform: `scale(var(--scale, 1))`
+                                                transform: `scale(var(--scale, 1))`,
+                                                boxShadow: `
+                                                    0 10px 25px color-mix(in srgb, var(--theme-danger, #EF4444) 15%, transparent),
+                                                    0 4px 12px color-mix(in srgb, var(--theme-danger, #EF4444) 10%, transparent)
+                                                `
                                             }}
                                         >
-                                            <div className="p-4">
-                                                <div className="flex items-start gap-3">
-                                                    <ExclamationTriangleIcon 
-                                                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                                                        style={{ color: 'var(--theme-danger, #EF4444)' }}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <h3 
-                                                            className="text-sm font-semibold mb-1"
-                                                            style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
+                                            {/* Header Section */}
+                                            <div 
+                                                className="px-6 py-4"
+                                                style={{
+                                                    background: `linear-gradient(135deg, 
+                                                        color-mix(in srgb, var(--theme-danger, #EF4444) 15%, transparent),
+                                                        color-mix(in srgb, var(--theme-danger, #EF4444) 8%, transparent)
+                                                    )`,
+                                                    borderBottom: '1px solid color-mix(in srgb, var(--theme-danger, #EF4444) 20%, transparent)'
+                                                }}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div 
+                                                            className="p-2 rounded-full"
+                                                            style={{
+                                                                background: 'color-mix(in srgb, var(--theme-danger, #EF4444) 20%, transparent)'
+                                                            }}
                                                         >
-                                                            Device Access Blocked
-                                                        </h3>
-                                                        <p 
-                                                            className="text-sm mb-3"
-                                                            style={{ color: 'var(--theme-danger-foreground, #991B1B)80' }}
-                                                        >
-                                                            {deviceMessage || 'You can only be logged in from one device at a time.'}
-                                                        </p>
-                                                        {blockedDeviceInfo && (
-                                                            <Card 
-                                                                className="mt-3"
-                                                                style={{
-                                                                    background: 'color-mix(in srgb, var(--theme-danger, #EF4444) 8%, transparent)',
-                                                                    borderColor: 'color-mix(in srgb, var(--theme-danger, #EF4444) 20%, transparent)',
-                                                                    borderWidth: 'var(--borderWidth, 1px)',
-                                                                    borderStyle: 'solid',
-                                                                    borderRadius: `var(--borderRadius, 8px)`,
-                                                                    fontFamily: 'var(--fontFamily, "Inter")',
-                                                                    transform: `scale(var(--scale, 1))`
-                                                                }}
+                                                            <ExclamationTriangleIcon 
+                                                                className="w-5 h-5"
+                                                                style={{ color: 'var(--theme-danger, #EF4444)' }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h3 
+                                                                className="text-lg font-bold mb-1"
+                                                                style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
                                                             >
-                                                                <div className="p-3">
-                                                                    <p 
-                                                                        className="text-xs font-medium mb-2"
-                                                                        style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
-                                                                    >
-                                                                        Currently active device:
-                                                                    </p>
-                                                                    <div className="space-y-1 text-xs">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <ComputerDesktopIcon className="w-3 h-3" />
-                                                                            <span>{blockedDeviceInfo.device_name}</span>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <CommandLineIcon className="w-3 h-3" />
-                                                                            <span>{blockedDeviceInfo.browser} {blockedDeviceInfo.browser_version}</span>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <DevicePhoneMobileIcon className="w-3 h-3" />
-                                                                            <span>{blockedDeviceInfo.platform}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </Card>
-                                                        )}
+                                                                🚫 Device Access Blocked
+                                                            </h3>
+                                                            <p 
+                                                                className="text-sm opacity-90"
+                                                                style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
+                                                            >
+                                                                Single device policy violation detected
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     <Button
                                                         isIconOnly
                                                         size="sm"
                                                         variant="light"
                                                         onPress={() => dismissAlert('Device')}
+                                                        className="text-danger hover:bg-danger/10"
                                                     >
                                                         <XMarkIcon className="w-4 h-4" />
                                                     </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Content Section */}
+                                            <div className="px-6 py-5">
+                                                <div className="mb-4">
+                                                    <p 
+                                                        className="text-sm leading-relaxed"
+                                                        style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
+                                                    >
+                                                        {(uiState.deviceBlockingData?.message || deviceMessage) || 
+                                                         'Your account is currently active on another device. For security reasons, you can only be logged in from one device at a time.'}
+                                                    </p>
+                                                </div>
+
+                                                {((uiState.deviceBlockingData?.blockedDeviceInfo || blockedDeviceInfo)) && (
+                                                    <div
+                                                        className="p-4 rounded-xl"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, 
+                                                                color-mix(in srgb, var(--theme-content1, #FAFAFA) 95%, transparent),
+                                                                color-mix(in srgb, var(--theme-content2, #F4F4F5) 90%, transparent)
+                                                            )`,
+                                                            border: '1px solid color-mix(in srgb, var(--theme-danger, #EF4444) 15%, transparent)',
+                                                            borderRadius: `var(--borderRadius, 12px)`
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            <ComputerDesktopIcon 
+                                                                className="w-4 h-4"
+                                                                style={{ color: 'var(--theme-danger, #EF4444)' }}
+                                                            />
+                                                            <span 
+                                                                className="text-sm font-semibold"
+                                                                style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}
+                                                            >
+                                                                Currently Active Device:
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        {(() => {
+                                                            const deviceInfo = uiState.deviceBlockingData?.blockedDeviceInfo || blockedDeviceInfo;
+                                                            return (
+                                                                <div className="grid grid-cols-1 gap-3">
+                                                                    <div className="flex items-center justify-between p-3 rounded-lg"
+                                                                         style={{
+                                                                             background: 'color-mix(in srgb, var(--theme-content1, #FAFAFA) 80%, transparent)',
+                                                                             border: '1px solid color-mix(in srgb, var(--theme-divider, #E4E4E7) 50%, transparent)'
+                                                                         }}>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="p-2 rounded-full"
+                                                                                 style={{
+                                                                                     background: 'color-mix(in srgb, var(--theme-primary, #006FEE) 10%, transparent)'
+                                                                                 }}>
+                                                                                {deviceInfo?.device_type === 'mobile' ? (
+                                                                                    <DevicePhoneMobileIcon className="w-4 h-4 text-primary" />
+                                                                                ) : deviceInfo?.device_type === 'tablet' ? (
+                                                                                    <DeviceTabletIcon className="w-4 h-4 text-secondary" />
+                                                                                ) : (
+                                                                                    <ComputerDesktopIcon className="w-4 h-4 text-default-500" />
+                                                                                )}
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="font-semibold text-sm text-foreground">
+                                                                                    {deviceInfo?.device_name || 'Unknown Device'}
+                                                                                </p>
+                                                                                <p className="text-xs text-foreground/70">
+                                                                                    {deviceInfo?.browser} {deviceInfo?.browser_version} • {deviceInfo?.platform}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <Chip
+                                                                            size="sm"
+                                                                            color="warning"
+                                                                            variant="flat"
+                                                                            startContent={<LockClosedIcon className="w-3 h-3" />}
+                                                                        >
+                                                                            Active
+                                                                        </Chip>
+                                                                    </div>
+                                                                    
+                                                                    {deviceInfo?.last_activity && (
+                                                                        <div className="flex items-center gap-2 text-xs"
+                                                                             style={{ color: 'var(--theme-foreground, #11181C)60' }}>
+                                                                            <ClockIcon className="w-3 h-3" />
+                                                                            <span>Last active: {deviceInfo.last_activity}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    
+                                                                    {deviceInfo?.ip_address && (
+                                                                        <div className="flex items-center gap-2 text-xs"
+                                                                             style={{ color: 'var(--theme-foreground, #11181C)60' }}>
+                                                                            <GlobeAltIcon className="w-3 h-3" />
+                                                                            <span>IP Address: {deviceInfo.ip_address}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                )}
+
+                                                {/* Action Buttons */}
+                                                <div className="flex flex-col gap-3 mt-5 pt-4"
+                                                     style={{
+                                                         borderTop: '1px solid color-mix(in srgb, var(--theme-danger, #EF4444) 15%, transparent)'
+                                                     }}>
+                                                    <div className="flex items-center gap-2 text-sm"
+                                                         style={{ color: 'var(--theme-danger-foreground, #991B1B)' }}>
+                                                        <InformationCircleIcon className="w-4 h-4" />
+                                                        <span className="font-medium">What can you do?</span>
+                                                    </div>
+                                                    <div className="text-xs space-y-2"
+                                                         style={{ color: 'var(--theme-danger-foreground, #991B1B)80' }}>
+                                                        <div className="flex items-start gap-2">
+                                                            <span className="inline-block w-1 h-1 rounded-full mt-2 bg-current opacity-60"></span>
+                                                            <span>Log out from the other device and try again</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                            <span className="inline-block w-1 h-1 rounded-full mt-2 bg-current opacity-60"></span>
+                                                            <span>Contact your administrator to reset your device access</span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                            <span className="inline-block w-1 h-1 rounded-full mt-2 bg-current opacity-60"></span>
+                                                            <span>Request to disable single device restriction for your account</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Card>
