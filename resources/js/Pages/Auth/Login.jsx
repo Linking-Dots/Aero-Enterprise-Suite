@@ -377,15 +377,20 @@ export default function Login({
                     // Handle device blocking errors
                     if (errors.device_blocking) {
                         console.log('Device blocking error detected:', errors.device_blocking);
+                        console.log('Current uiState before update:', uiState);
                         
-                        setUiState(prevState => ({
-                            ...prevState,
-                            showDeviceAlert: true,
-                            deviceBlockingData: {
-                                message: errors.device_blocking.device_message || 'Login blocked: Account is active on another device',
-                                blockedDeviceInfo: errors.device_blocking.blocked_device_info || null
-                            }
-                        }));
+                        setUiState(prevState => {
+                            const newState = {
+                                ...prevState,
+                                showDeviceAlert: true,
+                                deviceBlockingData: {
+                                    message: errors.device_blocking.device_message || 'Login blocked: Account is active on another device',
+                                    blockedDeviceInfo: errors.device_blocking.blocked_device_info || null
+                                }
+                            };
+                            console.log('Setting new uiState:', newState);
+                            return newState;
+                        });
                         
                         // Don't clear password for device blocking
                         setUiState(prevState => ({
@@ -735,7 +740,16 @@ export default function Login({
                                     </motion.div>
                                 )}
 
-                                {(deviceBlocked || uiState.deviceBlockingData) && uiState.showDeviceAlert && (
+                                {(() => {
+                                    const shouldShowAlert = (deviceBlocked || uiState.deviceBlockingData) && uiState.showDeviceAlert;
+                                    console.log('Device alert render check:', {
+                                        deviceBlocked,
+                                        deviceBlockingData: uiState.deviceBlockingData,
+                                        showDeviceAlert: uiState.showDeviceAlert,
+                                        shouldShowAlert
+                                    });
+                                    return shouldShowAlert;
+                                })() && (
                                     <motion.div
                                         variants={itemVariants}
                                         initial="hidden"
@@ -924,10 +938,7 @@ export default function Login({
                                                     </div>
                                                     <div className="text-xs space-y-2"
                                                          style={{ color: 'var(--theme-danger-foreground, #991B1B)80' }}>
-                                                        <div className="flex items-start gap-2">
-                                                            <span className="inline-block w-1 h-1 rounded-full mt-2 bg-current opacity-60"></span>
-                                                            <span>Log out from the other device and try again</span>
-                                                        </div>
+                                                        
                                                         <div className="flex items-start gap-2">
                                                             <span className="inline-block w-1 h-1 rounded-full mt-2 bg-current opacity-60"></span>
                                                             <span>Contact your administrator to reset your device access</span>

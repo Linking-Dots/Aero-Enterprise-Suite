@@ -161,10 +161,11 @@ class DeviceTrackingService
             ];
         }
 
-        // Check if user has any active devices that would block this login
-        $activeDevice = $user->activeDevices()->first();
+        // Check if user has ANY registered devices (active or inactive)
+        // Once a device is registered, it becomes the ONLY allowed device
+        $registeredDevice = $user->devices()->first();
 
-        if ($activeDevice) {
+        if ($registeredDevice) {
             // Additional check: see if this might be the same physical device
             // by comparing core device characteristics
             $deviceInfo = $this->getDeviceInfo($request);
@@ -174,17 +175,17 @@ class DeviceTrackingService
                 'device_type' => $deviceInfo['device_type'],
             ];
 
-            $activeDeviceFingerprint = [
-                'browser_name' => $activeDevice->browser_name,
-                'platform' => $activeDevice->platform,
-                'device_type' => $activeDevice->device_type,
+            $registeredDeviceFingerprint = [
+                'browser_name' => $registeredDevice->browser_name,
+                'platform' => $registeredDevice->platform,
+                'device_type' => $registeredDevice->device_type,
             ];
 
             // If the core characteristics match, this might be the same device
             // with changed network conditions (IP, headers, etc.)
-            if ($currentDeviceFingerprint === $activeDeviceFingerprint) {
+            if ($currentDeviceFingerprint === $registeredDeviceFingerprint) {
                 // Update the existing device with new fingerprint
-                $activeDevice->update([
+                $registeredDevice->update([
                     'device_id' => $deviceId,
                     'compatible_device_id' => $compatibleDeviceId,
                     'ip_address' => $deviceInfo['ip_address'],
@@ -194,24 +195,24 @@ class DeviceTrackingService
                 return [
                     'allowed' => true,
                     'device_id' => $deviceId,
-                    'existing_device' => $activeDevice,
-                    'message' => 'Login from same device (updated network fingerprint)',
+                    'existing_device' => $registeredDevice,
+                    'message' => 'Login from registered device (updated network fingerprint)',
                 ];
             }
 
             return [
                 'allowed' => false,
                 'device_id' => $deviceId,
-                'blocked_by_device' => $activeDevice,
-                'message' => 'Login blocked: Account is active on another device',
+                'blocked_by_device' => $registeredDevice,
+                'message' => 'Login blocked: Account is locked to a specific device. Only the registered device can access this account.',
             ];
         }
 
-        // No active devices, allow login (first time or after reset)
+        // No registered devices, allow login (first time setup)
         return [
             'allowed' => true,
             'device_id' => $deviceId,
-            'message' => 'Login allowed: No active devices found',
+            'message' => 'Login allowed: First device registration',
         ];
     }
 
@@ -223,6 +224,12 @@ class DeviceTrackingService
         $deviceId = $this->generateDeviceId($request);
         $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
         $deviceInfo = $this->getDeviceInfo($request);
+
+        // If single device login is enabled, remove all other devices first
+        if ($user->hasSingleDeviceLoginEnabled()) {
+            // Delete all existing devices for this user to enforce single device policy
+            $user->devices()->delete();
+        }
 
         // Check if device already exists
         $device = $user->devices()->where('device_id', $deviceId)->first();
@@ -285,7 +292,8 @@ class DeviceTrackingService
     }
 
     /**
-     * Deactivate device by session ID.
+     * Deactivate device by session ID (logout).
+     * For single-device users, the device remains registered but becomes inactive.
      */
     public function deactivateDeviceBySession(string $sessionId): void
     {
@@ -305,6 +313,15 @@ class DeviceTrackingService
         return UserDevice::where('is_active', false)
             ->where('updated_at', '<', Carbon::now()->subDays(30))
             ->delete();
+    }
+
+    /**
+     * Reset/unlock devices for a user (Admin function).
+     * This removes all registered devices, allowing the user to login from any device again.
+     */
+    public function resetUserDevices(User $user): bool
+    {
+        return $user->devices()->delete() > 0;
     }
 
     /**

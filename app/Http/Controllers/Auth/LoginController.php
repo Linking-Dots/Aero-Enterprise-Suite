@@ -149,9 +149,16 @@ class LoginController extends Controller
                 );
 
                 // Prepare device blocking data for Inertia response
+                $deviceMessage = $deviceCheck['message'];
+
+                // If the device was blocked due to device locking, provide more specific message
+                if (strpos($deviceMessage, 'locked to a specific device') !== false) {
+                    $deviceMessage = 'This account is secured with device locking. You can only login from your registered device. Contact your administrator to reset device access.';
+                }
+
                 $deviceBlockedData = [
                     'blocked' => true,
-                    'message' => $deviceCheck['message'],
+                    'message' => $deviceMessage,
                     'blocked_device_info' => $deviceCheck['blocked_by_device'] ? [
                         'device_name' => $deviceCheck['blocked_by_device']->device_name,
                         'browser' => $deviceCheck['blocked_by_device']->browser_name,
@@ -159,7 +166,7 @@ class LoginController extends Controller
                         'platform' => $deviceCheck['blocked_by_device']->platform,
                         'device_type' => $deviceCheck['blocked_by_device']->device_type,
                         'ip_address' => $deviceCheck['blocked_by_device']->ip_address,
-                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity ? 
+                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity ?
                             $deviceCheck['blocked_by_device']->last_activity->format('M j, Y g:i A') : null,
                     ] : null,
                 ];
@@ -168,7 +175,7 @@ class LoginController extends Controller
                 $exception = ValidationException::withMessages([
                     'device_blocked' => $deviceCheck['message'],
                 ]);
-                
+
                 // Add device blocking data to the exception response
                 $exception->errorBag('device_blocking')->withMessages([
                     'device_blocked_data' => json_encode($deviceBlockedData),
