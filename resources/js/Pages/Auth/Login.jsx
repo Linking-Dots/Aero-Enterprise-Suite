@@ -374,7 +374,38 @@ export default function Login({
                 onError: (errors) => {
                     console.error('Login validation errors:', errors);
                     
-                    // Handle server validation errors
+                    // Handle device blocking errors
+                    if (errors.device_blocked) {
+                        // Parse device blocking data if present in errors
+                        let deviceBlockingData = null;
+                        
+                        if (errors.device_blocked_data) {
+                            try {
+                                deviceBlockingData = JSON.parse(errors.device_blocked_data);
+                            } catch (e) {
+                                console.error('Error parsing device blocking data:', e);
+                            }
+                        }
+                        
+                        setUiState(prevState => ({
+                            ...prevState,
+                            showDeviceAlert: true,
+                            deviceBlockingData: {
+                                message: errors.device_blocked,
+                                blockedDeviceInfo: deviceBlockingData?.blocked_device_info || null
+                            }
+                        }));
+                        
+                        // Don't clear password for device blocking
+                        setUiState(prevState => ({
+                            ...prevState,
+                            isSubmitting: false
+                        }));
+                        
+                        return;
+                    }
+                    
+                    // Handle regular server validation errors
                     const newErrors = { ...validationErrors };
                     
                     if (errors.email) {
@@ -388,7 +419,7 @@ export default function Login({
 
                     // Show error toasts for non-field-specific errors
                     Object.entries(errors).forEach(([key, error]) => {
-                        if (key !== 'email' && key !== 'password' && typeof error === 'string') {
+                        if (key !== 'email' && key !== 'password' && key !== 'device_blocked' && key !== 'device_blocked_data' && typeof error === 'string') {
                             toast.error(error, {
                                 style: {
                                     backdropFilter: 'blur(16px) saturate(200%)',
@@ -398,41 +429,25 @@ export default function Login({
                             });
                         }
                     });
-                },
-                onFinish: (visit) => {
-                    // Handle device blocking response (JSON response)
-                    if (visit.response && visit.response.status === 422) {
-                        try {
-                            const responseData = typeof visit.response.data === 'string' 
-                                ? JSON.parse(visit.response.data) 
-                                : visit.response.data;
-                            
-                            if (responseData.device_blocked) {
-                                setUiState(prevState => ({
-                                    ...prevState,
-                                    showDeviceAlert: true,
-                                    deviceBlockingData: {
-                                        message: responseData.device_message,
-                                        blockedDeviceInfo: responseData.blocked_device_info
-                                    }
-                                }));
-                                return; // Don't clear password for device blocking
-                            }
-                        } catch (e) {
-                            console.error('Error parsing device blocking response:', e);
-                        }
-                    }
-
-                    // Clean up submission state
+                    
+                    // Clean up submission state for regular errors
                     setUiState(prevState => ({
                         ...prevState,
                         isSubmitting: false
                     }));
 
-                    // Clear password for security (but not for device blocking)
+                    // Clear password for security (except for device blocking)
                     setFormData(prevData => ({
                         ...prevData,
                         password: ''
+                    }));
+                },
+                onFinish: (visit) => {
+                    // Only clean up for successful submissions or non-device-blocking errors
+                    // Device blocking is handled in onError
+                    setUiState(prevState => ({
+                        ...prevState,
+                        isSubmitting: false
                     }));
                 }
             });

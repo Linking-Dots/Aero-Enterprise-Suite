@@ -148,10 +148,10 @@ class LoginController extends Controller
                     ]
                 );
 
-                // Return JSON response for device blocking (no re-rendering)
-                return response()->json([
-                    'device_blocked' => true,
-                    'device_message' => $deviceCheck['message'],
+                // Prepare device blocking data for Inertia response
+                $deviceBlockedData = [
+                    'blocked' => true,
+                    'message' => $deviceCheck['message'],
                     'blocked_device_info' => $deviceCheck['blocked_by_device'] ? [
                         'device_name' => $deviceCheck['blocked_by_device']->device_name,
                         'browser' => $deviceCheck['blocked_by_device']->browser_name,
@@ -162,7 +162,19 @@ class LoginController extends Controller
                         'last_activity' => $deviceCheck['blocked_by_device']->last_activity ? 
                             $deviceCheck['blocked_by_device']->last_activity->format('M j, Y g:i A') : null,
                     ] : null,
-                ], 422); // Unprocessable Entity status
+                ];
+
+                // Use validation exception with device data for proper Inertia handling
+                $exception = ValidationException::withMessages([
+                    'device_blocked' => $deviceCheck['message'],
+                ]);
+                
+                // Add device blocking data to the exception response
+                $exception->errorBag('device_blocking')->withMessages([
+                    'device_blocked_data' => json_encode($deviceBlockedData),
+                ]);
+
+                throw $exception;
             }
         }
 
