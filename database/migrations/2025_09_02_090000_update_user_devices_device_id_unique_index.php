@@ -16,14 +16,14 @@ return new class extends Migration
             // Note: index names follow Laravel's convention unless customized
             try {
                 $table->dropUnique('user_devices_device_id_unique');
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 // ignore if it doesn't exist
             }
 
             // Optional redundant non-unique index may exist; drop if present to avoid duplication
             try {
                 $table->dropIndex('user_devices_device_id_index');
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 // ignore if it doesn't exist
             }
 
@@ -44,13 +44,13 @@ return new class extends Migration
             // Drop composite unique and device_id index
             try {
                 $table->dropUnique('user_devices_user_device_unique');
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 // ignore
             }
 
             try {
                 $table->dropIndex('user_devices_device_id_index');
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 // ignore
             }
 
