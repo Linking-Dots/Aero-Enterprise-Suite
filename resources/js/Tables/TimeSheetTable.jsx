@@ -437,7 +437,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                     attendance.punches
                                         .filter(punch => punch.punch_in)
                                         .map((punch, index) => (
-                                            <span key={index} className="block">
+                                            <span key={index} className="block text-xs">
+                                                <span className="text-default-400 mr-1">{index + 1}.</span>
                                                 {formatTime(punch.punch_in, attendance.date) || 'Invalid time'}
                                             </span>
                                         ))
@@ -454,13 +455,12 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                             <ClockIcon className="w-4 h-4 text-danger" />
                             <div className="flex flex-col">
                                 {attendance.punches && attendance.punches.length > 0 ? (
-                                    attendance.punches
-                                        .filter(punch => punch.punch_out)
-                                        .map((punch, index) => (
-                                            <span key={index} className="block">
-                                                {formatTime(punch.punch_out, attendance.date) || 'Invalid time'}
-                                            </span>
-                                        ))
+                                    attendance.punches.map((punch, index) => (
+                                        <span key={index} className="block text-xs">
+                                            <span className="text-default-400 mr-1">{index + 1}.</span>
+                                            {punch.punch_out ? formatTime(punch.punch_out, attendance.date) || 'Invalid time' : 'No punch out'}
+                                        </span>
+                                    ))
                                 ) : attendance.punchin_time ? (
                                     <span>
                                         {isCurrentDate ? 'Currently working' : 'Missing punch-out'}

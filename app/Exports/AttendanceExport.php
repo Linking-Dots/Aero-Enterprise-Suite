@@ -52,14 +52,16 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
                 $incomplete = false;
 
                 foreach ($attendances as $attendance) {
-                    // Collect all clock in times
+                    // Collect all clock in times with numbers
                     if ($attendance->punchin) {
                         $allClockIns[] = Carbon::parse($attendance->punchin)->format('h:i A');
-                    }
-
-                    // Collect all clock out times
-                    if ($attendance->punchout) {
-                        $allClockOuts[] = Carbon::parse($attendance->punchout)->format('h:i A');
+                        
+                        // For each punch in, add corresponding punch out or "No punch out"
+                        if ($attendance->punchout) {
+                            $allClockOuts[] = Carbon::parse($attendance->punchout)->format('h:i A');
+                        } else {
+                            $allClockOuts[] = 'No punch out';
+                        }
                     }
 
                     if ($attendance->punchin && $attendance->punchout) {
@@ -82,14 +84,18 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
                     ? intval($totalMinutes / 60).'h '.($totalMinutes % 60).'m'
                     : '';
 
-                // Format all clock in times (each on new line)
+                // Format all clock in times (each on new line with numbers)
                 $in = count($allClockIns) > 0
-                    ? implode("\n", $allClockIns)
+                    ? implode("\n", array_map(function($time, $index) {
+                        return ($index + 1) . '. ' . $time;
+                    }, $allClockIns, array_keys($allClockIns)))
                     : 'Not clocked in';
 
-                // Format all clock out times (each on new line)
+                // Format all clock out times (each on new line with numbers)
                 $out = count($allClockOuts) > 0
-                    ? implode("\n", $allClockOuts)
+                    ? implode("\n", array_map(function($time, $index) {
+                        return ($index + 1) . '. ' . $time;
+                    }, $allClockOuts, array_keys($allClockOuts)))
                     : ($incomplete
                         ? ($dateIsToday ? 'Still working' : 'No punchout')
                         : 'Not punched out');
