@@ -3,6 +3,7 @@
 <head>
     <title>Device Info Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <h2>Device Hardware Info Test</h2>
@@ -78,7 +79,7 @@
                 const response = await fetch('/debug/device-info', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Device-Model': formData.get('device_model'),
                         'X-Device-Serial': formData.get('device_serial'),
                         'X-Device-Mac': formData.get('device_mac'),
