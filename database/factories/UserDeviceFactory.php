@@ -27,6 +27,9 @@ class UserDeviceFactory extends Factory
         return [
             'user_id' => User::factory(),
             'device_id' => fake()->uuid(),
+            'device_model' => fake()->optional(0.6)->bothify('Model-??-###'),
+            'device_serial' => fake()->optional(0.6)->bothify('SN########'),
+            'device_mac' => fake()->optional(0.6)->macAddress(),
             'device_name' => fake()->randomElement($browsers).' on '.fake()->randomElement($platforms),
             'browser_name' => fake()->randomElement($browsers),
             'browser_version' => fake()->numerify('##.#.#'),

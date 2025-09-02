@@ -82,6 +82,10 @@ class DeviceTrackingService
             'device_type' => $deviceType,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            // Optional hardware identifiers provided by native shells or browser extensions
+            'device_model' => $request->header('X-Device-Model'),
+            'device_serial' => $request->header('X-Device-Serial'),
+            'device_mac' => $request->header('X-Device-Mac'),
             'device_fingerprint' => [
                 'screen_resolution' => $request->header('Screen-Resolution'),
                 'timezone' => $request->header('Timezone'),
@@ -150,8 +154,14 @@ class DeviceTrackingService
             ->first();
 
         if ($compatibleDevice) {
-            // Update the device with new device_id for future logins
-            $compatibleDevice->update(['device_id' => $deviceId]);
+            // Update the device with new device_id and hardware identity for future logins
+            $info = $this->getDeviceInfo($request);
+            $compatibleDevice->update([
+                'device_id' => $deviceId,
+                'device_model' => $info['device_model'] ?? $compatibleDevice->device_model,
+                'device_serial' => $info['device_serial'] ?? $compatibleDevice->device_serial,
+                'device_mac' => $info['device_mac'] ?? $compatibleDevice->device_mac,
+            ]);
 
             return [
                 'allowed' => true,
@@ -191,6 +201,9 @@ class DeviceTrackingService
                     'compatible_device_id' => $compatibleDeviceId,
                     'ip_address' => $deviceInfo['ip_address'],
                     'user_agent' => $deviceInfo['user_agent'],
+                    'device_model' => $deviceInfo['device_model'] ?? $registeredDevice->device_model,
+                    'device_serial' => $deviceInfo['device_serial'] ?? $registeredDevice->device_serial,
+                    'device_mac' => $deviceInfo['device_mac'] ?? $registeredDevice->device_mac,
                 ]);
 
                 return [
@@ -234,12 +247,15 @@ class DeviceTrackingService
             }
 
             // Use updateOrCreate to handle potential race conditions
-            $device = $user->devices()->updateOrCreate(
+        $device = $user->devices()->updateOrCreate(
                 [
                     'device_id' => $deviceId,
                 ],
                 [
                     'compatible_device_id' => $compatibleDeviceId,
+            'device_model' => $deviceInfo['device_model'] ?? null,
+            'device_serial' => $deviceInfo['device_serial'] ?? null,
+            'device_mac' => $deviceInfo['device_mac'] ?? null,
                     'session_id' => $sessionId,
                     'last_activity' => Carbon::now(),
                     'is_active' => true,
