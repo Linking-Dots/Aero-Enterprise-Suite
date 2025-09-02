@@ -74,6 +74,19 @@ class DeviceTrackingService
             $deviceType = 'tablet';
         }
 
+        // Try to read hardware identity from headers, then body input, then cookies
+        $deviceModel = $request->header('X-Device-Model')
+            ?? $request->input('device_model')
+            ?? $request->cookie('device_model');
+
+        $deviceSerial = $request->header('X-Device-Serial')
+            ?? $request->input('device_serial')
+            ?? $request->cookie('device_serial');
+
+        $deviceMac = $request->header('X-Device-Mac')
+            ?? $request->input('device_mac')
+            ?? $request->cookie('device_mac');
+
         return [
             'device_name' => $this->generateDeviceName(),
             'browser_name' => $this->agent->browser(),
@@ -83,9 +96,9 @@ class DeviceTrackingService
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             // Optional hardware identifiers provided by native shells or browser extensions
-            'device_model' => $request->header('X-Device-Model'),
-            'device_serial' => $request->header('X-Device-Serial'),
-            'device_mac' => $request->header('X-Device-Mac'),
+            'device_model' => $deviceModel,
+            'device_serial' => $deviceSerial,
+            'device_mac' => $deviceMac,
             'device_fingerprint' => [
                 'screen_resolution' => $request->header('Screen-Resolution'),
                 'timezone' => $request->header('Timezone'),
