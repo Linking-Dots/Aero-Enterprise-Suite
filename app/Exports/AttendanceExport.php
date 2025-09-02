@@ -86,14 +86,14 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
 
                 // Format all clock in times (each on new line with numbers)
                 $in = count($allClockIns) > 0
-                    ? implode("\n", array_map(function($time, $index) {
+                    ? implode("\r\n", array_map(function($time, $index) {
                         return ($index + 1) . '. ' . $time;
                     }, $allClockIns, array_keys($allClockIns)))
                     : 'Not clocked in';
 
                 // Format all clock out times (each on new line with numbers)
                 $out = count($allClockOuts) > 0
-                    ? implode("\n", array_map(function($time, $index) {
+                    ? implode("\r\n", array_map(function($time, $index) {
                         return ($index + 1) . '. ' . $time;
                     }, $allClockOuts, array_keys($allClockOuts)))
                     : ($incomplete
@@ -260,6 +260,13 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
                     ->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle("A1:{$highestCol}{$highestRow}")
                     ->getAlignment()->setHorizontal('center');
+
+                // ====== Enable text wrapping for Clock In and Clock Out columns ======
+                $dataStartRow = 5; // After headers and summary rows
+                $sheet->getStyle("G{$dataStartRow}:H{$highestRow}")
+                    ->getAlignment()->setWrapText(true);
+                $sheet->getStyle("G{$dataStartRow}:H{$highestRow}")
+                    ->getAlignment()->setVertical('top');
 
                 // ====== Freeze pane after headers ======
                 $sheet->freezePane('A5');
