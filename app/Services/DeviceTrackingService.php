@@ -25,12 +25,24 @@ class DeviceTrackingService
     {
         $userAgent = $request->userAgent() ?? '';
 
+        // Include hardware identifiers in fingerprint if available to improve uniqueness
+        $deviceModel = $request->header('X-Device-Model')
+            ?? $request->input('device_model')
+            ?? $request->cookie('device_model');
+
+        $deviceSerial = $request->header('X-Device-Serial')
+            ?? $request->input('device_serial')
+            ?? $request->cookie('device_serial');
+
         // Create a stable device fingerprint that doesn't include IP
         // This prevents issues with dynamic IPs, WiFi switching, VPN usage, etc.
         $fingerprint = [
             'user_agent' => $userAgent,
             'accept_language' => $request->header('Accept-Language', ''),
             'accept_encoding' => $request->header('Accept-Encoding', ''),
+            // Include hardware info in fingerprint for better uniqueness when available
+            'device_model' => $deviceModel,
+            'device_serial' => $deviceSerial,
         ];
 
         $fingerprintString = json_encode($fingerprint);
