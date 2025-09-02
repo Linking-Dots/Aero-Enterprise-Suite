@@ -45,18 +45,21 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
                 ->first();
 
             if ($attendances->count()) {
-                $firstIn = null;
-                $lastOut = null;
+                $allClockIns = [];
+                $allClockOuts = [];
                 $totalMinutes = 0;
                 $completePunches = 0;
                 $incomplete = false;
 
                 foreach ($attendances as $attendance) {
-                    if ($attendance->punchin && ! $firstIn) {
-                        $firstIn = $attendance->punchin;
+                    // Collect all clock in times
+                    if ($attendance->punchin) {
+                        $allClockIns[] = Carbon::parse($attendance->punchin)->format('h:i A');
                     }
+
+                    // Collect all clock out times
                     if ($attendance->punchout) {
-                        $lastOut = $attendance->punchout;
+                        $allClockOuts[] = Carbon::parse($attendance->punchout)->format('h:i A');
                     }
 
                     if ($attendance->punchin && $attendance->punchout) {
@@ -79,9 +82,14 @@ class AttendanceExport implements FromCollection, ShouldAutoSize, WithEvents, Wi
                     ? intval($totalMinutes / 60).'h '.($totalMinutes % 60).'m'
                     : '';
 
-                $in = $firstIn ? Carbon::parse($firstIn)->format('h:i A') : 'Not clocked in';
-                $out = $lastOut
-                    ? Carbon::parse($lastOut)->format('h:i A')
+                // Format all clock in times (each on new line)
+                $in = count($allClockIns) > 0
+                    ? implode("\n", $allClockIns)
+                    : 'Not clocked in';
+
+                // Format all clock out times (each on new line)
+                $out = count($allClockOuts) > 0
+                    ? implode("\n", $allClockOuts)
                     : ($incomplete
                         ? ($dateIsToday ? 'Still working' : 'No punchout')
                         : 'Not punched out');

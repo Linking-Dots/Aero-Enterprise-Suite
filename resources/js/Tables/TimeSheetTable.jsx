@@ -364,8 +364,8 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
         ...(canViewAllAttendance && (url !== '/attendance-employee') ? [
             { name: "Employee", uid: "employee", icon: UserIcon, ariaLabel: "Employee name and information" }
         ] : []),
-        { name: "Clock In", uid: "clockin_time", icon: ClockIcon, ariaLabel: "First punch in time" },
-        { name: "Clock Out", uid: "clockout_time", icon: ClockIcon, ariaLabel: "Last punch out time" },
+        { name: "Clock In", uid: "clockin_time", icon: ClockIcon, ariaLabel: "All clock in times" },
+        { name: "Clock Out", uid: "clockout_time", icon: ClockIcon, ariaLabel: "All clock out times" },
         { name: "Work Hours", uid: "production_time", icon: ClockIcon, ariaLabel: "Total working hours" },
         { name: "Punches", uid: "punch_details", icon: ClockIcon, ariaLabel: "Number of time punches recorded" }
     ];
@@ -433,15 +433,20 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                         <div className="flex items-center gap-2">
                             <ClockIcon className="w-4 h-4 text-success" />
                             <div className="flex flex-col">
-                                <span>
-                                    {attendance.punchin_time 
-                                        ? formatTime(attendance.punchin_time, attendance.date) || 'Invalid time'
-                                        : 'Not clocked in'
-                                    }
-                                </span>
-                                {attendance.punchin_time && (
+                                {attendance.punches && attendance.punches.length > 0 ? (
+                                    attendance.punches
+                                        .filter(punch => punch.punch_in)
+                                        .map((punch, index) => (
+                                            <span key={index} className="block">
+                                                {formatTime(punch.punch_in, attendance.date) || 'Invalid time'}
+                                            </span>
+                                        ))
+                                ) : (
+                                    <span>Not clocked in</span>
+                                )}
+                                {attendance.punches && attendance.punches.filter(p => p.punch_in).length > 0 && (
                                     <span className="text-xs text-default-500">
-                                        First punch
+                                        {attendance.punches.filter(p => p.punch_in).length} punch{attendance.punches.filter(p => p.punch_in).length !== 1 ? 'es' : ''}
                                     </span>
                                 )}
                             </div>
@@ -453,17 +458,29 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                         <div className="flex items-center gap-2">
                             <ClockIcon className="w-4 h-4 text-danger" />
                             <div className="flex flex-col">
-                                <span>
-                                    {attendance.punchout_time 
-                                        ? formatTime(attendance.punchout_time, attendance.date) || 'Invalid time'
-                                        : attendance.punchin_time 
-                                            ? (isCurrentDate ? 'Currently working' : 'Missing punch-out')
-                                            : 'Not started'
-                                    }
-                                </span>
-                                {attendance.punchout_time && (
+                                {attendance.punches && attendance.punches.length > 0 ? (
+                                    attendance.punches
+                                        .filter(punch => punch.punch_out)
+                                        .map((punch, index) => (
+                                            <span key={index} className="block">
+                                                {formatTime(punch.punch_out, attendance.date) || 'Invalid time'}
+                                            </span>
+                                        ))
+                                ) : attendance.punchin_time ? (
+                                    <span>
+                                        {isCurrentDate ? 'Currently working' : 'Missing punch-out'}
+                                    </span>
+                                ) : (
+                                    <span>Not started</span>
+                                )}
+                                {attendance.punches && attendance.punches.filter(p => p.punch_out).length > 0 && (
                                     <span className="text-xs text-default-500">
-                                        Last punch
+                                        {attendance.punches.filter(p => p.punch_out).length} punch{attendance.punches.filter(p => p.punch_out).length !== 1 ? 'es' : ''}
+                                    </span>
+                                )}
+                                {attendance.punches && attendance.punches.filter(p => p.punch_out).length === 0 && attendance.punchin_time && (
+                                    <span className="text-xs text-default-500">
+                                        {isCurrentDate ? 'Currently working' : 'Missing punch-out'}
                                     </span>
                                 )}
                             </div>

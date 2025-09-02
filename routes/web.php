@@ -695,6 +695,3 @@ require __DIR__.'/hr.php';
 require __DIR__.'/dms.php';
 
 require __DIR__.'/auth.php';
-
-// Debug routes (remove in production)
-require __DIR__.'/debug-device.php';
