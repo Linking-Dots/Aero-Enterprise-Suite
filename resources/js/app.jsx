@@ -61,9 +61,22 @@ if (ENABLE_MONITORING) {
                     data: error.response.data
                 });
             }
-            // Handle CSRF token mismatch without full page reload
+            
+            // Handle session expiry (419 status code)
             if (error.response && error.response.status === 419) {
-                // Refresh CSRF token and retry the request
+                // Check if response indicates session expiry
+                if (error.response.data && error.response.data.session_expired) {
+                    // Trigger session expired modal
+                    window.dispatchEvent(new CustomEvent('session-expired', {
+                        detail: {
+                            message: error.response.data.message || 'Your session has expired.',
+                            redirect: error.response.data.redirect || '/login'
+                        }
+                    }));
+                    return Promise.reject(error);
+                }
+                
+                // Try to refresh CSRF token for token mismatch
                 const token = document.head.querySelector('meta[name="csrf-token"]');
                 if (token) {
                     // Try to get a fresh CSRF token

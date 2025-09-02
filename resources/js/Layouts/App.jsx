@@ -291,6 +291,7 @@ const App = React.memo(({ children }) => {
       checkSession();
       sessionCheckRef.current = setInterval(checkSession, 30000);
     }, 10000);
+    
     return () => {
       clearTimeout(initialTimeout);
       if (sessionCheckRef.current) {
@@ -298,6 +299,49 @@ const App = React.memo(({ children }) => {
       }
     };
   }, [staticLayoutData.currentAuth?.user?.id]);
+
+  // Listen for session expiry events from various sources
+  useEffect(() => {
+    // Listen for session expiry from axios interceptors
+    const handleSessionExpired = (event) => {
+      console.log('Session expired event received:', event.detail);
+      setSessionExpired(true);
+      
+      // Clear any existing session check interval
+      if (sessionCheckRef.current) {
+        clearInterval(sessionCheckRef.current);
+        sessionCheckRef.current = null;
+      }
+    };
+
+    // Listen for Inertia errors that might indicate session expiry
+    const handleInertiaError = (event) => {
+      const response = event.detail?.response;
+      if (response && response.status === 419) {
+        console.log('Inertia 419 error - session expired');
+        setSessionExpired(true);
+      }
+    };
+
+    // Listen for Inertia responses that contain session_expired flag
+    const handleInertiaFinish = (event) => {
+      const page = event.detail?.page;
+      if (page && page.props && page.props.session_expired) {
+        console.log('Inertia page props indicate session expired');
+        setSessionExpired(true);
+      }
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+    document.addEventListener('inertia:error', handleInertiaError);
+    document.addEventListener('inertia:finish', handleInertiaFinish);
+
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+      document.removeEventListener('inertia:error', handleInertiaError);
+      document.removeEventListener('inertia:finish', handleInertiaFinish);
+    };
+  }, []);
 
   // Inertia loading state
   useEffect(() => {
