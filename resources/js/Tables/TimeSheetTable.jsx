@@ -444,11 +444,6 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                 ) : (
                                     <span>Not clocked in</span>
                                 )}
-                                {attendance.punches && attendance.punches.filter(p => p.punch_in).length > 0 && (
-                                    <span className="text-xs text-default-500">
-                                        {attendance.punches.filter(p => p.punch_in).length} punch{attendance.punches.filter(p => p.punch_in).length !== 1 ? 'es' : ''}
-                                    </span>
-                                )}
                             </div>
                         </div>
                     </TableCell>
@@ -472,16 +467,6 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                                     </span>
                                 ) : (
                                     <span>Not started</span>
-                                )}
-                                {attendance.punches && attendance.punches.filter(p => p.punch_out).length > 0 && (
-                                    <span className="text-xs text-default-500">
-                                        {attendance.punches.filter(p => p.punch_out).length} punch{attendance.punches.filter(p => p.punch_out).length !== 1 ? 'es' : ''}
-                                    </span>
-                                )}
-                                {attendance.punches && attendance.punches.filter(p => p.punch_out).length === 0 && attendance.punchin_time && (
-                                    <span className="text-xs text-default-500">
-                                        {isCurrentDate ? 'Currently working' : 'Missing punch-out'}
-                                    </span>
                                 )}
                             </div>
                         </div>
