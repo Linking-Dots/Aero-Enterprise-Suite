@@ -113,6 +113,9 @@ class LeaveSummaryService
                 }
             }
 
+            // Calculate detailed leave type information (used and remaining)
+            $leaveTypeDetails = $this->calculateLeaveTypeDetails($user, $leaveTypes, $userLeaves);
+
             // Calculate balance information
             $balanceInfo = $this->calculateLeaveBalance($user, $leaveTypes, $userLeaves);
 
@@ -123,9 +126,16 @@ class LeaveSummaryService
             $row['total_allocated'] = $balanceInfo['total_allocated'];
             $row['total_balance'] = $balanceInfo['total_balance'];
 
-            // Add leave type columns
+            // Add leave type columns (old format for compatibility)
             foreach ($leaveTypeColumns as $type) {
                 $row[$type] = $leaveTypeTotals[$type] ?: '';
+            }
+
+            // Add detailed leave type information (used and remaining)
+            foreach ($leaveTypeDetails as $typeDetail) {
+                $row[$typeDetail['type'].'_used'] = $typeDetail['used'];
+                $row[$typeDetail['type'].'_remaining'] = $typeDetail['remaining'];
+                $row[$typeDetail['type'].'_allocated'] = $typeDetail['allocated'];
             }
 
             // Calculate usage percentage
@@ -145,12 +155,18 @@ class LeaveSummaryService
         // Generate department-wise summary
         $departmentSummary = $this->generateDepartmentSummary($result);
 
-        // Build columns array
+        // Build columns array with detailed leave type information
+        $leaveTypeDetailColumns = [];
+        foreach ($leaveTypeColumns as $type) {
+            $leaveTypeDetailColumns[] = $type.'_used';
+            $leaveTypeDetailColumns[] = $type.'_remaining';
+        }
+
         $columns = array_merge(
             ['employee_name', 'department'],
             array_values($months),
             ['total_approved', 'total_pending', 'total_rejected'],
-            $leaveTypeColumns,
+            $leaveTypeDetailColumns,
             ['total_allocated', 'total_balance', 'usage_percentage']
         );
 
@@ -190,6 +206,31 @@ class LeaveSummaryService
             'total_used' => $totalUsed,
             'total_balance' => max(0, $totalAllocated - $totalUsed),
         ];
+    }
+
+    /**
+     * Calculate detailed leave type information (used and remaining)
+     */
+    private function calculateLeaveTypeDetails(User $user, $leaveTypes, $userLeaves): array
+    {
+        $details = [];
+
+        foreach ($leaveTypes as $leaveType) {
+            $used = $userLeaves->where('leave_type', $leaveType->id)
+                ->where('status', 'Approved')
+                ->sum('no_of_days');
+            $allocated = $leaveType->days ?? 0;
+            $remaining = max(0, $allocated - $used);
+
+            $details[] = [
+                'type' => $leaveType->type,
+                'used' => $used,
+                'remaining' => $remaining,
+                'allocated' => $allocated,
+            ];
+        }
+
+        return $details;
     }
 
     /**

@@ -348,6 +348,35 @@ const LeaveSummary = ({ title, summaryData }) => {
                 );
 
             default:
+                // Handle leave type used/remaining columns
+                if (columnKey.endsWith('_used')) {
+                    return cellValue > 0 ? (
+                        <Chip
+                            size="sm"
+                            variant="flat"
+                            color="success"
+                            className="min-w-10"
+                        >
+                            {cellValue}
+                        </Chip>
+                    ) : '';
+                }
+                
+                if (columnKey.endsWith('_remaining')) {
+                    return cellValue > 0 ? (
+                        <Chip
+                            size="sm"
+                            variant="flat"
+                            color="primary"
+                            className="min-w-10"
+                        >
+                            {cellValue}
+                        </Chip>
+                    ) : (
+                        <span className="text-xs text-danger">0</span>
+                    );
+                }
+                
                 return cellValue !== undefined && cellValue !== null && cellValue !== '' ? cellValue : '';
         }
     }, []);
@@ -852,6 +881,33 @@ const LeaveSummary = ({ title, summaryData }) => {
                                                                         <span className="text-xs font-semibold">Pending</span>
                                                                     </div>
                                                                 </TableColumn>
+                                                                {/* Dynamic Leave Type Columns */}
+                                                                {leave_types.map((leaveType) => (
+                                                                    <React.Fragment key={leaveType.id}>
+                                                                        <TableColumn 
+                                                                            key={`${leaveType.type}_used`} 
+                                                                            align="center" 
+                                                                            className="bg-default-100/80 backdrop-blur-md" 
+                                                                            style={{ minWidth: "70px", maxWidth: "70px", width: "70px" }}
+                                                                        >
+                                                                            <div className="flex flex-col items-center gap-0">
+                                                                                <span className="text-xs font-semibold">{leaveType.type}</span>
+                                                                                <span className="text-xs text-success">Used</span>
+                                                                            </div>
+                                                                        </TableColumn>
+                                                                        <TableColumn 
+                                                                            key={`${leaveType.type}_remaining`} 
+                                                                            align="center" 
+                                                                            className="bg-default-100/80 backdrop-blur-md" 
+                                                                            style={{ minWidth: "70px", maxWidth: "70px", width: "70px" }}
+                                                                        >
+                                                                            <div className="flex flex-col items-center gap-0">
+                                                                                <span className="text-xs font-semibold">{leaveType.type}</span>
+                                                                                <span className="text-xs text-primary">Remaining</span>
+                                                                            </div>
+                                                                        </TableColumn>
+                                                                    </React.Fragment>
+                                                                ))}
                                                                 <TableColumn key="total_balance" align="center" className="bg-default-100/80 backdrop-blur-md" style={{ minWidth: "80px", maxWidth: "80px", width: "80px" }}>
                                                                     <span className="text-xs font-semibold">Balance</span>
                                                                 </TableColumn>

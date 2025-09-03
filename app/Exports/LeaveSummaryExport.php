@@ -26,32 +26,43 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
     {
         $summaryData = $this->summaryService->generateLeaveSummary($this->filters);
         $data = $summaryData['data'] ?? [];
+        $leaveTypes = $summaryData['leave_types'] ?? [];
 
         $rows = collect();
         $counter = 1;
 
         foreach ($data as $employee) {
-            $rows->push([
+            $row = [
                 'No.' => $counter++,
                 'Employee Name' => $employee['employee_name'] ?? 'N/A',
                 'Department' => $employee['department'] ?? 'N/A',
-                'January' => $employee['JAN'] ?? 0,
-                'February' => $employee['FEB'] ?? 0,
-                'March' => $employee['MAR'] ?? 0,
-                'April' => $employee['APR'] ?? 0,
-                'May' => $employee['MAY'] ?? 0,
-                'June' => $employee['JUN'] ?? 0,
-                'July' => $employee['JUL'] ?? 0,
-                'August' => $employee['AUG'] ?? 0,
-                'September' => $employee['SEP'] ?? 0,
-                'October' => $employee['OCT'] ?? 0,
-                'November' => $employee['NOV'] ?? 0,
-                'December' => $employee['DEC'] ?? 0,
+                'January' => $employee['JAN'] ?? '',
+                'February' => $employee['FEB'] ?? '',
+                'March' => $employee['MAR'] ?? '',
+                'April' => $employee['APR'] ?? '',
+                'May' => $employee['MAY'] ?? '',
+                'June' => $employee['JUN'] ?? '',
+                'July' => $employee['JUL'] ?? '',
+                'August' => $employee['AUG'] ?? '',
+                'September' => $employee['SEP'] ?? '',
+                'October' => $employee['OCT'] ?? '',
+                'November' => $employee['NOV'] ?? '',
+                'December' => $employee['DEC'] ?? '',
                 'Total Approved' => $employee['total_approved'] ?? 0,
                 'Total Pending' => $employee['total_pending'] ?? 0,
-                'Total Balance' => $employee['total_balance'] ?? 0,
-                'Usage Percentage' => ($employee['usage_percentage'] ?? 0).'%',
-            ]);
+            ];
+
+            // Add detailed leave type columns (used and remaining for each type)
+            foreach ($leaveTypes as $leaveType) {
+                $type = $leaveType->type;
+                $row[$type . ' Used'] = $employee[$type . '_used'] ?? 0;
+                $row[$type . ' Remaining'] = $employee[$type . '_remaining'] ?? 0;
+            }
+
+            $row['Total Balance'] = $employee['total_balance'] ?? 0;
+            $row['Usage Percentage'] = ($employee['usage_percentage'] ?? 0).'%';
+
+            $rows->push($row);
         }
 
         return $rows;
@@ -59,7 +70,10 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
 
     public function headings(): array
     {
-        return [
+        $summaryData = $this->summaryService->generateLeaveSummary($this->filters);
+        $leaveTypes = $summaryData['leave_types'] ?? [];
+
+        $baseHeaders = [
             'No.',
             'Employee Name',
             'Department',
@@ -77,9 +91,21 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
             'December',
             'Total Approved',
             'Total Pending',
+        ];
+
+        // Add leave type headers (used and remaining for each type)
+        $leaveTypeHeaders = [];
+        foreach ($leaveTypes as $leaveType) {
+            $leaveTypeHeaders[] = $leaveType->type . ' Used';
+            $leaveTypeHeaders[] = $leaveType->type . ' Remaining';
+        }
+
+        $endHeaders = [
             'Total Balance',
             'Usage Percentage',
         ];
+
+        return array_merge($baseHeaders, $leaveTypeHeaders, $endHeaders);
     }
 
     public function registerEvents(): array
@@ -89,6 +115,20 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
                 $sheet = $event->sheet->getDelegate();
                 $summaryData = $this->summaryService->generateLeaveSummary($this->filters);
                 $stats = $summaryData['stats'] ?? [];
+                $leaveTypes = $summaryData['leave_types'] ?? [];
+
+                // Calculate dynamic column range based on leave types
+                $leaveTypeColumnsCount = count($leaveTypes) * 2; // used + remaining for each type
+                $baseColumnsCount = 17; // base columns before leave types
+                $totalColumns = $baseColumnsCount + $leaveTypeColumnsCount + 2; // +2 for total balance and usage
+                
+                // Generate last column letter dynamically
+                $lastColumn = '';
+                if ($totalColumns <= 26) {
+                    $lastColumn = chr(64 + $totalColumns);
+                } else {
+                    $lastColumn = 'Z' . chr(64 + ($totalColumns - 26));
+                }
 
                 $firstDataRow = 2;
                 $lastDataRow = $sheet->getHighestDataRow();
@@ -101,29 +141,29 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
                 $sheet->insertNewRowBefore(1, 3);
 
                 // ====== Title ======
-                $sheet->mergeCells('A1:S1');
+                $sheet->mergeCells("A1:{$lastColumn}1");
                 $sheet->setCellValue('A1', 'Leave Summary Report - '.($this->filters['year'] ?? now()->year));
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
 
                 // ====== Generated on ======
-                $sheet->mergeCells('A2:S2');
+                $sheet->mergeCells("A2:{$lastColumn}2");
                 $sheet->setCellValue('A2', 'Generated on: '.now()->format('F d, Y h:i A'));
                 $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
 
                 // ====== Summary statistics ======
-                $sheet->mergeCells('A3:S3');
+                $sheet->mergeCells("A3:{$lastColumn}3");
                 $summaryText = "Total Employees: {$totalEmployees} | Approved Leaves: {$totalApproved} | Pending Leaves: {$totalPending} | Departments: {$totalDepartments}";
                 $sheet->setCellValue('A3', $summaryText);
                 $sheet->getStyle('A3')->getAlignment()->setHorizontal('center');
                 $sheet->getStyle('A3')->getFont()->setBold(true);
 
                 // ====== Style the headers ======
-                $sheet->getStyle('A4:S4')->getFont()->setBold(true);
-                $sheet->getStyle('A4:S4')->getFill()
+                $sheet->getStyle("A4:{$lastColumn}4")->getFont()->setBold(true);
+                $sheet->getStyle("A4:{$lastColumn}4")->getFill()
                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('E3F2FD');
-                $sheet->getStyle('A4:S4')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle("A4:{$lastColumn}4")->getAlignment()->setHorizontal('center');
 
                 // ====== Borders for the full range ======
                 $highestRow = $sheet->getHighestRow();

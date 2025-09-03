@@ -584,13 +584,7 @@ const PunchStatusCard = React.memo(() => {
             const response = await axios.post(route('attendance.punch'), punchData);
 
             if (response.data.status === 'success') {
-                toast.success(response.data.message, {
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: 'var(--theme-success)',
-                        color: 'var(--theme-success-foreground)',
-                    }
-                });
+                
 
                 setUiState(prev => ({
                     ...prev,

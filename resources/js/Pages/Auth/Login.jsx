@@ -362,15 +362,7 @@ export default function Login({
             router.post(route('login'), submissionData, {
                 preserveState: true,
                 preserveScroll: true,
-                onSuccess: () => {
-                    toast.success('Login successful! Redirecting...', {
-                        style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: 'var(--theme-success)',
-                            color: 'var(--theme-success-foreground)',
-                        }
-                    });
-                },
+                
                 onError: (errors) => {
                     console.error('Login validation errors:', errors);
                     
@@ -494,7 +486,7 @@ export default function Login({
     useEffect(() => {
         if (status) {
             setUiState(prevState => ({ ...prevState, showSuccessAlert: true }));
-            toast.success(status);
+            
             
             const timer = setTimeout(() => {
                 dismissAlert('Success');

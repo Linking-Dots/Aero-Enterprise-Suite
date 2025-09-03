@@ -109,6 +109,12 @@
                 <th class="month-col">Dec</th>
                 <th class="total-col">Approved</th>
                 <th class="total-col">Pending</th>
+                @if(isset($summaryData['leave_types']))
+                    @foreach($summaryData['leave_types'] as $leaveType)
+                        <th class="total-col">{{ $leaveType->type }} Used</th>
+                        <th class="total-col">{{ $leaveType->type }} Rem.</th>
+                    @endforeach
+                @endif
                 <th class="total-col">Balance</th>
                 <th class="total-col">Usage %</th>
             </tr>
@@ -118,20 +124,26 @@
             <tr>
                 <td class="employee-name">{{ $employee['employee_name'] ?? 'N/A' }}</td>
                 <td class="department">{{ $employee['department'] ?? 'N/A' }}</td>
-                <td class="month-col">{{ $employee['JAN'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['FEB'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['MAR'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['APR'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['MAY'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['JUN'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['JUL'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['AUG'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['SEP'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['OCT'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['NOV'] ?? 0 }}</td>
-                <td class="month-col">{{ $employee['DEC'] ?? 0 }}</td>
+                <td class="month-col">{{ $employee['JAN'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['FEB'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['MAR'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['APR'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['MAY'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['JUN'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['JUL'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['AUG'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['SEP'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['OCT'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['NOV'] ?? '' }}</td>
+                <td class="month-col">{{ $employee['DEC'] ?? '' }}</td>
                 <td class="total-col">{{ $employee['total_approved'] ?? 0 }}</td>
                 <td class="total-col">{{ $employee['total_pending'] ?? 0 }}</td>
+                @if(isset($summaryData['leave_types']))
+                    @foreach($summaryData['leave_types'] as $leaveType)
+                        <td class="total-col">{{ $employee[$leaveType->type.'_used'] ?? 0 }}</td>
+                        <td class="total-col">{{ $employee[$leaveType->type.'_remaining'] ?? 0 }}</td>
+                    @endforeach
+                @endif
                 <td class="total-col">{{ $employee['total_balance'] ?? 0 }}</td>
                 <td class="total-col">{{ ($employee['usage_percentage'] ?? 0) }}%</td>
             </tr>
