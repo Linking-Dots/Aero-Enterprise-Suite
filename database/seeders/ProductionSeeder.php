@@ -19,6 +19,10 @@ class ProductionSeeder extends Seeder
         $this->command->info('🚀 Seeding production subscription system...');
 
         DB::transaction(function () {
+            // First seed roles and permissions
+            $this->call(RolePermissionSeeder::class);
+            
+            // Then seed subscription data
             $this->seedModules();
             $this->seedSubscriptionPlans();
             $this->attachModulesToPlans();

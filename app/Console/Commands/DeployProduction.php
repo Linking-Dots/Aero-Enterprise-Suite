@@ -73,9 +73,20 @@ class DeployProduction extends Command
         $this->info('🔧 Running database migrations...');
         
         if ($this->confirm('This will run migrations in production. Continue?', false)) {
-            Artisan::call('migrate', ['--force' => true]);
-            $this->info('✅ Migrations completed');
-            $this->line(Artisan::output());
+            try {
+                // Run all migrations including the new permission tables
+                Artisan::call('migrate', ['--force' => true]);
+                $this->info('✅ Migrations completed');
+                $this->line(Artisan::output());
+                
+                // Clear permission cache
+                Artisan::call('permission:cache-reset');
+                $this->info('✅ Permission cache cleared');
+                
+            } catch (\Exception $e) {
+                $this->error('❌ Migration failed: ' . $e->getMessage());
+                throw $e;
+            }
         } else {
             $this->warn('⚠️ Migrations skipped');
         }
@@ -116,6 +127,14 @@ class DeployProduction extends Command
         $this->info('👤 Creating super administrator...');
         
         try {
+            // Check if super admin role exists
+            $superAdminRole = Role::where('name', 'Super Administrator')->first();
+            
+            if (!$superAdminRole) {
+                $this->error('❌ Super Administrator role not found. Please run seeding first.');
+                throw new \Exception('Super Administrator role not found');
+            }
+            
             // Check if super admin already exists
             $existingAdmin = User::role('Super Administrator')->first();
             
@@ -136,15 +155,20 @@ class DeployProduction extends Command
                 $this->warn("Generated password: {$password}");
             }
 
-            Artisan::call('admin:create-super-admin', [
-                '--name' => $name,
-                '--email' => $email,
-                '--password' => $password,
-                '--no-interaction' => true
+            // Create the user directly since we have the role
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'email_verified_at' => now()
             ]);
             
+            // Assign the Super Administrator role
+            $user->assignRole($superAdminRole);
+            
             $this->info('✅ Super admin created successfully');
-            $this->line(Artisan::output());
+            $this->info("👤 Email: {$user->email}");
+            $this->info("🔑 Password: {$password}");
             
         } catch (\Exception $e) {
             $this->error('❌ Admin creation failed: ' . $e->getMessage());
