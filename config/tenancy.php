@@ -19,8 +19,12 @@ return [
     'central_domains' => [
         '127.0.0.1',
         '127.0.0.1:8000',
+        '127.0.0.1:8001', 
+        '127.0.0.1:8002',
         'localhost',
         'localhost:8000',
+        'localhost:8001',
+        'localhost:8002',
         'aero-hr.test', // Add your local development domain
     ],
 

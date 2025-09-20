@@ -67,5 +67,7 @@ class Kernel extends HttpKernel
         'role_hierarchy' => \App\Http\Middleware\RoleHierarchyMiddleware::class,
         // Device Security Middleware
         'single_device' => \App\Http\Middleware\SingleDeviceLoginMiddleware::class,
+        // Tenancy Middleware
+        'central-domain' => \App\Http\Middleware\CentralDomainMiddleware::class,
     ];
 }

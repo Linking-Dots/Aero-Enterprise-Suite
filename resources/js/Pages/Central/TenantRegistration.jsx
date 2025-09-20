@@ -112,24 +112,33 @@ export default function TenantRegistration({ subscriptionPlans = [], modules = [
         if (!plan) return 0;
         
         let total = formData.billingCycle === 'monthly' 
-            ? plan.base_monthly_price 
-            : plan.base_yearly_price;
+            ? parseFloat(plan.base_monthly_price || 0)
+            : parseFloat(plan.base_yearly_price || 0);
         
         // Add module prices
         formData.selectedModules.forEach(moduleId => {
             const module = modules.find(m => m.id === moduleId);
-            if (module && !plan.included_modules?.includes(moduleId)) {
-                const price = formData.billingCycle === 'monthly' 
-                    ? module.monthly_price 
-                    : module.yearly_price;
+            if (module) {
+                // Check if module is included in the plan
+                const planModule = plan.modules?.find(pm => pm.id === moduleId);
+                const isIncluded = planModule?.pivot?.is_included || 
+                                 plan.included_modules?.includes(moduleId) || 
+                                 false;
                 
-                // Apply plan discount
-                const discount = plan.module_discount_percentage || 0;
-                total += price * (1 - discount / 100);
+                if (!isIncluded) {
+                    const modulePrice = formData.billingCycle === 'monthly' 
+                        ? parseFloat(module.monthly_price || 0)
+                        : parseFloat(module.yearly_price || 0);
+                    
+                    // Apply plan discount
+                    const discount = parseFloat(plan.module_discount_percentage || 0);
+                    const discountedPrice = modulePrice * (1 - discount / 100);
+                    total += discountedPrice;
+                }
             }
         });
         
-        return total;
+        return total.toFixed(2);
     };
 
     const validateStep = (step) => {

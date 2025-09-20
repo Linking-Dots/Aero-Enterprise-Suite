@@ -35,8 +35,9 @@ Route::middleware([
     Route::post('register', [RegisterController::class, 'store'])->name('tenant.register.store');
     Route::post('logout', [LoginController::class, 'destroy'])->name('tenant.logout');
 
-    // Tenant dashboard homepage
-    Route::redirect('/', '/dashboard');
+    // Tenant dashboard homepage - only for tenant domains
+    // Central domains should show landing page instead
+    // Route::redirect('/', '/dashboard');
 
     // Test route to verify tenant context
     Route::get('/tenant-info', function () {

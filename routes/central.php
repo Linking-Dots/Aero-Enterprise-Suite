@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Central\Admin\SubscriptionManagementController;
+use App\Http\Controllers\Central\TenantRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,25 +18,28 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Central routes - accessible only from central domains
-Route::middleware(['web', 'central-domain'])->group(function () {
+// Note: Middleware is applied in RouteServiceProvider
 
-    // Landing page and marketing routes
-    Route::get('/', function () {
-        return inertia('Central/Landing', [
-            'app_name' => config('app.name'),
-            'app_version' => config('app.version'),
-        ]);
-    })->name('central.home');
+// Test route
+Route::get('/test-central', function () {
+    return 'Central route working!';
+});
+
+// Landing page and marketing routes
+Route::get('/', function () {
+    return inertia('Central/Landing', [
+        'app_name' => config('app.name'),
+        'app_version' => config('app.version'),
+    ]);
+})->name('central.home');
 
     // Tenant registration and management routes
-    Route::get('/register-tenant', function () {
-        return inertia('Central/TenantRegistration');
-    })->name('central.tenant.register');
+    Route::get('/register-tenant', [TenantRegistrationController::class, 'index'])->name('central.tenant.register');
+    Route::post('/register-tenant', [TenantRegistrationController::class, 'store'])->name('central.tenant.store');
+    Route::get('/tenant/{tenant}/welcome', [TenantRegistrationController::class, 'welcome'])->name('tenant.welcome');
 
-    Route::post('/register-tenant', function () {
-        // Tenant registration logic will be implemented later
-        // This will create new tenant and redirect to their domain
-    })->name('central.tenant.store');
+    // Slug availability check
+    Route::get('/check-slug-availability', [TenantRegistrationController::class, 'checkSlugAvailability'])->name('central.tenant.check-slug');
 
     // Tenant login/selection for existing users
     Route::get('/tenant-login', function () {
@@ -53,7 +58,21 @@ Route::middleware(['web', 'central-domain'])->group(function () {
     });
 
     // Super admin routes for managing all tenants
-    Route::prefix('admin')->middleware(['auth', 'super-admin'])->name('central.admin.')->group(function () {
+    Route::prefix('admin')->middleware(['auth', 'super-admin'])->name('admin.')->group(function () {
+        // Subscription Management
+        Route::get('/subscription-management', [SubscriptionManagementController::class, 'index'])->name('subscription.management');
+
+        // Subscription Plans
+        Route::post('/subscription-plans', [SubscriptionManagementController::class, 'storePlan'])->name('subscription-plans.store');
+        Route::put('/subscription-plans/{plan}', [SubscriptionManagementController::class, 'updatePlan'])->name('subscription-plans.update');
+        Route::delete('/subscription-plans/{plan}', [SubscriptionManagementController::class, 'destroyPlan'])->name('subscription-plans.destroy');
+
+        // Modules
+        Route::post('/modules', [SubscriptionManagementController::class, 'storeModule'])->name('modules.store');
+        Route::put('/modules/{module}', [SubscriptionManagementController::class, 'updateModule'])->name('modules.update');
+        Route::delete('/modules/{module}', [SubscriptionManagementController::class, 'destroyModule'])->name('modules.destroy');
+
+        // Other admin routes
         Route::get('/tenants', function () {
             return inertia('Central/Admin/Tenants');
         })->name('tenants');
@@ -69,4 +88,3 @@ Route::middleware(['web', 'central-domain'])->group(function () {
     Route::get('central-register', [RegisterController::class, 'create'])->name('central.register');
     Route::post('central-register', [RegisterController::class, 'store'])->name('central.register.store');
     Route::post('central-logout', [LoginController::class, 'destroy'])->name('central.logout');
-});

@@ -59,6 +59,8 @@ Route::get('/csrf-token', function () {
 });
 
 // Temporary fallback - will be updated once tenant routing is complete
+// Commented out temporarily to test central routing
+/*
 Route::fallback(function () {
     return response()->json([
         'message' => 'This route may have been moved to tenant-specific routing.',
@@ -66,8 +68,9 @@ Route::fallback(function () {
         'current_domain' => request()->getHost(),
     ], 404);
 });
+*/
 
-Route::redirect('/', '/dashboard');
+// Route::redirect('/', '/dashboard'); // Temporarily disabled for central domain testing
 
 Route::get('/session-check', function () {
     return response()->json(['authenticated' => auth()->check()]);
@@ -717,6 +720,8 @@ Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () 
     ]);
 });
 
+// Temporarily comment out module routes to test central routing
+/*
 // Include all module routes
 require __DIR__.'/modules.php';
 require __DIR__.'/compliance.php';
@@ -725,3 +730,4 @@ require __DIR__.'/analytics.php';
 require __DIR__.'/project-management.php';
 require __DIR__.'/hr.php';
 require __DIR__.'/dms.php';
+*/
