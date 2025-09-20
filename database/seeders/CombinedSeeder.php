@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\AttendanceRule;
 use App\Models\Benefit;
 use App\Models\Competency;
 use App\Models\DocumentCategory;
@@ -87,18 +86,7 @@ class CombinedSeeder extends Seeder
                 ],
             ]);
 
-            // Create rules for the first user (typically admin)
-            AttendanceRule::create([
-                'attendance_type_id' => 1,
-                'applicable_to_type' => User::class,
-                'applicable_to_id' => 1,
-            ]);
-
-            AttendanceRule::create([
-                'attendance_type_id' => 2,
-                'applicable_to_type' => User::class,
-                'applicable_to_id' => 1,
-            ]);
+            // AttendanceRule functionality can be implemented later if needed
         }
     }
 
@@ -153,9 +141,15 @@ class CombinedSeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
+            $slug = strtolower(str_replace(' ', '-', $category['name']));
             DocumentCategory::firstOrCreate(
                 ['name' => $category['name']],
-                ['description' => $category['description']]
+                [
+                    'description' => $category['description'],
+                    'slug' => $slug,
+                    'color' => '#0ea5e9',
+                    'is_active' => true,
+                ]
             );
         }
     }

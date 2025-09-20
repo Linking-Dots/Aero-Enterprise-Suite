@@ -33,6 +33,9 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
+            // Central application routes (tenant management, billing, landing)
+            Route::group([], base_path('routes/central.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
 

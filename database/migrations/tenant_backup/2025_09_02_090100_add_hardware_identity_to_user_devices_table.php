@@ -33,10 +33,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('user_devices', function (Blueprint $table) {
-            try { $table->dropUnique('user_devices_user_hardware_unique'); } catch (Throwable $e) {}
-            try { $table->dropIndex(['device_model']); } catch (Throwable $e) {}
-            try { $table->dropIndex(['device_serial']); } catch (Throwable $e) {}
-            try { $table->dropIndex(['device_mac']); } catch (Throwable $e) {}
+            try {
+                $table->dropUnique('user_devices_user_hardware_unique');
+            } catch (Throwable $e) {
+            }
+            try {
+                $table->dropIndex(['device_model']);
+            } catch (Throwable $e) {
+            }
+            try {
+                $table->dropIndex(['device_serial']);
+            } catch (Throwable $e) {
+            }
+            try {
+                $table->dropIndex(['device_mac']);
+            } catch (Throwable $e) {
+            }
 
             $table->dropColumn(['device_model', 'device_serial', 'device_mac']);
         });
