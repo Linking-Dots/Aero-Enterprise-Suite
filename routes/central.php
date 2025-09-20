@@ -58,7 +58,7 @@ Route::get('/', function () {
     });
 
     // Super admin routes for managing all tenants
-    Route::prefix('admin')->middleware(['auth', 'super-admin'])->name('admin.')->group(function () {
+    Route::prefix('admin')->middleware(['auth', 'role:Super Administrator'])->name('admin.')->group(function () {
         // Subscription Management
         Route::get('/subscription-management', [SubscriptionManagementController::class, 'index'])->name('subscription.management');
 
