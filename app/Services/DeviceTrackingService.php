@@ -173,18 +173,25 @@ class DeviceTrackingService
             ];
         }
 
-        // First, check if this exact device is already registered and active FOR THIS USER
+        // First, check if this exact device is already registered (active or inactive) FOR THIS USER
         $existingDevice = $user->devices()
             ->where('device_id', $deviceId)
             ->where('user_id', $user->id) // Explicit user scoping
-            ->active()
-            ->first();
+            ->first(); // Check both active and inactive
 
         if ($existingDevice) {
+            // If device was inactive, reactivate it
+            if (! $existingDevice->is_active) {
+                $existingDevice->update([
+                    'is_active' => true,
+                    'last_activity' => Carbon::now(),
+                ]);
+            }
+
             return [
                 'allowed' => true,
                 'device_id' => $deviceId,
-                'existing_device' => $existingDevice,
+                'existing_device' => $existingDevice->fresh(),
                 'message' => 'Login from registered device',
             ];
         }
