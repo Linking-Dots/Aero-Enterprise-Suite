@@ -171,17 +171,12 @@ class LoginController extends Controller
                     ] : null,
                 ];
 
-                // Use validation exception with device data for proper Inertia handling
-                $exception = ValidationException::withMessages([
-                    'device_blocked' => $deviceCheck['message'],
+                // FIXED: Use proper ValidationException structure for Inertia
+                // This ensures Login.jsx receives the device blocking data correctly
+                throw ValidationException::withMessages([
+                    'device_blocking' => [$deviceMessage],
+                    'device_blocking_data' => [json_encode($deviceBlockedData)],
                 ]);
-
-                // Add device blocking data to the exception response
-                $exception->errorBag('device_blocking')->withMessages([
-                    'device_blocked_data' => json_encode($deviceBlockedData),
-                ]);
-
-                throw $exception;
             }
         }
 
@@ -191,7 +186,11 @@ class LoginController extends Controller
         // Login user
         Auth::login($user, $remember);
 
+        // Regenerate session for security
+        $request->session()->regenerate();
+
         // Register/update device if single device login is enabled
+        // CRITICAL: Use the regenerated session ID
         if ($user->hasSingleDeviceLoginEnabled()) {
             $sessionId = $request->session()->getId();
             $this->deviceService->registerDevice($user, $request, $sessionId);
@@ -210,8 +209,6 @@ class LoginController extends Controller
             'success',
             $request
         );
-
-        $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
     }

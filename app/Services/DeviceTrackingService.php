@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UserDevice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
 
 class DeviceTrackingService
@@ -53,18 +54,34 @@ class DeviceTrackingService
     /**
      * Generate a more flexible device identifier for compatibility checks.
      * This is used to identify similar devices even with minor differences.
+     * CRITICAL: Now includes user_id to prevent cross-account device reuse.
      */
-    public function generateCompatibleDeviceId(Request $request): string
+    public function generateCompatibleDeviceId(Request $request, ?int $userId = null): string
     {
         $userAgent = $request->userAgent() ?? '';
 
         // Extract core browser and platform info, ignoring version details
         $this->agent->setUserAgent($userAgent);
 
+        // Include stable client hints for better device differentiation
+        $clientHints = [
+            'ua_platform' => $request->header('Sec-CH-UA-Platform'),
+            'ua_mobile' => $request->header('Sec-CH-UA-Mobile'),
+            'ua_model' => $request->header('Sec-CH-UA-Model'),
+            'ua_full_version' => $request->header('Sec-CH-UA-Full-Version'),
+        ];
+
+        // Check for persistent device GUID cookie
+        $deviceGuid = $request->cookie('device_guid');
+
         $coreFingerprint = [
             'browser' => $this->agent->browser(),
             'platform' => $this->agent->platform(),
             'device_type' => $this->agent->isMobile() ? 'mobile' : ($this->agent->isTablet() ? 'tablet' : 'desktop'),
+            'client_hints' => array_filter($clientHints), // Only include non-null hints
+            'device_guid' => $deviceGuid,
+            // CRITICAL: Include user_id to scope devices per account
+            'user_id' => $userId,
         ];
 
         $fingerprintString = json_encode($coreFingerprint);
@@ -141,6 +158,7 @@ class DeviceTrackingService
 
     /**
      * Check if user can login from the current device.
+     * CRITICAL: All device queries are now scoped to user_id to prevent cross-account device reuse.
      */
     public function canUserLoginFromDevice(User $user, Request $request): array
     {
@@ -155,9 +173,10 @@ class DeviceTrackingService
             ];
         }
 
-        // First, check if this exact device is already registered and active
+        // First, check if this exact device is already registered and active FOR THIS USER
         $existingDevice = $user->devices()
             ->where('device_id', $deviceId)
+            ->where('user_id', $user->id) // Explicit user scoping
             ->active()
             ->first();
 
@@ -172,26 +191,47 @@ class DeviceTrackingService
 
         // If no exact match, check for compatible devices (same core browser/platform)
         // This handles cases where minor changes in user agent or headers occur
-        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
+        // CRITICAL: Include user_id in hash to prevent cross-account collisions
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request, $user->id);
         $compatibleDevice = $user->devices()
             ->where('compatible_device_id', $compatibleDeviceId)
-            ->active()
-            ->first();
+            ->where('user_id', $user->id) // Explicit user scoping
+            ->first(); // Check both active and inactive
 
         if ($compatibleDevice) {
+            // SECURITY CHECK: Verify the device actually belongs to this user
+            if ($compatibleDevice->user_id !== $user->id) {
+                // Log security event - attempted device takeover
+                Log::warning('Device takeover attempt detected', [
+                    'attempted_user_id' => $user->id,
+                    'device_owner_id' => $compatibleDevice->user_id,
+                    'device_id' => $deviceId,
+                    'ip' => $request->ip(),
+                ]);
+
+                return [
+                    'allowed' => false,
+                    'device_id' => $deviceId,
+                    'message' => 'Login blocked: Device verification failed.',
+                ];
+            }
+
             // Update the device with new device_id and hardware identity for future logins
+            // CRITICAL: Reactivate the device if it was inactive
             $info = $this->getDeviceInfo($request);
             $compatibleDevice->update([
                 'device_id' => $deviceId,
+                'is_active' => true, // Explicitly reactivate
                 'device_model' => $info['device_model'] ?? $compatibleDevice->device_model,
                 'device_serial' => $info['device_serial'] ?? $compatibleDevice->device_serial,
                 'device_mac' => $info['device_mac'] ?? $compatibleDevice->device_mac,
+                'last_activity' => Carbon::now(),
             ]);
 
             return [
                 'allowed' => true,
                 'device_id' => $deviceId,
-                'existing_device' => $compatibleDevice,
+                'existing_device' => $compatibleDevice->fresh(),
                 'message' => 'Login from compatible device (updated fingerprint)',
             ];
         }
@@ -199,7 +239,9 @@ class DeviceTrackingService
         // Check if user has ANY registered devices
         // Once a device is registered, it becomes the ONLY allowed device
         // If no devices exist (after reset), allow login from any device
-        $registeredDevice = $user->devices()->first();
+        $registeredDevice = $user->devices()
+            ->where('user_id', $user->id) // Explicit user scoping
+            ->first();
 
         if ($registeredDevice) {
             // Additional check: see if this might be the same physical device
@@ -221,20 +263,23 @@ class DeviceTrackingService
             // with changed network conditions (IP, headers, etc.)
             if ($currentDeviceFingerprint === $registeredDeviceFingerprint) {
                 // Update the existing device with new fingerprint
+                // CRITICAL: Include user-scoped compatible device ID
                 $registeredDevice->update([
                     'device_id' => $deviceId,
-                    'compatible_device_id' => $compatibleDeviceId,
+                    'compatible_device_id' => $this->generateCompatibleDeviceId($request, $user->id),
+                    'is_active' => true, // Explicitly reactivate
                     'ip_address' => $deviceInfo['ip_address'],
                     'user_agent' => $deviceInfo['user_agent'],
                     'device_model' => $deviceInfo['device_model'] ?? $registeredDevice->device_model,
                     'device_serial' => $deviceInfo['device_serial'] ?? $registeredDevice->device_serial,
                     'device_mac' => $deviceInfo['device_mac'] ?? $registeredDevice->device_mac,
+                    'last_activity' => Carbon::now(),
                 ]);
 
                 return [
                     'allowed' => true,
                     'device_id' => $deviceId,
-                    'existing_device' => $registeredDevice,
+                    'existing_device' => $registeredDevice->fresh(),
                     'message' => 'Login from registered device (updated network fingerprint)',
                 ];
             }
@@ -257,30 +302,36 @@ class DeviceTrackingService
 
     /**
      * Register a new device for the user.
+     * CRITICAL: Ensures device operations are scoped to the current user only.
      */
     public function registerDevice(User $user, Request $request, string $sessionId): UserDevice
     {
         $deviceId = $this->generateDeviceId($request);
-        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request, $user->id); // Include user_id
         $deviceInfo = $this->getDeviceInfo($request);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($user, $deviceId, $compatibleDeviceId, $sessionId, $deviceInfo) {
             // If single device login is enabled, remove all other devices first
+            // CRITICAL: Only delete devices belonging to THIS user
             if ($user->hasSingleDeviceLoginEnabled()) {
                 // Delete all existing devices for this user to enforce single device policy
-                $user->devices()->delete();
+                $user->devices()
+                    ->where('user_id', $user->id) // Explicit user scoping
+                    ->delete();
             }
 
             // Use updateOrCreate to handle potential race conditions
-        $device = $user->devices()->updateOrCreate(
+            // CRITICAL: Ensure we only update devices that belong to this user
+            $device = $user->devices()->updateOrCreate(
                 [
                     'device_id' => $deviceId,
+                    'user_id' => $user->id, // Explicit user scoping in match condition
                 ],
                 [
                     'compatible_device_id' => $compatibleDeviceId,
-            'device_model' => $deviceInfo['device_model'] ?? null,
-            'device_serial' => $deviceInfo['device_serial'] ?? null,
-            'device_mac' => $deviceInfo['device_mac'] ?? null,
+                    'device_model' => $deviceInfo['device_model'] ?? null,
+                    'device_serial' => $deviceInfo['device_serial'] ?? null,
+                    'device_mac' => $deviceInfo['device_mac'] ?? null,
                     'session_id' => $sessionId,
                     'last_activity' => Carbon::now(),
                     'is_active' => true,
@@ -295,21 +346,32 @@ class DeviceTrackingService
                 ]
             );
 
+            // Update user_sessions table with the regenerated session ID
+            \Illuminate\Support\Facades\DB::table('user_sessions')
+                ->where('user_id', $user->id)
+                ->where('session_id', $sessionId)
+                ->update([
+                    'updated_at' => Carbon::now(),
+                ]);
+
             return $device;
         });
     }
 
     /**
      * Update device activity.
+     * CRITICAL: All device lookups are scoped to user_id to prevent cross-account device reassignment.
      */
     public function updateDeviceActivity(User $user, Request $request, ?string $sessionId = null): void
     {
         $deviceId = $this->generateDeviceId($request);
-        $compatibleDeviceId = $this->generateCompatibleDeviceId($request);
+        $compatibleDeviceId = $this->generateCompatibleDeviceId($request, $user->id); // Include user_id
 
         // First try to find by exact device ID
+        // CRITICAL: Scope to current user
         $device = $user->devices()
             ->where('device_id', $deviceId)
+            ->where('user_id', $user->id) // Explicit user scoping
             ->active()
             ->first();
 
@@ -317,11 +379,24 @@ class DeviceTrackingService
         if (! $device) {
             $device = $user->devices()
                 ->where('compatible_device_id', $compatibleDeviceId)
+                ->where('user_id', $user->id) // Explicit user scoping
                 ->active()
                 ->first();
 
             // Update the device ID if found through compatible ID
+            // CRITICAL: Only update if device belongs to this user (already verified above)
             if ($device) {
+                // Verify ownership one more time before updating
+                if ($device->user_id !== $user->id) {
+                    Log::warning('Device ownership mismatch in updateDeviceActivity', [
+                        'user_id' => $user->id,
+                        'device_owner_id' => $device->user_id,
+                        'device_id' => $deviceId,
+                    ]);
+
+                    return;
+                }
+
                 $device->update(['device_id' => $deviceId]);
             }
         }

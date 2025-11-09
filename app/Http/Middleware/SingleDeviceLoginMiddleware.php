@@ -19,6 +19,7 @@ class SingleDeviceLoginMiddleware
 
     /**
      * Handle an incoming request.
+     * CRITICAL: Verifies device ownership before updating activity.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -39,11 +40,8 @@ class SingleDeviceLoginMiddleware
             return $next($request);
         }
 
-        // Update device activity for current session
-        $sessionId = $request->session()->getId();
-        $this->deviceService->updateDeviceActivity($user, $request, $sessionId);
-
-        // Check if current device is valid
+        // CRITICAL: First check if current device is valid BEFORE updating activity
+        // This prevents unauthorized devices from updating activity logs
         $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
 
         if (! $deviceCheck['allowed']) {
@@ -67,6 +65,11 @@ class SingleDeviceLoginMiddleware
                 ] : null,
             ]);
         }
+
+        // Only update device activity if the device check passed
+        // This ensures we only update devices that belong to this user
+        $sessionId = $request->session()->getId();
+        $this->deviceService->updateDeviceActivity($user, $request, $sessionId);
 
         return $next($request);
     }
