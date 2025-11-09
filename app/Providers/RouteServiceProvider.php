@@ -33,15 +33,9 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
-            // Central application routes (tenant management, billing, landing) - MUST COME FIRST
-            Route::middleware(['web'])
-                ->group(base_path('routes/central.php'));
-
-            // Other application routes - loaded after central
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
 
-            /*
             Route::middleware('web')
                 ->group(base_path('routes/hr.php'));
 
@@ -59,7 +53,6 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/modules.php'));
-            */
         });
     }
 }

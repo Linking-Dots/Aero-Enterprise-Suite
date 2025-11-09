@@ -15,9 +15,6 @@ class DocumentCategory extends Model
         'name',
         'description',
         'parent_id',
-        'slug',
-        'color',
-        'is_active',
     ];
 
     /**
