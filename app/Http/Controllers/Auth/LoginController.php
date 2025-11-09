@@ -136,6 +136,9 @@ class LoginController extends Controller
             $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
 
             if (! $deviceCheck['allowed']) {
+                // Safely get blocked device (may be null in some cases)
+                $blockedDevice = $deviceCheck['blocked_by_device'] ?? null;
+
                 $this->authService->logAuthenticationEvent(
                     $user,
                     'login_device_blocked',
@@ -143,7 +146,7 @@ class LoginController extends Controller
                     $request,
                     [
                         'device_id' => $deviceCheck['device_id'],
-                        'blocked_by_device' => $deviceCheck['blocked_by_device']?->id,
+                        'blocked_by_device' => $blockedDevice?->id,
                         'message' => $deviceCheck['message'],
                     ]
                 );
@@ -159,15 +162,15 @@ class LoginController extends Controller
                 $deviceBlockedData = [
                     'blocked' => true,
                     'message' => $deviceMessage,
-                    'blocked_device_info' => $deviceCheck['blocked_by_device'] ? [
-                        'device_name' => $deviceCheck['blocked_by_device']->device_name,
-                        'browser' => $deviceCheck['blocked_by_device']->browser_name,
-                        'browser_version' => $deviceCheck['blocked_by_device']->browser_version,
-                        'platform' => $deviceCheck['blocked_by_device']->platform,
-                        'device_type' => $deviceCheck['blocked_by_device']->device_type,
-                        'ip_address' => $deviceCheck['blocked_by_device']->ip_address,
-                        'last_activity' => $deviceCheck['blocked_by_device']->last_activity ?
-                            $deviceCheck['blocked_by_device']->last_activity->format('M j, Y g:i A') : null,
+                    'blocked_device_info' => $blockedDevice ? [
+                        'device_name' => $blockedDevice->device_name,
+                        'browser' => $blockedDevice->browser_name,
+                        'browser_version' => $blockedDevice->browser_version,
+                        'platform' => $blockedDevice->platform,
+                        'device_type' => $blockedDevice->device_type,
+                        'ip_address' => $blockedDevice->ip_address,
+                        'last_activity' => $blockedDevice->last_activity ?
+                            $blockedDevice->last_activity->format('M j, Y g:i A') : null,
                     ] : null,
                 ];
 
