@@ -55,17 +55,18 @@ export function getDeviceGuid(): string {
 
 /**
  * Get the stored FCM token
+ * Checks multiple locations for compatibility with existing Firebase setup
  */
 export function getFcmToken(): string | null {
-    // Try cookie first
-    let fcmToken = Cookies.get('fcm_token');
+    // Check localStorage with both old and new keys
+    let fcmToken = localStorage.getItem('fcm_token') || localStorage.getItem(FCM_TOKEN_STORAGE);
     
-    // Try localStorage as backup
+    // Try cookie as backup
     if (!fcmToken) {
-        fcmToken = localStorage.getItem(FCM_TOKEN_STORAGE);
+        fcmToken = Cookies.get('fcm_token');
     }
     
-    return fcmToken;
+    return fcmToken || null;
 }
 
 /**

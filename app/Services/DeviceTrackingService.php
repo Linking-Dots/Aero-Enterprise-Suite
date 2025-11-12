@@ -359,6 +359,11 @@ class DeviceTrackingService
         $compatibleDeviceId = $this->generateCompatibleDeviceId($request, $user->id); // Include user_id
         $deviceInfo = $this->getDeviceInfo($request);
 
+        // If no FCM token in request, try to get from user table (existing Firebase setup)
+        if (empty($deviceInfo['fcm_token']) && ! empty($user->fcm_token)) {
+            $deviceInfo['fcm_token'] = $user->fcm_token;
+        }
+
         return \Illuminate\Support\Facades\DB::transaction(function () use ($user, $deviceId, $compatibleDeviceId, $sessionId, $deviceInfo) {
             // If single device login is enabled, remove all other devices first
             // CRITICAL: Only delete devices belonging to THIS user
