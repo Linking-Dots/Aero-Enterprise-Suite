@@ -11,6 +11,7 @@ import { ThemeProvider } from './Contexts/ThemeContext';
 import { HeroUIProvider } from '@heroui/react';
 import './bootstrap';
 import './theme/index.js';
+import { initializeDeviceIdentification } from './services/deviceIdentification';
 
 // Enhanced axios configuration with interceptors
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -187,6 +188,11 @@ createInertiaApp({
         }
     },
 }).then(() => {
+    // Initialize device identification
+    initializeDeviceIdentification().catch(err => {
+        console.warn('Device identification initialization failed:', err);
+    });
+    
     // Theme restoration is now handled by ThemeContext
     console.log('App initialization complete - theme handled by ThemeContext');
     

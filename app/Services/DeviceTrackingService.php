@@ -20,77 +20,102 @@ class DeviceTrackingService
 
     /**
      * Generate a unique device identifier based on request data.
-     * Note: IP address is excluded from fingerprint to handle dynamic IPs.
+     * IMPROVED: Prioritizes stable identifiers over volatile browser headers.
      */
     public function generateDeviceId(Request $request): string
     {
-        $userAgent = $request->userAgent() ?? '';
+        // Priority 1: FCM Token (most stable, unique per device/app installation)
+        $fcmToken = $request->header('X-FCM-Token')
+            ?? $request->input('fcm_token')
+            ?? $request->cookie('fcm_token');
 
-        // Include hardware identifiers in fingerprint if available to improve uniqueness
-        $deviceModel = $request->header('X-Device-Model')
-            ?? $request->input('device_model')
-            ?? $request->cookie('device_model');
+        if ($fcmToken) {
+            // FCM token is highly stable and unique
+            return hash('sha256', 'fcm:'.$fcmToken);
+        }
 
-        $deviceSerial = $request->header('X-Device-Serial')
-            ?? $request->input('device_serial')
-            ?? $request->cookie('device_serial');
+        // Priority 2: Device GUID (persistent cookie set by frontend)
+        $deviceGuid = $request->cookie('device_guid')
+            ?? $request->header('X-Device-GUID')
+            ?? $request->input('device_guid');
 
-        // Create a stable device fingerprint that doesn't include IP
-        // This prevents issues with dynamic IPs, WiFi switching, VPN usage, etc.
-        $fingerprint = [
-            'user_agent' => $userAgent,
-            'accept_language' => $request->header('Accept-Language', ''),
-            'accept_encoding' => $request->header('Accept-Encoding', ''),
-            // Include hardware info in fingerprint for better uniqueness when available
-            'device_model' => $deviceModel,
-            'device_serial' => $deviceSerial,
-        ];
+        if ($deviceGuid) {
+            return hash('sha256', 'guid:'.$deviceGuid);
+        }
 
-        $fingerprintString = json_encode($fingerprint);
+        // Priority 3: Hardware identifiers (native apps via Capacitor)
+        $deviceUuid = $request->header('X-Device-UUID')
+            ?? $request->input('device_uuid')
+            ?? $request->cookie('device_uuid');
 
-        return hash('sha256', $fingerprintString);
+        if ($deviceUuid) {
+            return hash('sha256', 'uuid:'.$deviceUuid);
+        }
+
+        // Priority 4: MAC address (if provided by native app)
+        $deviceMac = $request->header('X-Device-Mac')
+            ?? $request->input('device_mac')
+            ?? $request->cookie('device_mac');
+
+        if ($deviceMac) {
+            return hash('sha256', 'mac:'.$deviceMac);
+        }
+
+        // Fallback: Basic fingerprint (least stable, only use if nothing else available)
+        // Only use User Agent, no volatile headers
+        $userAgent = $request->userAgent() ?? 'unknown';
+
+        return hash('sha256', 'fallback:'.$userAgent);
     }
 
     /**
      * Generate a more flexible device identifier for compatibility checks.
-     * This is used to identify similar devices even with minor differences.
-     * CRITICAL: Now includes user_id to prevent cross-account device reuse.
+     * IMPROVED: Uses stable identifiers + user_id to prevent cross-account device reuse.
      */
     public function generateCompatibleDeviceId(Request $request, ?int $userId = null): string
     {
+        // Try to get FCM token first (most stable)
+        $fcmToken = $request->header('X-FCM-Token')
+            ?? $request->input('fcm_token')
+            ?? $request->cookie('fcm_token');
+
+        if ($fcmToken) {
+            // FCM token + user_id = perfect device identification
+            return hash('sha256', json_encode([
+                'fcm_token' => $fcmToken,
+                'user_id' => $userId,
+            ]));
+        }
+
+        // Try device GUID
+        $deviceGuid = $request->cookie('device_guid')
+            ?? $request->header('X-Device-GUID')
+            ?? $request->input('device_guid');
+
+        if ($deviceGuid) {
+            return hash('sha256', json_encode([
+                'device_guid' => $deviceGuid,
+                'user_id' => $userId,
+            ]));
+        }
+
+        // Fallback to browser/platform fingerprint
         $userAgent = $request->userAgent() ?? '';
-
-        // Extract core browser and platform info, ignoring version details
         $this->agent->setUserAgent($userAgent);
-
-        // Include stable client hints for better device differentiation
-        $clientHints = [
-            'ua_platform' => $request->header('Sec-CH-UA-Platform'),
-            'ua_mobile' => $request->header('Sec-CH-UA-Mobile'),
-            'ua_model' => $request->header('Sec-CH-UA-Model'),
-            'ua_full_version' => $request->header('Sec-CH-UA-Full-Version'),
-        ];
-
-        // Check for persistent device GUID cookie
-        $deviceGuid = $request->cookie('device_guid');
 
         $coreFingerprint = [
             'browser' => $this->agent->browser(),
             'platform' => $this->agent->platform(),
             'device_type' => $this->agent->isMobile() ? 'mobile' : ($this->agent->isTablet() ? 'tablet' : 'desktop'),
-            'client_hints' => array_filter($clientHints), // Only include non-null hints
-            'device_guid' => $deviceGuid,
-            // CRITICAL: Include user_id to scope devices per account
             'user_id' => $userId,
         ];
 
-        $fingerprintString = json_encode($coreFingerprint);
-
-        return hash('sha256', $fingerprintString);
+        return hash('sha256', json_encode($coreFingerprint));
     }
 
     /**
      * Get device information from request.
+     * IMPROVED: Captures FCM token and persistent device identifiers.
      */
     public function getDeviceInfo(Request $request): array
     {
@@ -103,7 +128,20 @@ class DeviceTrackingService
             $deviceType = 'tablet';
         }
 
-        // Try to read hardware identity from headers, then body input, then cookies
+        // Stable identifiers (priority order)
+        $fcmToken = $request->header('X-FCM-Token')
+            ?? $request->input('fcm_token')
+            ?? $request->cookie('fcm_token');
+
+        $deviceGuid = $request->cookie('device_guid')
+            ?? $request->header('X-Device-GUID')
+            ?? $request->input('device_guid');
+
+        $deviceUuid = $request->header('X-Device-UUID')
+            ?? $request->input('device_uuid')
+            ?? $request->cookie('device_uuid');
+
+        // Hardware identifiers (for native apps)
         $deviceModel = $request->header('X-Device-Model')
             ?? $request->input('device_model')
             ?? $request->cookie('device_model');
@@ -124,7 +162,11 @@ class DeviceTrackingService
             'device_type' => $deviceType,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            // Optional hardware identifiers provided by native shells or browser extensions
+            // Stable identifiers
+            'fcm_token' => $fcmToken,
+            'device_guid' => $deviceGuid,
+            'device_uuid' => $deviceUuid,
+            // Hardware identifiers
             'device_model' => $deviceModel,
             'device_serial' => $deviceSerial,
             'device_mac' => $deviceMac,
@@ -336,6 +378,11 @@ class DeviceTrackingService
                 ],
                 [
                     'compatible_device_id' => $compatibleDeviceId,
+                    // Stable identifiers
+                    'fcm_token' => $deviceInfo['fcm_token'] ?? null,
+                    'device_guid' => $deviceInfo['device_guid'] ?? null,
+                    'device_uuid' => $deviceInfo['device_uuid'] ?? null,
+                    // Hardware identifiers
                     'device_model' => $deviceInfo['device_model'] ?? null,
                     'device_serial' => $deviceInfo['device_serial'] ?? null,
                     'device_mac' => $deviceInfo['device_mac'] ?? null,

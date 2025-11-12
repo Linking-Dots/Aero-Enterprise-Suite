@@ -15,9 +15,14 @@ class UserDevice extends Model
         'user_id',
         'device_id',
         'compatible_device_id',
-    'device_model',
-    'device_serial',
-    'device_mac',
+        // Stable identifiers
+        'fcm_token',
+        'device_guid',
+        'device_uuid',
+        // Hardware identifiers
+        'device_model',
+        'device_serial',
+        'device_mac',
         'device_name',
         'browser_name',
         'browser_version',
