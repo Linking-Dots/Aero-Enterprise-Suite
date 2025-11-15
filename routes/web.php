@@ -46,7 +46,8 @@ Route::get('/csrf-token', function () {
 });
 
 // Apply device authentication middleware to protected routes
-$middlewareStack = ['auth', 'verified', 'device_auth'];
+// TEMPORARY: Device auth disabled until deployment is verified
+$middlewareStack = ['auth', 'verified']; // 'device_auth' - temporarily disabled
 
 Route::middleware($middlewareStack)->group(function () {
 
