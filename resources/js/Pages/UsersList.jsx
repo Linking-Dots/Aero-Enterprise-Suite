@@ -237,11 +237,19 @@ const UsersList = ({ title, roles, departments, designations }) => {
       if (response.status === 200) {
         const { users } = response.data;
         
-        // Handle paginated data
+        // Handle paginated data with UserCollection structure
         if (users.data && Array.isArray(users.data)) {
           setUsers(users.data);
-          setTotalRows(users.total || users.data.length);
-          setLastPage(users.last_page || 1);
+          
+          // Check if meta object exists (UserCollection format)
+          if (users.meta) {
+            setTotalRows(users.meta.total || 0);
+            setLastPage(users.meta.last_page || 1);
+          } else {
+            // Fallback to old format
+            setTotalRows(users.total || users.data.length);
+            setLastPage(users.last_page || 1);
+          }
         } else if (Array.isArray(users)) {
           // Handle direct array response
           setUsers(users);
