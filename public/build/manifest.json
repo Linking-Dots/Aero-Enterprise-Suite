@@ -1,155 +1,155 @@
 {
-  "_AdjustmentsHorizontalIcon-DoeVcrNC.js": {
-    "file": "assets/AdjustmentsHorizontalIcon-DoeVcrNC.js",
+  "_AdjustmentsHorizontalIcon-B2d4jZmU.js": {
+    "file": "assets/AdjustmentsHorizontalIcon-B2d4jZmU.js",
     "name": "AdjustmentsHorizontalIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ArrowLeftIcon-CVRHKWva.js": {
-    "file": "assets/ArrowLeftIcon-CVRHKWva.js",
+  "_ArrowLeftIcon-ApUiDBHv.js": {
+    "file": "assets/ArrowLeftIcon-ApUiDBHv.js",
     "name": "ArrowLeftIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_AuthLayout-Bdr63d2E.js": {
-    "file": "assets/AuthLayout-Bdr63d2E.js",
+  "_AuthLayout-CtSCMbS4.js": {
+    "file": "assets/AuthLayout-CtSCMbS4.js",
     "name": "AuthLayout",
     "imports": [
       "resources/js/app.jsx",
-      "_GlassCard-tq8d8nY0.js",
+      "_GlassCard-CIHhNUtW.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js"
+      "_proxy-fDD2ujqZ.js"
     ]
   },
-  "_BulkDeleteModal-Dj84QE_e.js": {
-    "file": "assets/BulkDeleteModal-Dj84QE_e.js",
+  "_BulkDeleteModal-BkVAmFi4.js": {
+    "file": "assets/BulkDeleteModal-BkVAmFi4.js",
     "name": "BulkDeleteModal",
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ClockIcon-ChFXL_Ff.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_HeartIcon-BK63qj52.js",
-      "_SunIcon-C7JKk0vx.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_calendar-BopjbhtG.js",
-      "_user-DWiuetAs.js",
-      "_clock-Cr7aNZop.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js"
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ClockIcon-BafoBwRf.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_UserIcon-DaWnyvow.js",
+      "_HeartIcon-DU7-434-.js",
+      "_SunIcon-Cj_Qrx1B.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_calendar-Ks81t44C.js",
+      "_user-DmY_trHG.js",
+      "_clock-wTTKFUfg.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js"
     ]
   },
-  "_Button-Bf4-Yrbe.js": {
-    "file": "assets/Button-Bf4-Yrbe.js",
+  "_Button-z6WBnGJR.js": {
+    "file": "assets/Button-z6WBnGJR.js",
     "name": "Button",
     "imports": [
       "resources/js/app.jsx",
-      "_proxy-BHshDoAS.js"
+      "_proxy-fDD2ujqZ.js"
     ]
   },
-  "_ChartBarIcon-JNTBlviq.js": {
-    "file": "assets/ChartBarIcon-JNTBlviq.js",
+  "_ChartBarIcon-BPMcdXzD.js": {
+    "file": "assets/ChartBarIcon-BPMcdXzD.js",
     "name": "ChartBarIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ChartPieIcon-ClsO98FT.js": {
-    "file": "assets/ChartPieIcon-ClsO98FT.js",
+  "_ChartPieIcon-ntKMmsso.js": {
+    "file": "assets/ChartPieIcon-ntKMmsso.js",
     "name": "ChartPieIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_CheckCircleIcon-BlN3OktQ.js": {
-    "file": "assets/CheckCircleIcon-BlN3OktQ.js",
+  "_CheckCircleIcon-DFaNd4qG.js": {
+    "file": "assets/CheckCircleIcon-DFaNd4qG.js",
     "name": "CheckCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_CheckCircleIcon-CTmMgZPD.js": {
-    "file": "assets/CheckCircleIcon-CTmMgZPD.js",
+  "_CheckCircleIcon-Y6zaNLYr.js": {
+    "file": "assets/CheckCircleIcon-Y6zaNLYr.js",
     "name": "CheckCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ClipboardDocumentListIcon-DHMz6QIL.js": {
-    "file": "assets/ClipboardDocumentListIcon-DHMz6QIL.js",
+  "_ClipboardDocumentListIcon-BcuN99hl.js": {
+    "file": "assets/ClipboardDocumentListIcon-BcuN99hl.js",
     "name": "ClipboardDocumentListIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ClockIcon-ChFXL_Ff.js": {
-    "file": "assets/ClockIcon-ChFXL_Ff.js",
+  "_ClockIcon-BafoBwRf.js": {
+    "file": "assets/ClockIcon-BafoBwRf.js",
     "name": "ClockIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_DailyWorks-BP2rAQ-p.js": {
-    "file": "assets/DailyWorks-BP2rAQ-p.js",
+  "_DailyWorks-BCycH9u9.js": {
+    "file": "assets/DailyWorks-BCycH9u9.js",
     "name": "DailyWorks",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_xlsx-DhsXJJlV.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_StatsCards-CChDBcUs.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_calendar-BopjbhtG.js",
-      "_map-pin-BH_hdxQf.js",
-      "_clock-Cr7aNZop.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_useDateFieldState-nJ_7f98H.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_index-D4H5Nesx.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_proxy-BHshDoAS.js",
-      "_PlusIcon-BCxHxKhs.js"
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_xlsx-BNr-YIW2.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_UserIcon-DaWnyvow.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_calendar-Ks81t44C.js",
+      "_map-pin-BdoZnI6L.js",
+      "_clock-wTTKFUfg.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_useDateFieldState-CwwkgTCZ.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_features-animation-DXOOQoLz.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_index-BCwFVrUX.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PlusIcon-CxlvS_ES.js"
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs",
@@ -162,23 +162,23 @@
     "file": "assets/Dashboard-Bh76j7cs.css",
     "src": "_Dashboard-Bh76j7cs.css"
   },
-  "_Dashboard-DJ5BzCaS.js": {
-    "file": "assets/Dashboard-DJ5BzCaS.js",
+  "_Dashboard-h6QAntAa.js": {
+    "file": "assets/Dashboard-h6QAntAa.js",
     "name": "Dashboard",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_CheckCircleIcon-CTmMgZPD.js"
+      "_proxy-fDD2ujqZ.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_CheckCircleIcon-DFaNd4qG.js"
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs",
@@ -192,404 +192,404 @@
       "assets/Dashboard-Bh76j7cs.css"
     ]
   },
-  "_DeviceTabletIcon-C8e1JzaF.js": {
-    "file": "assets/DeviceTabletIcon-C8e1JzaF.js",
+  "_DeviceTabletIcon-KQwbRISO.js": {
+    "file": "assets/DeviceTabletIcon-KQwbRISO.js",
     "name": "DeviceTabletIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_DocumentArrowDownIcon-BTegPBhP.js": {
-    "file": "assets/DocumentArrowDownIcon-BTegPBhP.js",
+  "_DocumentArrowDownIcon-C20MXWnv.js": {
+    "file": "assets/DocumentArrowDownIcon-C20MXWnv.js",
     "name": "DocumentArrowDownIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_EllipsisVerticalIcon-MD4dfyXX.js": {
-    "file": "assets/EllipsisVerticalIcon-MD4dfyXX.js",
+  "_EllipsisVerticalIcon-ttfMl0oW.js": {
+    "file": "assets/EllipsisVerticalIcon-ttfMl0oW.js",
     "name": "EllipsisVerticalIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_EnvelopeIcon-Cyp16-sG.js": {
-    "file": "assets/EnvelopeIcon-Cyp16-sG.js",
+  "_EnvelopeIcon-B5mwuyNO.js": {
+    "file": "assets/EnvelopeIcon-B5mwuyNO.js",
     "name": "EnvelopeIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ExclamationTriangleIcon-DMLwC-5W.js": {
-    "file": "assets/ExclamationTriangleIcon-DMLwC-5W.js",
+  "_ExclamationTriangleIcon-BGAT4xC5.js": {
+    "file": "assets/ExclamationTriangleIcon-BGAT4xC5.js",
     "name": "ExclamationTriangleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ExclamationTriangleIcon-U8_lQdyK.js": {
-    "file": "assets/ExclamationTriangleIcon-U8_lQdyK.js",
+  "_ExclamationTriangleIcon-BRHce3NX.js": {
+    "file": "assets/ExclamationTriangleIcon-BRHce3NX.js",
     "name": "ExclamationTriangleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_EyeIcon-kjikpHR1.js": {
-    "file": "assets/EyeIcon-kjikpHR1.js",
+  "_EyeIcon-a0s7eMVb.js": {
+    "file": "assets/EyeIcon-a0s7eMVb.js",
     "name": "EyeIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_EyeSlashIcon-BWXE-kQB.js": {
-    "file": "assets/EyeSlashIcon-BWXE-kQB.js",
+  "_EyeSlashIcon-BMfzW_oW.js": {
+    "file": "assets/EyeSlashIcon-BMfzW_oW.js",
     "name": "EyeSlashIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_FunnelIcon-2Kubj-Dn.js": {
-    "file": "assets/FunnelIcon-2Kubj-Dn.js",
+  "_FunnelIcon-BRFBKw4y.js": {
+    "file": "assets/FunnelIcon-BRFBKw4y.js",
     "name": "FunnelIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_GlassCard-tq8d8nY0.js": {
-    "file": "assets/GlassCard-tq8d8nY0.js",
+  "_GlassCard-CIHhNUtW.js": {
+    "file": "assets/GlassCard-CIHhNUtW.js",
     "name": "GlassCard",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_GlobeAltIcon-noOtcPmT.js": {
-    "file": "assets/GlobeAltIcon-noOtcPmT.js",
+  "_GlobeAltIcon-DpJEJ-u2.js": {
+    "file": "assets/GlobeAltIcon-DpJEJ-u2.js",
     "name": "GlobeAltIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_HashtagIcon-Dsxi04I6.js": {
-    "file": "assets/HashtagIcon-Dsxi04I6.js",
+  "_HashtagIcon-DW0VWQSv.js": {
+    "file": "assets/HashtagIcon-DW0VWQSv.js",
     "name": "HashtagIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_HeartIcon-BK63qj52.js": {
-    "file": "assets/HeartIcon-BK63qj52.js",
+  "_HeartIcon-DU7-434-.js": {
+    "file": "assets/HeartIcon-DU7-434-.js",
     "name": "HeartIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_InformationCircleIcon-CDepHfVV.js": {
-    "file": "assets/InformationCircleIcon-CDepHfVV.js",
+  "_InformationCircleIcon-CMaP-m_1.js": {
+    "file": "assets/InformationCircleIcon-CMaP-m_1.js",
     "name": "InformationCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_KeyIcon-BR78fqqK.js": {
-    "file": "assets/KeyIcon-BR78fqqK.js",
+  "_KeyIcon-BOXdq5uq.js": {
+    "file": "assets/KeyIcon-BOXdq5uq.js",
     "name": "KeyIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_LockClosedIcon-DAK_BEbO.js": {
-    "file": "assets/LockClosedIcon-DAK_BEbO.js",
+  "_LockClosedIcon-BUK-UVqk.js": {
+    "file": "assets/LockClosedIcon-BUK-UVqk.js",
     "name": "LockClosedIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_LockOpenIcon-LY5WiS6Y.js": {
-    "file": "assets/LockOpenIcon-LY5WiS6Y.js",
+  "_LockOpenIcon-K-DQ3yb-.js": {
+    "file": "assets/LockOpenIcon-K-DQ3yb-.js",
     "name": "LockOpenIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_MagnifyingGlassIcon-D5oqs3FB.js": {
-    "file": "assets/MagnifyingGlassIcon-D5oqs3FB.js",
+  "_MagnifyingGlassIcon-BWFO8J6c.js": {
+    "file": "assets/MagnifyingGlassIcon-BWFO8J6c.js",
     "name": "MagnifyingGlassIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_Marker-DzpXMdCb.js": {
-    "file": "assets/Marker-DzpXMdCb.js",
+  "_Marker-PPW3Hilj.js": {
+    "file": "assets/Marker-PPW3Hilj.js",
     "name": "Marker",
     "imports": [
-      "_leaflet-CaP3HUOO.js"
+      "_leaflet-k81ujoNR.js"
     ]
   },
-  "_NoDataMessage-BW2gelus.js": {
-    "file": "assets/NoDataMessage-BW2gelus.js",
+  "_NoDataMessage-B8Cf7x5Q.js": {
+    "file": "assets/NoDataMessage-B8Cf7x5Q.js",
     "name": "NoDataMessage",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_PageHeader-BotAXnpM.js": {
-    "file": "assets/PageHeader-BotAXnpM.js",
+  "_PageHeader-E9WcBe_9.js": {
+    "file": "assets/PageHeader-E9WcBe_9.js",
     "name": "PageHeader",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_PencilIcon-BkKyTD42.js": {
-    "file": "assets/PencilIcon-BkKyTD42.js",
+  "_PencilIcon-BuUz1NC4.js": {
+    "file": "assets/PencilIcon-BuUz1NC4.js",
     "name": "PencilIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_PlusIcon-BCxHxKhs.js": {
-    "file": "assets/PlusIcon-BCxHxKhs.js",
+  "_PlusIcon-CxlvS_ES.js": {
+    "file": "assets/PlusIcon-CxlvS_ES.js",
     "name": "PlusIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_PresentationChartLineIcon-SFe0N5ss.js": {
-    "file": "assets/PresentationChartLineIcon-SFe0N5ss.js",
+  "_PresentationChartLineIcon-D4O6ggVs.js": {
+    "file": "assets/PresentationChartLineIcon-D4O6ggVs.js",
     "name": "PresentationChartLineIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_ShieldCheckIcon-BYBWX_Ph.js": {
-    "file": "assets/ShieldCheckIcon-BYBWX_Ph.js",
+  "_ShieldCheckIcon-BRyCzdhJ.js": {
+    "file": "assets/ShieldCheckIcon-BRyCzdhJ.js",
     "name": "ShieldCheckIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_StatsCards-CChDBcUs.js": {
-    "file": "assets/StatsCards-CChDBcUs.js",
+  "_StatsCards-_COLE7TS.js": {
+    "file": "assets/StatsCards-_COLE7TS.js",
     "name": "StatsCards",
     "imports": [
       "resources/js/app.jsx",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js"
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js"
     ]
   },
-  "_SunIcon-C7JKk0vx.js": {
-    "file": "assets/SunIcon-C7JKk0vx.js",
+  "_SunIcon-Cj_Qrx1B.js": {
+    "file": "assets/SunIcon-Cj_Qrx1B.js",
     "name": "SunIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_TableCellsIcon-m10qWc7L.js": {
-    "file": "assets/TableCellsIcon-m10qWc7L.js",
+  "_TableCellsIcon-BcPJX8Jt.js": {
+    "file": "assets/TableCellsIcon-BcPJX8Jt.js",
     "name": "TableCellsIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_TimeSheetTable-DTDiBSvR.js": {
-    "file": "assets/TimeSheetTable-DTDiBSvR.js",
+  "_TimeSheetTable-CxcLXCwq.js": {
+    "file": "assets/TimeSheetTable-CxcLXCwq.js",
     "name": "TimeSheetTable",
     "imports": [
       "resources/js/app.jsx",
-      "_dayjs.min-B9vFY_nY.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_PageHeader-BotAXnpM.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_proxy-BHshDoAS.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js"
+      "_dayjs.min-CXJgYfto.js",
+      "_Dashboard-h6QAntAa.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_proxy-fDD2ujqZ.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_UserIcon-DaWnyvow.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-S574QCAN-CBc0rh3V.js"
     ]
   },
-  "_TrashIcon-jO2cXYDk.js": {
-    "file": "assets/TrashIcon-jO2cXYDk.js",
+  "_TrashIcon-ZPnPh3K_.js": {
+    "file": "assets/TrashIcon-ZPnPh3K_.js",
     "name": "TrashIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_TrophyIcon-CGh3NavR.js": {
-    "file": "assets/TrophyIcon-CGh3NavR.js",
+  "_TrophyIcon-CddmzjLT.js": {
+    "file": "assets/TrophyIcon-CddmzjLT.js",
     "name": "TrophyIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_UserIcon-CpBOTOOT.js": {
-    "file": "assets/UserIcon-CpBOTOOT.js",
+  "_UserIcon-DaWnyvow.js": {
+    "file": "assets/UserIcon-DaWnyvow.js",
     "name": "UserIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_UserPlusIcon-lZU_2lRt.js": {
-    "file": "assets/UserPlusIcon-lZU_2lRt.js",
+  "_UserPlusIcon-w_pElCY9.js": {
+    "file": "assets/UserPlusIcon-w_pElCY9.js",
     "name": "UserPlusIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_XCircleIcon-ChDLRiub.js": {
-    "file": "assets/XCircleIcon-ChDLRiub.js",
+  "_XCircleIcon-BOaQsNyQ.js": {
+    "file": "assets/XCircleIcon-BOaQsNyQ.js",
     "name": "XCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_XCircleIcon-G5zt9xsl.js": {
-    "file": "assets/XCircleIcon-G5zt9xsl.js",
+  "_XCircleIcon-CtQsJLNo.js": {
+    "file": "assets/XCircleIcon-CtQsJLNo.js",
     "name": "XCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_calendar-BopjbhtG.js": {
-    "file": "assets/calendar-BopjbhtG.js",
+  "_calendar-Ks81t44C.js": {
+    "file": "assets/calendar-Ks81t44C.js",
     "name": "calendar",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_camera-BhvD-9YI.js": {
-    "file": "assets/camera-BhvD-9YI.js",
+  "_camera-Bqbvuv38.js": {
+    "file": "assets/camera-Bqbvuv38.js",
     "name": "camera",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_chunk-57V4RE7B-DYEOAoWt.js": {
-    "file": "assets/chunk-57V4RE7B-DYEOAoWt.js",
+  "_chunk-57V4RE7B-E5HD9hav.js": {
+    "file": "assets/chunk-57V4RE7B-E5HD9hav.js",
     "name": "chunk-57V4RE7B",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-D5XJWRAV-CVXe_h6o.js": {
-    "file": "assets/chunk-D5XJWRAV-CVXe_h6o.js",
+  "_chunk-D5XJWRAV-D_IgJYwa.js": {
+    "file": "assets/chunk-D5XJWRAV-D_IgJYwa.js",
     "name": "chunk-D5XJWRAV",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-EAPQ7RWQ-C_ZIqbI7.js": {
-    "file": "assets/chunk-EAPQ7RWQ-C_ZIqbI7.js",
+  "_chunk-EAPQ7RWQ-CaYebZHr.js": {
+    "file": "assets/chunk-EAPQ7RWQ-CaYebZHr.js",
     "name": "chunk-EAPQ7RWQ",
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js"
+      "_Dashboard-h6QAntAa.js"
     ]
   },
-  "_chunk-F3UDT23P-CfD27OBv.js": {
-    "file": "assets/chunk-F3UDT23P-CfD27OBv.js",
+  "_chunk-F3UDT23P-CDzd4n3p.js": {
+    "file": "assets/chunk-F3UDT23P-CDzd4n3p.js",
     "name": "chunk-F3UDT23P",
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js"
+      "_Dashboard-h6QAntAa.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js"
     ]
   },
-  "_chunk-JOT4BT4P-CLdwwahr.js": {
-    "file": "assets/chunk-JOT4BT4P-CLdwwahr.js",
+  "_chunk-JOT4BT4P-D2Qykl_U.js": {
+    "file": "assets/chunk-JOT4BT4P-D2Qykl_U.js",
     "name": "chunk-JOT4BT4P",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-QESP63UR-Cpfg6Osr.js": {
-    "file": "assets/chunk-QESP63UR-Cpfg6Osr.js",
+  "_chunk-QESP63UR-B3XRSBip.js": {
+    "file": "assets/chunk-QESP63UR-B3XRSBip.js",
     "name": "chunk-QESP63UR",
     "imports": [
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-S574QCAN-Cb5yHIHy.js": {
-    "file": "assets/chunk-S574QCAN-Cb5yHIHy.js",
+  "_chunk-S574QCAN-CBc0rh3V.js": {
+    "file": "assets/chunk-S574QCAN-CBc0rh3V.js",
     "name": "chunk-S574QCAN",
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js"
+      "_Dashboard-h6QAntAa.js"
     ]
   },
-  "_chunk-SSA7SXE4-BTItze1Z.js": {
-    "file": "assets/chunk-SSA7SXE4-BTItze1Z.js",
+  "_chunk-SSA7SXE4-DJSLlphc.js": {
+    "file": "assets/chunk-SSA7SXE4-DJSLlphc.js",
     "name": "chunk-SSA7SXE4",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-TLYTI3QM-BSxz-uix.js": {
-    "file": "assets/chunk-TLYTI3QM-BSxz-uix.js",
+  "_chunk-TLYTI3QM-DJeXmNPD.js": {
+    "file": "assets/chunk-TLYTI3QM-DJeXmNPD.js",
     "name": "chunk-TLYTI3QM",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_chunk-TQNYOUFX-Drz50ky1.js": {
-    "file": "assets/chunk-TQNYOUFX-Drz50ky1.js",
+  "_chunk-TQNYOUFX-Cm8QdaAl.js": {
+    "file": "assets/chunk-TQNYOUFX-Cm8QdaAl.js",
     "name": "chunk-TQNYOUFX",
     "imports": [
       "resources/js/app.jsx",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
-  "_chunk-XJ2YRSUP-lNaR9vZt.js": {
-    "file": "assets/chunk-XJ2YRSUP-lNaR9vZt.js",
+  "_chunk-XJ2YRSUP-Bbsfrd9q.js": {
+    "file": "assets/chunk-XJ2YRSUP-Bbsfrd9q.js",
     "name": "chunk-XJ2YRSUP",
     "imports": [
       "resources/js/app.jsx",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_react-toastify.esm-BDdnkiAB.js"
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_react-toastify.esm-DHv8-Qd5.js"
     ]
   },
-  "_chunk-YRZGWF2W-BSYRfbDM.js": {
-    "file": "assets/chunk-YRZGWF2W-BSYRfbDM.js",
+  "_chunk-YRZGWF2W-Do4JmSpw.js": {
+    "file": "assets/chunk-YRZGWF2W-Do4JmSpw.js",
     "name": "chunk-YRZGWF2W",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_clock-Cr7aNZop.js": {
-    "file": "assets/clock-Cr7aNZop.js",
+  "_clock-wTTKFUfg.js": {
+    "file": "assets/clock-wTTKFUfg.js",
     "name": "clock",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_create-visual-element-Dv6o1znz.js": {
-    "file": "assets/create-visual-element-Dv6o1znz.js",
+  "_create-visual-element-DH3r6YR-.js": {
+    "file": "assets/create-visual-element-DH3r6YR-.js",
     "name": "create-visual-element",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_createLucideIcon-BIFw61hB.js": {
-    "file": "assets/createLucideIcon-BIFw61hB.js",
+  "_createLucideIcon-Dy3jN6oq.js": {
+    "file": "assets/createLucideIcon-Dy3jN6oq.js",
     "name": "createLucideIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_dayjs.min-B9vFY_nY.js": {
-    "file": "assets/dayjs.min-B9vFY_nY.js",
+  "_dayjs.min-CXJgYfto.js": {
+    "file": "assets/dayjs.min-CXJgYfto.js",
     "name": "dayjs.min",
     "imports": [
       "resources/js/app.jsx"
@@ -599,34 +599,34 @@
     "file": "assets/en-US-D8UQXs-H.js",
     "name": "en-US"
   },
-  "_features-animation-BfbXr3Ir.js": {
-    "file": "assets/features-animation-BfbXr3Ir.js",
+  "_features-animation-DXOOQoLz.js": {
+    "file": "assets/features-animation-DXOOQoLz.js",
     "name": "features-animation",
     "imports": [
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
+    ]
+  },
+  "_index-BCwFVrUX.js": {
+    "file": "assets/index-BCwFVrUX.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.jsx"
     ]
   },
   "_index-CtBsO7PD.js": {
     "file": "assets/index-CtBsO7PD.js",
     "name": "index"
   },
-  "_index-D4H5Nesx.js": {
-    "file": "assets/index-D4H5Nesx.js",
-    "name": "index",
-    "imports": [
-      "resources/js/app.jsx"
-    ]
-  },
-  "_index-D5qpTudK.js": {
-    "file": "assets/index-D5qpTudK.js",
+  "_index-DrktYdp9.js": {
+    "file": "assets/index-DrktYdp9.js",
     "name": "index",
     "imports": [
       "resources/js/app.jsx",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js"
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js"
     ]
   },
-  "_isBetween-Branh0xT.js": {
-    "file": "assets/isBetween-Branh0xT.js",
+  "_isBetween-D2BVDtUD.js": {
+    "file": "assets/isBetween-D2BVDtUD.js",
     "name": "isBetween",
     "imports": [
       "resources/js/app.jsx"
@@ -636,8 +636,8 @@
     "file": "assets/leaflet-CLLlcC51.css",
     "src": "_leaflet-CLLlcC51.css"
   },
-  "_leaflet-CaP3HUOO.js": {
-    "file": "assets/leaflet-CaP3HUOO.js",
+  "_leaflet-k81ujoNR.js": {
+    "file": "assets/leaflet-k81ujoNR.js",
     "name": "leaflet",
     "imports": [
       "resources/js/app.jsx"
@@ -651,8 +651,8 @@
       "assets/marker-icon-hN30_KVU.png"
     ]
   },
-  "_leaflet-routing-machine-8quC1UbT.js": {
-    "file": "assets/leaflet-routing-machine-8quC1UbT.js",
+  "_leaflet-routing-machine-DnSwq9lb.js": {
+    "file": "assets/leaflet-routing-machine-DnSwq9lb.js",
     "name": "leaflet-routing-machine",
     "imports": [
       "resources/js/app.jsx"
@@ -665,79 +665,79 @@
       "assets/logo-DFQfDCzR.png"
     ]
   },
-  "_map-pin-BH_hdxQf.js": {
-    "file": "assets/map-pin-BH_hdxQf.js",
+  "_map-pin-BdoZnI6L.js": {
+    "file": "assets/map-pin-BdoZnI6L.js",
     "name": "map-pin",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_proxy-BHshDoAS.js": {
-    "file": "assets/proxy-BHshDoAS.js",
+  "_proxy-fDD2ujqZ.js": {
+    "file": "assets/proxy-fDD2ujqZ.js",
     "name": "proxy",
     "imports": [
       "resources/js/app.jsx",
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
-  "_react-toastify.esm-BDdnkiAB.js": {
-    "file": "assets/react-toastify.esm-BDdnkiAB.js",
+  "_react-toastify.esm-DHv8-Qd5.js": {
+    "file": "assets/react-toastify.esm-DHv8-Qd5.js",
     "name": "react-toastify.esm",
     "imports": [
       "resources/js/app.jsx",
-      "_chunk-SSA7SXE4-BTItze1Z.js"
+      "_chunk-SSA7SXE4-DJSLlphc.js"
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs"
     ]
   },
-  "_useDateFieldState-nJ_7f98H.js": {
-    "file": "assets/useDateFieldState-nJ_7f98H.js",
+  "_useDateFieldState-CwwkgTCZ.js": {
+    "file": "assets/useDateFieldState-CwwkgTCZ.js",
     "name": "useDateFieldState",
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-F3UDT23P-CfD27OBv.js"
+      "_Dashboard-h6QAntAa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js"
     ]
   },
-  "_useToggleState-CNXYdUeg.js": {
-    "file": "assets/useToggleState-CNXYdUeg.js",
+  "_useToggleState-DWHboc1X.js": {
+    "file": "assets/useToggleState-DWHboc1X.js",
     "name": "useToggleState",
     "imports": [
       "resources/js/app.jsx",
-      "_chunk-SSA7SXE4-BTItze1Z.js"
+      "_chunk-SSA7SXE4-DJSLlphc.js"
     ]
   },
-  "_user-DWiuetAs.js": {
-    "file": "assets/user-DWiuetAs.js",
+  "_user-DmY_trHG.js": {
+    "file": "assets/user-DmY_trHG.js",
     "name": "user",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_users-D8NTKVGd.js": {
-    "file": "assets/users-D8NTKVGd.js",
+  "_users-CKyHyw0u.js": {
+    "file": "assets/users-CKyHyw0u.js",
     "name": "users",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_x-DiaN4Qo4.js": {
-    "file": "assets/x-DiaN4Qo4.js",
+  "_x-B5Pdimeu.js": {
+    "file": "assets/x-B5Pdimeu.js",
     "name": "x",
     "imports": [
-      "_createLucideIcon-BIFw61hB.js"
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
-  "_xlsx-DhsXJJlV.js": {
-    "file": "assets/xlsx-DhsXJJlV.js",
+  "_xlsx-BNr-YIW2.js": {
+    "file": "assets/xlsx-BNr-YIW2.js",
     "name": "xlsx",
     "imports": [
       "resources/js/app.jsx",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_createLucideIcon-BIFw61hB.js"
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
   "node_modules/@fontsource/roboto/files/roboto-cyrillic-300-normal.woff": {
@@ -1029,65 +1029,65 @@
     "src": "node_modules/@fontsource/roboto/files/roboto-vietnamese-700-normal.woff2"
   },
   "node_modules/@heroui/dom-animation/dist/index.mjs": {
-    "file": "assets/index-w1ZwOfg1.js",
+    "file": "assets/index-lC17ktdR.js",
     "name": "index",
     "src": "node_modules/@heroui/dom-animation/dist/index.mjs",
     "isDynamicEntry": true,
     "imports": [
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
       "resources/js/app.jsx"
     ]
   },
   "node_modules/canvg/lib/index.es.js": {
-    "file": "assets/index.es-52SK9rgz.js",
+    "file": "assets/index.es-QaCHSPHY.js",
     "name": "index.es",
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_DailyWorks-BP2rAQ-p.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_DailyWorks-BCycH9u9.js",
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_xlsx-DhsXJJlV.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_StatsCards-CChDBcUs.js",
-      "_calendar-BopjbhtG.js",
-      "_map-pin-BH_hdxQf.js",
-      "_clock-Cr7aNZop.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_useDateFieldState-nJ_7f98H.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_index-D4H5Nesx.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_PlusIcon-BCxHxKhs.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_xlsx-BNr-YIW2.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_calendar-Ks81t44C.js",
+      "_map-pin-BdoZnI6L.js",
+      "_clock-wTTKFUfg.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_useDateFieldState-CwwkgTCZ.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_index-BCwFVrUX.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_PlusIcon-CxlvS_ES.js"
     ]
   },
   "node_modules/dompurify/dist/purify.es.mjs": {
@@ -1132,306 +1132,306 @@
     "isEntry": true
   },
   "resources/js/Pages/Administration/RoleManagement.jsx": {
-    "file": "assets/RoleManagement-CX0bw7bN.js",
+    "file": "assets/RoleManagement-CqfSz0m0.js",
     "name": "RoleManagement",
     "src": "resources/js/Pages/Administration/RoleManagement.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_GlassCard-tq8d8nY0.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_FunnelIcon-2Kubj-Dn.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_Dashboard-h6QAntAa.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_FunnelIcon-BRFBKw4y.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_features-animation-DXOOQoLz.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/Administration/SystemMonitoringEnhanced.jsx": {
-    "file": "assets/SystemMonitoringEnhanced-EGBQSrfL.js",
+    "file": "assets/SystemMonitoringEnhanced-Dy4xse2X.js",
     "name": "SystemMonitoringEnhanced",
     "src": "resources/js/Pages/Administration/SystemMonitoringEnhanced.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_proxy-BHshDoAS.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_index-D4H5Nesx.js",
-      "_ChartPieIcon-ClsO98FT.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_Dashboard-h6QAntAa.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_index-BCwFVrUX.js",
+      "_ChartPieIcon-ntKMmsso.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/AttendanceAdmin.jsx": {
-    "file": "assets/AttendanceAdmin-ZjJQ6z1V.js",
+    "file": "assets/AttendanceAdmin-Bw2ntc-Z.js",
     "name": "AttendanceAdmin",
     "src": "resources/js/Pages/AttendanceAdmin.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_ClipboardDocumentListIcon-DHMz6QIL.js",
-      "_proxy-BHshDoAS.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_MagnifyingGlassIcon-D5oqs3FB.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_UserIcon-DaWnyvow.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_ClipboardDocumentListIcon-BcuN99hl.js",
+      "_proxy-fDD2ujqZ.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_MagnifyingGlassIcon-BWFO8J6c.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/AttendanceEmployee.jsx": {
-    "file": "assets/AttendanceEmployee-DDQmzAab.js",
+    "file": "assets/AttendanceEmployee-DjuAdQYy.js",
     "name": "AttendanceEmployee",
     "src": "resources/js/Pages/AttendanceEmployee.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_TimeSheetTable-DTDiBSvR.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_proxy-BHshDoAS.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_TimeSheetTable-CxcLXCwq.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_UserIcon-DaWnyvow.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_PageHeader-BotAXnpM.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-S574QCAN-CBc0rh3V.js"
     ]
   },
   "resources/js/Pages/Auth/ForgotPassword.jsx": {
-    "file": "assets/ForgotPassword-Dovy7Wbi.js",
+    "file": "assets/ForgotPassword-CHHwqZh7.js",
     "name": "ForgotPassword",
     "src": "resources/js/Pages/Auth/ForgotPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthLayout-Bdr63d2E.js",
-      "_Button-Bf4-Yrbe.js",
-      "_proxy-BHshDoAS.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_ArrowLeftIcon-CVRHKWva.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_GlassCard-tq8d8nY0.js",
+      "_AuthLayout-CtSCMbS4.js",
+      "_Button-z6WBnGJR.js",
+      "_proxy-fDD2ujqZ.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_ArrowLeftIcon-ApUiDBHv.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_GlassCard-CIHhNUtW.js",
       "_logo-Pwvcz7fP.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
   "resources/js/Pages/Auth/Login.jsx": {
-    "file": "assets/Login-NMdHCrR-.js",
+    "file": "assets/Login-C7B6-MWh.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_proxy-BHshDoAS.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_DeviceTabletIcon-C8e1JzaF.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_EyeSlashIcon-BWXE-kQB.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_DeviceTabletIcon-KQwbRISO.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_EyeSlashIcon-BMfzW_oW.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/Auth/Register.jsx": {
-    "file": "assets/Register-DGzKjAyL.js",
+    "file": "assets/Register-CMKlAfgz.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthLayout-Bdr63d2E.js",
-      "_Button-Bf4-Yrbe.js",
-      "_proxy-BHshDoAS.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_EyeSlashIcon-BWXE-kQB.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_GlassCard-tq8d8nY0.js",
+      "_AuthLayout-CtSCMbS4.js",
+      "_Button-z6WBnGJR.js",
+      "_proxy-fDD2ujqZ.js",
+      "_UserIcon-DaWnyvow.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_EyeSlashIcon-BMfzW_oW.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_GlassCard-CIHhNUtW.js",
       "_logo-Pwvcz7fP.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
   "resources/js/Pages/Auth/ResetPassword.jsx": {
-    "file": "assets/ResetPassword-DFAwEfc2.js",
+    "file": "assets/ResetPassword-BpP3ZddW.js",
     "name": "ResetPassword",
     "src": "resources/js/Pages/Auth/ResetPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthLayout-Bdr63d2E.js",
-      "_Button-Bf4-Yrbe.js",
-      "_proxy-BHshDoAS.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_EyeSlashIcon-BWXE-kQB.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_GlassCard-tq8d8nY0.js",
+      "_AuthLayout-CtSCMbS4.js",
+      "_Button-z6WBnGJR.js",
+      "_proxy-fDD2ujqZ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_EyeSlashIcon-BMfzW_oW.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_GlassCard-CIHhNUtW.js",
       "_logo-Pwvcz7fP.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
   "resources/js/Pages/Auth/VerifyEmail.jsx": {
-    "file": "assets/VerifyEmail-BAXFwSyg.js",
+    "file": "assets/VerifyEmail-BFpotf25.js",
     "name": "VerifyEmail",
     "src": "resources/js/Pages/Auth/VerifyEmail.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthLayout-Bdr63d2E.js",
-      "_proxy-BHshDoAS.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_GlassCard-tq8d8nY0.js",
+      "_AuthLayout-CtSCMbS4.js",
+      "_proxy-fDD2ujqZ.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_GlassCard-CIHhNUtW.js",
       "_logo-Pwvcz7fP.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
   "resources/js/Pages/Dashboard.jsx": {
-    "file": "assets/Dashboard-DIzyG6IJ.js",
+    "file": "assets/Dashboard-CRTP31gB.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_TimeSheetTable-DTDiBSvR.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_leaflet-CaP3HUOO.js",
-      "_leaflet-routing-machine-8quC1UbT.js",
-      "_proxy-BHshDoAS.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_users-D8NTKVGd.js",
-      "_map-pin-BH_hdxQf.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_isBetween-Branh0xT.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_SunIcon-C7JKk0vx.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_ClipboardDocumentListIcon-DHMz6QIL.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_PageHeader-BotAXnpM.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_TimeSheetTable-CxcLXCwq.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_leaflet-k81ujoNR.js",
+      "_leaflet-routing-machine-DnSwq9lb.js",
+      "_proxy-fDD2ujqZ.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_users-CKyHyw0u.js",
+      "_map-pin-BdoZnI6L.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_isBetween-D2BVDtUD.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_SunIcon-Cj_Qrx1B.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_UserIcon-DaWnyvow.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_ClipboardDocumentListIcon-BcuN99hl.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js"
     ],
     "css": [
       "assets/Dashboard-CVsAX0xU.css"
@@ -1442,136 +1442,136 @@
     ]
   },
   "resources/js/Pages/Departments.jsx": {
-    "file": "assets/Departments-BNDcGwRy.js",
+    "file": "assets/Departments-BgO0bdRN.js",
     "name": "Departments",
     "src": "resources/js/Pages/Departments.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_NoDataMessage-BW2gelus.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_proxy-BHshDoAS.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_NoDataMessage-B8Cf7x5Q.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_UserIcon-DaWnyvow.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_proxy-fDD2ujqZ.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/Designations.jsx": {
-    "file": "assets/Designations-D0wnLNnU.js",
+    "file": "assets/Designations-inmP769Q.js",
     "name": "Designations",
     "src": "resources/js/Pages/Designations.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_NoDataMessage-BW2gelus.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_x-DiaN4Qo4.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_proxy-BHshDoAS.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_NoDataMessage-B8Cf7x5Q.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_x-B5Pdimeu.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_proxy-fDD2ujqZ.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_createLucideIcon-BIFw61hB.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_createLucideIcon-Dy3jN6oq.js"
     ]
   },
   "resources/js/Pages/Employees/EmployeeList.jsx": {
-    "file": "assets/EmployeeList-BpHR4w8t.js",
+    "file": "assets/EmployeeList-rCPlmPx2.js",
     "name": "EmployeeList",
     "src": "resources/js/Pages/Employees/EmployeeList.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_HashtagIcon-Dsxi04I6.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_TrophyIcon-CGh3NavR.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_proxy-BHshDoAS.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_FunnelIcon-2Kubj-Dn.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_UserIcon-DaWnyvow.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_HashtagIcon-DW0VWQSv.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_TrophyIcon-CddmzjLT.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_proxy-fDD2ujqZ.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_FunnelIcon-BRFBKw4y.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/HR/Offboarding/Create.jsx": {
-    "file": "assets/Create-DkdpB_3L.js",
+    "file": "assets/Create-ClCU0DGE.js",
     "name": "Create",
     "src": "resources/js/Pages/HR/Offboarding/Create.jsx",
     "isDynamicEntry": true,
@@ -1580,7 +1580,7 @@
     ]
   },
   "resources/js/Pages/HR/Offboarding/Index.jsx": {
-    "file": "assets/Index-D66BlPQL.js",
+    "file": "assets/Index-DdLfmgWO.js",
     "name": "Index",
     "src": "resources/js/Pages/HR/Offboarding/Index.jsx",
     "isDynamicEntry": true,
@@ -1589,7 +1589,7 @@
     ]
   },
   "resources/js/Pages/HR/Offboarding/Show.jsx": {
-    "file": "assets/Show-142TCHmQ.js",
+    "file": "assets/Show-DKe271iA.js",
     "name": "Show",
     "src": "resources/js/Pages/HR/Offboarding/Show.jsx",
     "isDynamicEntry": true,
@@ -1598,7 +1598,7 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Create.jsx": {
-    "file": "assets/Create-Bb85cR8y.js",
+    "file": "assets/Create-LtyZLk0n.js",
     "name": "Create",
     "src": "resources/js/Pages/HR/Onboarding/Create.jsx",
     "isDynamicEntry": true,
@@ -1607,7 +1607,7 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Edit.jsx": {
-    "file": "assets/Edit-CdpIgNXp.js",
+    "file": "assets/Edit-CqGPDeHk.js",
     "name": "Edit",
     "src": "resources/js/Pages/HR/Onboarding/Edit.jsx",
     "isDynamicEntry": true,
@@ -1616,7 +1616,7 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Index.jsx": {
-    "file": "assets/Index-DyuGfecA.js",
+    "file": "assets/Index-y5sL-rQ1.js",
     "name": "Index",
     "src": "resources/js/Pages/HR/Onboarding/Index.jsx",
     "isDynamicEntry": true,
@@ -1625,7 +1625,7 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Show.jsx": {
-    "file": "assets/Show-Doi3npSg.js",
+    "file": "assets/Show-6EDqQaZe.js",
     "name": "Show",
     "src": "resources/js/Pages/HR/Onboarding/Show.jsx",
     "isDynamicEntry": true,
@@ -1634,100 +1634,100 @@
     ]
   },
   "resources/js/Pages/HR/TimeOff/Dashboard.jsx": {
-    "file": "assets/Dashboard-CzRYTc3z.js",
+    "file": "assets/Dashboard-BhhlXHpa.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/HR/TimeOff/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_Dashboard-h6QAntAa.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js"
     ]
   },
   "resources/js/Pages/HR/TimeOff/Holidays.jsx": {
-    "file": "assets/Holidays-6HRxwXdk.js",
+    "file": "assets/Holidays-DEjLVPEa.js",
     "name": "Holidays",
     "src": "resources/js/Pages/HR/TimeOff/Holidays.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_index-D5qpTudK.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_proxy-BHshDoAS.js",
-      "_FunnelIcon-2Kubj-Dn.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_useDateFieldState-nJ_7f98H.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_index-DrktYdp9.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_FunnelIcon-BRFBKw4y.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_useDateFieldState-CwwkgTCZ.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/HR/TimeOff/Index.jsx": {
-    "file": "assets/Index-DC7AN_5N.js",
+    "file": "assets/Index-Blxy1mPP.js",
     "name": "Index",
     "src": "resources/js/Pages/HR/TimeOff/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_GlassCard-tq8d8nY0.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_proxy-BHshDoAS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
+      "_proxy-fDD2ujqZ.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js"
     ]
   },
   "resources/js/Pages/HR/Training/Create.jsx": {
@@ -1743,50 +1743,50 @@
     "isDynamicEntry": true
   },
   "resources/js/Pages/HR/Training/Index.jsx": {
-    "file": "assets/Index-H27Hr2rY.js",
+    "file": "assets/Index-DAkohKzX.js",
     "name": "Index",
     "src": "resources/js/Pages/HR/Training/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_user-DWiuetAs.js",
-      "_calendar-BopjbhtG.js",
-      "_map-pin-BH_hdxQf.js",
-      "_users-D8NTKVGd.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_proxy-BHshDoAS.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_MagnifyingGlassIcon-D5oqs3FB.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_user-DmY_trHG.js",
+      "_calendar-Ks81t44C.js",
+      "_map-pin-BdoZnI6L.js",
+      "_users-CKyHyw0u.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_MagnifyingGlassIcon-BWFO8J6c.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/HR/Training/Show.jsx": {
@@ -1796,252 +1796,252 @@
     "isDynamicEntry": true
   },
   "resources/js/Pages/Holidays.jsx": {
-    "file": "assets/Holidays-B0cTGnM6.js",
+    "file": "assets/Holidays-CLkAj9Do.js",
     "name": "Holidays",
     "src": "resources/js/Pages/Holidays.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
       "_en-US-D8UQXs-H.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_EyeIcon-kjikpHR1.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_proxy-BHshDoAS.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_EyeIcon-a0s7eMVb.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_proxy-fDD2ujqZ.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/LeaveSummary.jsx": {
-    "file": "assets/LeaveSummary-CdbVh4DK.js",
+    "file": "assets/LeaveSummary--C24U7ov.js",
     "name": "LeaveSummary",
     "src": "resources/js/Pages/LeaveSummary.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
       "_index-CtBsO7PD.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_StatsCards-CChDBcUs.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_proxy-BHshDoAS.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_FunnelIcon-2Kubj-Dn.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_StatsCards-_COLE7TS.js",
+      "_Dashboard-h6QAntAa.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_FunnelIcon-BRFBKw4y.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/LeavesAdmin.jsx": {
-    "file": "assets/LeavesAdmin-D2WOlv8K.js",
+    "file": "assets/LeavesAdmin-CDu7pVER.js",
     "name": "LeavesAdmin",
     "src": "resources/js/Pages/LeavesAdmin.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_BulkDeleteModal-Dj84QE_e.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_proxy-BHshDoAS.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_MagnifyingGlassIcon-D5oqs3FB.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_BulkDeleteModal-BkVAmFi4.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_MagnifyingGlassIcon-BWFO8J6c.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ClockIcon-ChFXL_Ff.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_HeartIcon-BK63qj52.js",
-      "_SunIcon-C7JKk0vx.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_calendar-BopjbhtG.js",
-      "_user-DWiuetAs.js",
-      "_clock-Cr7aNZop.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ClockIcon-BafoBwRf.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_HeartIcon-DU7-434-.js",
+      "_SunIcon-Cj_Qrx1B.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_calendar-Ks81t44C.js",
+      "_user-DmY_trHG.js",
+      "_clock-wTTKFUfg.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js"
     ]
   },
   "resources/js/Pages/LeavesAdmin_new.jsx": {
-    "file": "assets/LeavesAdmin_new-D8Slb2ev.js",
+    "file": "assets/LeavesAdmin_new-QV2jfjyj.js",
     "name": "LeavesAdmin_new",
     "src": "resources/js/Pages/LeavesAdmin_new.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_BulkDeleteModal-Dj84QE_e.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_proxy-BHshDoAS.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_MagnifyingGlassIcon-D5oqs3FB.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_BulkDeleteModal-BkVAmFi4.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_MagnifyingGlassIcon-BWFO8J6c.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ClockIcon-ChFXL_Ff.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_HeartIcon-BK63qj52.js",
-      "_SunIcon-C7JKk0vx.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_calendar-BopjbhtG.js",
-      "_user-DWiuetAs.js",
-      "_clock-Cr7aNZop.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ClockIcon-BafoBwRf.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_HeartIcon-DU7-434-.js",
+      "_SunIcon-Cj_Qrx1B.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_calendar-Ks81t44C.js",
+      "_user-DmY_trHG.js",
+      "_clock-wTTKFUfg.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js"
     ]
   },
   "resources/js/Pages/LeavesEmployee.jsx": {
-    "file": "assets/LeavesEmployee-B_RZANKQ.js",
+    "file": "assets/LeavesEmployee-CVqw-2A5.js",
     "name": "LeavesEmployee",
     "src": "resources/js/Pages/LeavesEmployee.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_dayjs.min-B9vFY_nY.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_BulkDeleteModal-Dj84QE_e.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_proxy-BHshDoAS.js",
-      "_PresentationChartLineIcon-SFe0N5ss.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_Dashboard-h6QAntAa.js",
+      "_BulkDeleteModal-BkVAmFi4.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PresentationChartLineIcon-D4O6ggVs.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ClockIcon-ChFXL_Ff.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_HeartIcon-BK63qj52.js",
-      "_SunIcon-C7JKk0vx.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_calendar-BopjbhtG.js",
-      "_user-DWiuetAs.js",
-      "_clock-Cr7aNZop.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ClockIcon-BafoBwRf.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_HeartIcon-DU7-434-.js",
+      "_SunIcon-Cj_Qrx1B.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_calendar-Ks81t44C.js",
+      "_user-DmY_trHG.js",
+      "_clock-wTTKFUfg.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js"
     ]
   },
   "resources/js/Pages/Profile/Partials/DeleteUserForm.jsx": {
-    "file": "assets/DeleteUserForm-DNkFmjKJ.js",
+    "file": "assets/DeleteUserForm-UA0qISyC.js",
     "name": "DeleteUserForm",
     "src": "resources/js/Pages/Profile/Partials/DeleteUserForm.jsx",
     "isDynamicEntry": true,
@@ -2050,7 +2050,7 @@
     ]
   },
   "resources/js/Pages/Profile/Partials/UpdatePasswordForm.jsx": {
-    "file": "assets/UpdatePasswordForm-DNkFmjKJ.js",
+    "file": "assets/UpdatePasswordForm-UA0qISyC.js",
     "name": "UpdatePasswordForm",
     "src": "resources/js/Pages/Profile/Partials/UpdatePasswordForm.jsx",
     "isDynamicEntry": true,
@@ -2059,7 +2059,7 @@
     ]
   },
   "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx": {
-    "file": "assets/UpdateProfileInformationForm-DNkFmjKJ.js",
+    "file": "assets/UpdateProfileInformationForm-UA0qISyC.js",
     "name": "UpdateProfileInformationForm",
     "src": "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx",
     "isDynamicEntry": true,
@@ -2068,373 +2068,373 @@
     ]
   },
   "resources/js/Pages/Profile/UserProfile.jsx": {
-    "file": "assets/UserProfile-Ds2v9oZC.js",
+    "file": "assets/UserProfile-BtuFFJth.js",
     "name": "UserProfile",
     "src": "resources/js/Pages/Profile/UserProfile.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_PageHeader-BotAXnpM.js",
-      "_StatsCards-CChDBcUs.js",
-      "_proxy-BHshDoAS.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_HashtagIcon-Dsxi04I6.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_x-DiaN4Qo4.js",
-      "_camera-BhvD-9YI.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_HeartIcon-BK63qj52.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_StatsCards-_COLE7TS.js",
+      "_proxy-fDD2ujqZ.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_HashtagIcon-DW0VWQSv.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_x-B5Pdimeu.js",
+      "_camera-Bqbvuv38.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_UserIcon-DaWnyvow.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_HeartIcon-DU7-434-.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js"
     ]
   },
   "resources/js/Pages/Project/DailyWorkSummary.jsx": {
-    "file": "assets/DailyWorkSummary-BImAtKu7.js",
+    "file": "assets/DailyWorkSummary-D7ro2zDr.js",
     "name": "DailyWorkSummary",
     "src": "resources/js/Pages/Project/DailyWorkSummary.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
       "_index-CtBsO7PD.js",
-      "_Dashboard-DJ5BzCaS.js",
-      "_xlsx-DhsXJJlV.js",
-      "_ClockIcon-ChFXL_Ff.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_StatsCards-CChDBcUs.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_isBetween-Branh0xT.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_proxy-BHshDoAS.js",
-      "_FunnelIcon-2Kubj-Dn.js",
-      "_AdjustmentsHorizontalIcon-DoeVcrNC.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_xlsx-BNr-YIW2.js",
+      "_ClockIcon-BafoBwRf.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_StatsCards-_COLE7TS.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_isBetween-D2BVDtUD.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_proxy-fDD2ujqZ.js",
+      "_FunnelIcon-BRFBKw4y.js",
+      "_AdjustmentsHorizontalIcon-B2d4jZmU.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/Settings/AttendanceSettings.jsx": {
-    "file": "assets/AttendanceSettings-Bgi1iUBV.js",
+    "file": "assets/AttendanceSettings-CW65_mad.js",
     "name": "AttendanceSettings",
     "src": "resources/js/Pages/Settings/AttendanceSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_leaflet-CaP3HUOO.js",
-      "_leaflet-routing-machine-8quC1UbT.js",
-      "_proxy-BHshDoAS.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_Marker-DzpXMdCb.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_index-D5qpTudK.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_leaflet-k81ujoNR.js",
+      "_leaflet-routing-machine-DnSwq9lb.js",
+      "_proxy-fDD2ujqZ.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_Marker-PPW3Hilj.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_index-DrktYdp9.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/Settings/CompanySettings.jsx": {
-    "file": "assets/CompanySettings-CvE-U_Fa.js",
+    "file": "assets/CompanySettings-DUok2jG7.js",
     "name": "CompanySettings",
     "src": "resources/js/Pages/Settings/CompanySettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_proxy-BHshDoAS.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_Dashboard-h6QAntAa.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_proxy-fDD2ujqZ.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_CheckCircleIcon-CTmMgZPD.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_CheckCircleIcon-DFaNd4qG.js"
     ]
   },
   "resources/js/Pages/Settings/HRMSettings.jsx": {
-    "file": "assets/HRMSettings-5O7l9tSO.js",
+    "file": "assets/HRMSettings-CDCBmtFJ.js",
     "name": "HRMSettings",
     "src": "resources/js/Pages/Settings/HRMSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_GlassCard-tq8d8nY0.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_Dashboard-h6QAntAa.js",
+      "_GlassCard-CIHhNUtW.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_CheckCircleIcon-CTmMgZPD.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_CheckCircleIcon-DFaNd4qG.js"
     ]
   },
   "resources/js/Pages/Settings/LeaveSettings.jsx": {
-    "file": "assets/LeaveSettings-ZlLgwDvF.js",
+    "file": "assets/LeaveSettings-DIAN3vMy.js",
     "name": "LeaveSettings",
     "src": "resources/js/Pages/Settings/LeaveSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_proxy-BHshDoAS.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_XCircleIcon-G5zt9xsl.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_index-D5qpTudK.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_proxy-fDD2ujqZ.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_XCircleIcon-BOaQsNyQ.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_index-DrktYdp9.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/TimeSheet.jsx": {
-    "file": "assets/TimeSheet-D2aEuDPn.js",
+    "file": "assets/TimeSheet-CkfPnBZk.js",
     "name": "TimeSheet",
     "src": "resources/js/Pages/TimeSheet.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_TimeSheetTable-DTDiBSvR.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_dayjs.min-B9vFY_nY.js",
-      "_leaflet-CaP3HUOO.js",
-      "_GlobeAltIcon-noOtcPmT.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_Marker-DzpXMdCb.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_InformationCircleIcon-CDepHfVV.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_chunk-QESP63UR-Cpfg6Osr.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_TimeSheetTable-CxcLXCwq.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_dayjs.min-CXJgYfto.js",
+      "_leaflet-k81ujoNR.js",
+      "_GlobeAltIcon-DpJEJ-u2.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_Marker-PPW3Hilj.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_InformationCircleIcon-CMaP-m_1.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_chunk-QESP63UR-B3XRSBip.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_PageHeader-BotAXnpM.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_chunk-JOT4BT4P-CLdwwahr.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_features-animation-DXOOQoLz.js",
+      "_PageHeader-E9WcBe_9.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_chunk-JOT4BT4P-D2Qykl_U.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/UserDevices.jsx": {
-    "file": "assets/UserDevices-m5sq15_B.js",
+    "file": "assets/UserDevices-D2aOY6RY.js",
     "name": "UserDevices",
     "src": "resources/js/Pages/UserDevices.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_ArrowLeftIcon-CVRHKWva.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_LockOpenIcon-LY5WiS6Y.js",
-      "_DeviceTabletIcon-C8e1JzaF.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_react-toastify.esm-BDdnkiAB.js",
+      "_Dashboard-h6QAntAa.js",
+      "_ArrowLeftIcon-ApUiDBHv.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_LockOpenIcon-K-DQ3yb-.js",
+      "_DeviceTabletIcon-KQwbRISO.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
       "_en-US-D8UQXs-H.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_KeyIcon-BR78fqqK.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_UserIcon-DaWnyvow.js",
+      "_KeyIcon-BOXdq5uq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
       "_logo-Pwvcz7fP.js",
-      "_proxy-BHshDoAS.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_proxy-fDD2ujqZ.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/UsersList.jsx": {
-    "file": "assets/UsersList-DA_hmeai.js",
+    "file": "assets/UsersList-9HCRcSuA.js",
     "name": "UsersList",
     "src": "resources/js/Pages/UsersList.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_StatsCards-CChDBcUs.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_HashtagIcon-Dsxi04I6.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_DeviceTabletIcon-C8e1JzaF.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_LockOpenIcon-LY5WiS6Y.js",
-      "_LockClosedIcon-DAK_BEbO.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-EAPQ7RWQ-C_ZIqbI7.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_user-DWiuetAs.js",
-      "_camera-BhvD-9YI.js",
-      "_createLucideIcon-BIFw61hB.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_XCircleIcon-ChDLRiub.js",
-      "_TrophyIcon-CGh3NavR.js",
-      "_UserPlusIcon-lZU_2lRt.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_proxy-BHshDoAS.js",
-      "_DocumentArrowDownIcon-BTegPBhP.js",
-      "_ChartPieIcon-ClsO98FT.js",
-      "_TableCellsIcon-m10qWc7L.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js",
-      "_chunk-57V4RE7B-DYEOAoWt.js",
-      "_chunk-TQNYOUFX-Drz50ky1.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_HashtagIcon-DW0VWQSv.js",
+      "_UserIcon-DaWnyvow.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_DeviceTabletIcon-KQwbRISO.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_LockOpenIcon-K-DQ3yb-.js",
+      "_LockClosedIcon-BUK-UVqk.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-EAPQ7RWQ-CaYebZHr.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_user-DmY_trHG.js",
+      "_camera-Bqbvuv38.js",
+      "_createLucideIcon-Dy3jN6oq.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_XCircleIcon-CtQsJLNo.js",
+      "_TrophyIcon-CddmzjLT.js",
+      "_UserPlusIcon-w_pElCY9.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_proxy-fDD2ujqZ.js",
+      "_DocumentArrowDownIcon-C20MXWnv.js",
+      "_ChartPieIcon-ntKMmsso.js",
+      "_TableCellsIcon-BcPJX8Jt.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js",
+      "_chunk-57V4RE7B-E5HD9hav.js",
+      "_chunk-TQNYOUFX-Cm8QdaAl.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js"
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js"
     ]
   },
   "resources/js/Pages/WorkLocations/WorkLocations.jsx": {
-    "file": "assets/WorkLocations-BfmNrUrL.js",
+    "file": "assets/WorkLocations-BGu-qzsj.js",
     "name": "WorkLocations",
     "src": "resources/js/Pages/WorkLocations/WorkLocations.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Dashboard-DJ5BzCaS.js",
-      "_react-toastify.esm-BDdnkiAB.js",
-      "_PencilIcon-BkKyTD42.js",
-      "_TrashIcon-jO2cXYDk.js",
-      "_UserIcon-CpBOTOOT.js",
-      "_CheckCircleIcon-CTmMgZPD.js",
-      "_CheckCircleIcon-BlN3OktQ.js",
-      "_ExclamationTriangleIcon-U8_lQdyK.js",
-      "_EllipsisVerticalIcon-MD4dfyXX.js",
-      "_chunk-S574QCAN-Cb5yHIHy.js",
-      "_chunk-F3UDT23P-CfD27OBv.js",
-      "_chunk-YRZGWF2W-BSYRfbDM.js",
-      "_chunk-D5XJWRAV-CVXe_h6o.js",
-      "_StatsCards-CChDBcUs.js",
-      "_chunk-SSA7SXE4-BTItze1Z.js",
-      "_ExclamationTriangleIcon-DMLwC-5W.js",
-      "_ChartBarIcon-JNTBlviq.js",
-      "_PlusIcon-BCxHxKhs.js",
-      "_proxy-BHshDoAS.js",
-      "_EnvelopeIcon-Cyp16-sG.js",
-      "_ShieldCheckIcon-BYBWX_Ph.js",
-      "_KeyIcon-BR78fqqK.js",
+      "_Dashboard-h6QAntAa.js",
+      "_react-toastify.esm-DHv8-Qd5.js",
+      "_PencilIcon-BuUz1NC4.js",
+      "_TrashIcon-ZPnPh3K_.js",
+      "_UserIcon-DaWnyvow.js",
+      "_CheckCircleIcon-DFaNd4qG.js",
+      "_CheckCircleIcon-Y6zaNLYr.js",
+      "_ExclamationTriangleIcon-BRHce3NX.js",
+      "_EllipsisVerticalIcon-ttfMl0oW.js",
+      "_chunk-S574QCAN-CBc0rh3V.js",
+      "_chunk-F3UDT23P-CDzd4n3p.js",
+      "_chunk-YRZGWF2W-Do4JmSpw.js",
+      "_chunk-D5XJWRAV-D_IgJYwa.js",
+      "_StatsCards-_COLE7TS.js",
+      "_chunk-SSA7SXE4-DJSLlphc.js",
+      "_ExclamationTriangleIcon-BGAT4xC5.js",
+      "_ChartBarIcon-BPMcdXzD.js",
+      "_PlusIcon-CxlvS_ES.js",
+      "_proxy-fDD2ujqZ.js",
+      "_EnvelopeIcon-B5mwuyNO.js",
+      "_ShieldCheckIcon-BRyCzdhJ.js",
+      "_KeyIcon-BOXdq5uq.js",
       "_logo-Pwvcz7fP.js",
-      "_features-animation-BfbXr3Ir.js",
-      "_create-visual-element-Dv6o1znz.js",
-      "_chunk-XJ2YRSUP-lNaR9vZt.js",
-      "_useToggleState-CNXYdUeg.js",
-      "_chunk-TLYTI3QM-BSxz-uix.js"
+      "_features-animation-DXOOQoLz.js",
+      "_create-visual-element-DH3r6YR-.js",
+      "_chunk-XJ2YRSUP-Bbsfrd9q.js",
+      "_useToggleState-DWHboc1X.js",
+      "_chunk-TLYTI3QM-DJeXmNPD.js"
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-n1LIYQPq.js",
+    "file": "assets/app--Ra0srDK.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -2454,7 +2454,7 @@
       "resources/js/Pages/Departments.jsx",
       "resources/js/Pages/Designations.jsx",
       "resources/js/Pages/Employees/EmployeeList.jsx",
-      "_Dashboard-DJ5BzCaS.js",
+      "_Dashboard-h6QAntAa.js",
       "resources/js/Pages/HR/Offboarding/Create.jsx",
       "resources/js/Pages/HR/Offboarding/Index.jsx",
       "resources/js/Pages/HR/Offboarding/Show.jsx",
@@ -2479,7 +2479,7 @@
       "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx",
       "resources/js/Pages/Profile/UserProfile.jsx",
       "resources/js/Pages/Project/DailyWorkSummary.jsx",
-      "_DailyWorks-BP2rAQ-p.js",
+      "_DailyWorks-BCycH9u9.js",
       "resources/js/Pages/Settings/AttendanceSettings.jsx",
       "resources/js/Pages/Settings/CompanySettings.jsx",
       "resources/js/Pages/Settings/HRMSettings.jsx",
@@ -2574,7 +2574,7 @@
     "isDynamicEntry": true
   },
   "resources/js/utils/firebaseInit.js": {
-    "file": "assets/firebaseInit-DjVBJbC5.js",
+    "file": "assets/firebaseInit-XlJ5Sa0U.js",
     "name": "firebaseInit",
     "src": "resources/js/utils/firebaseInit.js",
     "isDynamicEntry": true,

@@ -62,27 +62,35 @@ import AddEditUserForm from "@/Forms/AddEditUserForm.jsx";
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Theme utility function
-const getThemeRadius = () => {
-  if (typeof window === 'undefined') return 'lg';
-  
-  const rootStyles = getComputedStyle(document.documentElement);
-  const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-  
-  const radiusValue = parseInt(borderRadius);
-  if (radiusValue === 0) return 'none';
-  if (radiusValue <= 4) return 'sm';
-  if (radiusValue <= 8) return 'md';
-  if (radiusValue <= 12) return 'lg';
-  return 'xl';
-};
-
 const UsersList = ({ title, roles, departments, designations }) => {
   // Custom media query logic - matching AttendanceAdmin
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isMediumScreen, setIsMediumScreen] = useState(false);
+  const [themeRadius, setThemeRadius] = useState('lg');
+
+  // Theme utility function
+  const getThemeRadius = () => {
+    if (typeof window === 'undefined') return 'lg';
+    
+    const rootStyles = getComputedStyle(document.documentElement);
+    const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+    
+    const radiusValue = parseInt(borderRadius);
+    if (radiusValue === 0) return 'none';
+    if (radiusValue <= 4) return 'sm';
+    if (radiusValue <= 8) return 'md';
+    if (radiusValue <= 12) return 'lg';
+    return 'xl';
+  };
+
+  // Set theme radius on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setThemeRadius(getThemeRadius());
+    }
+  }, []);
   
   useEffect(() => {
     const checkScreenSize = () => {
@@ -496,7 +504,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                   isIconOnly
                   size="sm"
                   variant="ghost"
-                  radius={getThemeRadius()}
+                  radius={themeRadius}
                   isDisabled={deviceActions[user.id]}
                   className="min-w-6 w-6 h-6"
                   style={{
@@ -952,7 +960,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                               color="primary"
                               startContent={<UserPlusIcon className="w-4 h-4" />}
                               onPress={() => openModal('add')}
-                              radius={getThemeRadius()}
+                              radius={themeRadius}
                               style={{
                                 fontFamily: `var(--fontFamily, "Inter")`,
                               }}
@@ -964,7 +972,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                               size={isMobile ? "sm" : "md"}
                               variant="bordered"
                               startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
-                              radius={getThemeRadius()}
+                              radius={themeRadius}
                               style={{
                                 background: `color-mix(in srgb, var(--theme-primary) 10%, transparent)`,
                                 border: `1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent)`,
@@ -1370,7 +1378,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                                     (stats?.activity?.user_growth_rate || 0) < 0 ? "danger" : "default"
                                   }
                                   variant="flat"
-                                  radius={getThemeRadius()}
+                                  radius={themeRadius}
                                 >
                                   <span style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                     {stats?.activity?.user_growth_rate || 0}%
@@ -1473,7 +1481,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                                     (stats?.health?.system_metrics?.role_coverage || 0) > 60 ? "warning" : "danger"
                                   }
                                   variant="flat"
-                                  radius={getThemeRadius()}
+                                  radius={themeRadius}
                                 >
                                   <span style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                     {stats?.health?.system_metrics?.role_coverage || 0}%
@@ -1534,7 +1542,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                                     (stats?.quick_metrics?.system_health_score || 0) > 60 ? "warning" : "danger"
                                   }
                                   variant="flat"
-                                  radius={getThemeRadius()}
+                                  radius={themeRadius}
                                 >
                                   <span style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                     {stats?.quick_metrics?.system_health_score || 0}%
@@ -1618,7 +1626,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                             onValueChange={(value) => handleFilterChange('search', value)}
                             variant="bordered"
                             size={isMobile ? "sm" : "md"}
-                            radius={getThemeRadius()}
+                            radius={themeRadius}
                             startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
                             classNames={{
                               inputWrapper: "border-default-200 hover:border-default-300",
@@ -1637,7 +1645,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                             onSelectionChange={(keys) => handleFilterChange('status', Array.from(keys)[0])}
                             variant="bordered"
                             size={isMobile ? "sm" : "md"}
-                            radius={getThemeRadius()}
+                            radius={themeRadius}
                             className="w-32"
                             style={{
                               fontFamily: `var(--fontFamily, "Inter")`,
@@ -1654,7 +1662,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                             onSelectionChange={(keys) => handleFilterChange('role', Array.from(keys)[0])}
                             variant="bordered"
                             size={isMobile ? "sm" : "md"}
-                            radius={getThemeRadius()}
+                            radius={themeRadius}
                             className="w-32"
                             style={{
                               fontFamily: `var(--fontFamily, "Inter")`,
@@ -1671,7 +1679,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                           </Select>
 
                           {/* View Toggle */}
-                          <ButtonGroup variant="bordered" radius={getThemeRadius()}>
+                          <ButtonGroup variant="bordered" radius={themeRadius}>
                             <Button
                               isIconOnly
                               color={viewMode === 'table' ? 'primary' : 'default'}
@@ -1764,7 +1772,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
                                 size={isMobile ? "sm" : "md"}
                                 variant="bordered"
                                 showControls
-                                radius={getThemeRadius()}
+                                radius={themeRadius}
                                 style={{
                                   fontFamily: `var(--fontFamily, "Inter")`,
                                 }}
