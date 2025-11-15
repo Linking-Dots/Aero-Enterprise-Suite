@@ -19,6 +19,13 @@ import { toast } from "react-toastify";
 
 const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
     
+    const [showPassword, setShowPassword] = useState(false);
+    const [hover, setHover] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(user?.profile_image_url || user?.profile_image || null);
+    const [selectedImageFile, setSelectedImageFile] = useState(null);
+    const [allReportTo, setAllReportTo] = useState(allUsers);
+    const [themeRadius, setThemeRadius] = useState('lg');
+
     // Helper function to convert theme borderRadius to HeroUI radius values
     const getThemeRadius = () => {
         if (typeof window === 'undefined') return 'lg';
@@ -34,11 +41,12 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
         return 'full';
     };
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [hover, setHover] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(user?.profile_image_url || user?.profile_image || null);
-    const [selectedImageFile, setSelectedImageFile] = useState(null);
-    const [allReportTo, setAllReportTo] = useState(allUsers);
+    // Set theme radius on mount (client-side only)
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setThemeRadius(getThemeRadius());
+        }
+    }, []);
 
     // Initialize Precognition form with proper method and URL
     const form = useForm(
@@ -176,7 +184,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
             isOpen={open} 
             onClose={closeModal}
             size="3xl"
-            radius={getThemeRadius()}
+            radius={themeRadius}
             scrollBehavior="inside"
             classNames={{
                 base: "backdrop-blur-md max-h-[95vh] my-2",
@@ -269,7 +277,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         isRequired
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -290,7 +298,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         isRequired
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -312,7 +320,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         isRequired
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -332,7 +340,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.phone}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -355,7 +363,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.department_id}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             trigger: "min-h-unit-10",
                                             value: "text-small"
@@ -384,7 +392,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.designation_id}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             trigger: "min-h-unit-10",
                                             value: "text-small"
@@ -413,7 +421,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.gender}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             trigger: "min-h-unit-10",
                                             value: "text-small"
@@ -437,7 +445,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.employee_id}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -457,7 +465,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.birthday}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -477,7 +485,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.date_of_joining}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             input: "text-small",
                                             inputWrapper: "min-h-unit-10"
@@ -500,7 +508,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         errorMessage={form.errors.report_to}
                                         variant="bordered"
                                         size="sm"
-                                        radius={getThemeRadius()}
+                                        radius={themeRadius}
                                         classNames={{
                                             trigger: "min-h-unit-10",
                                             value: "text-small"
@@ -528,7 +536,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                     errorMessage={form.errors.address}
                                     variant="bordered"
                                     size="sm"
-                                    radius={getThemeRadius()}
+                                    radius={themeRadius}
                                     classNames={{
                                         input: "text-small",
                                         inputWrapper: "min-h-unit-10"
@@ -553,7 +561,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                             isRequired={!editMode}
                                             variant="bordered"
                                             size="sm"
-                                            radius={getThemeRadius()}
+                                            radius={themeRadius}
                                             endContent={
                                                 <button
                                                     className="focus:outline-none"
@@ -588,7 +596,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                             isRequired={!editMode}
                                             variant="bordered"
                                             size="sm"
-                                            radius={getThemeRadius()}
+                                            radius={themeRadius}
                                             endContent={
                                                 <button
                                                     className="focus:outline-none"
@@ -623,7 +631,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 variant="light" 
                                 onPress={closeModal}
                                 isDisabled={form.processing}
-                                radius={getThemeRadius()}
+                                radius={themeRadius}
                                 style={{
                                     borderRadius: `var(--borderRadius, 8px)`,
                                     fontFamily: `var(--fontFamily, "Inter")`,
@@ -639,7 +647,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 isLoading={form.processing}
                                 isDisabled={!form.isDirty || form.processing}
                                 startContent={!form.processing && <Lock className="w-4 h-4" />}
-                                radius={getThemeRadius()}
+                                radius={themeRadius}
                                 style={{
                                     borderRadius: `var(--borderRadius, 8px)`,
                                     fontFamily: `var(--fontFamily, "Inter")`,
