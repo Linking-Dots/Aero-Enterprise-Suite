@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\DeviceTrackingService;
+use App\Services\DeviceAuthService;
 use App\Services\ModernAuthenticationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,14 +19,14 @@ class LoginController extends Controller
 {
     protected ModernAuthenticationService $authService;
 
-    protected DeviceTrackingService $deviceService;
+    protected DeviceAuthService $deviceAuthService;
 
     public function __construct(
         ModernAuthenticationService $authService,
-        DeviceTrackingService $deviceService
+        DeviceAuthService $deviceAuthService
     ) {
         $this->authService = $authService;
-        $this->deviceService = $deviceService;
+        $this->deviceAuthService = $deviceAuthService;
     }
 
     /**
@@ -131,56 +131,52 @@ class LoginController extends Controller
             ]);
         }
 
-        // Check device restrictions if single device login is enabled
-        if ($user->hasSingleDeviceLoginEnabled()) {
-            $deviceCheck = $this->deviceService->canUserLoginFromDevice($user, $request);
+        // NEW SECURE DEVICE BINDING LOGIC
+        // Get device_id from request (UUIDv4 from frontend)
+        $deviceId = $request->input('device_id') ?? $request->header('X-Device-ID');
 
-            if (! $deviceCheck['allowed']) {
-                // Safely get blocked device (may be null in some cases)
-                $blockedDevice = $deviceCheck['blocked_by_device'] ?? null;
+        if (! $deviceId) {
+            throw ValidationException::withMessages([
+                'device_id' => 'Device identification is required for security.',
+            ]);
+        }
 
-                $this->authService->logAuthenticationEvent(
-                    $user,
-                    'login_device_blocked',
-                    'failure',
-                    $request,
-                    [
-                        'device_id' => $deviceCheck['device_id'],
-                        'blocked_by_device' => $blockedDevice?->id,
-                        'message' => $deviceCheck['message'],
-                    ]
-                );
+        // Check if user can login from this device
+        $deviceCheck = $this->deviceAuthService->canLoginFromDevice($user, $deviceId);
 
-                // Prepare device blocking data for Inertia response
-                $deviceMessage = $deviceCheck['message'];
+        if (! $deviceCheck['allowed']) {
+            $blockedDevice = $deviceCheck['device'] ?? null;
 
-                // If the device was blocked due to device locking, provide more specific message
-                if (strpos($deviceMessage, 'locked to a specific device') !== false) {
-                    $deviceMessage = 'This account is secured with device locking. You can only login from your registered device. Contact your administrator to reset device access.';
-                }
+            $this->authService->logAuthenticationEvent(
+                $user,
+                'login_device_blocked',
+                'failure',
+                $request,
+                [
+                    'device_id' => $deviceId,
+                    'blocked_by_device' => $blockedDevice?->id,
+                    'message' => $deviceCheck['message'],
+                ]
+            );
 
-                $deviceBlockedData = [
-                    'blocked' => true,
-                    'message' => $deviceMessage,
-                    'blocked_device_info' => $blockedDevice ? [
-                        'device_name' => $blockedDevice->device_name,
-                        'browser' => $blockedDevice->browser_name,
-                        'browser_version' => $blockedDevice->browser_version,
-                        'platform' => $blockedDevice->platform,
-                        'device_type' => $blockedDevice->device_type,
-                        'ip_address' => $blockedDevice->ip_address,
-                        'last_activity' => $blockedDevice->last_activity ?
-                            $blockedDevice->last_activity->format('M j, Y g:i A') : null,
-                    ] : null,
-                ];
+            $deviceBlockedData = [
+                'blocked' => true,
+                'message' => $deviceCheck['message'],
+                'blocked_device_info' => $blockedDevice ? [
+                    'device_name' => $blockedDevice->device_name,
+                    'browser' => $blockedDevice->browser,
+                    'platform' => $blockedDevice->platform,
+                    'device_type' => $blockedDevice->device_type,
+                    'ip_address' => $blockedDevice->ip_address,
+                    'last_used_at' => $blockedDevice->last_used_at ?
+                        $blockedDevice->last_used_at->format('M j, Y g:i A') : null,
+                ] : null,
+            ];
 
-                // FIXED: Use proper ValidationException structure for Inertia
-                // This ensures Login.jsx receives the device blocking data correctly
-                throw ValidationException::withMessages([
-                    'device_blocking' => [$deviceMessage],
-                    'device_blocking_data' => [json_encode($deviceBlockedData)],
-                ]);
-            }
+            throw ValidationException::withMessages([
+                'device_blocking' => [$deviceCheck['message']],
+                'device_blocking_data' => [json_encode($deviceBlockedData)],
+            ]);
         }
 
         // Clear rate limiting on successful login
@@ -192,11 +188,16 @@ class LoginController extends Controller
         // Regenerate session for security
         $request->session()->regenerate();
 
-        // Register/update device if single device login is enabled
-        // CRITICAL: Use the regenerated session ID
-        if ($user->hasSingleDeviceLoginEnabled()) {
-            $sessionId = $request->session()->getId();
-            $this->deviceService->registerDevice($user, $request, $sessionId);
+        // Register/update device with secure token
+        $device = $this->deviceAuthService->registerDevice($user, $request, $deviceId);
+
+        if (! $device) {
+            // If device registration failed, log out and throw error
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'device_id' => 'Failed to register device. Please try again.',
+            ]);
         }
 
         // Update login statistics
@@ -224,9 +225,19 @@ class LoginController extends Controller
         $user = Auth::user();
 
         if ($user) {
-            // Deactivate current device session
-            $sessionId = session()->getId();
-            $this->deviceService->deactivateDeviceBySession($sessionId);
+            // Get device_id from request
+            $deviceId = $request->header('X-Device-ID') ?? $request->input('device_id');
+
+            if ($deviceId) {
+                // Find and deactivate the device
+                $device = \App\Models\UserDevice::where('user_id', $user->id)
+                    ->where('device_id', $deviceId)
+                    ->first();
+
+                if ($device) {
+                    $device->deactivate();
+                }
+            }
 
             // Log logout event
             $this->authService->logAuthenticationEvent(
@@ -236,7 +247,8 @@ class LoginController extends Controller
                 $request
             );
 
-            // Update session tracking
+            // Update session tracking if exists
+            $sessionId = session()->getId();
             DB::table('user_sessions')
                 ->where('session_id', $sessionId)
                 ->update([

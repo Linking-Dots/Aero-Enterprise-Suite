@@ -7,6 +7,7 @@ use App\Http\Controllers\DailyWorkSummaryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmployeeController;
@@ -29,7 +30,6 @@ use App\Http\Controllers\Settings\LeaveSettingController;
 use App\Http\Controllers\SystemMonitoringController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserDeviceController;
 use Illuminate\Support\Facades\Route;
 
 // Include authentication routes
@@ -45,13 +45,8 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-// Conditionally apply single_device middleware only if the class exists
-// This prevents errors on servers where the middleware hasn't been deployed yet
-// Simple and reliable: Check class existence and use direct class reference
-$middlewareStack = ['auth', 'verified'];
-if (class_exists('\App\Http\Middleware\SingleDeviceLoginMiddleware')) {
-    $middlewareStack[] = \App\Http\Middleware\SingleDeviceLoginMiddleware::class;
-}
+// Apply device authentication middleware to protected routes
+$middlewareStack = ['auth', 'verified', 'device_auth'];
 
 Route::middleware($middlewareStack)->group(function () {
 
@@ -281,24 +276,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/user/{id}', [EmployeeController::class, 'destroy'])->name('user.delete');
     });
 
-    // User Device Management routes
+    // SECURE DEVICE MANAGEMENT ROUTES (NEW SYSTEM)
+    // User's own devices
+    Route::get('/my-devices', [DeviceController::class, 'index'])->name('user.devices');
+    Route::delete('/my-devices/{deviceId}', [DeviceController::class, 'deactivateDevice'])->name('user.devices.deactivate');
+
+    // Admin device management
     Route::middleware(['permission:users.view'])->group(function () {
-        Route::get('/users/{user}/devices', [UserDeviceController::class, 'show'])->name('users.device.show');
-        Route::get('/users/{user}/devices/list', [UserDeviceController::class, 'list'])->name('users.device.list');
+        Route::get('/users/{userId}/devices', [DeviceController::class, 'getUserDevices'])->name('admin.users.devices');
     });
 
     Route::middleware(['permission:users.update'])->group(function () {
-        Route::post('/users/devices/toggle', [UserDeviceController::class, 'toggleSingleDeviceLogin'])->name('users.device.toggle');
-        Route::post('/users/devices/reset', [UserDeviceController::class, 'resetUserDevices'])->name('users.device.reset');
-        Route::post('/users/devices/logout', [UserDeviceController::class, 'forceLogoutDevice'])->name('users.device.logout');
+        Route::post('/users/{userId}/devices/reset', [DeviceController::class, 'resetDevices'])->name('admin.users.devices.reset');
+        Route::post('/users/{userId}/devices/toggle', [DeviceController::class, 'toggleSingleDeviceLogin'])->name('admin.users.devices.toggle');
+        Route::delete('/users/{userId}/devices/{deviceId}', [DeviceController::class, 'adminDeactivateDevice'])->name('admin.users.devices.deactivate');
     });
-
-    // User's own device management
-    Route::get('/profile/devices', [UserDeviceController::class, 'userDevices'])->name('profile.devices');
-
-    // Current user device management (accessible to all authenticated users)
-    Route::get('/my-devices', [UserDeviceController::class, 'myDevices'])->name('user.my-devices');
-    Route::delete('/my-devices/{deviceId}', [UserDeviceController::class, 'removeMyDevice'])->name('user.my-devices.remove');
 
     // Company settings routes
     Route::middleware(['permission:company.settings'])->group(function () {

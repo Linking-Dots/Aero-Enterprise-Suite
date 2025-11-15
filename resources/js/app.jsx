@@ -11,7 +11,10 @@ import { ThemeProvider } from './Contexts/ThemeContext';
 import { HeroUIProvider } from '@heroui/react';
 import './bootstrap';
 import './theme/index.js';
-import { initializeDeviceIdentification } from './services/deviceIdentification';
+import { initializeDeviceAuth } from './utils/deviceAuth';
+
+// Initialize secure device authentication
+initializeDeviceAuth();
 
 // Enhanced axios configuration with interceptors
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';

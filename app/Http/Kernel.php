@@ -66,6 +66,6 @@ class Kernel extends HttpKernel
         'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'role_hierarchy' => \App\Http\Middleware\RoleHierarchyMiddleware::class,
         // Device Security Middleware
-        'single_device' => \App\Http\Middleware\SingleDeviceLoginMiddleware::class,
+        'device_auth' => \App\Http\Middleware\DeviceAuthMiddleware::class,
     ];
 }

@@ -330,35 +330,27 @@ const UsersList = ({ title, roles }) => {
     fetchStats();
   }, [fetchStats]);
 
-  // Device Management Functions
+  // Device Management Functions (Updated for New Secure Device System)
   const toggleSingleDeviceLogin = useCallback(async (userId, enabled) => {
     setDeviceActions(prev => ({ ...prev, [userId]: true }));
     
     try {
-      const response = await axios.post(route('users.device.toggle'), {
-        user_id: userId,
-        enabled: enabled
-      });
+      const response = await axios.post(route('admin.users.devices.toggle', { userId }));
 
-      if (response.status === 200) {
-        // Update user in state
+      if (response.data.success) {
+        // Update user in state with new toggle status
         setUsers(prevUsers => prevUsers.map(user => 
           user.id === userId ? { 
             ...user, 
-            single_device_login: enabled,
-            active_device: enabled ? user.active_device : null
+            single_device_login_enabled: response.data.single_device_login_enabled
           } : user
         ));
         
-        toast.success(
-          enabled 
-            ? 'Single device login enabled for user' 
-            : 'Single device login disabled for user'
-        );
+        toast.success(response.data.message);
       }
     } catch (error) {
       console.error('Error toggling single device login:', error);
-      toast.error('Failed to update device settings');
+      toast.error(error.response?.data?.message || 'Failed to toggle single device login');
     } finally {
       setDeviceActions(prev => ({ ...prev, [userId]: false }));
     }
@@ -368,12 +360,13 @@ const UsersList = ({ title, roles }) => {
     setDeviceActions(prev => ({ ...prev, [userId]: true }));
     
     try {
-      const response = await axios.post(route('users.device.reset'), {
-        user_id: userId
+      // NEW: Use admin.users.devices.reset route
+      const response = await axios.post(route('admin.users.devices.reset', { userId }), {
+        reason: 'Admin reset via user management'
       });
 
-      if (response.status === 200) {
-        // Update user in state
+      if (response.data.success) {
+        // Update user in state - clear active device
         setUsers(prevUsers => prevUsers.map(user => 
           user.id === userId ? { 
             ...user, 
@@ -381,11 +374,11 @@ const UsersList = ({ title, roles }) => {
           } : user
         ));
         
-        toast.success('User device has been reset');
+        toast.success(response.data.message || 'User devices have been reset');
       }
     } catch (error) {
-      console.error('Error resetting user device:', error);
-      toast.error('Failed to reset user device');
+      console.error('Error resetting user devices:', error);
+      toast.error('Failed to reset user devices');
     } finally {
       setDeviceActions(prev => ({ ...prev, [userId]: false }));
     }
@@ -393,12 +386,20 @@ const UsersList = ({ title, roles }) => {
 
   const showUserDevices = useCallback(async (userId) => {
     try {
-      const response = await axios.get(route('users.device.list', { user: userId }));
+      // NEW: Use admin.users.devices route
+      const response = await axios.get(route('admin.users.devices', { userId }));
       
-      if (response.status === 200) {
+      if (response.data.success) {
         const devices = response.data.devices;
-        // You could show this in a modal or separate page
-        toast.info(`User has ${devices.length} device record(s)`);
+        // Display device information in toast
+        if (devices.length === 0) {
+          toast.info('User has no registered devices');
+        } else {
+          const activeDevices = devices.filter(d => d.is_active).length;
+          toast.info(
+            `User has ${devices.length} device(s): ${activeDevices} active, ${devices.length - activeDevices} inactive`
+          );
+        }
       }
     } catch (error) {
       console.error('Error fetching user devices:', error);

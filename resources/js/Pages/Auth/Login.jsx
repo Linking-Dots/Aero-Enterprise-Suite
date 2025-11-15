@@ -32,7 +32,7 @@ import {
 } from '@heroui/react';
 import { toast } from 'react-toastify';
 import { useTheme } from '@/Contexts/ThemeContext';
-import { getDeviceGuid, getFcmToken, getDeviceHeaders } from '@/services/deviceIdentification';
+import { getDeviceId, getDeviceHeaders } from '@/utils/deviceAuth';
 
 /**
  * Enterprise Login Component for ERP System
@@ -352,17 +352,16 @@ export default function Login({
         }));
 
         try {
-            // Prepare submission data with device identifiers
+            // Prepare submission data with secure device_id (UUIDv4)
             const submissionData = {
                 email: formData.email.trim(),
                 password: formData.password,
                 remember: formData.remember,
-                device_guid: await getDeviceGuid(),
-                fcm_token: await getFcmToken(),
+                device_id: getDeviceId(), // NEW: Secure UUIDv4 device identifier
             };
             
             // Add device headers
-            const deviceHeaders = await getDeviceHeaders();
+            const deviceHeaders = getDeviceHeaders();
 
             // Submit using Inertia router
             router.post(route('login'), submissionData, {

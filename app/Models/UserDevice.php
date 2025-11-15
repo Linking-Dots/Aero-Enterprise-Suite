@@ -14,35 +14,28 @@ class UserDevice extends Model
     protected $fillable = [
         'user_id',
         'device_id',
-        'compatible_device_id',
-        // Stable identifiers
-        'fcm_token',
-        'device_guid',
-        'device_uuid',
-        // Hardware identifiers
-        'device_model',
-        'device_serial',
-        'device_mac',
+        'device_token',
         'device_name',
-        'browser_name',
-        'browser_version',
-        'platform',
         'device_type',
+        'browser',
+        'platform',
         'ip_address',
         'user_agent',
-        'session_id',
-        'last_activity',
         'is_active',
         'is_trusted',
-        'device_fingerprint',
+        'last_used_at',
+        'verified_at',
     ];
 
-    protected $casts = [
-        'last_activity' => 'datetime',
-        'is_active' => 'boolean',
-        'is_trusted' => 'boolean',
-        'device_fingerprint' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'is_trusted' => 'boolean',
+            'last_used_at' => 'datetime',
+            'verified_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the user that owns the device.
@@ -61,46 +54,22 @@ class UserDevice extends Model
     }
 
     /**
-     * Scope to get devices for a specific user.
+     * Scope to get trusted devices.
      */
-    public function scopeForUser($query, $userId)
+    public function scopeTrusted($query)
     {
-        return $query->where('user_id', $userId);
+        return $query->where('is_trusted', true);
     }
 
     /**
-     * Check if device is currently online (active within last 5 minutes).
+     * Mark device as active and update last used timestamp.
      */
-    public function isOnline(): bool
+    public function markAsUsed(): void
     {
-        if (! $this->last_activity) {
-            return false;
-        }
-
-        return $this->last_activity->gt(Carbon::now()->subMinutes(5));
-    }
-
-    /**
-     * Get formatted device info for display.
-     */
-    public function getFormattedDeviceInfoAttribute(): string
-    {
-        $parts = array_filter([
-            $this->browser_name,
-            $this->platform,
-            $this->device_type,
+        $this->update([
+            'is_active' => true,
+            'last_used_at' => Carbon::now(),
         ]);
-
-        return implode(' • ', $parts) ?: 'Unknown Device';
-    }
-
-    /**
-     * Get device location info.
-     */
-    public function getLocationAttribute(): string
-    {
-        // You can enhance this with IP geolocation service
-        return $this->ip_address ?: 'Unknown Location';
     }
 
     /**
@@ -110,18 +79,31 @@ class UserDevice extends Model
     {
         return $this->update([
             'is_active' => false,
-            'session_id' => null,
         ]);
     }
 
     /**
-     * Update device activity.
+     * Mark device as trusted (e.g., after OTP verification).
      */
-    public function updateActivity(?string $sessionId = null): bool
+    public function markAsTrusted(): bool
     {
         return $this->update([
-            'last_activity' => Carbon::now(),
-            'session_id' => $sessionId ?: $this->session_id,
+            'is_trusted' => true,
+            'verified_at' => Carbon::now(),
         ]);
+    }
+
+    /**
+     * Get formatted device info for display.
+     */
+    public function getFormattedInfoAttribute(): string
+    {
+        $parts = array_filter([
+            $this->browser,
+            $this->platform,
+            $this->device_type,
+        ]);
+
+        return implode(' • ', $parts) ?: 'Unknown Device';
     }
 }
