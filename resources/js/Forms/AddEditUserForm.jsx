@@ -51,7 +51,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     // Initialize Precognition form with proper method and URL
     const form = useForm(
         editMode ? 'put' : 'post',
-        editMode ? route('users.update', { user: user.id }) : route('users.store'),
+        editMode && user?.id ? route('users.update', { user: user.id }) : route('users.store'),
         {
             id: user?.id || '',
             name: user?.name || '',

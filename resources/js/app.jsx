@@ -191,10 +191,8 @@ createInertiaApp({
         }
     },
 }).then(() => {
-    // Initialize device identification
-    initializeDeviceIdentification().catch(err => {
-        console.warn('Device identification initialization failed:', err);
-    });
+    // Initialize device authentication
+    initializeDeviceAuth();
     
     // Theme restoration is now handled by ThemeContext
     console.log('App initialization complete - theme handled by ThemeContext');
