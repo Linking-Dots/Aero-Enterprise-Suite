@@ -405,7 +405,7 @@ const UsersTable = ({
                 fontFamily: `var(--fontFamily, "Inter")`,
               }}
             >
-              {user?.department || "N/A"}
+              {user?.department?.name || "N/A"}
             </span>
           </div>
         );
