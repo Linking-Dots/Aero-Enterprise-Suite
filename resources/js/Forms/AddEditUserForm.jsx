@@ -4,16 +4,36 @@ import {
     Spinner,
     Select,
     SelectItem,
-    Input
+    Input,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
 } from "@heroui/react";
 import React, { useEffect, useState } from "react";
-import { X, Camera, Eye, EyeOff, Lock } from 'lucide-react';
-import GlassDialog from "@/Components/GlassDialog.jsx";
+import { X, Camera, Eye, EyeOff, Lock, UserIcon, CalendarIcon } from 'lucide-react';
 import { useForm } from 'laravel-precognition-react';
 import { toast } from "react-toastify";
 
+
 const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
     
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [showPassword, setShowPassword] = useState(false);
     const [hover, setHover] = useState(false);
     const [selectedImage, setSelectedImage] = useState(user?.profile_image_url || user?.profile_image || null);
@@ -63,13 +83,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
             const fileType = selectedImageFile.type;
             if (!['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
                 toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary
-                    }
+                    icon: '🔴'
                 });
                 return;
             }
@@ -97,13 +111,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                     toast.success(response.data.messages?.length > 0
                         ? response.data.messages.join(' ')
                         : `User ${editMode ? 'updated' : 'added'} successfully`, {
-                        icon: '🟢',
-                        style: {
-                            backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
-                        }
+                        icon: '🟢'
                     });
                     closeModal();
                 },
@@ -121,44 +129,20 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
         if (error.response) {
             if (error.response.status === 422) {
                 toast.error(error.response.data.message || `Failed to ${editMode ? 'update' : 'add'} user.`, {
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    }
+                    icon: '🔴'
                 });
             } else {
                 toast.error('An unexpected error occurred. Please try again later.', {
-                    icon: '🔴',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    }
+                    icon: '🔴'
                 });
             }
         } else if (error.request) {
             toast.error('No response received from the server. Please check your internet connection.', {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard.background,
-                    border: theme.glassCard.border,
-                    color: theme.palette.text.primary,
-                }
+                icon: '🔴'
             });
         } else {
             toast.error('An error occurred while setting up the request.', {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard.background,
-                    border: theme.glassCard.border,
-                    color: theme.palette.text.primary,
-                }
+                icon: '🔴'
             });
         }
     };
@@ -188,510 +172,486 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     };
 
     return (
-        <GlassDialog
-            open={open}
+        <Modal 
+            isOpen={open} 
             onClose={closeModal}
-            fullWidth
-            maxWidth="md"
-            sx={{
-                '& .MuiPaper-root': {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    backgroundColor: theme.glassCard.background,
-                    border: theme.glassCard.border,
-                    borderRadius: '16px',
-                    color: theme.palette.text.primary,
-                    boxShadow: theme.glassCard.boxShadow,
-                }
+            size="3xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "backdrop-blur-md max-h-[95vh] my-2",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+                header: "border-b border-divider flex-shrink-0",
+                body: "overflow-y-auto max-h-[calc(95vh-160px)]",
+                footer: "border-t border-divider flex-shrink-0",
+                closeButton: "hover:bg-white/5 active:bg-white/10"
+            }}
+            style={{
+                border: `var(--borderWidth, 2px) solid var(--theme-divider, #E4E4E7)`,
+                borderRadius: `var(--borderRadius, 12px)`,
+                fontFamily: `var(--fontFamily, "Inter")`,
+                transform: `scale(var(--scale, 1))`,
             }}
         >
-            <DialogTitle sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', pb: 2 }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-                        {editMode ? 'Edit User' : 'Add New User'}
-                    </Typography>
-                    <IconButton
-                        aria-label="close"
-                        onClick={closeModal}
-                        sx={{
-                            color: theme.palette.grey[500],
-                            '&:hover': {
-                                color: theme.palette.primary.main,
-                            }
-                        }}
-                    >
-                        <ClearIcon />
-                    </IconButton>
-                </Box>
-            </DialogTitle>
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader className="flex flex-col gap-1 py-4" style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <div className="flex items-center gap-2">
+                                <UserIcon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: 'var(--theme-primary)' }} />
+                                <div>
+                                    <span className="text-lg font-semibold" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
+                                        {editMode ? 'Edit User' : 'Add New User'}
+                                    </span>
+                                    <p className="text-sm text-default-500 mt-0.5" style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}>
+                                        {editMode ? 'Update user information' : 'Create a new user account'}
+                                    </p>
+                                </div>
+                            </div>
+                        </ModalHeader>
+                        
+                        <ModalBody className="py-4 px-4 sm:py-6 sm:px-6 overflow-y-auto" style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Profile Image Upload */}
+                                <div className="flex justify-center mb-6">
+                                    <div 
+                                        className="relative group cursor-pointer"
+                                        onMouseEnter={() => setHover(true)}
+                                        onMouseLeave={() => setHover(false)}
+                                    >
+                                        <Avatar
+                                            src={selectedImage}
+                                            alt="Profile"
+                                            className="w-32 h-32 text-large transition-all duration-300"
+                                            style={{
+                                                border: `4px solid var(--theme-divider, #E4E4E7)`,
+                                                filter: hover ? 'brightness(70%)' : 'brightness(100%)',
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor="icon-button-file"
+                                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-opacity duration-300"
+                                            style={{
+                                                opacity: hover ? 1 : 0,
+                                            }}
+                                        >
+                                            <input
+                                                accept="image/*"
+                                                id="icon-button-file"
+                                                type="file"
+                                                className="hidden"
+                                                onChange={handleImageChange}
+                                            />
+                                            <Camera className="w-8 h-8 text-white" />
+                                        </label>
+                                    </div>
+                                </div>
 
-            <DialogContent sx={{ pt: 3 }}>
-                <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                        {/* Profile Image Upload */}
-                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                            <Box
-                                onMouseEnter={() => setHover(true)}
-                                onMouseLeave={() => setHover(false)}
-                                sx={{ position: 'relative' }}
-                            >
-                                <Avatar
-                                    src={selectedImage}
-                                    alt="Profile"
-                                    sx={{
-                                        width: 120,
-                                        height: 120,
-                                        border: '4px solid rgba(255, 255, 255, 0.1)',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                                        filter: hover ? 'brightness(70%)' : 'brightness(100%)',
-                                        transition: 'all 0.3s ease',
-                                    }}
-                                />
-                                <Box
-                                    component="label"
-                                    htmlFor="icon-button-file"
-                                    sx={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        opacity: hover ? 1 : 0,
-                                        transition: 'opacity 0.3s ease',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    <input
-                                        accept="image/*"
-                                        id="icon-button-file"
-                                        type="file"
-                                        style={{ display: 'none' }}
-                                        onChange={handleImageChange}
+                                {/* Basic Information */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input
+                                        label="Full Name"
+                                        placeholder="Enter full name"
+                                        value={form.data.name}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        onBlur={() => form.validate('name')}
+                                        isInvalid={form.invalid('name')}
+                                        errorMessage={form.errors.name}
+                                        isRequired
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
                                     />
-                                    <PhotoCamera sx={{ color: 'white', fontSize: 32 }} />
-                                </Box>
-                            </Box>
-                        </Grid>
 
-                        {/* Basic Information */}
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Full Name"
-                                    value={form.data.name}
-                                    onChange={(e) => handleChange('name', e.target.value)}
-                                    onBlur={() => form.validate('name')}
-                                    error={form.invalid('name')}
-                                    helperText={form.errors.name}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                    required
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Username"
+                                        placeholder="Enter username"
+                                        value={form.data.user_name}
+                                        onChange={(e) => handleChange('user_name', e.target.value)}
+                                        onBlur={() => form.validate('user_name')}
+                                        isInvalid={form.invalid('user_name')}
+                                        errorMessage={form.errors.user_name}
+                                        isRequired
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Username"
-                                    value={form.data.user_name}
-                                    onChange={(e) => handleChange('user_name', e.target.value)}
-                                    onBlur={() => form.validate('user_name')}
-                                    error={form.invalid('user_name')}
-                                    helperText={form.errors.user_name}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                    required
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Email"
+                                        type="email"
+                                        placeholder="Enter email address"
+                                        value={form.data.email}
+                                        onChange={(e) => handleChange('email', e.target.value)}
+                                        onBlur={() => form.validate('email')}
+                                        isInvalid={form.invalid('email')}
+                                        errorMessage={form.errors.email}
+                                        isRequired
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Email"
-                                    type="email"
-                                    value={form.data.email}
-                                    onChange={(e) => handleChange('email', e.target.value)}
-                                    onBlur={() => form.validate('email')}
-                                    error={form.invalid('email')}
-                                    helperText={form.errors.email}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                    required
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Phone"
+                                        placeholder="Enter phone number"
+                                        value={form.data.phone}
+                                        onChange={(e) => handleChange('phone', e.target.value)}
+                                        onBlur={() => form.validate('phone')}
+                                        isInvalid={form.invalid('phone')}
+                                        errorMessage={form.errors.phone}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Phone"
-                                    value={form.data.phone}
-                                    onChange={(e) => handleChange('phone', e.target.value)}
-                                    onBlur={() => form.validate('phone')}
-                                    error={form.invalid('phone')}
-                                    helperText={form.errors.phone}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Select
+                                        label="Department"
+                                        placeholder="Select department"
+                                        selectedKeys={form.data.department_id ? new Set([String(form.data.department_id)]) : new Set()}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleChange('department_id', value || '');
+                                        }}
+                                        onClose={() => form.validate('department_id')}
+                                        isInvalid={form.invalid('department_id')}
+                                        errorMessage={form.errors.department_id}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            trigger: "min-h-unit-10",
+                                            value: "text-small"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    >
+                                        {departments?.map((department) => (
+                                            <SelectItem key={department.id} value={department.id}>
+                                                {department.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <InputLabel id="department-label" sx={{ color: theme.palette.text.secondary }}>Department</InputLabel>
-                                <Select
-                                    labelId="department-label"
-                                    value={form.data.department_id}
-                                    onChange={(e) => handleChange('department_id', e.target.value)}
-                                    onBlur={() => form.validate('department_id')}
-                                    label="Department"
-                                    error={form.invalid('department_id')}
-                                    sx={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        borderRadius: '8px',
-                                    }}
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    {departments?.map((department) => (
-                                        <MenuItem key={department.id} value={department.id}>
-                                            {department.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {form.invalid('department_id') && <FormHelperText error>{form.errors.department_id}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
+                                    <Select
+                                        label="Designation"
+                                        placeholder="Select designation"
+                                        selectedKeys={form.data.designation_id ? new Set([String(form.data.designation_id)]) : new Set()}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleChange('designation_id', value || '');
+                                        }}
+                                        onClose={() => form.validate('designation_id')}
+                                        isInvalid={form.invalid('designation_id')}
+                                        errorMessage={form.errors.designation_id}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            trigger: "min-h-unit-10",
+                                            value: "text-small"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    >
+                                        {designations?.map((designation) => (
+                                            <SelectItem key={designation.id} value={designation.id}>
+                                                {designation.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <InputLabel id="designation-label" sx={{ color: theme.palette.text.secondary }}>Designation</InputLabel>
-                                <Select
-                                    labelId="designation-label"
-                                    value={form.data.designation_id}
-                                    onChange={(e) => handleChange('designation_id', e.target.value)}
-                                    onBlur={() => form.validate('designation_id')}
-                                    label="Designation"
-                                    error={form.invalid('designation_id')}
-                                    sx={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        borderRadius: '8px',
-                                    }}
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    {designations?.map((designation) => (
-                                        <MenuItem key={designation.id} value={designation.id}>
-                                            {designation.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {form.invalid('designation_id') && <FormHelperText error>{form.errors.designation_id}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
+                                    <Select
+                                        label="Gender"
+                                        placeholder="Select gender"
+                                        selectedKeys={form.data.gender ? new Set([form.data.gender]) : new Set()}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleChange('gender', value || '');
+                                        }}
+                                        onClose={() => form.validate('gender')}
+                                        isInvalid={form.invalid('gender')}
+                                        errorMessage={form.errors.gender}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            trigger: "min-h-unit-10",
+                                            value: "text-small"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    >
+                                        <SelectItem key="male" value="male">Male</SelectItem>
+                                        <SelectItem key="female" value="female">Female</SelectItem>
+                                        <SelectItem key="other" value="other">Other</SelectItem>
+                                    </Select>
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <InputLabel id="gender-label" sx={{ color: theme.palette.text.secondary }}>Gender</InputLabel>
-                                <Select
-                                    labelId="gender-label"
-                                    value={form.data.gender}
-                                    onChange={(e) => handleChange('gender', e.target.value)}
-                                    onBlur={() => form.validate('gender')}
-                                    label="Gender"
-                                    error={form.invalid('gender')}
-                                    sx={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        borderRadius: '8px',
-                                    }}
-                                >
-                                    <MenuItem value="">
-                                        <em>Select Gender</em>
-                                    </MenuItem>
-                                    <MenuItem value="male">Male</MenuItem>
-                                    <MenuItem value="female">Female</MenuItem>
-                                    <MenuItem value="other">Other</MenuItem>
-                                </Select>
-                                {form.invalid('gender') && <FormHelperText error>{form.errors.gender}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Employee ID"
+                                        placeholder="Enter employee ID"
+                                        value={form.data.employee_id}
+                                        onChange={(e) => handleChange('employee_id', e.target.value)}
+                                        onBlur={() => form.validate('employee_id')}
+                                        isInvalid={form.invalid('employee_id')}
+                                        errorMessage={form.errors.employee_id}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Employee ID"
-                                    value={form.data.employee_id}
-                                    onChange={(e) => handleChange('employee_id', e.target.value)}
-                                    onBlur={() => form.validate('employee_id')}
-                                    error={form.invalid('employee_id')}
-                                    helperText={form.errors.employee_id}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Date of Birth"
+                                        type="date"
+                                        value={form.data.birthday}
+                                        onChange={(e) => handleChange('birthday', e.target.value)}
+                                        onBlur={() => form.validate('birthday')}
+                                        isInvalid={form.invalid('birthday')}
+                                        errorMessage={form.errors.birthday}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Date of Birth"
-                                    type="date"
-                                    value={form.data.birthday}
-                                    onChange={(e) => handleChange('birthday', e.target.value)}
-                                    onBlur={() => form.validate('birthday')}
-                                    error={form.invalid('birthday')}
-                                    helperText={form.errors.birthday}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Input
+                                        label="Date of Joining"
+                                        type="date"
+                                        value={form.data.date_of_joining}
+                                        onChange={(e) => handleChange('date_of_joining', e.target.value)}
+                                        onBlur={() => form.validate('date_of_joining')}
+                                        isInvalid={form.invalid('date_of_joining')}
+                                        errorMessage={form.errors.date_of_joining}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            input: "text-small",
+                                            inputWrapper: "min-h-unit-10"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    />
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
-                                    label="Date of Joining"
-                                    type="date"
-                                    value={form.data.date_of_joining}
-                                    onChange={(e) => handleChange('date_of_joining', e.target.value)}
-                                    onBlur={() => form.validate('date_of_joining')}
-                                    error={form.invalid('date_of_joining')}
-                                    helperText={form.errors.date_of_joining}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
-                                    }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
-                        </Grid>
+                                    <Select
+                                        label="Reports To"
+                                        placeholder="Select supervisor"
+                                        selectedKeys={form.data.report_to ? new Set([String(form.data.report_to)]) : new Set()}
+                                        onSelectionChange={(keys) => {
+                                            const value = Array.from(keys)[0];
+                                            handleChange('report_to', value || '');
+                                        }}
+                                        onClose={() => form.validate('report_to')}
+                                        isInvalid={form.invalid('report_to')}
+                                        errorMessage={form.errors.report_to}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={getThemeRadius()}
+                                        classNames={{
+                                            trigger: "min-h-unit-10",
+                                            value: "text-small"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                    >
+                                        {allReportTo?.filter(u => u.id !== form.data.id).map((user) => (
+                                            <SelectItem key={user.id} value={user.id}>
+                                                {user.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
 
-                        <Grid item xs={12} md={6}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <InputLabel id="report-to-label" sx={{ color: theme.palette.text.secondary }}>Reports To</InputLabel>
-                                <Select
-                                    labelId="report-to-label"
-                                    value={form.data.report_to}
-                                    onChange={(e) => handleChange('report_to', e.target.value)}
-                                    onBlur={() => form.validate('report_to')}
-                                    label="Reports To"
-                                    error={form.invalid('report_to')}
-                                    sx={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        borderRadius: '8px',
-                                    }}
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    {allReportTo?.filter(u => u.id !== form.data.id).map((user) => (
-                                        <MenuItem key={user.id} value={user.id}>
-                                            {user.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {form.invalid('report_to') && <FormHelperText error>{form.errors.report_to}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                <TextField
+                                {/* Address - Full Width */}
+                                <Input
                                     label="Address"
-                                    multiline
-                                    rows={3}
+                                    placeholder="Enter address"
                                     value={form.data.address}
                                     onChange={(e) => handleChange('address', e.target.value)}
                                     onBlur={() => form.validate('address')}
-                                    error={form.invalid('address')}
-                                    helperText={form.errors.address}
-                                    InputProps={{
-                                        sx: {
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '8px',
-                                        }
+                                    isInvalid={form.invalid('address')}
+                                    errorMessage={form.errors.address}
+                                    variant="bordered"
+                                    size="sm"
+                                    radius={getThemeRadius()}
+                                    classNames={{
+                                        input: "text-small",
+                                        inputWrapper: "min-h-unit-10"
                                     }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: theme.palette.text.secondary,
-                                        }
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
                                     }}
                                 />
-                            </FormControl>
-                        </Grid>
 
-                        {/* Password fields (only required for new users) */}
-                        {!editMode && (
-                            <>
-                                <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <TextField
+                                {/* Password fields (only for new users) */}
+                                {!editMode && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
                                             label="Password"
                                             type={showPassword ? 'text' : 'password'}
+                                            placeholder="Enter password"
                                             value={form.data.password}
                                             onChange={(e) => handleChange('password', e.target.value)}
                                             onBlur={() => form.validate('password')}
-                                            error={form.invalid('password')}
-                                            helperText={form.errors.password}
-                                            required={!editMode}
-                                            InputProps={{
-                                                endAdornment: (
-                                                    <IconButton
-                                                        aria-label="toggle password visibility"
-                                                        onClick={handleTogglePasswordVisibility}
-                                                        edge="end"
-                                                    >
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                    </IconButton>
-                                                ),
-                                                sx: {
-                                                    background: 'rgba(255, 255, 255, 0.05)',
-                                                    borderRadius: '8px',
-                                                }
+                                            isInvalid={form.invalid('password')}
+                                            errorMessage={form.errors.password}
+                                            isRequired={!editMode}
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={getThemeRadius()}
+                                            endContent={
+                                                <button
+                                                    className="focus:outline-none"
+                                                    type="button"
+                                                    onClick={handleTogglePasswordVisibility}
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="w-4 h-4 text-default-400" />
+                                                    ) : (
+                                                        <Eye className="w-4 h-4 text-default-400" />
+                                                    )}
+                                                </button>
+                                            }
+                                            classNames={{
+                                                input: "text-small",
+                                                inputWrapper: "min-h-unit-10"
                                             }}
-                                            InputLabelProps={{
-                                                sx: {
-                                                    color: theme.palette.text.secondary,
-                                                }
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
                                             }}
                                         />
-                                    </FormControl>
-                                </Grid>
 
-                                <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <TextField
+                                        <Input
                                             label="Confirm Password"
                                             type={showPassword ? 'text' : 'password'}
+                                            placeholder="Confirm password"
                                             value={form.data.password_confirmation}
                                             onChange={(e) => handleChange('password_confirmation', e.target.value)}
                                             onBlur={() => form.validate('password_confirmation')}
-                                            error={form.invalid('password_confirmation')}
-                                            helperText={form.errors.password_confirmation || (form.data.password !== form.data.password_confirmation && form.data.password_confirmation ? 'Passwords do not match' : '')}
-                                            required={!editMode}
-                                            InputProps={{
-                                                endAdornment: (
-                                                    <IconButton
-                                                        aria-label="toggle password visibility"
-                                                        onClick={handleTogglePasswordVisibility}
-                                                        edge="end"
-                                                    >
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                    </IconButton>
-                                                ),
-                                                sx: {
-                                                    background: 'rgba(255, 255, 255, 0.05)',
-                                                    borderRadius: '8px',
-                                                }
+                                            isInvalid={form.invalid('password_confirmation') || (form.data.password !== form.data.password_confirmation && form.data.password_confirmation)}
+                                            errorMessage={form.errors.password_confirmation || (form.data.password !== form.data.password_confirmation && form.data.password_confirmation ? 'Passwords do not match' : '')}
+                                            isRequired={!editMode}
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={getThemeRadius()}
+                                            endContent={
+                                                <button
+                                                    className="focus:outline-none"
+                                                    type="button"
+                                                    onClick={handleTogglePasswordVisibility}
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="w-4 h-4 text-default-400" />
+                                                    ) : (
+                                                        <Eye className="w-4 h-4 text-default-400" />
+                                                    )}
+                                                </button>
+                                            }
+                                            classNames={{
+                                                input: "text-small",
+                                                inputWrapper: "min-h-unit-10"
                                             }}
-                                            InputLabelProps={{
-                                                sx: {
-                                                    color: theme.palette.text.secondary,
-                                                }
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
                                             }}
                                         />
-                                    </FormControl>
-                                </Grid>
-                            </>
-                        )}
-                    </Grid>
-                </form>
-            </DialogContent>
-
-            <DialogActions sx={{ justifyContent: 'space-between', p: 3, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <Button
-                    onClick={closeModal}
-                    variant="bordered"
-                    color="default"
-                    size="lg"
-                    className="bg-white/5 hover:bg-white/10 border border-white/10"
-                    disabled={form.processing}
-                >
-                    Cancel
-                </Button>
-                <LoadingButton
-                    onClick={handleSubmit}
-                    loading={form.processing}
-                    loadingPosition="start"
-                    startIcon={<PasswordIcon />}
-                    variant="contained"
-                    disabled={!form.isDirty || form.processing}
-                    sx={{
-                        background: 'linear-gradient(45deg, #3a7bd5 0%, #2456bd 100%)',
-                        boxShadow: '0 4px 20px 0 rgba(58, 123, 213, 0.4)',
-                        '&:hover': {
-                            background: 'linear-gradient(45deg, #2456bd 0%, #1a3c8a 100%)',
-                        },
-                    }}
-                >
-                    {editMode ? 'Update User' : 'Add User'}
-                </LoadingButton>
-            </DialogActions>
-        </GlassDialog>
+                                    </div>
+                                )}
+                            </form>
+                        </ModalBody>
+                        
+                        <ModalFooter className="flex justify-between px-4 sm:px-6 py-3 sm:py-4" style={{
+                            borderColor: `var(--theme-divider, #E4E4E7)`,
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
+                            <Button 
+                                variant="light" 
+                                onPress={closeModal}
+                                isDisabled={form.processing}
+                                radius={getThemeRadius()}
+                                style={{
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                onPress={handleSubmit}
+                                isLoading={form.processing}
+                                isDisabled={!form.isDirty || form.processing}
+                                startContent={!form.processing && <Lock className="w-4 h-4" />}
+                                radius={getThemeRadius()}
+                                style={{
+                                    borderRadius: `var(--borderRadius, 8px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
+                            >
+                                {editMode ? 'Update User' : 'Add User'}
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
     );
 };
 
