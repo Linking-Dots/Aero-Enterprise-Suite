@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\DeviceAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DeviceController extends Controller
 {
@@ -39,8 +40,17 @@ class DeviceController extends Controller
         $user = User::findOrFail($userId);
         $devices = $this->deviceAuthService->getUserDevices($user);
 
-        return response()->json([
-            'success' => true,
+        // If request expects JSON (API call), return JSON
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'devices' => $devices,
+            ]);
+        }
+
+        // Otherwise return Inertia page for browser navigation
+        return Inertia::render('UserDevices', [
+            'user' => $user,
             'devices' => $devices,
         ]);
     }
