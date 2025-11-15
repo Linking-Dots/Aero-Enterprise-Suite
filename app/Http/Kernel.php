@@ -17,6 +17,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\DeviceAuthMiddleware::class, // Global device authentication
     ];
 
     /**
@@ -65,7 +66,6 @@ class Kernel extends HttpKernel
         'api_security' => \App\Http\Middleware\ApiSecurityMiddleware::class,
         'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'role_hierarchy' => \App\Http\Middleware\RoleHierarchyMiddleware::class,
-        // Device Security Middleware
-        'device_auth' => \App\Http\Middleware\DeviceAuthMiddleware::class,
+        // Device auth is now global middleware - no need for alias
     ];
 }

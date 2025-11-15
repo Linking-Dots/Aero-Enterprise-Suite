@@ -45,8 +45,9 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-// Apply device authentication middleware to protected routes
-$middlewareStack = ['auth', 'verified', 'device_auth'];
+// Device authentication is now handled globally via DeviceAuthMiddleware
+// No need to apply it here - it runs on all requests automatically
+$middlewareStack = ['auth', 'verified'];
 
 Route::middleware($middlewareStack)->group(function () {
 
