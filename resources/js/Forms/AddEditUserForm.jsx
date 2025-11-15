@@ -9,37 +9,41 @@ import {
 import React, { useEffect, useState } from "react";
 import { X, Camera, Eye, EyeOff, Lock } from 'lucide-react';
 import GlassDialog from "@/Components/GlassDialog.jsx";
-
+import { useForm } from 'laravel-precognition-react';
 import { toast } from "react-toastify";
 
 const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
     
     const [showPassword, setShowPassword] = useState(false);
-    const [userData, setUserData] = useState({
-        id: user?.id || '',
-        name: user?.name || '',
-        user_name: user?.user_name || '',
-        gender: user?.gender || '',
-        birthday: user?.birthday || '',
-        date_of_joining: user?.date_of_joining || '',
-        address: user?.address || '',
-        employee_id: user?.employee_id || '',
-        phone: user?.phone || '',
-        email: user?.email || '',
-        department_id: user?.department_id || '',
-        designation_id: user?.designation_id || '',
-        report_to: user?.report_to || '',
-        password: '',
-        confirmPassword: '',
-        roles: user?.roles || []
-    });
-
-    const [errors, setErrors] = useState({});
-    const [processing, setProcessing] = useState(false);
     const [hover, setHover] = useState(false);
     const [selectedImage, setSelectedImage] = useState(user?.profile_image_url || user?.profile_image || null);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [allReportTo, setAllReportTo] = useState(allUsers);
+
+    // Initialize Precognition form with proper method and URL
+    const form = useForm(
+        editMode ? 'put' : 'post',
+        editMode ? route('users.update', { user: user.id }) : route('users.store'),
+        {
+            id: user?.id || '',
+            name: user?.name || '',
+            user_name: user?.user_name || '',
+            gender: user?.gender || '',
+            birthday: user?.birthday || '',
+            date_of_joining: user?.date_of_joining || '',
+            address: user?.address || '',
+            employee_id: user?.employee_id || '',
+            phone: user?.phone || '',
+            email: user?.email || '',
+            department_id: user?.department_id || '',
+            designation_id: user?.designation_id || '',
+            report_to: user?.report_to || '',
+            password: '',
+            password_confirmation: '',
+            roles: user?.roles || [],
+            profile_image: null,
+        }
+    );
 
 
 
@@ -53,29 +57,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setProcessing(true);
 
-        // Create a FormData object to handle both text and file data
-        const formData = new FormData();
-
-        // Append the user data to FormData
-        Object.keys(userData).forEach(key => {
-            if (key === 'roles' && Array.isArray(userData[key])) {
-                // Handle roles array
-                userData[key].forEach((role, index) => {
-                    formData.append(`roles[${index}]`, role);
-                });
-            } else if (userData[key] !== null && userData[key] !== undefined) {
-                formData.append(key, userData[key]);
-            }
-        });
-
-        // Check if a new image has been selected and add it to FormData
+        // Validate file type if image is selected
         if (selectedImageFile) {
             const fileType = selectedImageFile.type;
-            if (['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
-                formData.append('profile_image', selectedImageFile);
-            } else {
+            if (!['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
                 toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
                     icon: '🔴',
                     style: {
@@ -85,51 +71,48 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                         color: theme.palette.text.primary
                     }
                 });
-                setProcessing(false);
                 return;
             }
+            form.setData('profile_image', selectedImageFile);
         }
 
         try {
-            // Determine whether to create or update based on editMode
-            const url = editMode ? route('updateUser', { id: user.id }) : route('addUser');
-            const method = editMode ? 'put' : 'post';
-            
-            const response = await axios[method](url, formData);
-
-            if (response.status === 200) {
-                if (setUsers) {
-                    if (editMode) {
-                        // Update the user in the list
-                        setUsers(prevUsers => 
-                            prevUsers.map(u => 
-                                u.id === response.data.user.id ? response.data.user : u
-                            )
-                        );
-                    } else {
-                        // Add new user to the list
-                        setUsers(prevUsers => [...prevUsers, response.data.user]);
+            // Submit the form using Precognition
+            await form.submit({
+                onSuccess: (response) => {
+                    if (setUsers) {
+                        if (editMode) {
+                            // Update the user in the list
+                            setUsers(prevUsers => 
+                                prevUsers.map(u => 
+                                    u.id === response.data.user.id ? response.data.user : u
+                                )
+                            );
+                        } else {
+                            // Add new user to the list
+                            setUsers(prevUsers => [...prevUsers, response.data.user]);
+                        }
                     }
-                }
-                
-                toast.success(response.data.messages?.length > 0
-                    ? response.data.messages.join(' ')
-                    : `User ${editMode ? 'updated' : 'added'} successfully`, {
-                    icon: '🟢',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
-                    }
-                });
-                closeModal();
-            }
+                    
+                    toast.success(response.data.messages?.length > 0
+                        ? response.data.messages.join(' ')
+                        : `User ${editMode ? 'updated' : 'added'} successfully`, {
+                        icon: '🟢',
+                        style: {
+                            backdropFilter: 'blur(16px) saturate(200%)',
+                            background: theme.glassCard.background,
+                            border: theme.glassCard.border,
+                            color: theme.palette.text.primary,
+                        }
+                    });
+                    closeModal();
+                },
+                onError: (error) => {
+                    handleErrorResponse(error);
+                },
+            });
         } catch (error) {
-            setProcessing(false);
             handleErrorResponse(error);
-        } finally {
-            setProcessing(false);
         }
     };
 
@@ -137,8 +120,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     const handleErrorResponse = (error) => {
         if (error.response) {
             if (error.response.status === 422) {
-                setErrors(error.response.data.errors || {});
-                toast.error(error.response.data.error || `Failed to ${editMode ? 'update' : 'add'} user.`, {
+                toast.error(error.response.data.message || `Failed to ${editMode ? 'update' : 'add'} user.`, {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -192,18 +174,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     };
 
     const handleChange = (key, value) => {
-        setUserData(prev => ({
-            ...prev,
-            [key]: value
-        }));
+        form.setData(key, value);
         
-        // Clear error for this field if it exists
-        if (errors[key]) {
-            setErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[key];
-                return newErrors;
-            });
+        // Trigger validation on blur for real-time feedback
+        if (form.touched(key)) {
+            form.validate(key);
         }
     };
 
@@ -301,10 +276,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                                 <TextField
                                     label="Full Name"
-                                    value={userData.name}
+                                    value={form.data.name}
                                     onChange={(e) => handleChange('name', e.target.value)}
-                                    error={!!errors.name}
-                                    helperText={errors.name}
+                                    onBlur={() => form.validate('name')}
+                                    error={form.invalid('name')}
+                                    helperText={form.errors.name}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -325,10 +301,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                                 <TextField
                                     label="Username"
-                                    value={userData.user_name}
+                                    value={form.data.user_name}
                                     onChange={(e) => handleChange('user_name', e.target.value)}
-                                    error={!!errors.user_name}
-                                    helperText={errors.user_name}
+                                    onBlur={() => form.validate('user_name')}
+                                    error={form.invalid('user_name')}
+                                    helperText={form.errors.user_name}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -350,10 +327,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <TextField
                                     label="Email"
                                     type="email"
-                                    value={userData.email}
+                                    value={form.data.email}
                                     onChange={(e) => handleChange('email', e.target.value)}
-                                    error={!!errors.email}
-                                    helperText={errors.email}
+                                    onBlur={() => form.validate('email')}
+                                    error={form.invalid('email')}
+                                    helperText={form.errors.email}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -374,10 +352,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                                 <TextField
                                     label="Phone"
-                                    value={userData.phone}
+                                    value={form.data.phone}
                                     onChange={(e) => handleChange('phone', e.target.value)}
-                                    error={!!errors.phone}
-                                    helperText={errors.phone}
+                                    onBlur={() => form.validate('phone')}
+                                    error={form.invalid('phone')}
+                                    helperText={form.errors.phone}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -398,10 +377,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <InputLabel id="department-label" sx={{ color: theme.palette.text.secondary }}>Department</InputLabel>
                                 <Select
                                     labelId="department-label"
-                                    value={userData.department_id}
+                                    value={form.data.department_id}
                                     onChange={(e) => handleChange('department_id', e.target.value)}
+                                    onBlur={() => form.validate('department_id')}
                                     label="Department"
-                                    error={!!errors.department_id}
+                                    error={form.invalid('department_id')}
                                     sx={{
                                         background: 'rgba(255, 255, 255, 0.05)',
                                         borderRadius: '8px',
@@ -416,7 +396,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         </MenuItem>
                                     ))}
                                 </Select>
-                                {errors.department_id && <FormHelperText error>{errors.department_id}</FormHelperText>}
+                                {form.invalid('department_id') && <FormHelperText error>{form.errors.department_id}</FormHelperText>}
                             </FormControl>
                         </Grid>
 
@@ -425,10 +405,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <InputLabel id="designation-label" sx={{ color: theme.palette.text.secondary }}>Designation</InputLabel>
                                 <Select
                                     labelId="designation-label"
-                                    value={userData.designation_id}
+                                    value={form.data.designation_id}
                                     onChange={(e) => handleChange('designation_id', e.target.value)}
+                                    onBlur={() => form.validate('designation_id')}
                                     label="Designation"
-                                    error={!!errors.designation_id}
+                                    error={form.invalid('designation_id')}
                                     sx={{
                                         background: 'rgba(255, 255, 255, 0.05)',
                                         borderRadius: '8px',
@@ -443,7 +424,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         </MenuItem>
                                     ))}
                                 </Select>
-                                {errors.designation_id && <FormHelperText error>{errors.designation_id}</FormHelperText>}
+                                {form.invalid('designation_id') && <FormHelperText error>{form.errors.designation_id}</FormHelperText>}
                             </FormControl>
                         </Grid>
 
@@ -452,10 +433,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <InputLabel id="gender-label" sx={{ color: theme.palette.text.secondary }}>Gender</InputLabel>
                                 <Select
                                     labelId="gender-label"
-                                    value={userData.gender}
+                                    value={form.data.gender}
                                     onChange={(e) => handleChange('gender', e.target.value)}
+                                    onBlur={() => form.validate('gender')}
                                     label="Gender"
-                                    error={!!errors.gender}
+                                    error={form.invalid('gender')}
                                     sx={{
                                         background: 'rgba(255, 255, 255, 0.05)',
                                         borderRadius: '8px',
@@ -468,7 +450,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                     <MenuItem value="female">Female</MenuItem>
                                     <MenuItem value="other">Other</MenuItem>
                                 </Select>
-                                {errors.gender && <FormHelperText error>{errors.gender}</FormHelperText>}
+                                {form.invalid('gender') && <FormHelperText error>{form.errors.gender}</FormHelperText>}
                             </FormControl>
                         </Grid>
 
@@ -476,10 +458,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                                 <TextField
                                     label="Employee ID"
-                                    value={userData.employee_id}
+                                    value={form.data.employee_id}
                                     onChange={(e) => handleChange('employee_id', e.target.value)}
-                                    error={!!errors.employee_id}
-                                    helperText={errors.employee_id}
+                                    onBlur={() => form.validate('employee_id')}
+                                    error={form.invalid('employee_id')}
+                                    helperText={form.errors.employee_id}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -500,10 +483,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <TextField
                                     label="Date of Birth"
                                     type="date"
-                                    value={userData.birthday}
+                                    value={form.data.birthday}
                                     onChange={(e) => handleChange('birthday', e.target.value)}
-                                    error={!!errors.birthday}
-                                    helperText={errors.birthday}
+                                    onBlur={() => form.validate('birthday')}
+                                    error={form.invalid('birthday')}
+                                    helperText={form.errors.birthday}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -525,10 +509,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <TextField
                                     label="Date of Joining"
                                     type="date"
-                                    value={userData.date_of_joining}
+                                    value={form.data.date_of_joining}
                                     onChange={(e) => handleChange('date_of_joining', e.target.value)}
-                                    error={!!errors.date_of_joining}
-                                    helperText={errors.date_of_joining}
+                                    onBlur={() => form.validate('date_of_joining')}
+                                    error={form.invalid('date_of_joining')}
+                                    helperText={form.errors.date_of_joining}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -550,10 +535,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 <InputLabel id="report-to-label" sx={{ color: theme.palette.text.secondary }}>Reports To</InputLabel>
                                 <Select
                                     labelId="report-to-label"
-                                    value={userData.report_to}
+                                    value={form.data.report_to}
                                     onChange={(e) => handleChange('report_to', e.target.value)}
+                                    onBlur={() => form.validate('report_to')}
                                     label="Reports To"
-                                    error={!!errors.report_to}
+                                    error={form.invalid('report_to')}
                                     sx={{
                                         background: 'rgba(255, 255, 255, 0.05)',
                                         borderRadius: '8px',
@@ -562,13 +548,13 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                     <MenuItem value="">
                                         <em>None</em>
                                     </MenuItem>
-                                    {allReportTo?.filter(u => u.id !== userData.id).map((user) => (
+                                    {allReportTo?.filter(u => u.id !== form.data.id).map((user) => (
                                         <MenuItem key={user.id} value={user.id}>
                                             {user.name}
                                         </MenuItem>
                                     ))}
                                 </Select>
-                                {errors.report_to && <FormHelperText error>{errors.report_to}</FormHelperText>}
+                                {form.invalid('report_to') && <FormHelperText error>{form.errors.report_to}</FormHelperText>}
                             </FormControl>
                         </Grid>
 
@@ -578,10 +564,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                     label="Address"
                                     multiline
                                     rows={3}
-                                    value={userData.address}
+                                    value={form.data.address}
                                     onChange={(e) => handleChange('address', e.target.value)}
-                                    error={!!errors.address}
-                                    helperText={errors.address}
+                                    onBlur={() => form.validate('address')}
+                                    error={form.invalid('address')}
+                                    helperText={form.errors.address}
                                     InputProps={{
                                         sx: {
                                             background: 'rgba(255, 255, 255, 0.05)',
@@ -605,10 +592,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         <TextField
                                             label="Password"
                                             type={showPassword ? 'text' : 'password'}
-                                            value={userData.password}
+                                            value={form.data.password}
                                             onChange={(e) => handleChange('password', e.target.value)}
-                                            error={!!errors.password}
-                                            helperText={errors.password}
+                                            onBlur={() => form.validate('password')}
+                                            error={form.invalid('password')}
+                                            helperText={form.errors.password}
                                             required={!editMode}
                                             InputProps={{
                                                 endAdornment: (
@@ -639,10 +627,11 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         <TextField
                                             label="Confirm Password"
                                             type={showPassword ? 'text' : 'password'}
-                                            value={userData.confirmPassword}
-                                            onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                                            error={!!errors.confirmPassword}
-                                            helperText={errors.confirmPassword || (userData.password !== userData.confirmPassword && userData.confirmPassword ? 'Passwords do not match' : '')}
+                                            value={form.data.password_confirmation}
+                                            onChange={(e) => handleChange('password_confirmation', e.target.value)}
+                                            onBlur={() => form.validate('password_confirmation')}
+                                            error={form.invalid('password_confirmation')}
+                                            helperText={form.errors.password_confirmation || (form.data.password !== form.data.password_confirmation && form.data.password_confirmation ? 'Passwords do not match' : '')}
                                             required={!editMode}
                                             InputProps={{
                                                 endAdornment: (
@@ -680,15 +669,17 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                     color="default"
                     size="lg"
                     className="bg-white/5 hover:bg-white/10 border border-white/10"
+                    disabled={form.processing}
                 >
                     Cancel
                 </Button>
                 <LoadingButton
                     onClick={handleSubmit}
-                    loading={processing}
+                    loading={form.processing}
                     loadingPosition="start"
                     startIcon={<PasswordIcon />}
                     variant="contained"
+                    disabled={!form.isDirty || form.processing}
                     sx={{
                         background: 'linear-gradient(45deg, #3a7bd5 0%, #2456bd 100%)',
                         boxShadow: '0 4px 20px 0 rgba(58, 123, 213, 0.4)',

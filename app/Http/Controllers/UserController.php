@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateUserRoleRequest;
+use App\Http\Requests\UpdateUserStatusRequest;
+use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Models\HRM\AttendanceType;
 use App\Models\HRM\Department;
 use App\Models\HRM\Designation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
@@ -25,6 +33,8 @@ class UserController extends Controller
 
     public function index2(): \Inertia\Response
     {
+        $this->authorize('viewAny', User::class);
+
         return Inertia::render('UsersList', [
             'title' => 'User Management',
             'roles' => Role::all(),
@@ -32,28 +42,113 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateUserRole(Request $request, $id)
+    /**
+     * Store a new user.
+     */
+    public function store(StoreUserRequest $request)
     {
+        DB::beginTransaction();
         try {
-            $request->validate([
-                'roles' => 'required|array',
-            ]);
+            $validated = $request->validated();
 
-            $user = User::findOrFail($id);
+            // Hash password if provided
+            if (isset($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
-            $user->syncRoles($request->roles);
+            // Create user
+            $user = User::create($validated);
 
-            return response()->json(['messages' => ['Role updated successfully']], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['errors' => ['User not found']], 404);
+            // Assign roles if provided
+            if ($roles = $request->input('roles')) {
+                $user->syncRoles($roles);
+            } else {
+                // Assign default Employee role if no roles specified
+                $user->assignRole('Employee');
+            }
+
+            // Handle profile image
+            if ($request->hasFile('profile_image')) {
+                $user->addMediaFromRequest('profile_image')
+                    ->toMediaCollection('profile_images');
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'User created successfully.',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
+            ], 201);
         } catch (\Exception $e) {
-            return response()->json(['errors' => ['An unexpected error occurred. Please try again later.']], 500);
+            DB::rollBack();
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to create user.',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    public function toggleStatus($id, Request $request)
+    /**
+     * Update a user.
+     */
+    public function update(UpdateUserRequest $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $validated = $request->validated();
+
+            // Hash password if provided
+            if (isset($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($validated);
+
+            // Handle profile image
+            if ($request->hasFile('profile_image')) {
+                $user->clearMediaCollection('profile_images');
+                $user->addMediaFromRequest('profile_image')
+                    ->toMediaCollection('profile_images');
+            }
+
+            return response()->json([
+                'message' => 'User updated successfully.',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to update user.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updateUserRole(UpdateUserRoleRequest $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $user->syncRoles($request->input('roles'));
+
+            return response()->json([
+                'message' => 'Role updated successfully',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
+            ], 200);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to update user role.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function toggleStatus($id, UpdateUserStatusRequest $request)
     {
         $user = User::withTrashed()->findOrFail($id);
 
@@ -72,7 +167,33 @@ class UserController extends Controller
         return response()->json([
             'message' => 'User status updated successfully',
             'active' => $user->active,
+            'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
         ]);
+    }
+
+    /**
+     * Delete a user (soft delete).
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        $this->authorize('delete', $user);
+
+        try {
+            $user->active = false;
+            $user->save();
+            $user->delete();
+
+            return response()->json(['message' => 'User deleted successfully.']);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to delete user.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function updateFcmToken(Request $request)
@@ -97,13 +218,15 @@ class UserController extends Controller
 
     public function updateUserAttendanceType(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
+        $this->authorize('updateAttendanceType', $user);
+
         try {
             $request->validate([
                 'attendance_type_id' => 'required|exists:attendance_types,id',
                 'attendance_config' => 'nullable|array',
             ]);
-
-            $user = User::findOrFail($id);
 
             // Use Eloquent relationship to associate attendance type
             $attendanceType = AttendanceType::findOrFail($request->attendance_type_id);
@@ -121,7 +244,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'messages' => ["User attendance type updated to {$attendanceType->name} successfully."],
-                'user' => $user->fresh('attendanceType'),
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice', 'attendanceType'])),
             ]);
 
         } catch (\Exception $e) {
@@ -135,6 +258,8 @@ class UserController extends Controller
 
     public function paginate(Request $request): \Illuminate\Http\JsonResponse
     {
+        $this->authorize('viewAny', User::class);
+
         try {
             $perPage = $request->input('perPage', 10);
             $page = $request->input('page', 1);
@@ -145,7 +270,7 @@ class UserController extends Controller
 
             // Base query
             $query = User::withTrashed()
-                ->with(['department', 'designation', 'roles', 'activeDevices', 'currentDevice']);
+                ->with(['department', 'designation', 'roles', 'currentDevice']);
 
             // Filters
             if ($search) {
@@ -169,37 +294,13 @@ class UserController extends Controller
             }
 
             // Sort active users first
-            $query->orderByDesc('active');
+            $query->orderByDesc('active')->orderBy('name');
 
             // Paginate
             $users = $query->paginate($perPage, ['*'], 'page', $page);
 
-            // Transform user data
-            $users->getCollection()->transform(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                    'profile_image_url' => $user->profile_image_url,
-                    'active' => $user->active,
-                    'department_id' => $user->department_id,
-                    'department' => $user->department ? $user->department->name : null,
-                    'roles' => $user->roles->pluck('name')->toArray(),
-                    'single_device_login' => $user->single_device_login,
-                    'active_device' => $user->currentDevice ? [
-                        'id' => $user->currentDevice->id,
-                        'device_name' => $user->currentDevice->device_name,
-                        'device_type' => $user->currentDevice->device_type,
-                        'last_seen_at' => $user->currentDevice->last_used_at,
-                    ] : null,
-                    'created_at' => $user->created_at,
-                    'updated_at' => $user->updated_at,
-                ];
-            });
-
             return response()->json([
-                'users' => $users,
+                'users' => new UserCollection($users),
             ]);
         } catch (\Throwable $e) {
             report($e);

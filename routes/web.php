@@ -252,7 +252,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:holidays.create'])->post('/holiday-add', [HolidayController::class, 'create'])->name('holiday-add');
     Route::middleware(['permission:holidays.delete'])->delete('/holiday-delete', [HolidayController::class, 'delete'])->name('holiday-delete');
 
-    // User management routes
+    // User management routes - CONSOLIDATED & REFACTORED
     Route::middleware(['permission:users.view'])->group(function () {
         Route::get('/users', [UserController::class, 'index2'])->name('users');
         Route::get('/users/paginate', [UserController::class, 'paginate'])->name('users.paginate');
@@ -262,9 +262,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/profiles/search', [ProfileController::class, 'search'])->name('profiles.search');
     });
 
-    Route::middleware(['permission:users.create'])->post('/users', [ProfileController::class, 'store'])->name('addUser');
+    Route::middleware(['permission:users.create'])->group(function () {
+        Route::post('/users', [UserController::class, 'store'])
+            ->middleware(['precognitive'])
+            ->name('users.store');
+        // Legacy route for backward compatibility
+        Route::post('/users/legacy', [ProfileController::class, 'store'])->name('addUser');
+    });
 
     Route::middleware(['permission:users.update'])->group(function () {
+        Route::put('/users/{id}', [UserController::class, 'update'])
+            ->middleware(['precognitive'])
+            ->name('users.update');
+        Route::put('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+        Route::post('/users/{id}/roles', [UserController::class, 'updateUserRole'])->name('users.updateRole');
+        Route::post('/users/{id}/attendance-type', [UserController::class, 'updateUserAttendanceType'])->name('users.updateAttendanceType');
+
+        // Legacy routes for backward compatibility
         Route::post('/user/{id}/update-department', [DepartmentController::class, 'updateUserDepartment'])->name('user.updateDepartment');
         Route::post('/user/{id}/update-designation', [DesignationController::class, 'updateUserDesignation'])->name('user.updateDesignation');
         Route::post('/user/{id}/update-role', [UserController::class, 'updateUserRole'])->name('user.updateRole');
@@ -272,8 +286,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/user/{id}/update-attendance-type', [UserController::class, 'updateUserAttendanceType'])->name('user.updateAttendanceType');
     });
 
-    // Employee deletion route
-    Route::middleware(['permission:employees.delete'])->group(function () {
+    Route::middleware(['permission:users.delete'])->group(function () {
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+        // Legacy route for backward compatibility
         Route::delete('/user/{id}', [EmployeeController::class, 'destroy'])->name('user.delete');
     });
 

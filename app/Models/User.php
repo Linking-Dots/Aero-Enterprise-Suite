@@ -159,6 +159,60 @@ class User extends Authenticatable implements HasMedia
         'profile_image_url',
     ];
 
+    /**
+     * Query scope to load basic relations for user management.
+     */
+    public function scopeWithBasicRelations($query)
+    {
+        return $query->with([
+            'department:id,name',
+            'designation:id,title',
+            'roles:id,name',
+        ]);
+    }
+
+    /**
+     * Query scope to load device information.
+     */
+    public function scopeWithDeviceInfo($query)
+    {
+        return $query->with([
+            'currentDevice:id,user_id,device_name,device_type,last_used_at,is_active',
+        ]);
+    }
+
+    /**
+     * Query scope to load full relations for detailed views.
+     */
+    public function scopeWithFullRelations($query)
+    {
+        return $query->with([
+            'department',
+            'designation',
+            'roles',
+            'attendanceType',
+            'currentDevice',
+            'educations',
+            'experiences',
+        ]);
+    }
+
+    /**
+     * Query scope for active users only.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    /**
+     * Query scope for inactive users only.
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
     public function ledProjects()
     {
         return $this->hasMany(Project::class, 'project_leader_id');
