@@ -546,7 +546,7 @@ const UsersList = ({ title, roles }) => {
                 <DropdownItem
                   key="view-devices"
                   startContent={<DevicePhoneMobileIcon className="w-3 h-3" />}
-                  onPress={() => router.visit(route('users.device.show', { user: user.id }))}
+                  onPress={() => router.visit(route('admin.users.devices', { userId: user.id }))}
                   className="text-xs"
                 >
                   Device History

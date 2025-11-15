@@ -733,7 +733,7 @@ const UsersTable = ({
                 
                 <DropdownItem
                   textValue="View Devices"
-                  href={route('users.device.show', { user: user.id })}
+                  href={route('admin.users.devices', { userId: user.id })}
                   as={Link}
                   startContent={<DevicePhoneMobileIcon className="w-4 h-4" />}
                   className="text-blue-500"
