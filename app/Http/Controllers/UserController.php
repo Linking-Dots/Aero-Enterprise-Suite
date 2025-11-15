@@ -39,6 +39,7 @@ class UserController extends Controller
             'title' => 'User Management',
             'roles' => Role::all(),
             'departments' => Department::all(),
+            'designations' => Designation::all(),
         ]);
     }
 

@@ -77,7 +77,7 @@ const getThemeRadius = () => {
   return 'xl';
 };
 
-const UsersList = ({ title, roles }) => {
+const UsersList = ({ title, roles, departments, designations }) => {
   // Custom media query logic - matching AttendanceAdmin
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -818,6 +818,9 @@ const UsersList = ({ title, roles }) => {
       {openModalType === 'add' && (
         <AddEditUserForm
           user={null}
+          allUsers={users}
+          departments={departments}
+          designations={designations}
           open={openModalType === 'add'}
           setUsers={handleUsersUpdate}
           closeModal={closeModal}
@@ -829,6 +832,9 @@ const UsersList = ({ title, roles }) => {
       {openModalType === 'edit' && selectedUser && (
         <AddEditUserForm
           user={selectedUser}
+          allUsers={users}
+          departments={departments}
+          designations={designations}
           open={openModalType === 'edit'}
           setUsers={handleUsersUpdate}
           closeModal={closeModal}
