@@ -191,7 +191,7 @@ class UserController extends Controller
                         'id' => $user->currentDevice->id,
                         'device_name' => $user->currentDevice->device_name,
                         'device_type' => $user->currentDevice->device_type,
-                        'last_seen_at' => $user->currentDevice->last_activity,
+                        'last_seen_at' => $user->currentDevice->last_used_at,
                     ] : null,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,

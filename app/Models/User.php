@@ -242,7 +242,7 @@ class User extends Authenticatable implements HasMedia
      */
     public function currentDevice()
     {
-        return $this->hasOne(UserDevice::class)->active()->latest('last_activity');
+        return $this->hasOne(UserDevice::class)->active()->latest('last_used_at');
     }
 
     /**
@@ -337,7 +337,7 @@ class User extends Authenticatable implements HasMedia
      */
     public function getDeviceSummary(): array
     {
-        $devices = $this->devices()->orderBy('last_activity', 'desc')->get();
+        $devices = $this->devices()->orderBy('last_used_at', 'desc')->get();
 
         return [
             'total_devices' => $devices->count(),
