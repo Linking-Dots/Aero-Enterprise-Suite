@@ -172,7 +172,7 @@ const Analytics = ({ auth, event, analytics }) => {
                                             </div>
                                             <Button
                                                 variant="flat"
-                                                onPress={() => router.get(route('admin.events.show', event.id))}
+                                                onPress={() => router.get(route('events.show', event.id))}
                                                 startContent={<ArrowLeftIcon className="w-5 h-5" />}
                                                 radius={getThemeRadius()}
                                             >

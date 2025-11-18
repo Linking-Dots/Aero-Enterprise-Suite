@@ -60,7 +60,7 @@ const CheckRegistration = ({ registration, event }) => {
     };
 
     const handlePrintToken = () => {
-        window.open(route('admin.events.registrations.print', {
+        window.open(route('events.registrations.print-token', {
             event: event.id,
             registration: registration.id
         }), '_blank');

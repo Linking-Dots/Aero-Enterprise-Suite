@@ -224,8 +224,8 @@ export const getPages = (permissions, auth = null) => [
     priority: 4,
     module: 'events',
     subMenu: [
-      { name: 'Events', icon: <CalendarIcon  />, route: 'admin.events.index' },
-      { name: 'Create Event', icon: <CalendarDaysIcon  />, route: 'admin.events.create' },
+      { name: 'Events', icon: <CalendarIcon  />, route: 'events.index' },
+      { name: 'Create Event', icon: <CalendarDaysIcon  />, route: 'events.create' },
     ]
   }] : []),
   // 5. Project Management (Complete ERP Module)

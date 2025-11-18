@@ -87,7 +87,7 @@ const Show = ({ auth, registration, event }) => {
         
         setProcessing(true);
         try {
-            await axios.post(route('admin.events.registrations.approve', {
+            await axios.post(route('events.registrations.approve', {
                 event: event.id,
                 registration: registration.id
             }));
@@ -103,7 +103,7 @@ const Show = ({ auth, registration, event }) => {
     const handleReject = async () => {
         setProcessing(true);
         try {
-            await axios.post(route('admin.events.registrations.reject', {
+            await axios.post(route('events.registrations.reject', {
                 event: event.id,
                 registration: registration.id
             }), {
@@ -124,7 +124,7 @@ const Show = ({ auth, registration, event }) => {
         
         setProcessing(true);
         try {
-            await axios.post(route('admin.events.registrations.verify-payment', {
+            await axios.post(route('events.registrations.verify-payment', {
                 event: event.id,
                 registration: registration.id
             }));
@@ -138,7 +138,7 @@ const Show = ({ auth, registration, event }) => {
     };
 
     const handlePrintToken = () => {
-        window.open(route('admin.events.registrations.print', {
+        window.open(route('events.registrations.print-token', {
             event: event.id,
             registration: registration.id
         }), '_blank');
@@ -148,7 +148,7 @@ const Show = ({ auth, registration, event }) => {
         {
             label: 'Back',
             variant: 'light',
-            onClick: () => router.get(route('admin.events.registrations.index', event.id))
+            onClick: () => router.get(route('events.registrations.index', event.id))
         }
     ];
 
@@ -215,7 +215,7 @@ const Show = ({ auth, registration, event }) => {
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
                                                     variant="flat"
-                                                    onPress={() => router.get(route('admin.events.registrations.index', event.id))}
+                                                    onPress={() => router.get(route('events.registrations.index', event.id))}
                                                     startContent={<ArrowLeftIcon className="w-5 h-5" />}
                                                     radius={getThemeRadius()}
                                                 >
