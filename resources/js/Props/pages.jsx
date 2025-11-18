@@ -217,7 +217,18 @@ export const getPages = (permissions, auth = null) => [
       }] : []),
     ]
   }] : []),
-  // 4. Project Management (Complete ERP Module)
+  // 4. Event Management
+  ...(permissions.includes('event.view') ? [{
+    name: 'Events',
+    icon: <CalendarIcon className="" />,
+    priority: 4,
+    module: 'events',
+    subMenu: [
+      { name: 'Events', icon: <CalendarIcon  />, route: 'admin.events.index' },
+      { name: 'Create Event', icon: <CalendarDaysIcon  />, route: 'admin.events.create' },
+    ]
+  }] : []),
+  // 5. Project Management (Complete ERP Module)
   // Note: Tasks, Milestones, Issues, and Resources are project-specific and accessible from individual project pages
   // Only globally accessible features are shown in the main navigation
   ...((permissions.includes('project-management.dashboard.view') || 
@@ -227,7 +238,7 @@ export const getPages = (permissions, auth = null) => [
        permissions.includes('daily-works.view')) ? [{
     name: 'Projects',
     icon: <BriefcaseIcon className="" />,
-    priority: 4,
+    priority: 5,
     module: 'project-management',
     subMenu: [
       // Dashboard
@@ -283,11 +294,11 @@ export const getPages = (permissions, auth = null) => [
       
     ]
   }] : []),
-  // 5. DMS (Document Management System)
+  // 6. DMS (Document Management System)
   ...(permissions.includes('dms.view') ? [{
     name: 'DMS',
     icon: <FolderIcon className="" />,
-    priority: 5,
+    priority: 6,
     module: 'dms',
     subMenu: [
       { name: 'Dashboard', icon: <HomeIcon  />, route: 'dms.index' },
@@ -302,11 +313,11 @@ export const getPages = (permissions, auth = null) => [
       ] : []),
     ]
   }] : []),
-  // 6. CRM (Customer Relationship Management)
+  // 7. CRM (Customer Relationship Management)
   ...(permissions.includes('crm.view') ? [{
     name: 'CRM',
     icon: <UserIcon className="" />,
-    priority: 6,
+    priority: 7,
     module: 'crm',
     subMenu: [
       ...(permissions.includes('crm.customers.view') ? [{ name: 'Customers', icon: <UserGroupIcon  />, route: 'crm.customers.index' }] : []),
@@ -315,11 +326,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('crm.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'crm.dashboard' }] : []),
     ]
   }] : []),
-  // 7. FMS (Financial Management System)
+  // 8. FMS (Financial Management System)
   ...(permissions.includes('fms.view') ? [{
     name: 'Finance',
     icon: <BanknotesIcon className="" />,
-    priority: 7,
+    priority: 8,
     module: 'fms',
     subMenu: [
       ...(permissions.includes('fms.transactions.view') ? [{ name: 'Transactions', icon: <CreditCardIcon  />, route: 'fms.transactions.index' }] : []),
@@ -329,11 +340,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('fms.dashboard.view') ? [{ name: 'Dashboard', icon: <ChartBarSquareIcon  />, route: 'fms.dashboard' }] : []),
     ]
   }] : []),
-  // 8. POS (Point of Sale)
+  // 9. POS (Point of Sale)
   ...(permissions.includes('pos.view') ? [{
     name: 'POS',
     icon: <ShoppingCartIcon className="" />,
-    priority: 8,
+    priority: 9,
     module: 'pos',
     subMenu: [
       ...(permissions.includes('pos.sales.view') ? [{ name: 'Sales', icon: <ShoppingCartIcon  />, route: 'pos.sales.index' }] : []),
@@ -342,11 +353,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('pos.dashboard.view') ? [{ name: 'Reports', icon: <ChartBarSquareIcon  />, route: 'pos.dashboard' }] : []),
     ]
   }] : []),
-  // 9. IMS (Inventory Management System)
+  // 10. IMS (Inventory Management System)
   ...(permissions.includes('inventory.view') ? [{
     name: 'Inventory',
     icon: <ArchiveBoxIcon className="" />,
-    priority: 9,
+    priority: 10,
     module: 'ims',
     subMenu: [
       ...(permissions.includes('inventory.view') ? [{ name: 'Dashboard', icon: <HomeIcon  />, route: 'ims.index' }] : []),
@@ -358,11 +369,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('inventory.view') ? [{ name: 'Reports', icon: <ChartBarSquareIcon  />, route: 'ims.reports' }] : []),
     ]
   }] : []),
-  // 10. LMS (Learning Management System)
+  // 11. LMS (Learning Management System)
   ...(permissions.includes('lms.view') ? [{
     name: 'Learning',
     icon: <AcademicCapIcon className="" />,
-    priority: 10,
+    priority: 11,
     module: 'lms',
     subMenu: [
       ...(permissions.includes('lms.view') ? [{ name: 'Dashboard', icon: <HomeIcon  />, route: 'lms.dashboard' }] : []),
@@ -371,11 +382,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('lms.assessments.view') ? [{ name: 'Assessments', icon: <ClipboardDocumentCheckIcon  />, route: 'lms.assessments.index' }] : []),
     ]
   }] : []),
-  // 11. SCM (Supply Chain Management)
+  // 12. SCM (Supply Chain Management)
   ...(permissions.includes('scm.view') ? [{
     name: 'SCM',
     icon: <TruckIcon className="" />,
-    priority: 11,
+    priority: 12,
     module: 'scm',
     subMenu: [
       ...(permissions.includes('scm.suppliers.view') ? [{ name: 'Suppliers', icon: <UserGroupIcon  />, route: 'scm.suppliers.index' }] : []),
@@ -384,11 +395,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('scm.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'scm.dashboard' }] : []),
     ]
   }] : []),
-  // 12. Sales/Retail
+  // 13. Sales/Retail
   ...(permissions.includes('sales.view') ? [{
     name: 'Sales',
     icon: <ShoppingBagIcon className="" />,
-    priority: 12,
+    priority: 13,
     module: 'sales',
     subMenu: [
       ...(permissions.includes('sales.orders.view') ? [{ name: 'Orders', icon: <ClipboardDocumentCheckIcon  />, route: 'sales.orders.index' }] : []),
@@ -397,11 +408,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('sales.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'sales.dashboard' }] : []),
     ]
   }] : []),
-  // 13. Helpdesk
+  // 14. Helpdesk
   ...(permissions.includes('helpdesk.view') ? [{
     name: 'Helpdesk',
     icon: <TicketIcon className="" />,
-    priority: 13,
+    priority: 14,
     module: 'helpdesk',
     subMenu: [
       ...(permissions.includes('helpdesk.tickets.view') ? [{ name: 'Tickets', icon: <TicketIcon  />, route: 'helpdesk.tickets.index' }] : []),
@@ -409,11 +420,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('helpdesk.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'helpdesk.dashboard' }] : []),
     ]
   }] : []),
-  // 14. Assets
+  // 15. Assets
   ...(permissions.includes('assets.view') ? [{
     name: 'Assets',
     icon: <ComputerDesktopIcon className="" />,
-    priority: 14,
+    priority: 15,
     module: 'assets',
     subMenu: [
       ...(permissions.includes('assets.items.view') ? [{ name: 'Items', icon: <ComputerDesktopIcon  />, route: 'assets.items.index' }] : []),
@@ -421,11 +432,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('assets.dashboard.view') ? [{ name: 'Reports', icon: <ChartBarSquareIcon  />, route: 'assets.dashboard' }] : []),
     ]
   }] : []),
-  // 15. Compliance
+  // 16. Compliance
   ...(permissions.includes('compliance.view') ? [{
     name: 'Compliance',
     icon: <ShieldCheckIcon className="" />,
-    priority: 15,
+    priority: 16,
     module: 'compliance',
     subMenu: [
       ...(permissions.includes('compliance.dashboard.view') ? [{ name: 'Dashboard', icon: <ChartBarSquareIcon  />, route: 'compliance.dashboard' }] : []),
@@ -437,11 +448,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('compliance.controlled_documents.view') ? [{ name: 'Controlled Documents', icon: <DocumentDuplicateIcon  />, route: 'compliance.controlled-documents.index' }] : []),
     ]
   }] : []),
-  // 16. Procurement
+  // 17. Procurement
   ...(permissions.includes('procurement.view') ? [{
     name: 'Procurement',
     icon: <ShoppingBagIcon className="" />,
-    priority: 16,
+    priority: 17,
     module: 'procurement',
     subMenu: [
       ...(permissions.includes('procurement.purchase-orders.view') ? [{ name: 'POs', icon: <ShoppingCartIcon  />, route: 'procurement.purchase-orders.index' }] : []),
@@ -450,11 +461,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('procurement.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'procurement.dashboard' }] : []),
     ]
   }] : []),
-  // 17. Quality Management
+  // 18. Quality Management
   ...(permissions.includes('quality.view') ? [{
     name: 'Quality',
     icon: <BeakerIcon className="" />,
-    priority: 17,
+    priority: 18,
     module: 'quality',
     subMenu: [
       ...(permissions.includes('quality.inspections.view') ? [{ name: 'Inspections', icon: <ClipboardDocumentCheckIcon  />, route: 'quality.inspections.index' }] : []),
@@ -463,11 +474,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('quality.dashboard.view') ? [{ name: 'Analytics', icon: <ChartBarSquareIcon  />, route: 'quality.dashboard' }] : []),
     ]
   }] : []),
-  // 18. Analytics
+  // 19. Analytics
   ...(permissions.includes('analytics.view') ? [{
     name: 'Analytics',
     icon: <ChartBarSquareIcon className="" />,
-    priority: 18,
+    priority: 19,
     module: 'analytics',
     subMenu: [
       ...(permissions.includes('analytics.reports.view') ? [{ name: 'Reports', icon: <DocumentTextIcon  />, route: 'analytics.reports.index' }] : []),
@@ -475,11 +486,11 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('analytics.kpi.view') ? [{ name: 'KPIs', icon: <ChartBarSquareIcon  />, route: 'analytics.kpi.index' }] : []),
     ]
   }] : []),
-  // 19. Admin (System Administration)
+  // 20. Admin (System Administration)
   ...(permissions.includes('users.view') || permissions.includes('settings.view') || permissions.includes('roles.view') ? [{
     name: 'Admin',
     icon: <Cog6ToothIcon className="" />,
-    priority: 19,
+    priority: 20,
     module: 'admin',
     subMenu: [
       ...(permissions.includes('users.view') ? [{ name: 'Users', icon: <UsersIcon  />, route: 'users' }] : []),

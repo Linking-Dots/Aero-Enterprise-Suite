@@ -693,6 +693,66 @@ Route::middleware(['auth', 'verified'])->get('/test-employee-auth', function () 
     ]);
 });
 
+// Event Management Public Routes (no authentication required)
+Route::prefix('events')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PublicEventController::class, 'index'])->name('public.events.index');
+    Route::get('/{slug}', [\App\Http\Controllers\PublicEventController::class, 'show'])->name('public.events.show');
+    Route::post('/{slug}/register', [\App\Http\Controllers\PublicEventController::class, 'register'])->name('public.events.register');
+    Route::get('/{slug}/registration-success/{token}', [\App\Http\Controllers\PublicEventController::class, 'registrationSuccess'])->name('public.events.registration-success');
+    Route::get('/check-registration', [\App\Http\Controllers\PublicEventController::class, 'checkRegistration'])->name('public.events.check-registration');
+    Route::get('/token/{token}/download', [\App\Http\Controllers\PublicEventController::class, 'downloadToken'])->name('public.events.download-token');
+});
+
+// Event Management Admin Routes (require authentication and permissions)
+Route::middleware(['auth', 'verified'])->prefix('admin/events')->group(function () {
+    // Event CRUD
+    Route::middleware(['permission:event.view'])->group(function () {
+        Route::get('/', [\App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+        Route::get('/{event}', [\App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+        Route::get('/{event}/analytics', [\App\Http\Controllers\EventController::class, 'analytics'])->name('events.analytics');
+    });
+
+    Route::middleware(['permission:event.create'])->group(function () {
+        Route::get('/create', [\App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+        Route::post('/', [\App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+        Route::post('/{event}/duplicate', [\App\Http\Controllers\EventController::class, 'duplicate'])->name('events.duplicate');
+    });
+
+    Route::middleware(['permission:event.update'])->group(function () {
+        Route::get('/{event}/edit', [\App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
+        Route::put('/{event}', [\App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+        Route::post('/{event}/toggle-publish', [\App\Http\Controllers\EventController::class, 'togglePublish'])->name('events.toggle-publish');
+    });
+
+    Route::middleware(['permission:event.delete'])->group(function () {
+        Route::delete('/{event}', [\App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
+    });
+
+    // Sub-Events Management
+    Route::middleware(['permission:event.update'])->group(function () {
+        Route::post('/{event}/sub-events', [\App\Http\Controllers\SubEventController::class, 'store'])->name('sub-events.store');
+        Route::put('/{event}/sub-events/{subEvent}', [\App\Http\Controllers\SubEventController::class, 'update'])->name('sub-events.update');
+        Route::delete('/{event}/sub-events/{subEvent}', [\App\Http\Controllers\SubEventController::class, 'destroy'])->name('sub-events.destroy');
+        Route::post('/{event}/sub-events/reorder', [\App\Http\Controllers\SubEventController::class, 'reorder'])->name('sub-events.reorder');
+        Route::post('/{event}/sub-events/{subEvent}/toggle-active', [\App\Http\Controllers\SubEventController::class, 'toggleActive'])->name('sub-events.toggle-active');
+    });
+
+    // Registration Management
+    Route::middleware(['permission:event.registration.manage'])->group(function () {
+        Route::get('/{event}/registrations', [\App\Http\Controllers\EventRegistrationController::class, 'index'])->name('events.registrations.index');
+        Route::get('/{event}/registrations/{registration}', [\App\Http\Controllers\EventRegistrationController::class, 'show'])->name('events.registrations.show');
+        Route::post('/{event}/registrations/{registration}/approve', [\App\Http\Controllers\EventRegistrationController::class, 'approve'])->name('events.registrations.approve');
+        Route::post('/{event}/registrations/{registration}/reject', [\App\Http\Controllers\EventRegistrationController::class, 'reject'])->name('events.registrations.reject');
+        Route::post('/{event}/registrations/{registration}/cancel', [\App\Http\Controllers\EventRegistrationController::class, 'cancel'])->name('events.registrations.cancel');
+        Route::post('/{event}/registrations/{registration}/verify-payment', [\App\Http\Controllers\EventRegistrationController::class, 'verifyPayment'])->name('events.registrations.verify-payment');
+        Route::post('/{event}/registrations/bulk-approve', [\App\Http\Controllers\EventRegistrationController::class, 'bulkApprove'])->name('events.registrations.bulk-approve');
+        Route::post('/{event}/registrations/bulk-reject', [\App\Http\Controllers\EventRegistrationController::class, 'bulkReject'])->name('events.registrations.bulk-reject');
+        Route::get('/{event}/registrations/export/csv', [\App\Http\Controllers\EventRegistrationController::class, 'exportCsv'])->name('events.registrations.export-csv');
+        Route::get('/{event}/registrations/export/pdf', [\App\Http\Controllers\EventRegistrationController::class, 'exportPdf'])->name('events.registrations.export-pdf');
+        Route::get('/{event}/registrations/{registration}/print-token', [\App\Http\Controllers\EventRegistrationController::class, 'printToken'])->name('events.registrations.print-token');
+    });
+});
+
 // Include all module routes
 require __DIR__.'/modules.php';
 require __DIR__.'/compliance.php';
