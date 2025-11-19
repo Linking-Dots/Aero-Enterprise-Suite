@@ -40,86 +40,28 @@ const AuthGuard = ({ children, auth, url }) => {
                     return;
                 }
 
-                // If already initialized and user is authenticated, skip re-check for route changes
-                if (hasInitialized.current && auth?.isAuthenticated && auth?.user?.id) {
+                // CRITICAL: For protected routes, verify auth immediately
+                // Do NOT render until we confirm authentication
+                
+                // Check server-provided auth status first - this is most reliable
+                if (auth?.isAuthenticated && auth?.sessionValid && auth?.user?.id) {
+                    // Server says user is authenticated, trust it immediately
                     setIsAuthenticated(true);
                     setIsCheckingAuth(false);
+                    hasInitialized.current = true;
                     return;
                 }
 
-                // Only do full auth check on initial load or when auth state changes
-                if (!hasInitialized.current || !auth?.user?.id) {
-                    // Check server-provided auth status first
-                    if (auth?.isAuthenticated && auth?.sessionValid && auth?.user?.id) {
-                        setIsAuthenticated(true);
-                        setIsCheckingAuth(false);
-                        hasInitialized.current = true;
-                        
-                        // Optional background session check for security (non-blocking)
-                        setTimeout(async () => {
-                            try {
-                                const response = await fetch('/session-check', {
-                                    method: 'GET',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'Accept': 'application/json',
-                                    },
-                                    credentials: 'same-origin'
-                                });
-
-                                if (response.ok) {
-                                    const data = await response.json();
-                                    if (!data.authenticated) {
-                                        router.visit('/login', {
-                                            method: 'get',
-                                            preserveState: false,
-                                            preserveScroll: false,
-                                            replace: true
-                                        });
-                                    }
-                                }
-                            } catch (error) {
-                                console.warn('Background session check failed:', error);
-                            }
-                        }, 100);
-                        
-                        return;
-                    }
-
-                    // If no valid auth data, do immediate session check
-                    const response = await fetch('/session-check', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                        },
-                        credentials: 'same-origin'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.authenticated) {
-                            setIsAuthenticated(true);
-                            hasInitialized.current = true;
-                        } else {
-                            router.visit('/login', {
-                                method: 'get',
-                                preserveState: false,
-                                preserveScroll: false,
-                                replace: true
-                            });
-                            return;
-                        }
-                    } else {
-                        router.visit('/login', {
-                            method: 'get', 
-                            preserveState: false,
-                            preserveScroll: false,
-                            replace: true
-                        });
-                        return;
-                    }
-                }
+                // If no valid auth data from server, redirect immediately
+                // Do NOT do async checks that would show protected content
+                console.warn('No valid authentication data from server, redirecting to login');
+                router.visit('/login', {
+                    method: 'get',
+                    preserveState: false,
+                    preserveScroll: false,
+                    replace: true
+                });
+                return;
             } catch (error) {
                 console.error('Auth check failed:', error);
                 router.visit('/login', {
@@ -135,10 +77,11 @@ const AuthGuard = ({ children, auth, url }) => {
         };
 
         checkAuthStatus();
-    }, [auth?.user?.id, auth?.isAuthenticated, auth?.sessionValid, isPublicRoute]); // Removed 'url' dependency
+    }, [auth?.user?.id, auth?.isAuthenticated, auth?.sessionValid, url, isPublicRoute]);
 
-    // Show loading screen only on initial auth check, not on route changes
-    if (isCheckingAuth && !isPublicRoute && !hasInitialized.current) {
+    // CRITICAL: Show loading screen for ALL auth checks on protected routes
+    // This prevents flashing authenticated content to unauthenticated users
+    if (isCheckingAuth && !isPublicRoute) {
         return (
             <div className="fixed inset-0 z-9999 flex items-center justify-center bg-linear-to-br from-slate-900 via-blue-900 to-slate-900">
                 <motion.div

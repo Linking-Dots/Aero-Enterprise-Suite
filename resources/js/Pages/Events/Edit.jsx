@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Button,
@@ -22,9 +22,10 @@ import {
 } from '@heroicons/react/24/outline';
 import App from '@/Layouts/App.jsx';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const EditEvent = ({ event }) => {
-    const { data, setData, put, processing, errors } = useForm({
+    const [data, setData] = useState({
         title: event.title || '',
         slug: event.slug || '',
         description: event.description || '',
@@ -47,68 +48,122 @@ const EditEvent = ({ event }) => {
         custom_fields: event.custom_fields || []
     });
 
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
     const [bannerPreview, setBannerPreview] = useState(
         event.banner_image ? `/storage/${event.banner_image}` : null
     );
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setProcessing(true);
+        setErrors({});
         
-        const formData = new FormData();
-        Object.keys(data).forEach(key => {
-            if (key === 'custom_fields') {
-                formData.append(key, JSON.stringify(data[key]));
-            } else if (key === 'banner_image' && data[key]) {
-                formData.append(key, data[key]);
-            } else if (data[key] !== null && data[key] !== '') {
-                formData.append(key, data[key]);
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const formData = new FormData();
+                formData.append('_method', 'PUT');
+                
+                Object.keys(data).forEach(key => {
+                    if (key === 'custom_fields') {
+                        formData.append(key, JSON.stringify(data[key]));
+                    } else if (key === 'banner_image' && data[key]) {
+                        formData.append(key, data[key]);
+                    } else if (typeof data[key] === 'boolean') {
+                        // Handle boolean values - convert to '1' or '0' for Laravel
+                        formData.append(key, data[key] ? '1' : '0');
+                    } else if (data[key] !== null && data[key] !== '') {
+                        formData.append(key, data[key]);
+                    }
+                });
+
+                const response = await axios.post(route('events.update', event.id), formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                if (response.status === 200 || response.status === 201) {
+                    router.visit(route('events.show', event.id));
+                    resolve('Event updated successfully!');
+                } else {
+                    reject(`Unexpected response status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error updating event:', error);
+                
+                if (error.response) {
+                    if (error.response.status === 422) {
+                        setErrors(error.response.data.errors || {});
+                        reject(error.response.data.message || 'Failed to update event. Please check the form.');
+                    } else {
+                        reject(`HTTP Error ${error.response.status}: ${error.response.data.message || 'An unexpected error occurred.'}`);
+                    }
+                } else if (error.request) {
+                    reject('No response received from the server. Please check your internet connection.');
+                } else {
+                    reject('An error occurred while setting up the request.');
+                }
+            } finally {
+                setProcessing(false);
             }
         });
 
-        router.post(route('events.update', event.id), {
-            _method: 'put',
-            ...Object.fromEntries(formData),
-        }, {
-            forceFormData: true,
-            onSuccess: () => {
-                toast.success('Event updated successfully!');
-                router.get(route('events.show', event.id));
-            },
-            onError: (errors) => {
-                toast.error('Failed to update event. Please check the form.');
+        toast.promise(
+            promise,
+            {
+                pending: 'Updating event...',
+                success: {
+                    render({ data }) {
+                        return data;
+                    }
+                },
+                error: {
+                    render({ data }) {
+                        return data;
+                    }
+                }
             }
-        });
+        );
     };
 
     const handleBannerChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setData('banner_image', file);
+            setData(prev => ({ ...prev, banner_image: file }));
             setBannerPreview(URL.createObjectURL(file));
         }
     };
 
     const addCustomField = () => {
-        setData('custom_fields', [...data.custom_fields, {
-            field_name: '',
-            field_label: '',
-            field_type: 'text',
-            field_options: [],
-            is_required: false,
-            placeholder: '',
-            help_text: ''
-        }]);
+        setData(prev => ({
+            ...prev,
+            custom_fields: [...prev.custom_fields, {
+                field_name: '',
+                field_label: '',
+                field_type: 'text',
+                field_options: [],
+                is_required: false,
+                placeholder: '',
+                help_text: ''
+            }]
+        }));
     };
 
     const removeCustomField = (index) => {
-        const newFields = data.custom_fields.filter((_, i) => i !== index);
-        setData('custom_fields', newFields);
+        setData(prev => ({
+            ...prev,
+            custom_fields: prev.custom_fields.filter((_, i) => i !== index)
+        }));
     };
 
     const updateCustomField = (index, key, value) => {
-        const newFields = [...data.custom_fields];
-        newFields[index][key] = value;
-        setData('custom_fields', newFields);
+        setData(prev => ({
+            ...prev,
+            custom_fields: prev.custom_fields.map((field, i) => 
+                i === index ? { ...field, [key]: value } : field
+            )
+        }));
     };
 
     const getThemeRadius = () => {
@@ -402,7 +457,7 @@ const EditEvent = ({ event }) => {
                                                         </Button>
                                                     </div>
                                                     
-                                                    {data.custom_fields.length > 0 ? (
+                                                    {data.custom_fields && data.custom_fields.length > 0 ? (
                                                         <div className="space-y-4">
                                                             {data.custom_fields.map((field, index) => (
                                                                 <Card key={index} style={{ borderRadius: 'var(--borderRadius, 12px)' }}>

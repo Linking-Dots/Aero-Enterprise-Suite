@@ -705,16 +705,20 @@ Route::prefix('events')->group(function () {
 
 // Event Management Admin Routes (require authentication and permissions)
 Route::middleware(['auth', 'verified'])->prefix('admin/events')->group(function () {
-    // Event CRUD
-    Route::middleware(['permission:event.view'])->group(function () {
-        Route::get('/', [\App\Http\Controllers\EventController::class, 'index'])->name('events.index');
-        Route::get('/{event}', [\App\Http\Controllers\EventController::class, 'show'])->name('events.show');
-        Route::get('/{event}/analytics', [\App\Http\Controllers\EventController::class, 'analytics'])->name('events.analytics');
-    });
-
+    // Create route must come before {event} routes to avoid matching "create" as an event ID
     Route::middleware(['permission:event.create'])->group(function () {
         Route::get('/create', [\App\Http\Controllers\EventController::class, 'create'])->name('events.create');
         Route::post('/', [\App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+    });
+
+    // Event CRUD - View routes
+    Route::middleware(['permission:event.view'])->group(function () {
+        Route::get('/', [\App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+        Route::get('/{event}/analytics', [\App\Http\Controllers\EventController::class, 'analytics'])->name('events.analytics');
+        Route::get('/{event}', [\App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+    });
+
+    Route::middleware(['permission:event.create'])->group(function () {
         Route::post('/{event}/duplicate', [\App\Http\Controllers\EventController::class, 'duplicate'])->name('events.duplicate');
     });
 

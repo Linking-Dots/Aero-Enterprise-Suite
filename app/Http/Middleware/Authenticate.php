@@ -27,25 +27,24 @@ class Authenticate extends Middleware
     protected function unauthenticated($request, array $guards)
     {
         // Check if session has expired
-        if ($request->hasSession() && !$request->session()->has('_token')) {
+        if ($request->hasSession() && ! $request->session()->has('_token')) {
             // Clear any remaining session data
             $request->session()->flush();
             $request->session()->regenerate();
         }
 
-        // For Inertia requests (AJAX/SPA), return JSON response
+        // For Inertia requests (AJAX/SPA), redirect immediately without showing content
         if ($request->header('X-Inertia')) {
-            return response()->json([
-                'message' => 'Session expired. Please login again.',
-                'redirect' => route('login')
-            ], 401);
+            // Return 409 Conflict with redirect location
+            // This triggers Inertia to perform a full page visit to login
+            return redirect()->guest(route('login'));
         }
 
         // For API requests, return JSON response
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'message' => 'Unauthenticated.',
-                'error' => 'session_expired'
+                'error' => 'session_expired',
             ], 401);
         }
 

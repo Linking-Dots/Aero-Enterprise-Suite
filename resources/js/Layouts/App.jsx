@@ -12,7 +12,6 @@ import Header from "@/Layouts/Header.jsx";
 import Sidebar from "@/Layouts/Sidebar.jsx";
 import Breadcrumb from "@/Components/Breadcrumb.jsx";
 import BottomNav from "@/Layouts/BottomNav.jsx";
-import SessionExpiredModal from '@/Components/SessionExpiredModal.jsx';
 import ThemeSettingDrawer from "@/Components/ThemeSettingDrawer.jsx";
 import UpdateNotification from '@/Components/UpdateNotification.jsx';
 import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
@@ -122,7 +121,6 @@ PageContent.displayName = 'PageContent';
 // ===== MAIN APP LAYOUT =====
 const App = React.memo(({ children }) => {
   // ===== CORE STATE MANAGEMENT =====
-  const [sessionExpired, setSessionExpired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sideBarOpen, setSideBarOpen] = useState(() => {
     try {
@@ -178,7 +176,6 @@ const App = React.memo(({ children }) => {
   // Persistent refs
   const contentRef = useRef(null);
   const mainContentRef = useRef(null);
-  const sessionCheckRef = useRef(null);
   const layoutInitialized = useRef(false);
 
   // ===== STATIC HANDLERS (Never Change Reference) =====
@@ -267,81 +264,8 @@ const App = React.memo(({ children }) => {
     }
   }, [isMobile]);
 
-  // Session check
-  useEffect(() => {
-    if (!staticLayoutData.currentAuth?.user) return;
-    const checkSession = async () => {
-      try {
-        const response = await axios.get('/session-check');
-        if (!response.data.authenticated) {
-          setSessionExpired(true);
-          if (sessionCheckRef.current) {
-            clearInterval(sessionCheckRef.current);
-            sessionCheckRef.current = null;
-          }
-        }
-      } catch (error) {
-        console.error('Background session check failed:', error);
-      }
-    };
-
-    checkSession();
-
-    const initialTimeout = setTimeout(() => {
-      checkSession();
-      sessionCheckRef.current = setInterval(checkSession, 30000);
-    }, 10000);
-    
-    return () => {
-      clearTimeout(initialTimeout);
-      if (sessionCheckRef.current) {
-        clearInterval(sessionCheckRef.current);
-      }
-    };
-  }, [staticLayoutData.currentAuth?.user?.id]);
-
-  // Listen for session expiry events from various sources
-  useEffect(() => {
-    // Listen for session expiry from axios interceptors
-    const handleSessionExpired = (event) => {
-      console.log('Session expired event received:', event.detail);
-      setSessionExpired(true);
-      
-      // Clear any existing session check interval
-      if (sessionCheckRef.current) {
-        clearInterval(sessionCheckRef.current);
-        sessionCheckRef.current = null;
-      }
-    };
-
-    // Listen for Inertia errors that might indicate session expiry
-    const handleInertiaError = (event) => {
-      const response = event.detail?.response;
-      if (response && response.status === 419) {
-        console.log('Inertia 419 error - session expired');
-        setSessionExpired(true);
-      }
-    };
-
-    // Listen for Inertia responses that contain session_expired flag
-    const handleInertiaFinish = (event) => {
-      const page = event.detail?.page;
-      if (page && page.props && page.props.session_expired) {
-        console.log('Inertia page props indicate session expired');
-        setSessionExpired(true);
-      }
-    };
-
-    window.addEventListener('session-expired', handleSessionExpired);
-    document.addEventListener('inertia:error', handleInertiaError);
-    document.addEventListener('inertia:finish', handleInertiaFinish);
-
-    return () => {
-      window.removeEventListener('session-expired', handleSessionExpired);
-      document.removeEventListener('inertia:error', handleInertiaError);
-      document.removeEventListener('inertia:finish', handleInertiaFinish);
-    };
-  }, []);
+  // Session authentication is now handled by AuthGuard component
+  // No need for redundant session checking here
 
   // Inertia loading state
   useEffect(() => {
@@ -418,10 +342,6 @@ const App = React.memo(({ children }) => {
             isUpdating={isUpdating}
             version={currentVersion}
           />
-
-          {sessionExpired && (
-            <SessionExpiredModal setSessionExpired={setSessionExpired}/>
-          )}
 
           <ToastContainer
             position="top-center"

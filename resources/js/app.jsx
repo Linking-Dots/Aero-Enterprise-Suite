@@ -31,7 +31,7 @@ const ENABLE_MONITORING = import.meta.env.DEV ||
     (typeof window !== 'undefined' && window.location.search.includes('monitor=true')) ||
     (typeof window !== 'undefined' && localStorage.getItem('enable-monitoring') === 'true');
 
-// Optimized request interceptor
+// Optimized request interceptor (only for performance monitoring)
 if (ENABLE_MONITORING) {
     axios.interceptors.request.use(
         (config) => {
@@ -40,68 +40,63 @@ if (ENABLE_MONITORING) {
         },
         (error) => Promise.reject(error)
     );
+}
 
-    // Response interceptor for performance monitoring and error handling
-    axios.interceptors.response.use(
-        (response) => {
-            if (response.config.metadata) {
-                const endTime = new Date();
-                const duration = endTime - response.config.metadata.startTime;
-                
-                // Log slow requests (> 2 seconds)
-                if (duration > 2000) {
-                    console.warn(`Slow API response: ${response.config.url} took ${duration}ms`);
-                }
+// CRITICAL: Response interceptor for error handling (ALWAYS enabled, not just in dev)
+axios.interceptors.response.use(
+    (response) => {
+        // Performance monitoring only when enabled
+        if (ENABLE_MONITORING && response.config.metadata) {
+            const endTime = new Date();
+            const duration = endTime - response.config.metadata.startTime;
+            
+            // Log slow requests (> 2 seconds)
+            if (duration > 2000) {
+                console.warn(`Slow API response: ${response.config.url} took ${duration}ms`);
             }
-            return response;
-        },
-        (error) => {
-            // Enhanced error logging
-            if (error.response) {
-                console.error('API Error:', {
-                    status: error.response.status,
-                    url: error.config?.url,
-                    method: error.config?.method,
-                    data: error.response.data
+        }
+        return response;
+    },
+    (error) => {
+        // Enhanced error logging (always enabled)
+        if (error.response) {
+            console.error('API Error:', {
+                status: error.response.status,
+                url: error.config?.url,
+                method: error.config?.method,
+                data: error.response.data
+            });
+        }
+        
+        // CRITICAL: Handle session expiry (419 or 401 status codes) - ALWAYS enabled
+        if (error.response && (error.response.status === 419 || error.response.status === 401)) {
+            // Immediately redirect to login without showing modal
+            console.warn('Session expired or unauthenticated, redirecting to login');
+            
+            if (typeof window !== 'undefined' && window.Inertia) {
+                window.Inertia.visit('/login', {
+                    method: 'get',
+                    preserveState: false,
+                    preserveScroll: false,
+                    replace: true
                 });
+            } else {
+                window.location.href = '/login';
             }
             
-            // Handle session expiry (419 status code)
-            if (error.response && error.response.status === 419) {
-                // Check if response indicates session expiry
-                if (error.response.data && error.response.data.session_expired) {
-                    // Trigger session expired modal
-                    window.dispatchEvent(new CustomEvent('session-expired', {
-                        detail: {
-                            message: error.response.data.message || 'Your session has expired.',
-                            redirect: error.response.data.redirect || '/login'
-                        }
-                    }));
-                    return Promise.reject(error);
-                }
-                
-                // Try to refresh CSRF token for token mismatch
-                const token = document.head.querySelector('meta[name="csrf-token"]');
-                if (token) {
-                    // Try to get a fresh CSRF token
-                    fetch('/csrf-token')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.csrf_token) {
-                                token.content = data.csrf_token;
-                                axios.defaults.headers.common['X-CSRF-TOKEN'] = data.csrf_token;
-                            }
-                        })
-                        .catch(() => {
-                            // If we can't refresh the token, navigate to login instead of reload
-                            if (typeof window !== 'undefined' && window.Inertia) {
-                                window.Inertia.visit('/login');
-                            }
-                        });
-                }
-            }
             return Promise.reject(error);
         }
+        
+        return Promise.reject(error);
+    }
+);
+
+// Legacy code for CSRF token refresh (kept for compatibility but should not be needed)
+if (false) {
+    axios.interceptors.response.use(
+        // Placeholder for legacy code - already handled above
+        (response) => response,
+        (error) => Promise.reject(error)
     );
 }
 

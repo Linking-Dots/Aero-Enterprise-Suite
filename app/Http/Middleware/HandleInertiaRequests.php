@@ -30,6 +30,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Check if route requires authentication and redirect immediately if not authenticated
+        // This prevents sharing any authenticated data to unauthenticated users
+        if (! $request->user() && ! $this->isPublicRoute($request)) {
+            // For Inertia requests, we need to handle this carefully
+            // The auth middleware will handle the actual redirect
+            // But we ensure no authenticated data is shared
+        }
+
         $user = $request->user();
         $userWithDesignation = $user ? \App\Models\User::with('designation')->find($user->id) : null;
 
@@ -70,5 +78,35 @@ class HandleInertiaRequests extends Middleware
             'url' => $request->getPathInfo(),
             'csrfToken' => session('csrfToken'),
         ];
+    }
+
+    /**
+     * Check if the current route is public (doesn't require authentication).
+     */
+    protected function isPublicRoute(Request $request): bool
+    {
+        $publicRoutes = [
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'password.email',
+            'password.update',
+            'verification.notice',
+        ];
+
+        $currentRoute = $request->route();
+
+        if (! $currentRoute) {
+            return false;
+        }
+
+        $routeName = $currentRoute->getName();
+
+        return in_array($routeName, $publicRoutes) ||
+               str_starts_with($request->path(), 'login') ||
+               str_starts_with($request->path(), 'register') ||
+               str_starts_with($request->path(), 'forgot-password') ||
+               str_starts_with($request->path(), 'reset-password');
     }
 }

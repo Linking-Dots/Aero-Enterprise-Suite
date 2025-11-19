@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Button,
@@ -22,9 +22,10 @@ import {
 } from '@heroicons/react/24/outline';
 import App from '@/Layouts/App.jsx';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const CreateEvent = () => {
-    const { data, setData, post, processing, errors } = useForm({
+    const [data, setData] = useState({
         title: '',
         slug: '',
         description: '',
@@ -47,38 +48,86 @@ const CreateEvent = () => {
         custom_fields: []
     });
 
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
     const [bannerPreview, setBannerPreview] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setProcessing(true);
+        setErrors({});
         
-        const formData = new FormData();
-        Object.keys(data).forEach(key => {
-            if (key === 'custom_fields') {
-                formData.append(key, JSON.stringify(data[key]));
-            } else if (key === 'banner_image' && data[key]) {
-                formData.append(key, data[key]);
-            } else if (data[key] !== null && data[key] !== '') {
-                formData.append(key, data[key]);
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const formData = new FormData();
+                Object.keys(data).forEach(key => {
+                    if (key === 'custom_fields') {
+                        formData.append(key, JSON.stringify(data[key]));
+                    } else if (key === 'banner_image' && data[key]) {
+                        formData.append(key, data[key]);
+                    } else if (typeof data[key] === 'boolean') {
+                        // Handle boolean values - convert to '1' or '0' for Laravel
+                        formData.append(key, data[key] ? '1' : '0');
+                    } else if (data[key] !== null && data[key] !== '') {
+                        formData.append(key, data[key]);
+                    }
+                });
+
+                const response = await axios.post(route('events.store'), formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                if (response.status === 200 || response.status === 201) {
+                    // Redirect to events index or show page
+                    router.visit(route('events.index'));
+                    resolve('Event created successfully!');
+                } else {
+                    reject(`Unexpected response status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error creating event:', error);
+                
+                if (error.response) {
+                    if (error.response.status === 422) {
+                        setErrors(error.response.data.errors || {});
+                        reject(error.response.data.message || 'Failed to create event. Please check the form.');
+                    } else {
+                        reject(`HTTP Error ${error.response.status}: ${error.response.data.message || 'An unexpected error occurred.'}`);
+                    }
+                } else if (error.request) {
+                    reject('No response received from the server. Please check your internet connection.');
+                } else {
+                    reject('An error occurred while setting up the request.');
+                }
+            } finally {
+                setProcessing(false);
             }
         });
 
-        post(route('events.store'), {
-            data: formData,
-            forceFormData: true,
-            onSuccess: () => {
-                toast.success('Event created successfully!');
-            },
-            onError: (errors) => {
-                toast.error('Failed to create event. Please check the form.');
+        toast.promise(
+            promise,
+            {
+                pending: 'Creating event...',
+                success: {
+                    render({ data }) {
+                        return data;
+                    }
+                },
+                error: {
+                    render({ data }) {
+                        return data;
+                    }
+                }
             }
-        });
+        );
     };
 
     const handleBannerChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setData('banner_image', file);
+            setData(prev => ({ ...prev, banner_image: file }));
             setBannerPreview(URL.createObjectURL(file));
         }
     };
@@ -93,33 +142,46 @@ const CreateEvent = () => {
     };
 
     const handleTitleChange = (value) => {
-        setData('title', value);
+        setData(prev => ({ ...prev, title: value }));
         if (!data.slug) {
-            setData('slug', generateSlug(value));
+            setData(prev => ({ ...prev, slug: generateSlug(value) }));
         }
     };
 
+    // Helper function to update a single field
+    const updateField = (field, value) => {
+        setData(prev => ({ ...prev, [field]: value }));
+    };
+
     const addCustomField = () => {
-        setData('custom_fields', [...data.custom_fields, {
-            field_name: '',
-            field_label: '',
-            field_type: 'text',
-            field_options: [],
-            is_required: false,
-            placeholder: '',
-            help_text: ''
-        }]);
+        setData(prev => ({
+            ...prev,
+            custom_fields: [...prev.custom_fields, {
+                field_name: '',
+                field_label: '',
+                field_type: 'text',
+                field_options: [],
+                is_required: false,
+                placeholder: '',
+                help_text: ''
+            }]
+        }));
     };
 
     const removeCustomField = (index) => {
-        const newFields = data.custom_fields.filter((_, i) => i !== index);
-        setData('custom_fields', newFields);
+        setData(prev => ({
+            ...prev,
+            custom_fields: prev.custom_fields.filter((_, i) => i !== index)
+        }));
     };
 
     const updateCustomField = (index, key, value) => {
-        const newFields = [...data.custom_fields];
-        newFields[index][key] = value;
-        setData('custom_fields', newFields);
+        setData(prev => ({
+            ...prev,
+            custom_fields: prev.custom_fields.map((field, i) => 
+                i === index ? { ...field, [key]: value } : field
+            )
+        }));
     };
 
     const getThemeRadius = () => {
@@ -209,7 +271,7 @@ const CreateEvent = () => {
                                                             label="Slug (URL)"
                                                             placeholder="event-slug"
                                                             value={data.slug}
-                                                            onChange={(e) => setData('slug', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, slug: e.target.value }))}
                                                             errorMessage={errors.slug}
                                                             isInvalid={!!errors.slug}
                                                             description="Auto-generated from title, can be customized"
@@ -220,7 +282,7 @@ const CreateEvent = () => {
                                                             label="Venue"
                                                             placeholder="Enter venue location"
                                                             value={data.venue}
-                                                            onChange={(e) => setData('venue', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, venue: e.target.value }))}
                                                             errorMessage={errors.venue}
                                                             isInvalid={!!errors.venue}
                                                             startContent={<MapPinIcon className="w-4 h-4" />}
@@ -232,7 +294,7 @@ const CreateEvent = () => {
                                                             type="date"
                                                             label="Event Date"
                                                             value={data.event_date}
-                                                            onChange={(e) => setData('event_date', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, event_date: e.target.value }))}
                                                             errorMessage={errors.event_date}
                                                             isInvalid={!!errors.event_date}
                                                             isRequired
@@ -243,7 +305,7 @@ const CreateEvent = () => {
                                                             type="time"
                                                             label="Event Time"
                                                             value={data.event_time}
-                                                            onChange={(e) => setData('event_time', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, event_time: e.target.value }))}
                                                             errorMessage={errors.event_time}
                                                             isInvalid={!!errors.event_time}
                                                             isRequired
@@ -254,7 +316,7 @@ const CreateEvent = () => {
                                                             type="datetime-local"
                                                             label="Registration Deadline"
                                                             value={data.registration_deadline}
-                                                            onChange={(e) => setData('registration_deadline', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, registration_deadline: e.target.value }))}
                                                             errorMessage={errors.registration_deadline}
                                                             isInvalid={!!errors.registration_deadline}
                                                             radius={getThemeRadius()}
@@ -265,7 +327,7 @@ const CreateEvent = () => {
                                                             label="Max Participants"
                                                             placeholder="Leave empty for unlimited"
                                                             value={data.max_participants}
-                                                            onChange={(e) => setData('max_participants', e.target.value)}
+                                                            onChange={(e) => setData(prev => ({ ...prev, max_participants: e.target.value }))}
                                                             errorMessage={errors.max_participants}
                                                             isInvalid={!!errors.max_participants}
                                                             radius={getThemeRadius()}
@@ -277,7 +339,7 @@ const CreateEvent = () => {
                                                             label="Description"
                                                             placeholder="Enter event description"
                                                             value={data.description}
-                                                            onChange={(e) => setData('description', e.target.value)}
+                                                            onChange={(e) => updateField('description', e.target.value)}
                                                             errorMessage={errors.description}
                                                             isInvalid={!!errors.description}
                                                             rows={4}
@@ -313,7 +375,7 @@ const CreateEvent = () => {
                                                             label="Food Details"
                                                             placeholder="Enter food arrangements (optional)"
                                                             value={data.food_details}
-                                                            onChange={(e) => setData('food_details', e.target.value)}
+                                                            onChange={(e) => updateField('food_details', e.target.value)}
                                                             rows={3}
                                                             radius={getThemeRadius()}
                                                         />
@@ -322,7 +384,7 @@ const CreateEvent = () => {
                                                             label="Rules & Regulations"
                                                             placeholder="Enter event rules (optional)"
                                                             value={data.rules}
-                                                            onChange={(e) => setData('rules', e.target.value)}
+                                                            onChange={(e) => updateField('rules', e.target.value)}
                                                             rows={3}
                                                             radius={getThemeRadius()}
                                                         />
@@ -339,7 +401,7 @@ const CreateEvent = () => {
                                                             label="Organizer Name"
                                                             placeholder="Enter organizer name"
                                                             value={data.organizer_name}
-                                                            onChange={(e) => setData('organizer_name', e.target.value)}
+                                                            onChange={(e) => updateField('organizer_name', e.target.value)}
                                                             radius={getThemeRadius()}
                                                         />
                                                         
@@ -347,7 +409,7 @@ const CreateEvent = () => {
                                                             label="Organizer Phone"
                                                             placeholder="Enter phone number"
                                                             value={data.organizer_phone}
-                                                            onChange={(e) => setData('organizer_phone', e.target.value)}
+                                                            onChange={(e) => updateField('organizer_phone', e.target.value)}
                                                             radius={getThemeRadius()}
                                                         />
                                                         
@@ -356,7 +418,7 @@ const CreateEvent = () => {
                                                             label="Organizer Email"
                                                             placeholder="Enter email address"
                                                             value={data.organizer_email}
-                                                            onChange={(e) => setData('organizer_email', e.target.value)}
+                                                            onChange={(e) => updateField('organizer_email', e.target.value)}
                                                             radius={getThemeRadius()}
                                                         />
                                                     </div>
@@ -370,26 +432,26 @@ const CreateEvent = () => {
                                                     <div className="space-y-4">
                                                         <Input
                                                             label="Meta Title"
-                                                            placeholder="Enter meta title (for SEO)"
+                                                            placeholder="SEO title"
                                                             value={data.meta_title}
-                                                            onChange={(e) => setData('meta_title', e.target.value)}
+                                                            onChange={(e) => updateField('meta_title', e.target.value)}
                                                             radius={getThemeRadius()}
                                                         />
                                                         
                                                         <Textarea
                                                             label="Meta Description"
-                                                            placeholder="Enter meta description (for SEO)"
+                                                            placeholder="SEO description"
                                                             value={data.meta_description}
-                                                            onChange={(e) => setData('meta_description', e.target.value)}
-                                                            rows={2}
+                                                            onChange={(e) => updateField('meta_description', e.target.value)}
+                                                            rows={3}
                                                             radius={getThemeRadius()}
                                                         />
                                                         
                                                         <Input
                                                             label="Meta Keywords"
-                                                            placeholder="Enter comma-separated keywords"
+                                                            placeholder="Comma separated keywords"
                                                             value={data.meta_keywords}
-                                                            onChange={(e) => setData('meta_keywords', e.target.value)}
+                                                            onChange={(e) => updateField('meta_keywords', e.target.value)}
                                                             radius={getThemeRadius()}
                                                         />
                                                     </div>
@@ -413,7 +475,7 @@ const CreateEvent = () => {
                                                         </Button>
                                                     </div>
                                                     
-                                                    {data.custom_fields.length > 0 ? (
+                                                    {data.custom_fields && data.custom_fields.length > 0 ? (
                                                         <div className="space-y-4">
                                                             {data.custom_fields.map((field, index) => (
                                                                 <Card key={index} style={{ borderRadius: 'var(--borderRadius, 12px)' }}>
@@ -519,14 +581,14 @@ const CreateEvent = () => {
                                                     <div className="space-y-3">
                                                         <Switch
                                                             isSelected={data.is_published}
-                                                            onValueChange={(value) => setData('is_published', value)}
+                                                            onValueChange={(value) => setData(prev => ({ ...prev, is_published: value }))}
                                                         >
                                                             Publish Event (make visible to public)
                                                         </Switch>
                                                         
                                                         <Switch
                                                             isSelected={data.is_registration_open}
-                                                            onValueChange={(value) => setData('is_registration_open', value)}
+                                                            onValueChange={(value) => setData(prev => ({ ...prev, is_registration_open: value }))}
                                                         >
                                                             Open for Registration
                                                         </Switch>
