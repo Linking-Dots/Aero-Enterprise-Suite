@@ -75,7 +75,7 @@ const MAP_CONFIG = {
     POSITION_THRESHOLD: 0.0001,
     OFFSET_MULTIPLIER: 0.0001,
     MARKER_SIZE: [40, 40],
-    POPUP_MAX_WIDTH: 150,
+    POPUP_MAX_WIDTH: 200,
     UPDATE_INTERVAL: 30000 // 30 seconds
 };
 
@@ -638,8 +638,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         
         // Build photo section HTML
         const photoSection = photoUrl ? `
-            <div style="margin-top: 12px; margin-bottom: 12px;">
-                <div style="color: ${textSecondary}; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div style="margin-top: 8px; margin-bottom: 8px;">
+                <div style="color: ${textSecondary}; font-size: 9px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;">
                     ${photoLabel}
                 </div>
                 <img 
@@ -647,9 +647,9 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     data-fullscreen-photo="${photoUrl}"
                     style="
                         width: 100%; 
-                        height: auto;
-                        object-fit: contain; 
-                        border-radius: 8px;
+                        max-height: 80px;
+                        object-fit: cover; 
+                        border-radius: 6px;
                         border: 1px solid ${alpha(primaryColor, 0.2)};
                         background: rgba(0,0,0,0.02);
                         cursor: pointer;
