@@ -647,8 +647,9 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     data-fullscreen-photo="${photoUrl}"
                     style="
                         width: 100%; 
-                        height: 50px;
-                        object-fit: cover; 
+                        height: auto;
+                        max-height: 100px;
+                        object-fit: contain; 
                         border-radius: 4px;
                         border: 1px solid ${alpha(primaryColor, 0.2)};
                         display: block;
