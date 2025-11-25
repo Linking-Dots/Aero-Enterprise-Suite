@@ -442,25 +442,57 @@ class AttendanceController extends Controller
         try {
             $selectedDate = Carbon::parse($request->query('date'))->format('Y-m-d');
 
-            $attendances = Attendance::with(['user.designation'])
+            $attendances = Attendance::with(['user.designation', 'user.attendanceType', 'media'])
                 ->whereNotNull('punchin')
                 ->whereDate('date', $selectedDate)
+                ->orderBy('user_id')
+                ->orderBy('punchin')
                 ->get();
 
-            $locations = $attendances->map(function ($attendance) {
-                $user = $attendance->user;
+            // Group attendances by user to handle multiple cycles
+            $userAttendances = $attendances->groupBy('user_id');
 
-                return [
+            $locations = [];
+
+            foreach ($userAttendances as $userId => $userPunches) {
+                $user = $userPunches->first()->user;
+                $attendanceType = $user->attendanceType;
+                $baseSlug = $attendanceType ? preg_replace('/_\d+$/', '', $attendanceType->slug) : null;
+                $requiresPhoto = in_array($baseSlug, ['geo_polygon', 'route_waypoint']);
+
+                $cycles = $userPunches->map(function ($attendance) use ($requiresPhoto) {
+                    return [
+                        'attendance_id' => $attendance->id,
+                        'punchin_location' => $attendance->punchin_location_array ?? null,
+                        'punchout_location' => $attendance->punchout_location_array ?? null,
+                        'punchin_time' => $attendance->punchin,
+                        'punchout_time' => $attendance->punchout,
+                        'punchin_photo_url' => $requiresPhoto ? $attendance->punchin_photo_url : null,
+                        'punchout_photo_url' => $requiresPhoto ? $attendance->punchout_photo_url : null,
+                        'is_complete' => ! is_null($attendance->punchout),
+                    ];
+                })->values()->toArray();
+
+                $locations[] = [
                     'user_id' => $user->id ?? null,
                     'name' => $user->name ?? 'Unknown',
                     'profile_image_url' => $user->profile_image_url ?? null,
                     'designation' => optional($user->designation)->title ?? 'N/A',
-                    'punchin_location' => $attendance->punchin_location_array ?? null,
-                    'punchout_location' => $attendance->punchout_location_array ?? null,
-                    'punchin_time' => $attendance->punchin,
-                    'punchout_time' => $attendance->punchout,
+                    'attendance_type' => $attendanceType ? [
+                        'id' => $attendanceType->id,
+                        'name' => $attendanceType->name,
+                        'slug' => $attendanceType->slug,
+                        'base_slug' => $baseSlug,
+                    ] : null,
+                    'requires_photo' => $requiresPhoto,
+                    'cycles' => $cycles,
+                    // Keep legacy fields for backward compatibility
+                    'punchin_location' => $userPunches->last()->punchin_location_array ?? null,
+                    'punchout_location' => $userPunches->last()->punchout_location_array ?? null,
+                    'punchin_time' => $userPunches->last()->punchin,
+                    'punchout_time' => $userPunches->last()->punchout,
                 ];
-            });
+            }
 
             return response()->json([
                 'success' => true,

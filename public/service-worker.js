@@ -7,15 +7,15 @@ const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic`;
 const API_CACHE = `${CACHE_PREFIX}-api`;
 
 // Version will be replaced during build process
-const APP_VERSION = '1.2.5'; // This will be replaced by build process
+const APP_VERSION = '1.2.0'; // This will be replaced by build process
 
-// Cache configuration
+// Cache configuration - REDUCED TTLs to prevent stale data
 const CACHE_CONFIG = {
-    staticCacheTTL: 30 * 24 * 60 * 60 * 1000, // 30 days
-    dynamicCacheTTL: 7 * 24 * 60 * 60 * 1000, // 7 days
-    apiCacheTTL: 5 * 60 * 1000, // 5 minutes
-    maxDynamicCacheSize: 100,
-    maxApiCacheSize: 50
+    staticCacheTTL: 7 * 24 * 60 * 60 * 1000, // 7 days (was 30)
+    dynamicCacheTTL: 1 * 60 * 60 * 1000, // 1 hour (was 7 days)
+    apiCacheTTL: 0, // No API caching (was 5 minutes)
+    maxDynamicCacheSize: 50,
+    maxApiCacheSize: 0 // No API cache
 };
 
 // Assets to cache immediately
@@ -26,7 +26,7 @@ const STATIC_ASSETS = [
     '/offline.html'
 ];
 
-// Network-first patterns (always try network first)
+// Network-first patterns (always try network first) - EXPANDED to prevent stale data
 const NETWORK_FIRST_PATTERNS = [
     /\/api\//,
     /\/login/,
@@ -34,14 +34,41 @@ const NETWORK_FIRST_PATTERNS = [
     /\/register/,
     /\/password\//,
     /\/email\//,
-    /\/sanctum\//
+    /\/sanctum\//,
+    /\/locale/,
+    /\/attendance/,
+    /\/leave/,
+    /\/user/,
+    /\/dashboard/,
+    /\/punch/,
+    /\/timesheet/,
+    /\/employee/,
+    /\/department/,
+    /\/designation/,
+    /\/project/,
+    /\/task/,
+    /\/daily-?works?/i,
+    /\/notifications?/,
+    /\/settings/,
+    /\/profile/,
+    /\/admin/,
+    /\.json$/, // All JSON responses should be fresh
 ];
 
-// Cache-first patterns (try cache first)
+// Cache-first patterns (try cache first) - ONLY truly static assets
 const CACHE_FIRST_PATTERNS = [
-    /\.(?:js|css|png|jpg|jpeg|svg|gif|ico|woff|woff2|ttf|eot)$/,
-    /\/build\//,
-    /\/storage\//
+    /\.(?:png|jpg|jpeg|svg|gif|ico|woff|woff2|ttf|eot)$/, // Only images and fonts
+    /\/storage\/.*\.(?:png|jpg|jpeg|svg|gif|ico)$/, // Media files only
+];
+
+// Never cache these patterns - always go to network
+const NO_CACHE_PATTERNS = [
+    /\/api\//,
+    /\/sanctum\//,
+    /\/locale/,
+    /\?.*_=/, // Cache-busting queries
+    /\?.*timestamp=/,
+    /\?.*nocache=/,
 ];
 
 // Utility functions
@@ -165,6 +192,12 @@ self.addEventListener('fetch', event => {
         return;
     }
     
+    // NEVER cache certain patterns - always fetch from network
+    if (matchesPattern(url.pathname + url.search, NO_CACHE_PATTERNS)) {
+        event.respondWith(fetch(request));
+        return;
+    }
+    
     // Handle different caching strategies
     if (matchesPattern(url.pathname, NETWORK_FIRST_PATTERNS)) {
         // Network first strategy for dynamic content
@@ -173,8 +206,8 @@ self.addEventListener('fetch', event => {
         // Cache first strategy for static assets
         event.respondWith(cacheFirst(request));
     } else {
-        // Stale while revalidate for everything else
-        event.respondWith(staleWhileRevalidate(request));
+        // Network first for everything else (changed from staleWhileRevalidate)
+        event.respondWith(networkFirst(request));
     }
 });
 

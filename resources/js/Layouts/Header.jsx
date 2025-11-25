@@ -22,6 +22,7 @@ import {
 
 
 import ProfileMenu from '@/Components/ProfileMenu';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 import { useScrollTrigger } from '@/Hooks/useScrollTrigger.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -530,6 +531,9 @@ const MobileHeader = React.memo(({
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
             </Button>
+
+            {/* Language Switcher */}
+            <LanguageSwitcher variant="minimal" size="sm" />
 
             {/* Help & Support */}
             <Tooltip content="Help & Support" placement="bottom">
@@ -1401,6 +1405,9 @@ const DesktopHeader = React.memo(({
 
                 {/* Right Section: Enhanced Actions & Profile */}
                 <div className="flex items-center gap-4 flex-shrink-0">
+                  {/* Language Switcher */}
+                  <LanguageSwitcher variant="minimal" size="sm" showFlag={true} />
+
                   {/* Quick Actions */}
                   <Button
                     isIconOnly

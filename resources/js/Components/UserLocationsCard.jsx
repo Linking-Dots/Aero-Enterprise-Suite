@@ -279,17 +279,39 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         }
     }, [selectedDate]);
 
-    const createUserIcon = useCallback((user) => {
+    const createUserIcon = useCallback((user, type = 'default') => {
         const primaryColor = 'var(--theme-primary, #3b82f6)';
         const secondaryColor = 'var(--theme-secondary, #8b5cf6)';
+        const successColor = 'var(--theme-success, #17C964)';
+        const dangerColor = 'var(--theme-danger, #ef4444)';
+        
+        // Use different colors based on marker type
+        let gradientColors;
+        let shadowColor;
+        let indicator = '';
+        
+        if (type === 'punchin') {
+            gradientColors = `${successColor}, #059669`;
+            shadowColor = alpha(successColor, 0.4);
+            indicator = `<span style="position: absolute; top: -4px; right: -4px; font-size: 10px;">▶</span>`;
+        } else if (type === 'punchout') {
+            gradientColors = `${dangerColor}, #dc2626`;
+            shadowColor = alpha(dangerColor, 0.4);
+            indicator = `<span style="position: absolute; top: -4px; right: -4px; font-size: 10px;">◼</span>`;
+        } else {
+            gradientColors = `${primaryColor}, ${secondaryColor}`;
+            shadowColor = alpha(primaryColor, 0.4);
+        }
+        
         const iconHtml = `
             <div style="
+                position: relative;
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
+                background: linear-gradient(135deg, ${gradientColors});
                 border: 3px solid white;
-                box-shadow: 0 4px 12px ${alpha(primaryColor, 0.4)};
+                box-shadow: 0 4px 12px ${shadowColor};
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -302,6 +324,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     `<img src="${user.profile_image_url || user.profile_image}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='${user.name?.charAt(0)?.toUpperCase() || '?'}';" />` :
                     user.name?.charAt(0)?.toUpperCase() || '?'
                 }
+                ${indicator}
             </div>
         `;
         return L.divIcon({
@@ -313,20 +336,127 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         });
     }, []);
 
-    const createPopupContent = useCallback((user) => {
+    const createPopupContent = useCallback((user, type = 'combined') => {
         const statusColor = user.punchout_time ? 'var(--theme-success, #17C964)' : 'var(--theme-warning, #F5A524)';
         const primaryColor = 'var(--theme-primary, #3b82f6)';
         const secondaryColor = 'var(--theme-secondary, #8b5cf6)';
+        const successColor = 'var(--theme-success, #17C964)';
+        const dangerColor = 'var(--theme-danger, #ef4444)';
         const backgroundColor = 'var(--theme-content1, #ffffff)';
         const textPrimary = 'var(--theme-foreground, #1f2937)';
         const textSecondary = 'var(--theme-content3, #6b7280)';
+        
+        // Determine which photo to show based on popup type
+        let photoUrl = null;
+        let photoLabel = '';
+        if (type === 'punchin' && user.punchin_photo_url) {
+            photoUrl = user.punchin_photo_url;
+            photoLabel = 'Check In Photo';
+        } else if (type === 'punchout' && user.punchout_photo_url) {
+            photoUrl = user.punchout_photo_url;
+            photoLabel = 'Check Out Photo';
+        }
+        
+        // Build photo section HTML
+        const photoSection = photoUrl ? `
+            <div style="margin-top: 12px; margin-bottom: 12px;">
+                <div style="color: ${textSecondary}; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    ${photoLabel}
+                </div>
+                <img 
+                    src="${photoUrl}" 
+                    style="
+                        width: 100%; 
+                        max-height: 150px; 
+                        object-fit: cover; 
+                        border-radius: 8px;
+                        border: 1px solid ${alpha(primaryColor, 0.2)};
+                    " 
+                    onerror="this.style.display='none';"
+                />
+            </div>
+        ` : '';
+        
+        // Customize header based on type
+        let typeIndicator = '';
+        let headerColor = primaryColor;
+        if (type === 'punchin') {
+            typeIndicator = `
+                <div style="
+                    display: inline-block;
+                    padding: 2px 6px;
+                    background: ${alpha(successColor, 0.1)};
+                    color: ${successColor};
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: 600;
+                    margin-left: 8px;
+                    border: 1px solid ${alpha(successColor, 0.2)};
+                ">CHECK IN</div>
+            `;
+            headerColor = successColor;
+        } else if (type === 'punchout') {
+            typeIndicator = `
+                <div style="
+                    display: inline-block;
+                    padding: 2px 6px;
+                    background: ${alpha(dangerColor, 0.1)};
+                    color: ${dangerColor};
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: 600;
+                    margin-left: 8px;
+                    border: 1px solid ${alpha(dangerColor, 0.2)};
+                ">CHECK OUT</div>
+            `;
+            headerColor = dangerColor;
+        }
+        
+        // Build time section based on type
+        let timeSection = '';
+        if (type === 'punchin') {
+            timeSection = `
+                <div style="display: flex; align-items: center;">
+                    <span style="color: ${successColor}; margin-right: 8px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 13px;">
+                        Time: ${formatTime(user.punchin_time)}
+                    </span>
+                </div>
+            `;
+        } else if (type === 'punchout') {
+            timeSection = `
+                <div style="display: flex; align-items: center;">
+                    <span style="color: ${dangerColor}; margin-right: 8px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 13px;">
+                        Time: ${formatTime(user.punchout_time)}
+                    </span>
+                </div>
+            `;
+        } else {
+            // Combined view (legacy/fallback)
+            timeSection = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="color: ${successColor}; margin-right: 8px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 13px;">
+                        Check In: ${formatTime(user.punchin_time)}
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span style="color: ${dangerColor}; margin-right: 8px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 13px;">
+                        Check Out: ${formatTime(user.punchout_time)}
+                    </span>
+                </div>
+            `;
+        }
+        
         return `
             <div style="
                 min-width: 250px;
                 padding: 16px;
-                background: linear-gradient(135deg, ${alpha(backgroundColor, 0.95)}, ${alpha(primaryColor, 0.05)});
+                background: linear-gradient(135deg, ${alpha(backgroundColor, 0.95)}, ${alpha(headerColor, 0.05)});
                 border-radius: 12px;
-                border: 1px solid ${alpha(primaryColor, 0.2)};
+                border: 1px solid ${alpha(headerColor, 0.2)};
                 backdrop-filter: blur(20px);
                 font-family: var(--fontFamily, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
             ">
@@ -335,7 +465,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         width: 32px;
                         height: 32px;
                         border-radius: 50%;
-                        background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
+                        background: linear-gradient(135deg, ${type === 'punchin' ? successColor : type === 'punchout' ? dangerColor : primaryColor}, ${secondaryColor});
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -348,15 +478,19 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                             user.name?.charAt(0)?.toUpperCase() || '?'
                         }
                     </div>
-                    <div>
-                        <div style="font-weight: 600; color: ${textPrimary}; font-size: 16px;">
-                            ${user.name || 'Unknown User'}
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center;">
+                            <span style="font-weight: 600; color: ${textPrimary}; font-size: 16px;">
+                                ${user.name || 'Unknown User'}
+                            </span>
+                            ${typeIndicator}
                         </div>
                         <div style="color: ${textSecondary}; font-size: 12px;">
                             ${user.designation || 'No designation'}
                         </div>
                     </div>
                 </div>
+                ${type === 'combined' ? `
                 <div style="
                     display: inline-block;
                     padding: 4px 8px;
@@ -369,20 +503,10 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     border: 1px solid ${alpha(statusColor, 0.2)};
                 ">
                     ${user.punchout_time ? '✓ Completed' : '⏱ Active'}
-                </div>
+                </div>` : ''}
+                ${photoSection}
                 <div style="space-y: 8px;">
-                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                        <span style="color: var(--theme-success, #10b981); margin-right: 8px;">📍</span>
-                        <span style="color: ${textSecondary}; font-size: 13px;">
-                            Check In: ${formatTime(user.punchin_time)}
-                        </span>
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                        <span style="color: var(--theme-danger, #ef4444); margin-right: 8px;">📍</span>
-                        <span style="color: ${textSecondary}; font-size: 13px;">
-                            Check Out: ${formatTime(user.punchout_time)}
-                        </span>
-                    </div>
+                    ${timeSection}
                 </div>
             </div>
         `;
@@ -391,21 +515,18 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
     useEffect(() => {
         if (!map || !users.length) return;
 
-        // Clear existing markers
+        // Clear existing markers and polylines
         map.eachLayer((layer) => {
-            if (layer instanceof L.Marker && layer.options.userData) {
+            if ((layer instanceof L.Marker && layer.options.userData) ||
+                (layer instanceof L.Polyline && layer.options.userRoute)) {
                 map.removeLayer(layer);
             }
         });
 
         const processedPositions = [];
-
-        users.forEach((user, index) => {
-            const location = parseLocation(user.punchout_location || user.punchin_location);
-            
-            if (!location) return;
-
-            // Check for overlapping positions and adjust
+        
+        // Helper to adjust position for overlapping
+        const getAdjustedForOverlap = (location) => {
             let adjustedPosition = { ...location };
             let attempts = 0;
             const maxAttempts = 10;
@@ -420,20 +541,170 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 adjustedPosition = getAdjustedPosition(location, attempts + 1);
                 attempts++;
             }
-
+            
             processedPositions.push(adjustedPosition);
+            return adjustedPosition;
+        };
 
-            const marker = L.marker([adjustedPosition.lat, adjustedPosition.lng], {
-                icon: createUserIcon(user),
-                userData: true // Mark as user marker for cleanup
-            });
+        users.forEach((user) => {
+            // Check if user has cycles data (new format)
+            const cycles = user.cycles || [];
+            
+            if (cycles.length > 0) {
+                // New format: iterate through cycles
+                cycles.forEach((cycle, cycleIndex) => {
+                    const punchinLocation = parseLocation(cycle.punchin_location);
+                    const punchoutLocation = parseLocation(cycle.punchout_location);
+                    
+                    if (!punchinLocation && !punchoutLocation) return;
+                    
+                    const isCompleteCycle = punchinLocation && punchoutLocation && cycle.is_complete;
+                    
+                    // Build cycle data for popup (includes user info + cycle specifics)
+                    const cycleData = {
+                        ...user,
+                        punchin_time: cycle.punchin_time,
+                        punchout_time: cycle.punchout_time,
+                        punchin_photo_url: cycle.punchin_photo_url,
+                        punchout_photo_url: cycle.punchout_photo_url,
+                    };
+                    
+                    if (isCompleteCycle) {
+                        // Complete cycle: Show both markers with route line
+                        const adjustedPunchin = getAdjustedForOverlap(punchinLocation);
+                        const adjustedPunchout = getAdjustedForOverlap(punchoutLocation);
+                        
+                        // Create punch-in marker (green)
+                        const punchinMarker = L.marker([adjustedPunchin.lat, adjustedPunchin.lng], {
+                            icon: createUserIcon(user, 'punchin'),
+                            userData: true
+                        });
+                        
+                        punchinMarker.bindPopup(createPopupContent(cycleData, 'punchin'), {
+                            maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                            className: 'custom-popup'
+                        });
+                        
+                        punchinMarker.addTo(map);
+                        
+                        // Create punch-out marker (red)
+                        const punchoutMarker = L.marker([adjustedPunchout.lat, adjustedPunchout.lng], {
+                            icon: createUserIcon(user, 'punchout'),
+                            userData: true
+                        });
+                        
+                        punchoutMarker.bindPopup(createPopupContent(cycleData, 'punchout'), {
+                            maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                            className: 'custom-popup'
+                        });
+                        
+                        punchoutMarker.addTo(map);
+                        
+                        // Draw route line from punch-in to punch-out
+                        const routeLine = L.polyline(
+                            [
+                                [adjustedPunchin.lat, adjustedPunchin.lng],
+                                [adjustedPunchout.lat, adjustedPunchout.lng]
+                            ],
+                            {
+                                color: 'var(--theme-primary, #3b82f6)',
+                                weight: 3,
+                                opacity: 0.7,
+                                dashArray: '10, 10',
+                                userRoute: true
+                            }
+                        );
+                        
+                        routeLine.addTo(map);
+                    } else {
+                        // Incomplete cycle: Only show punch-in marker
+                        const location = punchinLocation || punchoutLocation;
+                        const adjustedPosition = getAdjustedForOverlap(location);
+                        
+                        const markerType = punchinLocation ? 'punchin' : 'punchout';
+                        const marker = L.marker([adjustedPosition.lat, adjustedPosition.lng], {
+                            icon: createUserIcon(user, markerType),
+                            userData: true
+                        });
 
-            marker.bindPopup(createPopupContent(user), {
-                maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
-                className: 'custom-popup'
-            });
+                        marker.bindPopup(createPopupContent(cycleData, markerType), {
+                            maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                            className: 'custom-popup'
+                        });
 
-            marker.addTo(map);
+                        marker.addTo(map);
+                    }
+                });
+            } else {
+                // Legacy format: use direct punchin/punchout locations
+                const punchinLocation = parseLocation(user.punchin_location);
+                const punchoutLocation = parseLocation(user.punchout_location);
+                
+                if (!punchinLocation && !punchoutLocation) return;
+                
+                const isCompleteCycle = punchinLocation && punchoutLocation && user.punchout_time;
+                
+                if (isCompleteCycle) {
+                    const adjustedPunchin = getAdjustedForOverlap(punchinLocation);
+                    const adjustedPunchout = getAdjustedForOverlap(punchoutLocation);
+                    
+                    const punchinMarker = L.marker([adjustedPunchin.lat, adjustedPunchin.lng], {
+                        icon: createUserIcon(user, 'punchin'),
+                        userData: true
+                    });
+                    
+                    punchinMarker.bindPopup(createPopupContent(user, 'punchin'), {
+                        maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                        className: 'custom-popup'
+                    });
+                    
+                    punchinMarker.addTo(map);
+                    
+                    const punchoutMarker = L.marker([adjustedPunchout.lat, adjustedPunchout.lng], {
+                        icon: createUserIcon(user, 'punchout'),
+                        userData: true
+                    });
+                    
+                    punchoutMarker.bindPopup(createPopupContent(user, 'punchout'), {
+                        maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                        className: 'custom-popup'
+                    });
+                    
+                    punchoutMarker.addTo(map);
+                    
+                    const routeLine = L.polyline(
+                        [
+                            [adjustedPunchin.lat, adjustedPunchin.lng],
+                            [adjustedPunchout.lat, adjustedPunchout.lng]
+                        ],
+                        {
+                            color: 'var(--theme-primary, #3b82f6)',
+                            weight: 3,
+                            opacity: 0.7,
+                            dashArray: '10, 10',
+                            userRoute: true
+                        }
+                    );
+                    
+                    routeLine.addTo(map);
+                } else {
+                    const location = punchinLocation || punchoutLocation;
+                    const adjustedPosition = getAdjustedForOverlap(location);
+                    
+                    const markerType = punchinLocation ? 'punchin' : 'punchout';
+                    const marker = L.marker([adjustedPosition.lat, adjustedPosition.lng], {
+                        icon: createUserIcon(user, markerType),
+                        userData: true
+                    });
+
+                    marker.bindPopup(createPopupContent(user, markerType), {
+                        maxWidth: MAP_CONFIG.POPUP_MAX_WIDTH,
+                        className: 'custom-popup'
+                    });
+
+                    marker.addTo(map);
+                }
+            }
         });
 
     }, [map, users, theme, parseLocation, arePositionsClose, getAdjustedPosition, createUserIcon, createPopupContent]);

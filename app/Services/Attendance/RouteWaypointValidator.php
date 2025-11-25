@@ -7,20 +7,36 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Route waypoint validation service using OSRM
+ * Supports multiple routes
  */
 class RouteWaypointValidator extends BaseAttendanceValidator
 {
     public function validate(): array
     {
-        $waypoints = $this->attendanceType->config['waypoints'] ?? [];
-        $tolerance = $this->attendanceType->config['tolerance'] ?? 100;
+        $config = $this->attendanceType->config ?? [];
         $userLat = $this->request->input('lat');
         $userLng = $this->request->input('lng');
-        $allowWithoutLocation = $this->attendanceType->config['allow_without_location'] ?? false;
+
+        // Check for new multi-route format first, fallback to legacy
+        $routes = $config['routes'] ?? [];
+        $validationMode = $config['validation_mode'] ?? 'any';
+        $allowWithoutLocation = $config['allow_without_location'] ?? false;
+
+        // Legacy support: single waypoints array format
+        if (empty($routes) && isset($config['waypoints'])) {
+            $routes = [
+                [
+                    'id' => 'legacy_route',
+                    'name' => 'Primary Route',
+                    'waypoints' => $config['waypoints'],
+                    'tolerance' => $config['tolerance'] ?? 300,
+                    'is_active' => true,
+                ],
+            ];
+        }
 
         // Check if location data is missing
         if (! $userLat || ! $userLng) {
-            // If location is not provided, check if we allow attendance without location
             if ($allowWithoutLocation) {
                 return $this->successResponse('Attendance recorded without location validation (location access denied).');
             } else {
@@ -28,17 +44,77 @@ class RouteWaypointValidator extends BaseAttendanceValidator
             }
         }
 
-        if (empty($waypoints)) {
-            return $this->errorResponse('No waypoints configured for this attendance type.');
+        // Filter active routes
+        $activeRoutes = array_filter($routes, fn ($r) => ($r['is_active'] ?? true));
+
+        if (empty($activeRoutes)) {
+            return $this->errorResponse('No routes configured for this attendance type.');
         }
 
-        $routeValidation = $this->validateUserLocationWithRoute($userLat, $userLng, $waypoints, $tolerance);
+        // Validate against all active routes
+        $validRoutes = [];
+        $checkedRoutes = [];
 
-        if (! $routeValidation['is_valid']) {
-            return $this->errorResponse($routeValidation['message'], 403);
+        foreach ($activeRoutes as $route) {
+            $waypoints = $route['waypoints'] ?? [];
+            $tolerance = $route['tolerance'] ?? 300;
+
+            if (empty($waypoints)) {
+                continue;
+            }
+
+            $validation = $this->validateUserLocationWithRoute($userLat, $userLng, $waypoints, $tolerance);
+
+            $checkedRoutes[] = [
+                'id' => $route['id'] ?? 'unknown',
+                'name' => $route['name'] ?? 'Unnamed',
+                'is_valid' => $validation['is_valid'],
+                'distance' => $validation['route_data']['distance_to_route'] ?? null,
+            ];
+
+            if ($validation['is_valid']) {
+                $validRoutes[] = [
+                    'route' => $route,
+                    'validation' => $validation,
+                ];
+            }
         }
 
-        return $this->successResponse($routeValidation['message'], $routeValidation['route_data'] ?? []);
+        // Apply validation mode
+        $isValid = $validationMode === 'all'
+            ? count($validRoutes) === count($activeRoutes)
+            : count($validRoutes) > 0;
+
+        if (! $isValid) {
+            // Find closest route for error message
+            $closestRoute = null;
+            $minDistance = PHP_FLOAT_MAX;
+
+            foreach ($checkedRoutes as $checked) {
+                if ($checked['distance'] !== null && $checked['distance'] < $minDistance) {
+                    $minDistance = $checked['distance'];
+                    $closestRoute = $checked;
+                }
+            }
+
+            $message = $closestRoute
+                ? "You are {$minDistance}m away from the nearest route ({$closestRoute['name']}). Please move closer to an authorized route."
+                : 'You are not on any authorized route.';
+
+            return $this->errorResponse($message, 403);
+        }
+
+        $matchedRoute = $validRoutes[0];
+
+        return $this->successResponse(
+            $matchedRoute['validation']['message'] ?? 'Location verified on route: '.($matchedRoute['route']['name'] ?? 'Valid route'),
+            [
+                'matched_route' => $matchedRoute['route'],
+                'route_data' => $matchedRoute['validation']['route_data'] ?? [],
+                'validation_mode' => $validationMode,
+                'checked_routes' => $checkedRoutes,
+            ]
+        );
     }
 
     /**
@@ -183,7 +259,8 @@ class RouteWaypointValidator extends BaseAttendanceValidator
                 ? "Location verified within {$tolerance}m of waypoint {$nearestWaypoint} (distance: ".round($minDistance, 2).'m).'
                 : 'You are '.round($minDistance, 2)."m away from the nearest waypoint. Maximum distance: {$tolerance}m.",
             'route_data' => [
-                'distance_to_nearest_waypoint' => round($minDistance, 2),
+                'distance_to_route' => round($minDistance ?? 0, 2),
+                'distance_to_nearest_waypoint' => round($minDistance ?? 0, 2),
                 'nearest_waypoint' => $nearestWaypoint,
                 'tolerance' => $tolerance,
                 'fallback_used' => true,

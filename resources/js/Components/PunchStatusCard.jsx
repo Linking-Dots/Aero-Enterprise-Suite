@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
     Card,
     CardBody,
@@ -45,7 +45,8 @@ import {
     GlobeAltIcon,
     XMarkIcon,
     BellIcon,
-    InformationCircleIcon
+    InformationCircleIcon,
+    CameraIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -180,6 +181,25 @@ const PunchStatusCard = React.memo(() => {
             timestamp: null
         }
     });
+
+    // Camera state for photo capture (polygon/route types)
+    const [cameraState, setCameraState] = useState({
+        isOpen: false,
+        capturedPhoto: null,
+        isCapturing: false,
+        stream: null,
+        pendingPunchData: null,
+    });
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+
+    // Check if user's attendance type requires photo capture
+    const requiresPhotoCapture = useMemo(() => {
+        const attendanceType = user?.attendance_type;
+        if (!attendanceType?.slug) return false;
+        const baseSlug = attendanceType.slug.replace(/_\d+$/, '');
+        return ['geo_polygon', 'route_waypoint'].includes(baseSlug);
+    }, [user?.attendance_type]);
 
     // ===== LOCATION MANAGEMENT - SIMPLIFIED =====
 
@@ -526,6 +546,160 @@ const PunchStatusCard = React.memo(() => {
         };
     }, []);
 
+    // ===== CAMERA FUNCTIONS FOR PHOTO CAPTURE =====
+    
+    /**
+     * Start camera for photo capture
+     */
+    const startCamera = useCallback(async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                await videoRef.current.play();
+            }
+            
+            setCameraState(prev => ({ ...prev, stream, isCapturing: false }));
+        } catch (error) {
+            console.error('Camera access error:', error);
+            toast.error('Unable to access camera. Please check permissions.');
+            setCameraState(prev => ({ ...prev, isOpen: false }));
+        }
+    }, []);
+
+    /**
+     * Stop camera stream
+     */
+    const stopCamera = useCallback(() => {
+        if (cameraState.stream) {
+            cameraState.stream.getTracks().forEach(track => track.stop());
+        }
+        setCameraState(prev => ({ ...prev, stream: null, isOpen: false, capturedPhoto: null }));
+    }, [cameraState.stream]);
+
+    /**
+     * Capture photo with coordinate watermark
+     */
+    const capturePhoto = useCallback(async () => {
+        if (!videoRef.current || !canvasRef.current) return;
+
+        setCameraState(prev => ({ ...prev, isCapturing: true }));
+
+        try {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas dimensions
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame
+            ctx.drawImage(video, 0, 0);
+
+            // Add coordinate watermark
+            const coordinates = locationState.coordinates;
+            if (coordinates) {
+                const watermarkText = `📍 ${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)} | ${new Date().toLocaleString()}`;
+                
+                // Watermark background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+                
+                // Watermark text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(watermarkText, 10, canvas.height - 20);
+            }
+
+            // Convert to base64
+            const photoData = canvas.toDataURL('image/jpeg', 0.85);
+            
+            setCameraState(prev => ({ 
+                ...prev, 
+                capturedPhoto: photoData, 
+                isCapturing: false 
+            }));
+
+            toast.success('Photo captured successfully!');
+        } catch (error) {
+            console.error('Photo capture error:', error);
+            toast.error('Failed to capture photo. Please try again.');
+            setCameraState(prev => ({ ...prev, isCapturing: false }));
+        }
+    }, [locationState.coordinates]);
+
+    /**
+     * Retake photo
+     */
+    const retakePhoto = useCallback(() => {
+        setCameraState(prev => ({ ...prev, capturedPhoto: null }));
+    }, []);
+
+    /**
+     * Confirm photo and submit punch
+     */
+    const confirmPhotoAndPunch = useCallback(async () => {
+        if (!cameraState.capturedPhoto || !cameraState.pendingPunchData) {
+            toast.error('Please capture a photo first.');
+            return;
+        }
+
+        setAttendanceState(prev => ({ ...prev, loading: true }));
+        stopCamera();
+
+        try {
+            // Add photo to punch data
+            const punchDataWithPhoto = {
+                ...cameraState.pendingPunchData,
+                photo: cameraState.capturedPhoto,
+            };
+
+            // Submit punch
+            const response = await axios.post(route('attendance.punch'), punchDataWithPhoto);
+
+            if (response.data.status === 'success') {
+                setUiState(prev => ({
+                    ...prev,
+                    sessionDialogOpen: true
+                }));
+
+                // Immediately fetch latest data after successful punch
+                setTimeout(() => {
+                    fetchCurrentStatus();
+                }, 500);
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            console.error('Punch operation failed:', error);
+            const errorMessage = error.response?.data?.message || 'Unable to record attendance. Please try again.';
+            toast.error(errorMessage);
+        } finally {
+            setAttendanceState(prev => ({ ...prev, loading: false }));
+            setCameraState(prev => ({ ...prev, pendingPunchData: null, capturedPhoto: null }));
+        }
+    }, [cameraState.capturedPhoto, cameraState.pendingPunchData, stopCamera, fetchCurrentStatus]);
+
+    /**
+     * Open camera modal and prepare punch data
+     */
+    const openCameraForPunch = useCallback(async (punchData) => {
+        setCameraState(prev => ({ 
+            ...prev, 
+            isOpen: true, 
+            pendingPunchData: punchData,
+            capturedPhoto: null 
+        }));
+        
+        // Start camera after modal opens
+        setTimeout(() => startCamera(), 300);
+    }, [startCamera]);
+
     /**
      * Handle punch action - Main attendance function
      */
@@ -580,7 +754,14 @@ const PunchStatusCard = React.memo(() => {
                 timestamp: new Date().toISOString(),
             };
 
-            // Submit punch
+            // Check if photo capture is required (polygon/route types)
+            if (requiresPhotoCapture) {
+                setAttendanceState(prev => ({ ...prev, loading: false }));
+                openCameraForPunch(punchData);
+                return;
+            }
+
+            // Submit punch directly (no photo required)
             const response = await axios.post(route('attendance.punch'), punchData);
 
             if (response.data.status === 'success') {
@@ -601,7 +782,7 @@ const PunchStatusCard = React.memo(() => {
         } catch (error) {
             console.error('Punch operation failed:', error);
             
-            const errorMessage = error.response.data.message || 'Unable to record attendance. Please try again.';
+            const errorMessage = error.response?.data?.message || 'Unable to record attendance. Please try again.';
             
             toast.error(errorMessage, {
                 style: {
@@ -613,7 +794,7 @@ const PunchStatusCard = React.memo(() => {
         } finally {
             setAttendanceState(prev => ({ ...prev, loading: false }));
         }
-    }, [attendanceState.userOnLeave, locationState.status, getLocation, getDeviceFingerprint, fetchCurrentStatus]);
+    }, [attendanceState.userOnLeave, locationState.status, getLocation, getDeviceFingerprint, fetchCurrentStatus, requiresPhotoCapture, openCameraForPunch]);
 
     /**
      * Handle GPS chip click
@@ -807,14 +988,16 @@ const PunchStatusCard = React.memo(() => {
 
                                 <div className="ml-3 flex-1 min-w-0">
                                     <h3 
-                                        className="font-semibold text-sm truncate"
+                                        className="font-semibold text-sm truncate notranslate"
                                         style={{ color: 'var(--theme-foreground)' }}
+                                        data-name="true"
                                     >
                                         {user?.name}
                                     </h3>
                                     <p 
-                                        className="text-xs"
+                                        className="text-xs notranslate"
                                         style={{ color: 'var(--theme-foreground-600)' }}
+                                        data-no-translate="true"
                                     >
                                         ID: {user?.employee_id || user?.id}
                                     </p>
@@ -1397,6 +1580,128 @@ const PunchStatusCard = React.memo(() => {
                             </ModalFooter>
                         </>
                     )}
+                </ModalContent>
+            </Modal>
+
+            {/* Camera Modal for Photo Capture */}
+            <Modal 
+                isOpen={cameraState.isOpen} 
+                onClose={stopCamera}
+                size="lg"
+                classNames={{
+                    backdrop: "bg-black/80",
+                    base: "bg-content1"
+                }}
+                style={{
+                    borderRadius: `var(--borderRadius, 12px)`,
+                    fontFamily: `var(--fontFamily, 'Inter')`,
+                }}
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <CameraIcon className="w-5 h-5 text-primary" />
+                            <span>Capture Attendance Photo</span>
+                        </div>
+                        <p className="text-sm text-default-500 font-normal">
+                            Take a photo for verification. Location coordinates will be added automatically.
+                        </p>
+                    </ModalHeader>
+                    <ModalBody className="p-4">
+                        <div className="relative rounded-lg overflow-hidden bg-black">
+                            {/* Video preview or captured photo */}
+                            {cameraState.capturedPhoto ? (
+                                <img 
+                                    src={cameraState.capturedPhoto} 
+                                    alt="Captured" 
+                                    className="w-full h-auto max-h-[400px] object-contain"
+                                />
+                            ) : (
+                                <video 
+                                    ref={videoRef}
+                                    autoPlay 
+                                    playsInline 
+                                    muted
+                                    className="w-full h-auto max-h-[400px] object-contain"
+                                />
+                            )}
+                            
+                            {/* Hidden canvas for photo capture */}
+                            <canvas ref={canvasRef} className="hidden" />
+                            
+                            {/* Location overlay */}
+                            {locationState.coordinates && (
+                                <div 
+                                    className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs"
+                                    style={{ background: 'rgba(0,0,0,0.7)' }}
+                                >
+                                    📍 {locationState.coordinates.latitude.toFixed(6)}, {locationState.coordinates.longitude.toFixed(6)}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Instructions */}
+                        <div 
+                            className="mt-3 p-3 rounded-lg text-sm"
+                            style={{ 
+                                background: 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
+                                borderRadius: 'var(--borderRadius, 8px)',
+                            }}
+                        >
+                            <p className="flex items-center gap-2">
+                                <InformationCircleIcon className="w-4 h-4 text-primary" />
+                                {cameraState.capturedPhoto 
+                                    ? 'Review your photo. You can retake if needed.'
+                                    : 'Position yourself clearly in the frame and capture the photo.'}
+                            </p>
+                        </div>
+                    </ModalBody>
+                    <ModalFooter className="flex gap-2">
+                        <Button 
+                            color="danger" 
+                            variant="light"
+                            onPress={stopCamera}
+                            style={{ fontFamily: `var(--fontFamily, 'Inter')` }}
+                        >
+                            Cancel
+                        </Button>
+                        
+                        {cameraState.capturedPhoto ? (
+                            <>
+                                <Button 
+                                    color="secondary" 
+                                    variant="flat"
+                                    onPress={retakePhoto}
+                                    startContent={<ArrowPathIcon className="w-4 h-4" />}
+                                    style={{ fontFamily: `var(--fontFamily, 'Inter')` }}
+                                >
+                                    Retake
+                                </Button>
+                                <Button 
+                                    color="success" 
+                                    variant="shadow"
+                                    onPress={confirmPhotoAndPunch}
+                                    isLoading={attendanceState.loading}
+                                    startContent={!attendanceState.loading && <CheckCircleIcon className="w-4 h-4" />}
+                                    style={{ fontFamily: `var(--fontFamily, 'Inter')` }}
+                                >
+                                    Confirm & {statusConfig.action}
+                                </Button>
+                            </>
+                        ) : (
+                            <Button 
+                                color="primary" 
+                                variant="shadow"
+                                onPress={capturePhoto}
+                                isLoading={cameraState.isCapturing}
+                                isDisabled={!cameraState.stream}
+                                startContent={!cameraState.isCapturing && <CameraIcon className="w-4 h-4" />}
+                                style={{ fontFamily: `var(--fontFamily, 'Inter')` }}
+                            >
+                                Capture Photo
+                            </Button>
+                        )}
+                    </ModalFooter>
                 </ModalContent>
             </Modal>
         </div>

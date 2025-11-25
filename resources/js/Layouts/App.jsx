@@ -18,6 +18,9 @@ import { FadeIn, SlideIn } from '@/Components/Animations/SmoothAnimations';
 import { useVersionManager } from '@/Hooks/useVersionManager.js';
 import AuthGuard from '@/Components/AuthGuard.jsx';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { TranslationProvider } from '@/Contexts/TranslationContext';
+import { GlobalAutoTranslator } from '@/Contexts/GlobalAutoTranslator';
+import { AppStateProvider } from '@/Contexts/AppStateContext';
 
 import '@/utils/serviceWorkerManager.js';
 import axios from 'axios';
@@ -328,24 +331,27 @@ const App = React.memo(({ children }) => {
 
   // ===== RENDER =====
   return (
-    <LayoutContext.Provider value={staticContextValue}>
-      {/* Theme Settings Drawer */}
-      {themeDrawer}
+    <TranslationProvider>
+      <GlobalAutoTranslator>
+        <AppStateProvider>
+          <LayoutContext.Provider value={staticContextValue}>
+            {/* Theme Settings Drawer */}
+            {themeDrawer}
 
-      <AuthGuard auth={auth} url={url}>
-        <div className="relative w-full h-screen overflow-hidden">
-          {/* Global Overlays and Modals */}
-          <UpdateNotification
-            isVisible={isUpdateAvailable}
-            onUpdate={staticHandleUpdate}
-            onDismiss={dismissUpdate}
-            isUpdating={isUpdating}
-            version={currentVersion}
-          />
+            <AuthGuard auth={auth} url={url}>
+          <div className="relative w-full h-screen overflow-hidden">
+            {/* Global Overlays and Modals */}
+            <UpdateNotification
+              isVisible={isUpdateAvailable}
+              onUpdate={staticHandleUpdate}
+              onDismiss={dismissUpdate}
+              isUpdating={isUpdating}
+              version={currentVersion}
+            />
 
-          <ToastContainer
-            position="top-center"
-            autoClose={5000}
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick
@@ -507,6 +513,9 @@ const App = React.memo(({ children }) => {
         </div>
       </AuthGuard>
     </LayoutContext.Provider>
+        </AppStateProvider>
+      </GlobalAutoTranslator>
+    </TranslationProvider>
   );
 });
 

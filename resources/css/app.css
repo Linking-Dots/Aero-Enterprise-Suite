@@ -30,3 +30,43 @@ layer(base);
 .table-row-height {
   min-height: 4rem; /* Accommodate 2 lines of text with padding */
 }
+
+/* Hide Google Translate toolbar and elements */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-te-balloon,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-te-gadget {
+  display: none !important;
+}
+
+/* Prevent Google Translate from modifying body position */
+.skiptranslate {
+  display: none !important;
+  height: 0 !important;
+}
+
+/* Fix for translated text styling */
+font[style] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Elements that should never be translated */
+[data-no-translate],
+[data-name],
+[data-email],
+[data-phone],
+.notranslate {
+  font-style: inherit !important;
+}

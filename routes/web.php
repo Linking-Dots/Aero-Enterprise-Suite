@@ -45,6 +45,24 @@ Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
+// Locale switching route (for dynamic translations) - client-side only, no server redirect
+Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale', 'en');
+    $supportedLocales = ['en', 'bn', 'ar', 'es', 'fr', 'de', 'hi', 'zh-CN', 'zh-TW'];
+
+    if (in_array($locale, $supportedLocales)) {
+        session(['locale' => $locale]);
+        app()->setLocale($locale);
+
+        if (auth()->check()) {
+            auth()->user()->update(['locale' => $locale]);
+        }
+    }
+
+    // Return empty response - locale is handled client-side
+    return response()->noContent();
+})->name('locale.update');
+
 // Device authentication is now handled globally via DeviceAuthMiddleware
 // No need to apply it here - it runs on all requests automatically
 $middlewareStack = ['auth', 'verified'];
@@ -356,7 +374,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:attendance.settings'])->group(function () {
         Route::get('/settings/attendance', [AttendanceSettingController::class, 'index'])->name('attendance-settings.index');
         Route::post('/settings/attendance', [AttendanceSettingController::class, 'updateSettings'])->name('attendance-settings.update');
+        Route::post('settings/attendance-type', [AttendanceSettingController::class, 'storeType'])->name('attendance-types.store');
         Route::put('settings/attendance-type/{id}', [AttendanceSettingController::class, 'updateType'])->name('attendance-types.update');
+        Route::delete('settings/attendance-type/{id}', [AttendanceSettingController::class, 'destroyType'])->name('attendance-types.destroy');
+
+        // Multi-config management routes
+        Route::post('settings/attendance-type/{id}/add-item', [AttendanceSettingController::class, 'addConfigItem'])->name('attendance-types.addItem');
+        Route::delete('settings/attendance-type/{id}/remove-item', [AttendanceSettingController::class, 'removeConfigItem'])->name('attendance-types.removeItem');
+        Route::post('settings/attendance-type/{id}/generate-qr', [AttendanceSettingController::class, 'generateQrCode'])->name('attendance-types.generateQr');
     });
 
     // HR Module Settings

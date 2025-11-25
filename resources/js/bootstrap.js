@@ -7,10 +7,20 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 window.axios.defaults.withXSRFToken = true;
 
-// Attach device ID to all axios requests
+// Prevent browser/service worker caching of API responses
+window.axios.defaults.headers.common['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+window.axios.defaults.headers.common['Pragma'] = 'no-cache';
+window.axios.defaults.headers.common['Expires'] = '0';
+
+// Attach device ID and cache-busting to all axios requests
 axios.interceptors.request.use(
     (config) => {
         try {
+            // Add cache-busting timestamp to GET requests
+            if (config.method === 'get' || config.method === 'GET') {
+                config.params = config.params || {};
+                config.params._t = Date.now();
+            }
             return attachDeviceId(config);
         } catch (error) {
             console.warn('[Device Auth] Failed to attach device ID:', error);

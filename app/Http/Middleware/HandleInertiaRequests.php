@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\CompanySetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -77,7 +78,61 @@ class HandleInertiaRequests extends Middleware
 
             'url' => $request->getPathInfo(),
             'csrfToken' => session('csrfToken'),
+
+            // Localization - shared on every request
+            'locale' => App::getLocale(),
+            'fallbackLocale' => config('app.fallback_locale', 'en'),
+            'supportedLocales' => SetLocale::getSupportedLocales(),
+            'translations' => fn () => $this->getTranslations(),
         ];
+    }
+
+    /**
+     * Get translations for the current locale.
+     *
+     * Translations are loaded lazily to avoid performance impact on every request.
+     * Only the necessary namespaces are loaded based on the current route.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getTranslations(): array
+    {
+        $locale = App::getLocale();
+        $translations = [];
+
+        // Always load common translations
+        $namespaces = ['common', 'navigation', 'validation'];
+
+        // Add route-specific translations
+        $routeName = request()->route()?->getName() ?? '';
+        if (str_contains($routeName, 'dashboard')) {
+            $namespaces[] = 'dashboard';
+        }
+        if (str_contains($routeName, 'employee') || str_contains($routeName, 'department') || str_contains($routeName, 'designation') || str_contains($routeName, 'leave') || str_contains($routeName, 'attendance')) {
+            $namespaces[] = 'hr';
+        }
+        if (str_contains($routeName, 'device')) {
+            $namespaces[] = 'device';
+        }
+
+        // Load PHP translation files
+        foreach ($namespaces as $namespace) {
+            $path = lang_path("{$locale}/{$namespace}.php");
+            if (file_exists($path)) {
+                $translations[$namespace] = require $path;
+            }
+        }
+
+        // Load JSON translations (flat keys for simple lookups)
+        $jsonPath = lang_path("{$locale}.json");
+        if (file_exists($jsonPath)) {
+            $jsonTranslations = json_decode(file_get_contents($jsonPath), true);
+            if ($jsonTranslations) {
+                $translations = array_merge($translations, $jsonTranslations);
+            }
+        }
+
+        return $translations;
     }
 
     /**

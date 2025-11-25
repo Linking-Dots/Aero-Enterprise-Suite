@@ -119,6 +119,7 @@ class User extends Authenticatable implements HasMedia
         'single_device_login_enabled',
         'device_reset_at',
         'device_reset_reason',
+        'locale',
     ];
 
     /**

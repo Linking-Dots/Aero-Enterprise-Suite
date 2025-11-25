@@ -18,6 +18,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  DropdownSection,
   Select,
   SelectItem,
   Spinner,
@@ -43,7 +44,11 @@ import {
   CogIcon,
   CheckCircleIcon,
   XCircleIcon,
-  HashtagIcon
+  HashtagIcon,
+  MapPinIcon,
+  WifiIcon,
+  MapIcon,
+  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import DeleteEmployeeModal from '@/Components/DeleteEmployeeModal';
 import ProfilePictureModal from '@/Components/ProfilePictureModal';
@@ -80,20 +85,109 @@ const EmployeeTable = ({
     employee: null
   });
 
-   // Helper function to convert theme borderRadius to HeroUI radius values
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
-        const radiusValue = parseInt(borderRadius);
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
+  // Helper function to convert theme borderRadius to HeroUI radius values
+  const getThemeRadius = () => {
+    if (typeof window === 'undefined') return 'lg';
+    
+    const rootStyles = getComputedStyle(document.documentElement);
+    const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+    
+    const radiusValue = parseInt(borderRadius);
+    if (radiusValue === 0) return 'none';
+    if (radiusValue <= 4) return 'sm';
+    if (radiusValue <= 8) return 'md';
+    if (radiusValue <= 16) return 'lg';
+    return 'full';
+  };
+
+  // Helper to extract base slug (removes _2, _3, etc. suffixes)
+  const getBaseSlug = (slug) => {
+    if (!slug) return '';
+    return slug.replace(/_\d+$/, '');
+  };
+
+  // Check if an attendance type has valid configuration data
+  const hasValidConfig = (type) => {
+    const config = type?.config;
+    if (!config) return false;
+    
+    const baseSlug = getBaseSlug(type.slug);
+    
+    switch (baseSlug) {
+      case 'geo_polygon':
+        // Has polygon points or polygons array with points
+        return (config.polygon && config.polygon.length >= 3) ||
+               (config.polygons && config.polygons.some(p => p.points?.length >= 3));
+      case 'wifi_ip':
+        // Has IP addresses configured
+        return (config.allowed_ips && config.allowed_ips.length > 0) ||
+               (config.allowed_ranges && config.allowed_ranges.length > 0) ||
+               (config.ip_locations && config.ip_locations.some(l => 
+                 (l.allowed_ips?.length > 0) || (l.allowed_ranges?.length > 0)
+               ));
+      case 'route_waypoint':
+        // Has waypoints configured
+        return (config.waypoints && config.waypoints.length >= 2) ||
+               (config.routes && config.routes.some(r => r.waypoints?.length >= 2));
+      case 'qr_code':
+        // Has QR codes configured
+        return (config.code) ||
+               (config.qr_codes && config.qr_codes.length > 0);
+      default:
+        return false;
+    }
+  };
+
+  // Category configuration for grouping
+  const categoryConfig = {
+    'geo_polygon': {
+      title: 'Geo Polygon',
+      icon: MapPinIcon,
+      color: 'warning',
+    },
+    'wifi_ip': {
+      title: 'WiFi/IP',
+      icon: WifiIcon,
+      color: 'secondary',
+    },
+    'route_waypoint': {
+      title: 'Route Waypoint',
+      icon: MapIcon,
+      color: 'primary',
+    },
+    'qr_code': {
+      title: 'QR Code',
+      icon: QrCodeIcon,
+      color: 'success',
+    },
+  };
+
+  // Group attendance types by category, only including those with valid config
+  const groupedAttendanceTypes = useMemo(() => {
+    if (!attendanceTypes) return [];
+
+    const grouped = {};
+    
+    attendanceTypes.forEach(type => {
+      if (!type.is_active) return; // Skip inactive types
+      if (!hasValidConfig(type)) return; // Skip types without config
+      
+      const baseSlug = getBaseSlug(type.slug);
+      if (!categoryConfig[baseSlug]) return;
+      
+      if (!grouped[baseSlug]) {
+        grouped[baseSlug] = {
+          ...categoryConfig[baseSlug],
+          slug: baseSlug,
+          types: []
+        };
+      }
+      grouped[baseSlug].types.push(type);
+    });
+
+    // Convert to array and filter out empty categories
+    return Object.values(grouped).filter(cat => cat.types.length > 0);
+  }, [attendanceTypes]);
 
   const handleDepartmentChange = async (userId, departmentId) => {
     const promise = new Promise(async (resolve, reject) => {
@@ -598,31 +692,60 @@ const EmployeeTable = ({
           );
 
       case "attendance_type":
+        const hasConfiguredTypes = groupedAttendanceTypes.length > 0;
+        
         return (
-          <div className="flex flex-col gap-2 min-w-[150px]">
-            <Dropdown>
+          <div className="flex flex-col gap-2 min-w-[180px]">
+            <Dropdown isDisabled={!hasConfiguredTypes}>
               <DropdownTrigger>
                 <Button 
                   variant="bordered"
                   size="sm"
-                  className="justify-between backdrop-blur-md border-white/20 min-w-[150px] bg-white/10 hover:bg-white/15 transition-all duration-300"
+                  className={`justify-between backdrop-blur-md border-white/20 min-w-[180px] transition-all duration-300 ${
+                    !hasConfiguredTypes
+                      ? 'bg-gray-500/20 border-gray-400/40 opacity-50'
+                      : 'bg-white/10 hover:bg-white/15'
+                  }`}
                   startContent={<ClockIcon className="w-4 h-4" />}
-                  endContent={<EllipsisVerticalIcon className="w-4 h-4 rotate-90" />}
+                  endContent={hasConfiguredTypes && <EllipsisVerticalIcon className="w-4 h-4 rotate-90" />}
                 >
-                  <span>
-                    {user.attendance_type_name || "Select Type"}
+                  <span className="truncate">
+                    {!hasConfiguredTypes 
+                      ? 'No Types Configured' 
+                      : (user.attendance_type_name || "Select Type")}
                   </span>
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu aria-label="Attendance Type options">
-                {attendanceTypes?.map((type) => (
-                  <DropdownItem
-                    key={type.id.toString()}
-                    onPress={() => handleAttendanceTypeChange(user.id, type.id)}
-                  >
-                    {type.name}
-                  </DropdownItem>
-                ))}
+              <DropdownMenu 
+                aria-label="Attendance Type options"
+                className="min-w-[200px]"
+              >
+                {groupedAttendanceTypes.map((category, categoryIndex) => {
+                  const CategoryIcon = category.icon;
+                  return (
+                    <DropdownSection 
+                      key={category.slug}
+                      title={category.title}
+                      showDivider={categoryIndex < groupedAttendanceTypes.length - 1}
+                      classNames={{
+                        heading: "flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-default-500 px-2 py-1"
+                      }}
+                    >
+                      {category.types.map((type) => (
+                        <DropdownItem
+                          key={type.id.toString()}
+                          onPress={() => handleAttendanceTypeChange(user.id, type.id)}
+                          startContent={
+                            <span className="text-base">{type.icon || '📍'}</span>
+                          }
+                          description={type.description?.substring(0, 30) || null}
+                        >
+                          {type.name}
+                        </DropdownItem>
+                      ))}
+                    </DropdownSection>
+                  );
+                })}
               </DropdownMenu>
             </Dropdown>
           </div>

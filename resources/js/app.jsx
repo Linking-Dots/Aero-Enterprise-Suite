@@ -6,10 +6,8 @@ import {createInertiaApp} from '@inertiajs/react';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import axios from 'axios';
 import ErrorBoundary from './Components/ErrorBoundary/ErrorBoundary';
-import { AppStateProvider } from './Contexts/AppStateContext';
 import { ThemeProvider } from './Contexts/ThemeContext';
 import { HeroUIProvider } from '@heroui/react';
-import './bootstrap';
 import './theme/index.js';
 import { initializeDeviceAuth } from './utils/deviceAuth';
 
@@ -127,9 +125,7 @@ createInertiaApp({
             <ErrorBoundary>
                 <ThemeProvider>
                     <HeroUIProvider>
-                        <AppStateProvider>
-                            <App {...props} />
-                        </AppStateProvider>
+                        <App {...props} />
                     </HeroUIProvider>
                 </ThemeProvider>
             </ErrorBoundary>

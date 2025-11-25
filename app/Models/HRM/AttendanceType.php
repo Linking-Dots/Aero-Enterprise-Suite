@@ -3,6 +3,7 @@
 namespace App\Models\HRM;
 
 use App\Models\User;
+use Database\Factories\AttendanceTypeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,6 +27,14 @@ class AttendanceType extends Model
         'required_permissions' => 'array',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): AttendanceTypeFactory
+    {
+        return AttendanceTypeFactory::new();
+    }
 
     // Relationship with users
     public function users()

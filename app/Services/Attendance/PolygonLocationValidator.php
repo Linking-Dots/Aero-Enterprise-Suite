@@ -4,19 +4,35 @@ namespace App\Services\Attendance;
 
 /**
  * Polygon-based location validation service
+ * Supports multiple polygon geofences
  */
 class PolygonLocationValidator extends BaseAttendanceValidator
 {
     public function validate(): array
     {
-        $polygon = $this->attendanceType->config['polygon'] ?? [];
+        $config = $this->attendanceType->config ?? [];
         $lat = $this->request->input('lat');
         $lng = $this->request->input('lng');
-        $allowWithoutLocation = $this->attendanceType->config['allow_without_location'] ?? false;
+
+        // Check for new multi-polygon format first, fallback to legacy
+        $polygons = $config['polygons'] ?? [];
+        $validationMode = $config['validation_mode'] ?? 'any';
+        $allowWithoutLocation = $config['allow_without_location'] ?? false;
+
+        // Legacy support: single polygon format
+        if (empty($polygons) && isset($config['polygon'])) {
+            $polygons = [
+                [
+                    'id' => 'legacy_polygon',
+                    'name' => 'Primary Location',
+                    'points' => $config['polygon'],
+                    'is_active' => true,
+                ],
+            ];
+        }
 
         // Check if location data is missing
         if (! $lat || ! $lng) {
-            // If location is not provided, check if we allow attendance without location
             if ($allowWithoutLocation) {
                 return $this->successResponse('Attendance recorded without location validation (location access denied).');
             } else {
@@ -24,15 +40,52 @@ class PolygonLocationValidator extends BaseAttendanceValidator
             }
         }
 
-        if (empty($polygon)) {
-            return $this->errorResponse('No polygon boundary configured for this attendance type.');
+        // Filter active polygons
+        $activePolygons = array_filter($polygons, fn ($p) => ($p['is_active'] ?? true));
+
+        if (empty($activePolygons)) {
+            return $this->errorResponse('No polygon boundaries configured for this attendance type.');
         }
 
-        if (! $this->isPointInPolygon($lat, $lng, $polygon)) {
-            return $this->errorResponse('You are not within the allowed location boundary.', 403);
+        // Validate against all active polygons
+        $validPolygons = [];
+        $checkedPolygons = [];
+
+        foreach ($activePolygons as $polygon) {
+            $polygonPoints = $polygon['points'] ?? [];
+            if (empty($polygonPoints)) {
+                continue;
+            }
+
+            $isInside = $this->isPointInPolygon($lat, $lng, $polygonPoints);
+            $checkedPolygons[] = [
+                'id' => $polygon['id'] ?? 'unknown',
+                'name' => $polygon['name'] ?? 'Unnamed',
+                'is_valid' => $isInside,
+            ];
+
+            if ($isInside) {
+                $validPolygons[] = $polygon;
+            }
         }
 
-        return $this->successResponse('Location verified within polygon boundary.');
+        // Apply validation mode
+        $isValid = $validationMode === 'all'
+            ? count($validPolygons) === count($activePolygons)
+            : count($validPolygons) > 0;
+
+        if (! $isValid) {
+            return $this->errorResponse('You are not within any allowed location boundary.', 403);
+        }
+
+        return $this->successResponse(
+            'Location verified within polygon boundary: '.($validPolygons[0]['name'] ?? 'Valid location'),
+            [
+                'matched_polygon' => $validPolygons[0] ?? null,
+                'validation_mode' => $validationMode,
+                'checked_polygons' => $checkedPolygons,
+            ]
+        );
     }
 
     /**
@@ -46,8 +99,17 @@ class PolygonLocationValidator extends BaseAttendanceValidator
 
         $count = count($polygon);
         for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            if ((($polygon[$i]['lat'] > $y) !== ($polygon[$j]['lat'] > $y)) &&
-                ($x < ($polygon[$j]['lng'] - $polygon[$i]['lng']) * ($y - $polygon[$i]['lat']) / ($polygon[$j]['lat'] - $polygon[$i]['lat']) + $polygon[$i]['lng'])) {
+            $pointLat = $polygon[$i]['lat'] ?? null;
+            $pointLng = $polygon[$i]['lng'] ?? null;
+            $prevLat = $polygon[$j]['lat'] ?? null;
+            $prevLng = $polygon[$j]['lng'] ?? null;
+
+            if ($pointLat === null || $pointLng === null || $prevLat === null || $prevLng === null) {
+                continue;
+            }
+
+            if ((($pointLat > $y) !== ($prevLat > $y)) &&
+                ($x < ($prevLng - $pointLng) * ($y - $pointLat) / ($prevLat - $pointLat) + $pointLng)) {
                 $inside = ! $inside;
             }
         }

@@ -38,6 +38,8 @@ import {
     Textarea,
     Tabs,
     Tab,
+    Accordion,
+    AccordionItem,
 } from "@heroui/react";
 import {
     ClockIcon,
@@ -288,6 +290,12 @@ const PolygonRenderer = ({ polygonPoints }) => {
 const AttendanceSettings = () => {
     const { title, attendanceSettings: initialSettings, attendanceTypes: initialTypes } = usePage().props;
     
+    // Helper function to extract base slug (removes _2, _3, etc. suffixes)
+    const getBaseSlug = (slug) => {
+        if (!slug) return '';
+        return slug.replace(/_\d+$/, '');
+    };
+    
     // Custom media queries (following LeavesAdmin pattern)
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
@@ -353,10 +361,10 @@ const AttendanceSettings = () => {
         is_active: false
     });
 
-    // Waypoint state
+    // Waypoint state - Single route with multiple waypoints
     const [waypointForm, setWaypointForm] = useState({
-        tolerance: 300,
-        waypoints: []
+        tolerance: 150,
+        waypoints: [],
     });
 
     // Enhanced waypoint map state
@@ -364,9 +372,9 @@ const AttendanceSettings = () => {
     const [mapCenter, setMapCenter] = useState([23.8103, 90.4125]); // Default to Dhaka
     const [mapZoom, setMapZoom] = useState(13);
 
-    // Geo polygon state
+    // Geo polygon state - Single polygon with multiple points
     const [polygonForm, setPolygonForm] = useState({
-        polygon: []
+        polygon: [],
     });
     const [isAddingPolygonPoint, setIsAddingPolygonPoint] = useState(false);
     const [polygonMapCenter, setPolygonMapCenter] = useState([23.8103, 90.4125]);
@@ -382,6 +390,55 @@ const AttendanceSettings = () => {
             type.slug.toLowerCase().includes(searchValue.toLowerCase())
         );
     }, [types, searchValue]);
+
+    // Group attendance types by slug category for accordion display
+    const groupedTypes = useMemo(() => {
+        const categoryConfig = {
+            'geo_polygon': {
+                title: 'Geo Polygon Attendance',
+                description: 'Location-based attendance using polygon boundaries',
+                icon: '📍',
+                color: 'warning',
+            },
+            'wifi_ip': {
+                title: 'WiFi/IP Attendance',
+                description: 'Network-based attendance using IP addresses',
+                icon: '📶',
+                color: 'secondary',
+            },
+            'route_waypoint': {
+                title: 'Route Waypoint Attendance',
+                description: 'Route-based attendance with waypoint tracking',
+                icon: '🗺️',
+                color: 'primary',
+            },
+            'qr_code': {
+                title: 'QR Code Attendance',
+                description: 'QR code scanning for attendance',
+                icon: '📱',
+                color: 'success',
+            },
+        };
+
+        // Initialize all categories (always show all four accordions)
+        const grouped = {};
+        Object.entries(categoryConfig).forEach(([slug, config]) => {
+            grouped[slug] = {
+                ...config,
+                types: []
+            };
+        });
+        
+        // Add types to their respective categories
+        filteredTypes.forEach(type => {
+            const baseSlug = getBaseSlug(type.slug);
+            if (grouped[baseSlug]) {
+                grouped[baseSlug].types.push(type);
+            }
+        });
+
+        return grouped;
+    }, [filteredTypes, getBaseSlug]);
 
     // Handle settings update
     const handleSettingsUpdate = useCallback(async (formData) => {
@@ -458,48 +515,106 @@ const AttendanceSettings = () => {
     const handleTypeUpdate = useCallback(async (typeData) => {
         setTypeLoading(true);
         try {
-            const response = await axios.put(`/settings/attendance-type/${editingType.id}`, typeData);
+            let response;
             
-            if (response.data.attendanceType) {
-                const updatedType = response.data.attendanceType;
-                setTypes(prev => prev.map(type => 
-                    type.id === updatedType.id ? updatedType : type
-                ));
-                toast.success(response.data.message || 'Attendance type updated successfully');
-                onTypeModalClose();
+            if (editingType?.id) {
+                // Update existing type
+                response = await axios.put(`/settings/attendance-type/${editingType.id}`, typeData);
+                
+                if (response.data.attendanceType) {
+                    const updatedType = response.data.attendanceType;
+                    setTypes(prev => prev.map(type => 
+                        type.id === updatedType.id ? updatedType : type
+                    ));
+                    toast.success(response.data.message || 'Attendance type updated successfully');
+                }
+            } else {
+                // Create new type
+                response = await axios.post('/settings/attendance-type', {
+                    ...typeData,
+                    slug: editingType?.slug,
+                    icon: editingType?.icon,
+                });
+                
+                if (response.data.attendanceType) {
+                    setTypes(prev => [...prev, response.data.attendanceType]);
+                    toast.success(response.data.message || 'Attendance type created successfully');
+                }
             }
+            
+            onTypeModalClose();
         } catch (error) {
             console.error('Type update error:', error);
-            toast.error(error.response?.data?.message || 'Failed to update attendance type');
+            toast.error(error.response?.data?.message || 'Failed to save attendance type');
         } finally {
             setTypeLoading(false);
         }
     }, [editingType, onTypeModalClose]);
+
+    const handleDeleteType = useCallback(async (type) => {
+        if (!confirm(`Are you sure you want to delete "${type.name}"? This action cannot be undone.`)) {
+            return;
+        }
+        
+        try {
+            await axios.delete(`/settings/attendance-type/${type.id}`);
+            setTypes(prev => prev.filter(t => t.id !== type.id));
+            toast.success('Attendance type deleted successfully');
+        } catch (error) {
+            console.error('Type delete error:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete attendance type');
+        }
+    }, []);
 
     const handleTypeSubmit = useCallback((e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
         
-        // Handle config based on type
+        // Handle config based on type - now supporting multi-config structure
         let config = editingType?.config || {};
         
-        if (editingType?.slug === 'geo_polygon') {
-            // Keep existing polygon data
-            config = { ...config };
-        } else if (editingType?.slug === 'wifi_ip') {
-            config = {
-                allowed_ips: data.allowed_ips ? data.allowed_ips.split(',').map(ip => ip.trim()).filter(Boolean) : [],
-                allowed_ranges: data.allowed_ranges ? data.allowed_ranges.split(',').map(range => range.trim()).filter(Boolean) : []
+        const baseSlug = getBaseSlug(editingType?.slug);
+        
+        if (baseSlug === 'geo_polygon') {
+            // Keep existing polygons data (multi-polygon support)
+            config = { 
+                ...config,
+                validation_mode: data.validation_mode || config.validation_mode || 'any',
+                allow_without_location: data.allow_without_location === 'true' || config.allow_without_location || false,
             };
-        } else if (editingType?.slug === 'route_waypoint') {
+        } else if (baseSlug === 'wifi_ip') {
+            // Parse allowed_ips and allowed_ranges from comma-separated string
+            const allowedIps = data.allowed_ips 
+                ? data.allowed_ips.split(',').map(ip => ip.trim()).filter(ip => ip)
+                : config.allowed_ips || [];
+            const allowedRanges = data.allowed_ranges
+                ? data.allowed_ranges.split(',').map(range => range.trim()).filter(range => range)
+                : config.allowed_ranges || [];
+            
             config = {
-                tolerance: parseInt(data.tolerance) || 300,
-                waypoints: editingType?.config?.waypoints || []
+                ...config,
+                allowed_ips: allowedIps,
+                allowed_ranges: allowedRanges,
+                validation_mode: data.validation_mode || config.validation_mode || 'any',
+                allow_without_network: data.allow_without_network === 'true' || config.allow_without_network || false,
             };
-        } else if (editingType?.slug === 'qr_code') {
+        } else if (baseSlug === 'route_waypoint') {
+            // Keep existing routes data (multi-route support)
             config = {
-                max_distance: parseInt(data.max_distance) || 50
+                ...config,
+                tolerance: parseInt(data.tolerance) || config.tolerance || 150,
+                validation_mode: data.validation_mode || config.validation_mode || 'any',
+                allow_without_location: data.allow_without_location === 'true' || config.allow_without_location || false,
+            };
+        } else if (baseSlug === 'qr_code') {
+            // Keep existing qr_codes data (multi-QR support)
+            config = {
+                ...config,
+                code_expiry_hours: parseInt(data.code_expiry_hours) || config.code_expiry_hours || 24,
+                one_time_use: data.one_time_use === 'true' || config.one_time_use || false,
+                require_location: data.require_location === 'true' || config.require_location || false,
+                max_distance: parseInt(data.max_distance) || config.max_distance || 100,
             };
         }
         
@@ -513,19 +628,19 @@ const AttendanceSettings = () => {
         handleTypeUpdate(finalData);
     }, [editingType, typeFormData, handleTypeUpdate]);
 
-    // Waypoint management
+    // Waypoint management - Single route with multiple waypoints
     const openWaypointModal = useCallback((type) => {
         setEditingType(type);
         const waypoints = type.config?.waypoints || [];
+        
         setWaypointForm({
-            tolerance: type.config?.tolerance || 300,
-            waypoints: waypoints
+            tolerance: type.config?.tolerance || 150,
+            waypoints: waypoints,
         });
         
-        // Set map center to first waypoint or default location
-        if (waypoints.length > 0) {
-            const firstWaypoint = waypoints[0];
-            setMapCenter([parseFloat(firstWaypoint.lat), parseFloat(firstWaypoint.lng)]);
+        // Center map on first waypoint if available
+        if (waypoints.length > 0 && waypoints[0]?.lat && waypoints[0]?.lng) {
+            setMapCenter([parseFloat(waypoints[0].lat), parseFloat(waypoints[0].lng)]);
             setMapZoom(15);
         } else {
             setMapCenter([23.8103, 90.4125]); // Default to Dhaka
@@ -573,18 +688,19 @@ const AttendanceSettings = () => {
         }
     };
 
-    // Polygon management
+    // Polygon management - Single polygon with multiple points
     const openPolygonModal = useCallback((type) => {
         setEditingType(type);
         const polygon = type.config?.polygon || [];
+        
         setPolygonForm({
-            polygon: polygon
+            polygon: polygon,
         });
         
-        // Set map center to polygon center or default location
+        // Center map on polygon center if available
         if (polygon.length > 0) {
-            const latSum = polygon.reduce((sum, p) => sum + parseFloat(p.lat), 0);
-            const lngSum = polygon.reduce((sum, p) => sum + parseFloat(p.lng), 0);
+            const latSum = polygon.reduce((sum, p) => sum + parseFloat(p.lat || 0), 0);
+            const lngSum = polygon.reduce((sum, p) => sum + parseFloat(p.lng || 0), 0);
             setPolygonMapCenter([latSum / polygon.length, lngSum / polygon.length]);
             setPolygonMapZoom(15);
         } else {
@@ -634,17 +750,18 @@ const AttendanceSettings = () => {
     };
 
     const handlePolygonSubmit = useCallback(async () => {
-        if (polygonForm.polygon.length < 3) {
-            toast.error('Minimum 3 points required for a polygon');
+        // Validate polygon has at least 3 points
+        const validPoints = polygonForm.polygon.filter(pt => pt.lat && pt.lng);
+        
+        if (validPoints.length < 3) {
+            toast.error('Polygon requires minimum 3 points');
             return;
         }
 
         try {
-            const validPoints = polygonForm.polygon.filter(p => p.lat && p.lng);
-            
             const updatedConfig = {
                 ...editingType.config,
-                polygon: validPoints
+                polygon: validPoints,
             };
             
             const response = await axios.put(`/settings/attendance-type/${editingType.id}`, { 
@@ -663,13 +780,19 @@ const AttendanceSettings = () => {
     }, [editingType, polygonForm, onPolygonModalClose]);
 
     const handleWaypointSubmit = useCallback(async () => {
+        // Validate waypoints
+        const validWaypoints = waypointForm.waypoints.filter(w => w.lat && w.lng);
+        
+        if (validWaypoints.length < 2) {
+            toast.error('At least 2 waypoints are required for a route');
+            return;
+        }
+
         try {
-            const validWaypoints = waypointForm.waypoints.filter(w => w.lat && w.lng);
-            
             const updatedConfig = {
                 ...editingType.config,
-                tolerance: waypointForm.tolerance,
-                waypoints: validWaypoints
+                waypoints: validWaypoints,
+                tolerance: waypointForm.tolerance || 150,
             };
             
             const response = await axios.put(`/settings/attendance-type/${editingType.id}`, { 
@@ -680,7 +803,7 @@ const AttendanceSettings = () => {
                 type.id === editingType.id ? response.data.attendanceType : type
             ));
             
-            toast.success('Waypoints updated successfully');
+            toast.success('Route waypoints updated successfully');
             onWaypointModalClose();
         } catch (error) {
             toast.error('Failed to update waypoints');
@@ -1001,103 +1124,203 @@ const AttendanceSettings = () => {
                                         <Tab key="types" title="Attendance Types">
                                             <div className="mt-6">
                                                 <ScrollShadow className="max-h-[600px]">
-                                                    <Table 
-                                                        aria-label="Attendance types table"
-                                                        radius={getThemeRadius()}
-                                                        className="min-w-full"
-                                                        classNames={{
-                                                            wrapper: "shadow-none bg-transparent",
-                                                            th: "bg-content2/50 text-default-600 font-semibold",
-                                                            td: "text-foreground",
-                                                        }}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                    >
-                                                        <TableHeader>
-                                                            <TableColumn>TYPE</TableColumn>
-                                                            <TableColumn>STATUS</TableColumn>
-                                                            <TableColumn>ACTIONS</TableColumn>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            {filteredTypes.map((type) => {
-                                                                const status = getStatusDisplay(type.is_active);
-                                                                const StatusIcon = status.icon;
-                                                                
-                                                                return (
-                                                                    <TableRow key={type.id}>
-                                                                        <TableCell>
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className="text-2xl">{type.icon}</div>
-                                                                                <div>
-                                                                                    <p className="font-semibold text-foreground">{type.name}</p>
-                                                                                    <p className="text-sm text-default-500">{type.description}</p>
-                                                                                </div>
+                                                    {Object.keys(groupedTypes).length === 0 ? (
+                                                        <Card>
+                                                            <CardBody className="text-center py-12">
+                                                                <ClockIcon className="w-16 h-16 text-default-300 mx-auto mb-4" />
+                                                                <p className="text-default-500 text-lg">No attendance types found</p>
+                                                                <p className="text-sm text-default-400 mt-2">
+                                                                    {searchValue ? 'Try adjusting your search criteria' : 'Configure attendance types to get started'}
+                                                                </p>
+                                                            </CardBody>
+                                                        </Card>
+                                                    ) : (
+                                                        <Accordion 
+                                                            variant="splitted"
+                                                            selectionMode="multiple"
+                                                            defaultExpandedKeys={Object.keys(groupedTypes)}
+                                                            className="px-0"
+                                                        >
+                                                            {Object.entries(groupedTypes).map(([slug, category]) => (
+                                                                <AccordionItem
+                                                                    key={slug}
+                                                                    aria-label={category.title}
+                                                                    startContent={
+                                                                        <div className="flex items-center gap-3">
+                                                                            <span className="text-2xl">{category.icon}</span>
+                                                                            <div>
+                                                                                <p className="font-semibold text-foreground">{category.title}</p>
+                                                                                <p className="text-xs text-default-500">{category.description}</p>
                                                                             </div>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <Chip
-                                                                                startContent={<StatusIcon className="w-4 h-4" />}
-                                                                                variant="flat"
-                                                                                color={status.color}
+                                                                        </div>
+                                                                    }
+                                                                    subtitle={
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <Chip size="sm" variant="flat" color={category.color}>
+                                                                                {category.types.length} configuration{category.types.length !== 1 ? 's' : ''}
+                                                                            </Chip>
+                                                                            <Chip size="sm" variant="flat" color="success">
+                                                                                {category.types.filter(t => t.is_active).length} active
+                                                                            </Chip>
+                                                                        </div>
+                                                                    }
+                                                                    classNames={{
+                                                                        base: "py-0 w-full",
+                                                                        title: "font-medium text-medium",
+                                                                        trigger: "px-4 py-3 data-[hover=true]:bg-default-100 rounded-lg",
+                                                                        indicator: "text-medium",
+                                                                        content: "px-2 pb-4",
+                                                                    }}
+                                                                >
+                                                                    <div className="space-y-4">
+                                                                        {/* Add New Button */}
+                                                                        <div className="flex justify-end">
+                                                                            <Button
+                                                                                color="primary"
                                                                                 size="sm"
+                                                                                variant="flat"
+                                                                                startContent={<PlusIcon className="w-4 h-4" />}
                                                                                 radius={getThemeRadius()}
-                                                                                style={{
-                                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                                onPress={() => {
+                                                                                    // Open modal to create new attendance type of this category
+                                                                                    const newType = {
+                                                                                        id: null,
+                                                                                        name: '',
+                                                                                        description: '',
+                                                                                        slug: slug,
+                                                                                        icon: category.icon,
+                                                                                        is_active: true,
+                                                                                        config: {}
+                                                                                    };
+                                                                                    openTypeModal(newType);
+                                                                                }}
+                                                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                                            >
+                                                                                Add New {category.title.replace(' Attendance', '')}
+                                                                            </Button>
+                                                                        </div>
+
+                                                                        {/* Table of attendance types */}
+                                                                        {category.types.length > 0 ? (
+                                                                            <Table
+                                                                                aria-label={`${category.title} configurations`}
+                                                                                removeWrapper
+                                                                                classNames={{
+                                                                                    th: "bg-default-100 text-default-600 text-xs uppercase",
+                                                                                    td: "py-3",
                                                                                 }}
                                                                             >
-                                                                                {status.text}
-                                                                            </Chip>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <Tooltip content="Edit attendance type">
-                                                                                    <Button
-                                                                                        isIconOnly
-                                                                                        size="sm"
-                                                                                        variant="light"
-                                                                                        color="primary"
-                                                                                        radius={getThemeRadius()}
-                                                                                        onPress={() => openTypeModal(type)}
-                                                                                    >
-                                                                                        <PencilIcon className="w-4 h-4" />
-                                                                                    </Button>
-                                                                                </Tooltip>
-                                                                                {type.slug === 'route_waypoint' && (
-                                                                                    <Tooltip content="Configure waypoints">
-                                                                                        <Button
-                                                                                            isIconOnly
-                                                                                            size="sm"
-                                                                                            variant="light"
-                                                                                            color="secondary"
-                                                                                            radius={getThemeRadius()}
-                                                                                            onPress={() => openWaypointModal(type)}
-                                                                                        >
-                                                                                            <MapPinIcon className="w-4 h-4" />
-                                                                                        </Button>
-                                                                                    </Tooltip>
-                                                                                )}
-                                                                                {type.slug === 'geo_polygon' && (
-                                                                                    <Tooltip content="Configure polygon boundary">
-                                                                                        <Button
-                                                                                            isIconOnly
-                                                                                            size="sm"
-                                                                                            variant="light"
-                                                                                            color="warning"
-                                                                                            radius={getThemeRadius()}
-                                                                                            onPress={() => openPolygonModal(type)}
-                                                                                        >
-                                                                                            <MapPinIcon className="w-4 h-4" />
-                                                                                        </Button>
-                                                                                    </Tooltip>
-                                                                                )}
-                                                                            </div>
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                );
-                                                            })}
-                                                        </TableBody>
-                                                    </Table>
+                                                                                <TableHeader>
+                                                                                    <TableColumn>NAME</TableColumn>
+                                                                                    <TableColumn>DESCRIPTION</TableColumn>
+                                                                                    <TableColumn>STATUS</TableColumn>
+                                                                                    <TableColumn align="center">ACTIONS</TableColumn>
+                                                                                </TableHeader>
+                                                                                <TableBody>
+                                                                                    {category.types.map((type) => {
+                                                                                        const status = getStatusDisplay(type.is_active);
+                                                                                        const StatusIcon = status.icon;
+                                                                                        const typeBaseSlug = getBaseSlug(type.slug);
+                                                                                        
+                                                                                        return (
+                                                                                            <TableRow key={type.id}>
+                                                                                                <TableCell>
+                                                                                                    <div className="flex items-center gap-2">
+                                                                                                        <span className="text-lg">{type.icon}</span>
+                                                                                                        <span className="font-medium">{type.name}</span>
+                                                                                                    </div>
+                                                                                                </TableCell>
+                                                                                                <TableCell>
+                                                                                                    <span className="text-default-500 text-sm">
+                                                                                                        {type.description || 'No description'}
+                                                                                                    </span>
+                                                                                                </TableCell>
+                                                                                                <TableCell>
+                                                                                                    <Chip
+                                                                                                        startContent={<StatusIcon className="w-3 h-3" />}
+                                                                                                        variant="flat"
+                                                                                                        color={status.color}
+                                                                                                        size="sm"
+                                                                                                        radius={getThemeRadius()}
+                                                                                                    >
+                                                                                                        {status.text}
+                                                                                                    </Chip>
+                                                                                                </TableCell>
+                                                                                                <TableCell>
+                                                                                                    <div className="flex items-center justify-center gap-1">
+                                                                                                        <Tooltip content="Edit">
+                                                                                                            <Button
+                                                                                                                isIconOnly
+                                                                                                                size="sm"
+                                                                                                                variant="light"
+                                                                                                                color="primary"
+                                                                                                                radius={getThemeRadius()}
+                                                                                                                onPress={() => openTypeModal(type)}
+                                                                                                            >
+                                                                                                                <PencilIcon className="w-4 h-4" />
+                                                                                                            </Button>
+                                                                                                        </Tooltip>
+                                                                                                        {typeBaseSlug === 'route_waypoint' && (
+                                                                                                            <Tooltip content="Configure Routes">
+                                                                                                                <Button
+                                                                                                                    isIconOnly
+                                                                                                                    size="sm"
+                                                                                                                    variant="light"
+                                                                                                                    color="secondary"
+                                                                                                                    radius={getThemeRadius()}
+                                                                                                                    onPress={() => openWaypointModal(type)}
+                                                                                                                >
+                                                                                                                    <MapPinIcon className="w-4 h-4" />
+                                                                                                                </Button>
+                                                                                                            </Tooltip>
+                                                                                                        )}
+                                                                                                        {typeBaseSlug === 'geo_polygon' && (
+                                                                                                            <Tooltip content="Configure Polygon">
+                                                                                                                <Button
+                                                                                                                    isIconOnly
+                                                                                                                    size="sm"
+                                                                                                                    variant="light"
+                                                                                                                    color="warning"
+                                                                                                                    radius={getThemeRadius()}
+                                                                                                                    onPress={() => openPolygonModal(type)}
+                                                                                                                >
+                                                                                                                    <MapPinIcon className="w-4 h-4" />
+                                                                                                                </Button>
+                                                                                                            </Tooltip>
+                                                                                                        )}
+                                                                                                        <Tooltip content="Delete" color="danger">
+                                                                                                            <Button
+                                                                                                                isIconOnly
+                                                                                                                size="sm"
+                                                                                                                variant="light"
+                                                                                                                color="danger"
+                                                                                                                radius={getThemeRadius()}
+                                                                                                                onPress={() => handleDeleteType(type)}
+                                                                                                            >
+                                                                                                                <TrashIcon className="w-4 h-4" />
+                                                                                                            </Button>
+                                                                                                        </Tooltip>
+                                                                                                    </div>
+                                                                                                </TableCell>
+                                                                                            </TableRow>
+                                                                                        );
+                                                                                    })}
+                                                                                </TableBody>
+                                                                            </Table>
+                                                                        ) : (
+                                                                            <Card className="border border-dashed border-divider">
+                                                                                <CardBody className="text-center py-8">
+                                                                                    <span className="text-4xl mb-3 block">{category.icon}</span>
+                                                                                    <p className="text-default-500">No {category.title.toLowerCase()} configured yet</p>
+                                                                                    <p className="text-xs text-default-400 mt-1">Click the button above to add one</p>
+                                                                                </CardBody>
+                                                                            </Card>
+                                                                        )}
+                                                                    </div>
+                                                                </AccordionItem>
+                                                            ))}
+                                                        </Accordion>
+                                                    )}
                                                 </ScrollShadow>
                                             </div>
                                         </Tab>
@@ -1130,8 +1353,12 @@ const AttendanceSettings = () => {
                                 <div className="flex items-center gap-3">
                                     <div className="text-2xl">{editingType?.icon}</div>
                                     <div>
-                                        <h2 className="text-xl font-bold">Edit {editingType?.name}</h2>
-                                        <p className="text-sm text-default-500">Configure attendance type settings</p>
+                                        <h2 className="text-xl font-bold">
+                                            {editingType?.id ? `Edit ${editingType?.name}` : `Create New ${groupedTypes[editingType?.slug?.replace(/_\d+$/, '')]?.title || 'Attendance Type'}`}
+                                        </h2>
+                                        <p className="text-sm text-default-500">
+                                            {editingType?.id ? 'Configure attendance type settings' : 'Add a new attendance type configuration'}
+                                        </p>
                                     </div>
                                 </div>
                             </ModalHeader>
@@ -1180,7 +1407,7 @@ const AttendanceSettings = () => {
                                     </div>
 
                                     {/* Type-specific configurations */}
-                                    {editingType?.slug === 'wifi_ip' && (
+                                    {getBaseSlug(editingType?.slug) === 'wifi_ip' && (
                                         <div className="space-y-4">
                                             <h5 className="text-lg font-semibold">Network Configuration</h5>
                                             <Input
@@ -1210,7 +1437,7 @@ const AttendanceSettings = () => {
                                         </div>
                                     )}
 
-                                    {editingType?.slug === 'route_waypoint' && (
+                                    {getBaseSlug(editingType?.slug) === 'route_waypoint' && (
                                         <div className="space-y-4">
                                             <h5 className="text-lg font-semibold">Route Configuration</h5>
                                             <Input
@@ -1218,7 +1445,7 @@ const AttendanceSettings = () => {
                                                 label="Tolerance (meters)"
                                                 name="tolerance"
                                                 type="number"
-                                                defaultValue={editingType?.config?.tolerance || 300}
+                                                defaultValue={editingType?.config?.tolerance || 150}
                                                 variant="bordered"
                                                 radius={getThemeRadius()}
                                                 min="10"
@@ -1233,7 +1460,7 @@ const AttendanceSettings = () => {
                                         </div>
                                     )}
 
-                                    {editingType?.slug === 'qr_code' && (
+                                    {getBaseSlug(editingType?.slug) === 'qr_code' && (
                                         <div className="space-y-4">
                                             <h5 className="text-lg font-semibold">QR Code Configuration</h5>
                                             <Input
@@ -1253,11 +1480,11 @@ const AttendanceSettings = () => {
                                         </div>
                                     )}
 
-                                    {editingType?.slug === 'geo_polygon' && (
+                                    {getBaseSlug(editingType?.slug) === 'geo_polygon' && (
                                         <div className="space-y-4">
                                             <h5 className="text-lg font-semibold">Geofence Configuration</h5>
                                             <p className="text-sm text-default-500">
-                                                Polygon boundaries: {editingType?.config?.polygon?.length || 0} points configured
+                                                Polygon zones: {editingType?.config?.polygons?.length || 0} configured
                                             </p>
                                         </div>
                                     )}
@@ -1289,7 +1516,7 @@ const AttendanceSettings = () => {
                                         fontFamily: `var(--fontFamily, "Inter")`,
                                     }}
                                 >
-                                    Update Type
+                                    {editingType?.id ? 'Update Type' : 'Create Type'}
                                 </Button>
                             </ModalFooter>
                         </>
@@ -1328,29 +1555,25 @@ const AttendanceSettings = () => {
                             </ModalHeader>
                             <ModalBody>
                                 <div className="space-y-6">
-                                    {/* Tolerance Setting */}
+                                    {/* Tolerance and Stats */}
                                     <div className="flex items-center gap-4">
                                         <Input
                                             label="Tolerance (meters)"
                                             type="number"
                                             value={waypointForm.tolerance}
-                                            onChange={(e) => setWaypointForm(prev => ({ ...prev, tolerance: parseInt(e.target.value) || 300 }))}
+                                            onChange={(e) => setWaypointForm(prev => ({ ...prev, tolerance: parseInt(e.target.value) || 150 }))}
                                             variant="bordered"
                                             radius={getThemeRadius()}
                                             min="10"
                                             max="1000"
                                             className="max-w-xs"
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
+                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                         />
                                         <Chip 
                                             variant="flat" 
                                             color="primary" 
                                             size="sm"
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
+                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                         >
                                             {waypointForm.waypoints.length} waypoint{waypointForm.waypoints.length !== 1 ? 's' : ''}
                                         </Chip>
@@ -1359,11 +1582,9 @@ const AttendanceSettings = () => {
                                                 variant="flat" 
                                                 color="success" 
                                                 size="sm"
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
+                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                             >
-                                                Road Route: {waypointForm.waypoints.length - 1} segment{waypointForm.waypoints.length > 2 ? 's' : ''}
+                                                {waypointForm.waypoints.length - 1} segment{waypointForm.waypoints.length > 2 ? 's' : ''}
                                             </Chip>
                                         )}
                                     </div>
@@ -1395,9 +1616,7 @@ const AttendanceSettings = () => {
                                                     }}
                                                     startContent={isAddingWaypoint ? <XMarkIcon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
                                                     radius={getThemeRadius()}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                 >
                                                     {isAddingWaypoint ? 'Cancel Adding' : 'Add Waypoint'}
                                                 </Button>
@@ -1418,9 +1637,7 @@ const AttendanceSettings = () => {
                                                         }}
                                                         startContent={<ArrowPathIcon className="w-4 h-4" />}
                                                         radius={getThemeRadius()}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
+                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                     >
                                                         Fit All
                                                     </Button>
@@ -1659,9 +1876,7 @@ const AttendanceSettings = () => {
                                             variant="flat" 
                                             color="warning" 
                                             size="sm"
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
+                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                         >
                                             {polygonForm.polygon.length} point{polygonForm.polygon.length !== 1 ? 's' : ''}
                                         </Chip>
@@ -1670,9 +1885,7 @@ const AttendanceSettings = () => {
                                                 variant="flat" 
                                                 color="success" 
                                                 size="sm"
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
+                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                             >
                                                 Valid polygon boundary
                                             </Chip>
@@ -1682,9 +1895,7 @@ const AttendanceSettings = () => {
                                                 variant="flat" 
                                                 color="danger" 
                                                 size="sm"
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                }}
+                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                             >
                                                 Minimum 3 points required
                                             </Chip>
@@ -1718,9 +1929,7 @@ const AttendanceSettings = () => {
                                                     }}
                                                     startContent={isAddingPolygonPoint ? <XMarkIcon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
                                                     radius={getThemeRadius()}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                 >
                                                     {isAddingPolygonPoint ? 'Cancel Adding' : 'Add Point'}
                                                 </Button>
@@ -1741,9 +1950,7 @@ const AttendanceSettings = () => {
                                                         }}
                                                         startContent={<ArrowPathIcon className="w-4 h-4" />}
                                                         radius={getThemeRadius()}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
+                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                     >
                                                         Fit All
                                                     </Button>
@@ -1887,9 +2094,7 @@ const AttendanceSettings = () => {
                                                                     radius={getThemeRadius()}
                                                                     placeholder="e.g., 23.7588"
                                                                     size="sm"
-                                                                    style={{
-                                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                                    }}
+                                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                                 />
                                                                 <Input
                                                                     label="Longitude"
@@ -1901,9 +2106,7 @@ const AttendanceSettings = () => {
                                                                     radius={getThemeRadius()}
                                                                     placeholder="e.g., 90.3783"
                                                                     size="sm"
-                                                                    style={{
-                                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                                    }}
+                                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                                 />
                                                             </div>
                                                         </CardBody>
@@ -1923,9 +2126,7 @@ const AttendanceSettings = () => {
                                         onClose();
                                     }}
                                     radius={getThemeRadius()}
-                                    style={{
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}
+                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                 >
                                     Cancel
                                 </Button>
@@ -1934,9 +2135,7 @@ const AttendanceSettings = () => {
                                     onPress={handlePolygonSubmit}
                                     isDisabled={polygonForm.polygon.length < 3}
                                     radius={getThemeRadius()}
-                                    style={{
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}
+                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                 >
                                     Save Polygon ({polygonForm.polygon.length}/3+ points)
                                 </Button>

@@ -32,6 +32,7 @@ import {
 import { Link, usePage, router } from '@inertiajs/react';
 import { useTheme } from '../Contexts/ThemeContext';
 import ThemeSettingDrawer from './ThemeSettingDrawer';
+import LanguageSwitcher from './LanguageSwitcher';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = ({ 
@@ -185,6 +186,11 @@ const Header = ({
 
                     {/* Actions Section */}
                     <NavbarContent justify="end">
+                        {/* Language Switcher */}
+                        <NavbarItem>
+                            <LanguageSwitcher variant="minimal" size="sm" />
+                        </NavbarItem>
+
                         {/* Theme Toggle */}
                         {showThemeToggle && (
                             <NavbarItem>
