@@ -8,6 +8,13 @@ use Carbon\Carbon;
 
 class LeaveCrudService
 {
+    protected $approvalService;
+
+    public function __construct(LeaveApprovalService $approvalService)
+    {
+        $this->approvalService = $approvalService;
+    }
+
     /**
      * Create a new leave record
      */
@@ -15,16 +22,31 @@ class LeaveCrudService
     {
         $fromDate = Carbon::parse($data['fromDate']);
         $toDate = Carbon::parse($data['toDate']);
+        
+        $leaveTypeId = LeaveSetting::where('type', $data['leaveType'])->value('id');
+        $leaveSetting = LeaveSetting::find($leaveTypeId);
 
         $leave = Leave::create([
             'user_id' => $data['user_id'],
-            'leave_type' => LeaveSetting::where('type', $data['leaveType'])->value('id'),
+            'leave_type' => $leaveTypeId,
             'from_date' => $fromDate,
             'to_date' => $toDate,
             'no_of_days' => $data['daysCount'],
             'reason' => $data['leaveReason'],
             'status' => 'New',
         ]);
+
+        // Check if approval is required or auto-approve is enabled
+        if ($leaveSetting && (!$leaveSetting->requires_approval || $leaveSetting->auto_approve)) {
+            // Auto-approve the leave
+            $leave->update([
+                'status' => 'Approved',
+                'approved_at' => now(),
+            ]);
+        } else {
+            // Build and submit approval chain
+            $this->approvalService->submitForApproval($leave);
+        }
 
         return $leave->fresh(); // Ensure we return the latest data
     }

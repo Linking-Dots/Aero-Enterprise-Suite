@@ -1,4 +1,3 @@
-
 import React, {useState, useEffect} from 'react';
 import {
     Avatar,
@@ -19,6 +18,7 @@ import { X, CalendarIcon, UserIcon, ClockIcon } from 'lucide-react';
 import { toast } from "react-toastify";
 
 import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
+import ApprovalChain from "@/Components/Leave/ApprovalChain.jsx";
 import {router, usePage} from "@inertiajs/react";
 
 const LeaveForm = ({
@@ -570,6 +570,17 @@ const LeaveForm = ({
                                             }}
                                         />
                                     </div>
+
+                                    {/* Approval Chain - Show only when editing existing leave with approval chain */}
+                                    {currentLeave && currentLeave.approval_chain && currentLeave.approval_chain.length > 0 && (
+                                        <div className="col-span-full">
+                                            <ApprovalChain
+                                                approvalChain={currentLeave.approval_chain}
+                                                currentLevel={currentLeave.current_approval_level}
+                                                status={currentLeave.status}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </ModalBody>
                             <ModalFooter className="flex flex-col sm:flex-row justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4" style={{

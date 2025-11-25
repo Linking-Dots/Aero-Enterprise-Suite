@@ -88,6 +88,8 @@ const LeaveSettings = () => {
         eligibility: '',
         carry_forward: false,
         earned_leave: false,
+        requires_approval: true,
+        auto_approve: false,
         special_conditions: '',
     };
 
@@ -228,7 +230,9 @@ const LeaveSettings = () => {
             setNewLeaveType({
                 ...leaveType,
                 carry_forward: Boolean(leaveType.carry_forward),
-                earned_leave: Boolean(leaveType.earned_leave)
+                earned_leave: Boolean(leaveType.earned_leave),
+                requires_approval: Boolean(leaveType.requires_approval ?? true),
+                auto_approve: Boolean(leaveType.auto_approve)
             });
             setIsEditing(true);
         }
@@ -695,6 +699,85 @@ const LeaveSettings = () => {
                                                 </div>
                                             </div>
 
+                                            {/* Requires Approval */}
+                                            <div 
+                                                className="p-4 bg-white/5 backdrop-blur-md border border-white/10"
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                }}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <CheckCircleIcon className="w-4 h-4 text-default-400" />
+                                                        <div>
+                                                            <p 
+                                                                className="text-sm font-medium text-foreground"
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Requires Approval
+                                                            </p>
+                                                            <p 
+                                                                className="text-xs text-default-500"
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Manager approval needed
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Switch
+                                                        isSelected={newLeaveType.requires_approval}
+                                                        onValueChange={(value) => handleSwitchChange('requires_approval', value)}
+                                                        color="primary"
+                                                        size="sm"
+                                                        aria-label="Toggle approval requirement"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Auto Approve */}
+                                            <div 
+                                                className="p-4 bg-white/5 backdrop-blur-md border border-white/10"
+                                                style={{
+                                                    borderRadius: `var(--borderRadius, 8px)`,
+                                                }}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <CheckCircleIcon className="w-4 h-4 text-default-400" />
+                                                        <div>
+                                                            <p 
+                                                                className="text-sm font-medium text-foreground"
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Auto Approve
+                                                            </p>
+                                                            <p 
+                                                                className="text-xs text-default-500"
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Skip approval workflow
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Switch
+                                                        isSelected={newLeaveType.auto_approve}
+                                                        onValueChange={(value) => handleSwitchChange('auto_approve', value)}
+                                                        color="success"
+                                                        size="sm"
+                                                        aria-label="Toggle auto approval"
+                                                        isDisabled={!newLeaveType.requires_approval}
+                                                    />
+                                                </div>
+                                            </div>
+
                                             {/* Special Conditions */}
                                             <Input
                                                 label="Special Conditions"
@@ -978,7 +1061,7 @@ const LeaveSettings = () => {
                                                                 </p>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <div className="flex justify-center gap-2">
+                                                                <div className="flex justify-center gap-2 flex-wrap">
                                                                     <Tooltip content="Carry Forward Policy">
                                                                         <Chip
                                                                             startContent={leave.carry_forward ? <CheckCircleSolid className="w-3 h-3" /> : <XCircleSolid className="w-3 h-3" />}
@@ -1009,6 +1092,38 @@ const LeaveSettings = () => {
                                                                             Earned Leave
                                                                         </Chip>
                                                                     </Tooltip>
+                                                                    <Tooltip content="Requires Approval">
+                                                                        <Chip
+                                                                            startContent={(leave.requires_approval ?? true) ? <CheckCircleSolid className="w-3 h-3" /> : <XCircleSolid className="w-3 h-3" />}
+                                                                            color={(leave.requires_approval ?? true) ? 'primary' : 'default'}
+                                                                            variant="flat"
+                                                                            size="sm"
+                                                                            radius={getThemeRadius()}
+                                                                            className="text-xs font-medium"
+                                                                            style={{
+                                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                                            }}
+                                                                        >
+                                                                            Approval
+                                                                        </Chip>
+                                                                    </Tooltip>
+                                                                    {leave.auto_approve && (
+                                                                        <Tooltip content="Auto Approve Enabled">
+                                                                            <Chip
+                                                                                startContent={<CheckCircleSolid className="w-3 h-3" />}
+                                                                                color="success"
+                                                                                variant="flat"
+                                                                                size="sm"
+                                                                                radius={getThemeRadius()}
+                                                                                className="text-xs font-medium"
+                                                                                style={{
+                                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                                }}
+                                                                            >
+                                                                                Auto
+                                                                            </Chip>
+                                                                        </Tooltip>
+                                                                    )}
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell>

@@ -11,7 +11,6 @@ import {
     Button
 } from '@heroui/react';
 import GlassCard from '@/Components/GlassCard';
-import useTheme from '@/theme';
 import { toast } from "react-toastify"; // Assuming GlassCard is a custom component
 
 
@@ -40,9 +39,6 @@ const SalaryInformationForm = ({user, setUser}) => {
     const [dataChanged, setDataChanged] = useState(false);
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
-
-    const { isDark } = useTheme();
-    const primaryColor = getThemePrimaryColor();
 
     const handleChange = (key, value) => {
         setInitialUserData((prevUser) => {
@@ -135,9 +131,9 @@ const SalaryInformationForm = ({user, setUser}) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
             } else {
@@ -147,9 +143,9 @@ const SalaryInformationForm = ({user, setUser}) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
             }
@@ -159,9 +155,9 @@ const SalaryInformationForm = ({user, setUser}) => {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
-                    background: theme.glassCard.background,
-                    border: theme.glassCard.border,
-                    color: theme.palette.text.primary,
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
                 }
             });
             console.error(error);
@@ -194,8 +190,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -241,8 +237,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -284,8 +280,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -328,8 +324,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -360,8 +356,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -417,8 +413,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -461,8 +457,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -492,8 +488,8 @@ const SalaryInformationForm = ({user, setUser}) => {
                                                 PaperProps: {
                                                     sx: {
                                                         backdropFilter: 'blur(16px) saturate(200%)',
-                                                        background: theme.glassCard.background,
-                                                        border: theme.glassCard.border,
+                                                        background: 'var(--theme-content1)',
+                                                        border: '1px solid var(--theme-divider)',
                                                         borderRadius: 2,
                                                         boxShadow:
                                                             'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',

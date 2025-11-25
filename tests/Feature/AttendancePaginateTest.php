@@ -16,7 +16,7 @@ class AttendancePaginateTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create roles
         Role::create(['name' => 'Employee']);
         Role::create(['name' => 'Admin']);
@@ -31,7 +31,7 @@ class AttendancePaginateTest extends TestCase
             'password' => bcrypt('password'),
         ]);
         $user->assignRole('Employee');
-        
+
         // Create an admin user to make the request
         $admin = User::create([
             'name' => 'Test Admin',
@@ -39,7 +39,7 @@ class AttendancePaginateTest extends TestCase
             'password' => bcrypt('password'),
         ]);
         $admin->assignRole('Admin');
-        
+
         // Create an attendance record with only punch in (punchout is null)
         Attendance::create([
             'user_id' => $user->id,
@@ -58,7 +58,7 @@ class AttendancePaginateTest extends TestCase
 
         // Assert the request was successful
         $response->assertStatus(200);
-        
+
         // Assert the response has the expected structure
         $response->assertJsonStructure([
             'data',
@@ -68,7 +68,7 @@ class AttendancePaginateTest extends TestCase
             'leaveTypes',
             'leaveCounts',
         ]);
-        
+
         // Assert no error in the response
         $response->assertJsonMissing(['error']);
     }
@@ -82,7 +82,7 @@ class AttendancePaginateTest extends TestCase
             'password' => bcrypt('password'),
         ]);
         $user->assignRole('Employee');
-        
+
         // Create an admin user to make the request
         $admin = User::create([
             'name' => 'Test Admin 2',
@@ -90,9 +90,9 @@ class AttendancePaginateTest extends TestCase
             'password' => bcrypt('password'),
         ]);
         $admin->assignRole('Admin');
-        
+
         $today = Carbon::today();
-        
+
         // Create multiple attendance records for the same day - some with punchout, some without
         Attendance::create([
             'user_id' => $user->id,
@@ -102,7 +102,7 @@ class AttendancePaginateTest extends TestCase
             'punchin_location' => json_encode(['test' => 'location']),
             'punchout_location' => json_encode(['test' => 'location']),
         ]);
-        
+
         Attendance::create([
             'user_id' => $user->id,
             'date' => $today,
@@ -120,7 +120,7 @@ class AttendancePaginateTest extends TestCase
 
         // Assert the request was successful
         $response->assertStatus(200);
-        
+
         // Assert no error in the response
         $response->assertJsonMissing(['error']);
     }

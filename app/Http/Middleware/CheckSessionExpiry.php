@@ -26,12 +26,12 @@ class CheckSessionExpiry
         if (Auth::check()) {
             $sessionLifetime = config('session.lifetime') * 60; // Convert minutes to seconds
             $lastActivity = Session::get('last_activity', time());
-            
+
             // Check if session has expired
             if (time() - $lastActivity > $sessionLifetime) {
                 return $this->handleExpiredSession($request);
             }
-            
+
             // Update last activity timestamp
             Session::put('last_activity', time());
         }
@@ -52,7 +52,7 @@ class CheckSessionExpiry
             'password.email',
             'password.update',
             'verification.*',
-            'logout'
+            'logout',
         ];
 
         $skipPaths = [
@@ -62,7 +62,7 @@ class CheckSessionExpiry
             'reset-password',
             'verify-email',
             'csrf-token',
-            'session-check'
+            'session-check',
         ];
 
         // Skip if route name matches
@@ -72,7 +72,7 @@ class CheckSessionExpiry
 
         // Skip if path matches
         foreach ($skipPaths as $path) {
-            if ($request->is($path) || $request->is($path . '/*')) {
+            if ($request->is($path) || $request->is($path.'/*')) {
                 return true;
             }
         }
@@ -87,7 +87,7 @@ class CheckSessionExpiry
     {
         // Log the user out
         Auth::logout();
-        
+
         // Clear the session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -97,7 +97,7 @@ class CheckSessionExpiry
             return response()->json([
                 'message' => 'Your session has expired. Please login again.',
                 'redirect' => route('login'),
-                'session_expired' => true
+                'session_expired' => true,
             ], 419); // 419 Session Expired
         }
 
@@ -106,7 +106,7 @@ class CheckSessionExpiry
             return response()->json([
                 'message' => 'Session expired.',
                 'error' => 'session_expired',
-                'redirect' => route('login')
+                'redirect' => route('login'),
             ], 419);
         }
 

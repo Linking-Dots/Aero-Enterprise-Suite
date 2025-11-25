@@ -189,20 +189,41 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
 
 
     return (
-        <GlassDialog open={open} onClose={closeModal}>
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h3>
-                <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={closeModal}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={20} />
-                </Button>
-            </div>
+        <Modal
+            isOpen={open}
+            onOpenChange={processing ? undefined : closeModal}
+            size="2xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "bg-content1",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+            }}
+            style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}
+        >
+            <ModalContent>
+                <ModalHeader className="flex gap-3 items-center" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    borderBottom: '1px solid var(--theme-divider)'
+                }}>
+                    <div className="p-2 rounded-lg" style={{
+                        background: 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
+                        <User size={20} style={{ color: 'var(--theme-primary)' }} />
+                    </div>
+                    <span className="text-lg font-semibold" style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}>
+                        Personal Information
+                    </span>
+                </ModalHeader>
             <form onSubmit={handleSubmit}>
-                <div className="p-6">
+                <ModalBody className="py-4 px-4 sm:py-6 sm:px-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Input
@@ -211,6 +232,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onChange={(e) => handleChange('passport_no', e.target.value)}
                                 isInvalid={Boolean(errors.passport_no)}
                                 errorMessage={errors.passport_no}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -221,6 +252,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onChange={(e) => handleChange('passport_exp_date', e.target.value)}
                                 isInvalid={Boolean(errors.passport_exp_date)}
                                 errorMessage={errors.passport_exp_date}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -230,6 +271,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onChange={(e) => handleChange('nid', e.target.value)}
                                 isInvalid={Boolean(errors.nid)}
                                 errorMessage={errors.nid}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -239,6 +290,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onChange={(e) => handleChange('nationality', e.target.value)}
                                 isInvalid={Boolean(errors.nationality)}
                                 errorMessage={errors.nationality}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -248,6 +309,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onChange={(e) => handleChange('religion', e.target.value)}
                                 isInvalid={Boolean(errors.religion)}
                                 errorMessage={errors.religion}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -257,6 +328,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 onSelectionChange={(keys) => handleChange('marital_status', Array.from(keys)[0])}
                                 isInvalid={Boolean(errors.marital_status)}
                                 errorMessage={errors.marital_status}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    trigger: "min-h-unit-10",
+                                    value: "text-small"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             >
                                 <SelectItem key="na" value="na">-</SelectItem>
                                 <SelectItem key="Single" value="Single">Single</SelectItem>
@@ -271,6 +352,16 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 isInvalid={Boolean(errors.employment_of_spouse)}
                                 errorMessage={errors.employment_of_spouse}
                                 isDisabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div>
@@ -282,24 +373,52 @@ const PersonalInformationForm = ({user,setUser, open, closeModal }) => {
                                 isInvalid={Boolean(errors.number_of_children)}
                                 errorMessage={errors.number_of_children}
                                 isDisabled={changedUserData.marital_status === 'Single' || initialUserData.marital_status === 'Single'}
+                                variant="bordered"
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                </ModalBody>
+                <ModalFooter style={{
+                    borderTop: '1px solid var(--theme-divider)',
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
+                    <Button
+                        onPress={closeModal}
+                        isDisabled={processing}
+                        variant="light"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         isDisabled={!dataChanged}
-                        className="rounded-full px-6"
                         variant="bordered"
                         color="primary"
                         type="submit"
                         isLoading={processing}
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Submit
                     </Button>
-                </div>
+                </ModalFooter>
             </form>
-        </GlassDialog>
+            </ModalContent>
+        </Modal>
 
     );
 };

@@ -17,7 +17,7 @@ class DailyWorkPaginationService
     public function getPaginatedDailyWorks(Request $request): LengthAwarePaginator
     {
         $startTime = microtime(true);
-        
+
         $user = Auth::user();
         $perPage = $request->get('perPage', 30);
         $page = $request->get('search') != '' ? 1 : $request->get('page', 1);
@@ -33,7 +33,7 @@ class DailyWorkPaginationService
             'page' => $page,
             'is_mobile_mode' => $perPage >= 1000,
             'date_range' => [$startDate, $endDate],
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $query = $this->buildBaseQuery($user);
@@ -42,18 +42,18 @@ class DailyWorkPaginationService
         // Mobile mode detection: if perPage is very large (1000+), return all data without pagination
         if ($perPage >= 1000) {
             Log::info('Mobile mode: fetching all data without pagination');
-            
+
             // Limit to reasonable number to prevent memory issues
             $allData = $query->orderBy('date', 'desc')
-                           ->limit(500) // Safety limit for mobile
-                           ->get();
-            
+                ->limit(500) // Safety limit for mobile
+                ->get();
+
             $endTime = microtime(true);
             Log::info('DailyWork mobile query completed', [
-                'execution_time' => round(($endTime - $startTime) * 1000, 2) . 'ms',
-                'records_count' => $allData->count()
+                'execution_time' => round(($endTime - $startTime) * 1000, 2).'ms',
+                'records_count' => $allData->count(),
             ]);
-            
+
             // Create a manual paginator with all data on page 1
             return new LengthAwarePaginator(
                 $allData,
@@ -65,12 +65,12 @@ class DailyWorkPaginationService
         }
 
         $result = $query->orderBy('date', 'desc')->paginate($perPage, ['*'], 'page', $page);
-        
+
         $endTime = microtime(true);
         Log::info('DailyWork desktop query completed', [
-            'execution_time' => round(($endTime - $startTime) * 1000, 2) . 'ms',
+            'execution_time' => round(($endTime - $startTime) * 1000, 2).'ms',
             'records_count' => $result->count(),
-            'total_records' => $result->total()
+            'total_records' => $result->total(),
         ]);
 
         return $result;
@@ -110,9 +110,9 @@ class DailyWorkPaginationService
 
         // Use optimized eager loading to prevent N+1 queries
         $baseQuery = DailyWork::with([
-            
+
             'inchargeUser:id,name', // Load user names for display
-            'assignedUser:id,name'  // Load assigned user names
+            'assignedUser:id,name',  // Load assigned user names
         ]);
 
         if ($userDesignationTitle === 'Supervision Engineer') {
@@ -164,7 +164,7 @@ class DailyWorkPaginationService
                 $q->where('number', 'LIKE', "%{$search}%")
                     ->orWhere('location', 'LIKE', "%{$search}%")
                     ->orWhere('description', 'LIKE', "%{$search}%");
-                    // Remove date search as it's handled above
+                // Remove date search as it's handled above
             });
         }
 

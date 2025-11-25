@@ -27,6 +27,14 @@ class LeaveResource extends JsonResource
             'approved_by' => $this->approved_by,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            
+            // Approval workflow fields
+            'approval_chain' => $this->approval_chain,
+            'current_approval_level' => $this->current_approval_level,
+            'approved_at' => $this->approved_at,
+            'rejected_at' => $this->rejected_at,
+            'rejected_by' => $this->rejected_by,
+            'rejection_reason' => $this->rejection_reason,
 
             // Include employee data when available
             'employee' => $this->when($this->relationLoaded('employee') && $this->employee, function () {

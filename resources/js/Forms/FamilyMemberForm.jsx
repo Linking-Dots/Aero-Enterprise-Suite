@@ -9,12 +9,25 @@ import {
     ModalBody,
     ModalFooter,
 } from "@heroui/react";
-import { X } from "lucide-react";
-import useTheme from "@/theme";
+import { X, Users } from "lucide-react";
 import {toast} from "react-toastify";
-import GlassDialog from "@/Components/GlassDialog.jsx";
 
 const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => {
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [initialUserData, setInitialUserData] = useState({
         id: user.id,
         family_member_name: user.family_member_name || '',
@@ -30,8 +43,6 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
     const [dataChanged, setDataChanged] = useState(false);
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
-
-    const theme = useTheme();
 
     const handleChange = (key, value) => {
         setInitialUserData((prevUser) => {
@@ -87,9 +98,9 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 closeModal();
@@ -107,9 +118,9 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)',
                         }
                     });
                 } else {
@@ -118,9 +129,9 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)',
                         }
                     });
                 }
@@ -131,9 +142,9 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 console.error(error.request);
@@ -143,9 +154,9 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 console.error('Error', error.message);
@@ -156,21 +167,41 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
     };
 
     return (
-        <GlassDialog open={open} onClose={closeModal}>
+        <Modal
+            isOpen={open}
+            onOpenChange={processing ? undefined : closeModal}
+            size="2xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "bg-content1",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+            }}
+            style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}
+        >
             <ModalContent>
-                <ModalHeader className="flex justify-between items-center">
-                    <h2 className="text-lg font-semibold">Family Member</h2>
-                    <Button
-                        isIconOnly
-                        variant="light"
-                        onPress={closeModal}
-                        className="absolute top-2 right-2"
-                    >
-                        <X size={20} />
-                    </Button>
+                <ModalHeader className="flex gap-3 items-center" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    borderBottom: '1px solid var(--theme-divider)'
+                }}>
+                    <div className="p-2 rounded-lg" style={{
+                        background: 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
+                        <Users size={20} style={{ color: 'var(--theme-primary)' }} />
+                    </div>
+                    <span className="text-lg font-semibold" style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}>
+                        Family Member
+                    </span>
                 </ModalHeader>
             <form onSubmit={handleSubmit}>
-                <ModalBody>
+                <ModalBody className="py-4 px-4 sm:py-6 sm:px-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="col-span-1">
                             <Input
@@ -180,6 +211,15 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                                 onChange={(e) => handleChange('family_member_name', e.target.value)}
                                 isInvalid={Boolean(errors.family_member_name)}
                                 errorMessage={errors.family_member_name}
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div className="col-span-1">
@@ -190,6 +230,15 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                                 onChange={(e) => handleChange('family_member_relationship', e.target.value)}
                                 isInvalid={Boolean(errors.family_member_relationship)}
                                 errorMessage={errors.family_member_relationship}
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div className="col-span-1">
@@ -201,6 +250,15 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                                 onChange={(e) => handleChange('family_member_dob', e.target.value)}
                                 isInvalid={Boolean(errors.family_member_dob)}
                                 errorMessage={errors.family_member_dob}
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                         <div className="col-span-1">
@@ -211,25 +269,51 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                                 onChange={(e) => handleChange('family_member_phone', e.target.value)}
                                 isInvalid={Boolean(errors.family_member_phone)}
                                 errorMessage={errors.family_member_phone}
+                                size="sm"
+                                radius={getThemeRadius()}
+                                classNames={{
+                                    input: "text-small",
+                                    inputWrapper: "min-h-unit-10"
+                                }}
+                                style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}
                             />
                         </div>
                     </div>
                 </ModalBody>
-                <ModalFooter className="flex justify-end gap-2">
+                <ModalFooter style={{
+                    borderTop: '1px solid var(--theme-divider)',
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
+                    <Button
+                        onPress={closeModal}
+                        isDisabled={processing}
+                        variant="light"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         isDisabled={!dataChanged}
                         variant="bordered"
                         color="primary"
                         type="submit"
                         isLoading={processing}
-                        className="rounded-full px-4 py-2"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Submit
                     </Button>
                 </ModalFooter>
             </form>
             </ModalContent>
-        </GlassDialog>
+        </Modal>
     );
 };
 

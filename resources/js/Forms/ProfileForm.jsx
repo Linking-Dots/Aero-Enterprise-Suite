@@ -31,9 +31,9 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
         employee_id: user.employee_id || '',
         phone: user.phone || '',
         email: user.email || '',
-        department: user.department || '',
-        designation: user.designation || '',
-        report_to: user.report_to || '',
+        department: user.department_id || user.department || '',
+        designation: user.designation_id || user.designation || '',
+        report_to: user.report_to_id || user.report_to || '',
     });
 
 
@@ -55,56 +55,58 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (file) {
+            // Validate file type
+            const fileType = file.type;
+            if (!['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
+                toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
+                    icon: '🔴',
+                    style: {
+                        background: 'var(--theme-content1, #FFFFFF)',
+                        border: '1px solid var(--theme-danger, #F31260)',
+                        color: 'var(--theme-foreground, #11181C)',
+                        borderRadius: 'var(--borderRadius, 12px)',
+                        fontFamily: 'var(--fontFamily, "Inter")'
+                    }
+                });
+                return;
+            }
+
             // Create an object URL for preview
             const objectURL = URL.createObjectURL(file);
-
-            // Update state with the selected file's URL for preview
             setSelectedImage(objectURL);
 
             const promise = new Promise(async (resolve, reject) => {
                 try {
                     const formData = new FormData();
                     formData.append('id', user.id);
+                    formData.append('profile_image', file);
+                    formData.append('ruleSet', 'profile_image');
 
-                    // Append the selected image if there is one
-                    if (file) {
-                        // Get the file type
-                        const fileType = file.type;
-
-                        // Check if the file type is valid
-                        if (['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
-                            formData.append('profile_image', file);
-                        } else {
-                            console.error('Invalid file type. Only JPEG and PNG are allowed.');
-                            reject('Invalid file type');
-                            return;
-                        }
-                    }
-
-                    const response = await fetch(route('profile.update'), {
-                        method: 'POST',
+                    const response = await axios.post(route('profile.update'), formData, {
                         headers: {
-                            'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
-                        },
-                        body: formData,
+                            'Content-Type': 'multipart/form-data',
+                        }
                     });
 
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        setUser(data.user);
-                        setProcessing(false);
-                        resolve([...data.messages]);
+                    if (response.data.user) {
+                        setUser(response.data.user);
+                        setSelectedImage(null); // Clear preview after successful upload
+                        resolve(response.data.messages || ['Profile image updated successfully']);
                     } else {
-                        setProcessing(false);
-                        setErrors(data.errors);
-                        reject(data.error || 'Failed to update profile image.');
-                        console.error(data.errors);
+                        reject('Failed to update profile image');
                     }
                 } catch (error) {
-                    setProcessing(false);
-                    console.error(error);
-                    reject(error.message || 'An unexpected error occurred.');
+                    setSelectedImage(null); // Clear preview on error
+                    
+                    if (error.response?.status === 422) {
+                        const errors = error.response.data.errors;
+                        const errorMessages = Object.values(errors).flat();
+                        reject(errorMessages.join('. '));
+                    } else if (error.response?.data?.error) {
+                        reject(error.response.data.error);
+                    } else {
+                        reject(error.message || 'Failed to update profile image');
+                    }
                 }
             });
 
@@ -114,15 +116,14 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     pending: {
                         render() {
                             return (
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-2">
                                     <Spinner size="sm" />
-                                    <span className="ml-2">Updating profile image...</span>
+                                    <span>Uploading image...</span>
                                 </div>
                             );
                         },
                         icon: false,
                         style: {
-                           
                             background: 'var(--theme-content1, #FFFFFF)',
                             border: '1px solid var(--theme-divider, #E4E4E7)',
                             color: 'var(--theme-foreground, #11181C)',
@@ -132,17 +133,10 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     },
                     success: {
                         render({ data }) {
-                            return (
-                                <>
-                                    {data.map((message, index) => (
-                                        <div key={index}>{message}</div>
-                                    ))}
-                                </>
-                            );
+                            return Array.isArray(data) ? data.join('. ') : data;
                         },
-                        icon: '🟢',
+                        icon: '✅',
                         style: {
-                           
                             background: 'var(--theme-content1, #FFFFFF)',
                             border: '1px solid var(--theme-success, #17C964)',
                             color: 'var(--theme-foreground, #11181C)',
@@ -152,15 +146,10 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     },
                     error: {
                         render({ data }) {
-                            return (
-                                <>
-                                    {data}
-                                </>
-                            );
+                            return data || 'Failed to update profile image';
                         },
-                        icon: '🔴',
+                        icon: '❌',
                         style: {
-                            
                             background: 'var(--theme-content1, #FFFFFF)',
                             border: '1px solid var(--theme-danger, #F31260)',
                             color: 'var(--theme-foreground, #11181C)',
@@ -182,6 +171,11 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 delete updatedData[key];
             }
 
+            // Reset designation and report_to when department changes
+            if (key === 'department' && value !== prevUser.department) {
+                updatedData.designation = '';
+                updatedData.report_to = '';
+            }
 
             return updatedData;
         });
@@ -194,35 +188,52 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 delete updatedData[key];
             }
 
+            // Reset designation and report_to when department changes
+            if (key === 'department' && value !== initialUserData.department) {
+                updatedData.designation = '';
+                updatedData.report_to = '';
+            }
 
             return updatedData;
         });
-
-
     };
 
     useEffect(() => {
-
-
-        // Special case handling
-        if (user.department !== initialUserData.department) {
-            // Reset designation and report_to if department changes
-            initialUserData.designation = null;
-            initialUserData.report_to = null;
-        }
-
-        // Update designations based on the current department or the initial department
+        // Update designations based on the current department
+        const currentDept = changedUserData.department || initialUserData.department;
+        const currentDesignation = changedUserData.designation || initialUserData.designation;
+        
+        // Convert to number for comparison if it exists
+        const deptId = currentDept ? parseInt(currentDept) : null;
+        const designationId = currentDesignation ? parseInt(currentDesignation) : null;
+        
         setAllDesignations(
-            designations.filter((designation) =>
-                designation.department_id === (changedUserData.department || initialUserData.department)
-            )
+            designations.filter((designation) => {
+                const designationDeptId = parseInt(designation.department_id);
+                return deptId && designationDeptId === deptId;
+            })
         );
 
-        setAllReportTo(
-            allUsers.filter((user) =>
-                user.department === (changedUserData.department || initialUserData.department)
-            )
-        );
+        // Get current designation's hierarchy level
+        const currentDesignationObj = designations.find(d => parseInt(d.id) === designationId);
+        const currentHierarchyLevel = currentDesignationObj ? parseInt(currentDesignationObj.hierarchy_level) : 999;
+
+        // Filter report_to list: only users from same department with higher hierarchy (lower number = higher rank)
+        const filteredReportTo = allUsers.filter((u) => {
+            // Check both department and department_id fields
+            const userDept = parseInt(u.department_id || u.department);
+            const userDesignationId = parseInt(u.designation_id || u.designation);
+            
+            // Find user's designation to check hierarchy
+            const userDesignationObj = designations.find(d => parseInt(d.id) === userDesignationId);
+            const userHierarchyLevel = userDesignationObj ? parseInt(userDesignationObj.hierarchy_level) : 999;
+            
+            // Include if: same department AND higher hierarchy level (lower number) OR is current report_to
+            return (userDept === deptId && userHierarchyLevel < currentHierarchyLevel && userHierarchyLevel > 0) ||
+                u.id === initialUserData.report_to ||
+                u.id === changedUserData.report_to;
+        });
+        setAllReportTo(filteredReportTo);
 
         // Function to filter out unchanged data from changedUserData
         const updatedChangedUserData = { ...changedUserData };
@@ -343,6 +354,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
             size="5xl"
             scrollBehavior="inside"
             backdrop="blur"
+            hideCloseButton={true}
             classNames={{
                 backdrop: "bg-black/30",
                 base: "max-h-[90vh]",
@@ -589,7 +601,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                                         onSelectionChange={(keys) => handleChange('designation', Array.from(keys)[0])}
                                         isInvalid={Boolean(errors.designation)}
                                         errorMessage={errors.designation}
-                                        isDisabled={!user.department}
+                                        isDisabled={!(changedUserData.department || initialUserData.department)}
                                         variant="bordered"
                                         style={{
                                             borderRadius: 'var(--borderRadius, 12px)',

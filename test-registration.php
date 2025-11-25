@@ -18,28 +18,28 @@ $data = [
     'companySize' => '10-50',
     'website' => 'https://acme-corp.com',
     'description' => 'A test company for multi-tenant registration',
-    
+
     // Plan Selection
     'selectedPlan' => 1, // Starter plan
     'selectedModules' => [1, 2, 3], // HR Management, Attendance, Project Management
     'billingCycle' => 'monthly',
-    
+
     // Admin Account
     'adminName' => 'John Smith',
     'adminEmail' => 'john@acme-corp.com',
     'password' => 'SecurePassword123!',
     'passwordConfirmation' => 'SecurePassword123!',
-    
+
     // Preferences
     'timezone' => 'America/New_York',
     'agreeToTerms' => true,
 ];
 
 echo "=== Tenant Registration Test Data ===\n";
-echo "Company: " . $data['companyName'] . " (" . $data['companySlug'] . ")\n";
-echo "Admin: " . $data['adminName'] . " <" . $data['adminEmail'] . ">\n";
-echo "Plan: " . $data['selectedPlan'] . " (" . $data['billingCycle'] . ")\n";
-echo "Modules: " . implode(', ', $data['selectedModules']) . "\n";
-echo "Industry: " . $data['industry'] . " | Size: " . $data['companySize'] . "\n";
+echo 'Company: '.$data['companyName'].' ('.$data['companySlug'].")\n";
+echo 'Admin: '.$data['adminName'].' <'.$data['adminEmail'].">\n";
+echo 'Plan: '.$data['selectedPlan'].' ('.$data['billingCycle'].")\n";
+echo 'Modules: '.implode(', ', $data['selectedModules'])."\n";
+echo 'Industry: '.$data['industry'].' | Size: '.$data['companySize']."\n";
 echo "\nThis data structure matches what the React form sends to /register-tenant\n";
 echo "You can test this by submitting the registration form in the browser.\n";

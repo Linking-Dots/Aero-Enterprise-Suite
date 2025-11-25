@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('designations', function (Blueprint $table) {
-            $table->unsignedInteger('hierarchy_level')->default(1)->after('parent_id')
-                ->comment('Hierarchy level: 1 = highest (CEO, Director), higher numbers = lower positions');
+            if (! Schema::hasColumn('designations', 'hierarchy_level')) {
+                $table->unsignedInteger('hierarchy_level')->default(1)->after('parent_id')
+                    ->comment('Hierarchy level: 1 = highest (CEO, Director), higher numbers = lower positions');
+            }
         });
     }
 

@@ -52,6 +52,7 @@ import {
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { PhoneOff } from "lucide-react";
+import ApprovalActions from '@/Components/Leave/ApprovalActions.jsx';
 
 
 
@@ -606,11 +607,28 @@ const LeaveEmployeeTable = React.forwardRef(({
                 );
 
             case "status":
+                const canApproveThisLeave = leave.approval_chain && 
+                    leave.status === 'pending' && 
+                    leave.approval_chain.some(level => 
+                        level.level === leave.current_approval_level && 
+                        level.approver_id === auth.user.id && 
+                        level.status === 'pending'
+                    );
+
                 return (
                     <TableCell>
                         <div className="flex items-center gap-2">
                             {getStatusChip(leave.status)}
-                            {isAdminView && canApproveLeaves && (
+                            {canApproveThisLeave ? (
+                                <ApprovalActions 
+                                    leave={leave} 
+                                    onApprovalComplete={() => {
+                                        // Refresh the leaves list
+                                        if (fetchLeavesStats) fetchLeavesStats();
+                                        window.location.reload();
+                                    }}
+                                />
+                            ) : isAdminView && canApproveLeaves && (
                                 <Dropdown>
                                     <DropdownTrigger>
                                         <Button 
@@ -712,7 +730,7 @@ const LeaveEmployeeTable = React.forwardRef(({
             default:
                 return <TableCell>{leave[columnKey]}</TableCell>;
         }
-    }, [isAdminView, canApproveLeaves, isLargeScreen, updatingLeave, setCurrentLeave, openModal, handleClickOpen, updateLeaveStatus]);
+    }, [isAdminView, canApproveLeaves, canEditLeaves, canDeleteLeaves, isLargeScreen, updatingLeave, setCurrentLeave, openModal, handleClickOpen, updateLeaveStatus, auth, fetchLeavesStats]);
 
     const columns = [
         ...(isAdminView ? [{ name: "Employee", uid: "employee", icon: UserIcon }] : []),

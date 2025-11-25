@@ -194,9 +194,21 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
                 setProfileStats(prev => ({ ...prev, ...response.data.stats }));
             }
         } catch (error) {
-            console.error('Error fetching profile stats:', error);
-            // Use calculated stats if API fails
-            calculateProfileCompletion();
+            // Silently handle error and use local calculation
+            // Only log in development
+            if (import.meta.env.DEV) {
+                console.warn('Profile stats API not available, using local calculation:', error.response?.data?.message || error.message);
+            }
+            // Use calculated stats as fallback
+            const { completed, total, percentage } = calculateProfileCompletion();
+            setProfileStats(prev => ({
+                ...prev,
+                completion_percentage: percentage,
+                completed_sections: completed,
+                total_sections: total,
+                profile_views: 0,
+                last_updated: null
+            }));
         }
     }, [user.id, calculateProfileCompletion]);
 
@@ -689,158 +701,86 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
     );
 
     return (
-        <App>
+        <>
             <Head title={user.name} />
             
             {/* Enhanced Modals */}
             <AnimatePresence>
                 {modals.profile && (
-                    <EnhancedModal
-                        isOpen={modals.profile}
-                        onClose={() => closeModal('profile')}
-                        title="Edit Profile"
-                        subtitle="Update your basic profile information"
-                        icon={<UserIcon />}
-                        showFooter={false}
-                    >
-                        <ProfileForm
-                            user={user}
-                            allUsers={allUsers}
-                            departments={departments}
-                            designations={designations}
-                            open={modals.profile}
-                            setUser={setUser}
-                            closeModal={() => closeModal('profile')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <ProfileForm
+                        user={user}
+                        allUsers={allUsers}
+                        departments={departments}
+                        designations={designations}
+                        open={modals.profile}
+                        setUser={setUser}
+                        closeModal={() => closeModal('profile')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.personal && (
-                    <EnhancedModal
-                        isOpen={modals.personal}
-                        onClose={() => closeModal('personal')}
-                        title="Personal Information"
-                        subtitle="Update your personal details and identification"
-                        icon={<IdentificationIcon />}
-                        showFooter={false}
-                    >
-                        <PersonalInformationForm
-                            user={user}
-                            open={modals.personal}
-                            setUser={setUser}
-                            closeModal={() => closeModal('personal')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <PersonalInformationForm
+                        user={user}
+                        open={modals.personal}
+                        setUser={setUser}
+                        closeModal={() => closeModal('personal')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.emergency && (
-                    <EnhancedModal
-                        isOpen={modals.emergency}
-                        onClose={() => closeModal('emergency')}
-                        title="Emergency Contacts"
-                        subtitle="Manage your emergency contact information"
-                        icon={<PhoneIcon />}
-                        showFooter={false}
-                    >
-                        <EmergencyContactForm
-                            user={user}
-                            open={modals.emergency}
-                            setUser={setUser}
-                            closeModal={() => closeModal('emergency')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <EmergencyContactForm
+                        user={user}
+                        open={modals.emergency}
+                        setUser={setUser}
+                        closeModal={() => closeModal('emergency')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.bank && (
-                    <EnhancedModal
-                        isOpen={modals.bank}
-                        onClose={() => closeModal('bank')}
-                        title="Banking Information"
-                        subtitle="Update your banking and financial details"
-                        icon={<BanknotesIcon />}
-                        showFooter={false}
-                    >
-                        <BankInformationForm
-                            user={user}
-                            open={modals.bank}
-                            setUser={setUser}
-                            closeModal={() => closeModal('bank')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <BankInformationForm
+                        user={user}
+                        open={modals.bank}
+                        setUser={setUser}
+                        closeModal={() => closeModal('bank')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.family && (
-                    <EnhancedModal
-                        isOpen={modals.family}
-                        onClose={() => closeModal('family')}
-                        title="Family Information"
-                        subtitle="Add or update family member details"
-                        icon={<UsersIcon />}
-                        showFooter={false}
-                    >
-                        <FamilyMemberForm
-                            user={user}
-                            open={modals.family}
-                            setUser={setUser}
-                            closeModal={() => closeModal('family')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <FamilyMemberForm
+                        user={user}
+                        open={modals.family}
+                        setUser={setUser}
+                        closeModal={() => closeModal('family')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.education && (
-                    <EnhancedModal
-                        isOpen={modals.education}
-                        onClose={() => closeModal('education')}
-                        title="Education History"
-                        subtitle="Manage your educational background"
-                        icon={<AcademicCapIcon />}
-                        showFooter={false}
-                    >
-                        <EducationInformationDialog
-                            user={user}
-                            open={modals.education}
-                            setUser={setUser}
-                            closeModal={() => closeModal('education')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <EducationInformationDialog
+                        user={user}
+                        open={modals.education}
+                        setUser={setUser}
+                        closeModal={() => closeModal('education')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.experience && (
-                    <EnhancedModal
-                        isOpen={modals.experience}
-                        onClose={() => closeModal('experience')}
-                        title="Work Experience"
-                        subtitle="Update your professional experience"
-                        icon={<BriefcaseIcon />}
-                        showFooter={false}
-                    >
-                        <ExperienceInformationForm
-                            user={user}
-                            open={modals.experience}
-                            setUser={setUser}
-                            closeModal={() => closeModal('experience')}
-                            onSuccess={handleFormSuccess}
-                        />
-                    </EnhancedModal>
+                    <ExperienceInformationForm
+                        user={user}
+                        open={modals.experience}
+                        setUser={setUser}
+                        closeModal={() => closeModal('experience')}
+                        onSuccess={handleFormSuccess}
+                    />
                 )}
 
                 {modals.salary && (
-                    <EnhancedModal
-                        isOpen={modals.salary}
-                        onClose={() => closeModal('salary')}
-                        title="Salary Information"
-                        subtitle="Review salary and compensation details"
-                        icon={<CurrencyDollarIcon />}
-                        showFooter={false}
-                    >
-                        <SalaryInformationForm user={user} setUser={setUser} />
-                    </EnhancedModal>
+                    <SalaryInformationForm user={user} setUser={setUser} />
                 )}
             </AnimatePresence>
 
@@ -1152,7 +1092,7 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
                     </Card>
                 </motion.div>
             </div>
-        </App>
+        </>
     );
 };
 

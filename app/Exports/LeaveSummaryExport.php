@@ -55,8 +55,8 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
             // Add detailed leave type columns (used and remaining for each type)
             foreach ($leaveTypes as $leaveType) {
                 $type = $leaveType->type;
-                $row[$type . ' Used'] = $employee[$type . '_used'] ?? 0;
-                $row[$type . ' Remaining'] = $employee[$type . '_remaining'] ?? 0;
+                $row[$type.' Used'] = $employee[$type.'_used'] ?? 0;
+                $row[$type.' Remaining'] = $employee[$type.'_remaining'] ?? 0;
             }
 
             $row['Total Balance'] = $employee['total_balance'] ?? 0;
@@ -96,8 +96,8 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
         // Add leave type headers (used and remaining for each type)
         $leaveTypeHeaders = [];
         foreach ($leaveTypes as $leaveType) {
-            $leaveTypeHeaders[] = $leaveType->type . ' Used';
-            $leaveTypeHeaders[] = $leaveType->type . ' Remaining';
+            $leaveTypeHeaders[] = $leaveType->type.' Used';
+            $leaveTypeHeaders[] = $leaveType->type.' Remaining';
         }
 
         $endHeaders = [
@@ -121,13 +121,13 @@ class LeaveSummaryExport implements FromCollection, ShouldAutoSize, WithEvents, 
                 $leaveTypeColumnsCount = count($leaveTypes) * 2; // used + remaining for each type
                 $baseColumnsCount = 17; // base columns before leave types
                 $totalColumns = $baseColumnsCount + $leaveTypeColumnsCount + 2; // +2 for total balance and usage
-                
+
                 // Generate last column letter dynamically
                 $lastColumn = '';
                 if ($totalColumns <= 26) {
                     $lastColumn = chr(64 + $totalColumns);
                 } else {
-                    $lastColumn = 'Z' . chr(64 + ($totalColumns - 26));
+                    $lastColumn = 'Z'.chr(64 + ($totalColumns - 26));
                 }
 
                 $firstDataRow = 2;

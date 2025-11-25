@@ -2,15 +2,33 @@ import React, {useState} from 'react';
 import {
     Button,
     Input,
-    Spinner
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
 } from '@heroui/react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Briefcase } from 'lucide-react';
 import GlassCard from '@/Components/GlassCard'; // Ensure this component is correctly imported
-import GlassDialog from '@/Components/GlassDialog.jsx'; // Ensure this component is correctly imported
-import useTheme from '@/theme';
 import {toast} from 'react-toastify';
 
 const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [updatedUser, setUpdatedUser] = useState({
         id: user.id
     });
@@ -18,7 +36,6 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
     const [experienceList, setExperienceList] = useState(user.experiences.length > 0 ? user.experiences : [{ company_name: "", location: "", job_position: "", period_from: "", period_to: "", description: "" }]);
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
-    const theme = useTheme();
 
     const handleExperienceChange = (index, field, value) => {
         const updatedList = [...experienceList];
@@ -117,9 +134,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                         icon: false,
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)'
                         }
                     },
                     success: {
@@ -129,9 +146,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                         icon: '🟢',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)'
                         }
                     },
                     error: {
@@ -141,9 +158,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)'
                         }
                     }
                 }
@@ -203,9 +220,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                     icon: false,
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)'
                     }
                 },
                 success: {
@@ -221,9 +238,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     },
                 },
                 error: {
@@ -233,9 +250,9 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)'
                     }
                 }
             }
@@ -247,20 +264,41 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
     };
 
     return (
-        <GlassDialog open={open} onClose={closeModal} maxWidth="md" fullWidth>
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Experience Information</h3>
-                <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={closeModal}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={20} />
-                </Button>
-            </div>
+        <Modal
+            isOpen={open}
+            onOpenChange={processing ? undefined : closeModal}
+            size="3xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "bg-content1",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+            }}
+            style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}
+        >
+            <ModalContent>
+                <ModalHeader className="flex gap-3 items-center" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    borderBottom: '1px solid var(--theme-divider)'
+                }}>
+                    <div className="p-2 rounded-lg" style={{
+                        background: 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
+                        <Briefcase size={20} style={{ color: 'var(--theme-primary)' }} />
+                    </div>
+                    <span className="text-lg font-semibold" style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}>
+                        Experience Information
+                    </span>
+                </ModalHeader>
             <form onSubmit={handleSubmit}>
-                <div className="p-6">
+                <ModalBody className="py-4 px-4 sm:py-6 sm:px-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="space-y-4">
                         {experienceList.map((experience, index) => (
                             <div key={index}>
@@ -275,6 +313,8 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                 variant="light"
                                                 onPress={() => handleExperienceRemove(index)}
                                                 className="text-red-500 hover:text-red-700"
+                                                size="sm"
+                                                radius={getThemeRadius()}
                                             >
                                                 <X size={16} />
                                             </Button>
@@ -287,6 +327,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'company_name', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.company_name`])}
                                                     errorMessage={errors[`experiences.${index}.company_name`] ? errors[`experiences.${index}.company_name`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -296,6 +346,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'location', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.location`])}
                                                     errorMessage={errors[`experiences.${index}.location`] ? errors[`experiences.${index}.location`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -305,6 +365,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'job_position', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.job_position`])}
                                                     errorMessage={errors[`experiences.${index}.job_position`] ? errors[`experiences.${index}.job_position`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -315,6 +385,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'period_from', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.period_from`])}
                                                     errorMessage={errors[`experiences.${index}.period_from`] ? errors[`experiences.${index}.period_from`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -325,6 +405,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'period_to', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.period_to`])}
                                                     errorMessage={errors[`experiences.${index}.period_to`] ? errors[`experiences.${index}.period_to`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                             <div className="col-span-full">
@@ -334,6 +424,16 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                                                     onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
                                                     isInvalid={Boolean(errors[`experiences.${index}.description`])}
                                                     errorMessage={errors[`experiences.${index}.description`] ? errors[`experiences.${index}.description`][0] : ''}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    classNames={{
+                                                        input: "text-small",
+                                                        inputWrapper: "min-h-unit-10"
+                                                    }}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -347,25 +447,44 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                             variant="bordered"
                             onPress={handleAddMore}
                             startContent={<Plus size={16} />}
+                            radius={getThemeRadius()}
                         >
                             Add More
                         </Button>
                     </div>
-                </div>
-                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                </ModalBody>
+                <ModalFooter style={{
+                    borderTop: '1px solid var(--theme-divider)',
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
+                    <Button
+                        onPress={closeModal}
+                        isDisabled={processing}
+                        variant="light"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         isDisabled={!dataChanged}
-                        className="rounded-full px-8"
                         variant="bordered"
                         color="primary"
                         type="submit"
                         isLoading={processing}
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Submit
                     </Button>
-                </div>
+                </ModalFooter>
             </form>
-        </GlassDialog>
+            </ModalContent>
+        </Modal>
     );
 };
 

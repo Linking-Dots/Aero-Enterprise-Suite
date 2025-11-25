@@ -55,6 +55,40 @@ class Kernel extends ConsoleKernel
                 \App\Models\NotificationLog::class,
             ],
         ])->daily();
+
+        // Leave management scheduled tasks
+        // Reset annual leaves and process carry forwards - runs on January 1st at midnight
+        $schedule->command('leave:reset-annual')
+            ->yearly()
+            ->timezone(config('app.timezone', 'UTC'))
+            ->at('00:00')
+            ->before(function () {
+                Log::info('Starting annual leave reset process');
+            })
+            ->onSuccess(function () {
+                Log::info('Annual leave reset completed successfully');
+            })
+            ->onFailure(function () {
+                Log::error('Annual leave reset failed');
+            })
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/leave-reset.log'));
+
+        // Accrue monthly earned leaves - runs on 1st of each month at midnight
+        $schedule->command('leave:accrue-monthly')
+            ->monthlyOn(1, '00:00')
+            ->timezone(config('app.timezone', 'UTC'))
+            ->before(function () {
+                Log::info('Starting monthly leave accrual process');
+            })
+            ->onSuccess(function () {
+                Log::info('Monthly leave accrual completed successfully');
+            })
+            ->onFailure(function () {
+                Log::error('Monthly leave accrual failed');
+            })
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/leave-accrual.log'));
     }
 
     /**

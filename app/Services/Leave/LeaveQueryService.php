@@ -41,7 +41,7 @@ class LeaveQueryService
 
         $currentYear = $year ?: ($month ? Carbon::createFromFormat('Y-m-d', $month.'-01')->year : now()->year);
 
-        $leavesQuery = Leave::with('employee')
+        $leavesQuery = Leave::with(['employee', 'leaveSetting'])
             ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
             ->join('users', 'leaves.user_id', '=', 'users.id') // Ensure user exists
             ->select('leaves.*', 'leave_settings.type as leave_type');
@@ -154,7 +154,7 @@ class LeaveQueryService
                 // Use correct Carbon parsing for Y-m format
                 $monthStart = Carbon::createFromFormat('Y-m-d', $month.'-01')->startOfMonth();
                 $monthEnd = Carbon::createFromFormat('Y-m-d', $month.'-01')->endOfMonth();
-                
+
                 $range = [$monthStart, $monthEnd];
 
                 Log::info('LeaveQueryService - applying month filter', [

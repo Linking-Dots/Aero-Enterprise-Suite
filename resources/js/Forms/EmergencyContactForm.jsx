@@ -1,16 +1,34 @@
 import {
     Button,
     Input,
-    Spinner
+    Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
 } from "@heroui/react";
 import React, {useEffect, useState} from "react";
 import GlassCard from "@/Components/GlassCard.jsx";
-import { X } from 'lucide-react';
-import GlassDialog from "@/Components/GlassDialog.jsx";
-import useTheme from '@/theme';
+import { X, Phone } from 'lucide-react';
 import {toast} from "react-toastify";
 
 const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
     const [initialUserData, setInitialUserData] = useState({
         id: user.id,
         emergency_contact_primary_name: user.emergency_contact_primary_name || '',
@@ -31,7 +49,6 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    const theme = useTheme();
     const handleChange = (key, value) => {
         setInitialUserData((prevUser) => {
             const updatedData = { ...prevUser, [key]: value };
@@ -88,9 +105,9 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 closeModal();
@@ -108,9 +125,9 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)',
                         }
                     });
                 } else {
@@ -119,9 +136,9 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
-                            background: theme.glassCard.background,
-                            border: theme.glassCard.border,
-                            color: theme.palette.text.primary,
+                            background: 'var(--theme-content1)',
+                            border: '1px solid var(--theme-divider)',
+                            color: 'var(--theme-primary)',
                         }
                     });
                 }
@@ -132,9 +149,9 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 console.error(error.request);
@@ -144,9 +161,9 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
-                        background: theme.glassCard.background,
-                        border: theme.glassCard.border,
-                        color: theme.palette.text.primary,
+                        background: 'var(--theme-content1)',
+                        border: '1px solid var(--theme-divider)',
+                        color: 'var(--theme-primary)',
                     }
                 });
                 console.error('Error', error.message);
@@ -159,20 +176,41 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
 
 
     return (
-        <GlassDialog open={open} onClose={closeModal}>
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Emergency Contact Information</h3>
-                <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={closeModal}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={20} />
-                </Button>
-            </div>
+        <Modal
+            isOpen={open}
+            onOpenChange={processing ? undefined : closeModal}
+            size="2xl"
+            radius={getThemeRadius()}
+            scrollBehavior="inside"
+            classNames={{
+                base: "bg-content1",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+            }}
+            style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}
+        >
+            <ModalContent>
+                <ModalHeader className="flex gap-3 items-center" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    borderBottom: '1px solid var(--theme-divider)'
+                }}>
+                    <div className="p-2 rounded-lg" style={{
+                        background: 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
+                        <Phone size={20} style={{ color: 'var(--theme-primary)' }} />
+                    </div>
+                    <span className="text-lg font-semibold" style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}>
+                        Emergency Contact Information
+                    </span>
+                </ModalHeader>
             <form onSubmit={handleSubmit}>
-                <div className="p-6">
+                <ModalBody className="py-4 px-4 sm:py-6 sm:px-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="space-y-6">
                         {/* Primary Contact Section */}
                         <div>
@@ -190,6 +228,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_primary_name", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_primary_name)}
                                                 errorMessage={errors.emergency_contact_primary_name}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                         <div>
@@ -200,6 +248,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_primary_relationship", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_primary_relationship)}
                                                 errorMessage={errors.emergency_contact_primary_relationship}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                         <div>
@@ -210,6 +268,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_primary_phone", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_primary_phone)}
                                                 errorMessage={errors.emergency_contact_primary_phone}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -232,6 +300,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_secondary_name", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_secondary_name)}
                                                 errorMessage={errors.emergency_contact_secondary_name}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                         <div>
@@ -241,6 +319,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_secondary_relationship", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_secondary_relationship)}
                                                 errorMessage={errors.emergency_contact_secondary_relationship}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                         <div>
@@ -250,6 +338,16 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                                                 onChange={(e) => handleChange("emergency_contact_secondary_phone", e.target.value)}
                                                 isInvalid={Boolean(errors.emergency_contact_secondary_phone)}
                                                 errorMessage={errors.emergency_contact_secondary_phone}
+                                                variant="bordered"
+                                                size="sm"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    input: "text-small",
+                                                    inputWrapper: "min-h-unit-10"
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -257,21 +355,39 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                             </GlassCard>
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center justify-center p-6 border-t border-gray-200 dark:border-gray-700">
+                </ModalBody>
+                <ModalFooter style={{
+                    borderTop: '1px solid var(--theme-divider)',
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
+                    <Button
+                        onPress={closeModal}
+                        isDisabled={processing}
+                        variant="light"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         isDisabled={!dataChanged}
-                        className="rounded-full px-6"
                         variant="bordered"
                         color="primary"
                         type="submit"
                         isLoading={processing}
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Submit
                     </Button>
-                </div>
+                </ModalFooter>
             </form>
-        </GlassDialog>
+            </ModalContent>
+        </Modal>
     );
 };
 

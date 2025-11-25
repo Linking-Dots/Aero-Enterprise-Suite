@@ -39,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'Authentication required. Please login to continue.',
                     'redirect' => route('login'),
-                    'session_expired' => true
+                    'session_expired' => true,
                 ], 401);
             }
 
@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'Unauthenticated.',
                     'error' => 'authentication_required',
-                    'redirect' => route('login')
+                    'redirect' => route('login'),
                 ], 401);
             }
 
@@ -65,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'Your session has expired. Please refresh the page and login again.',
                     'redirect' => route('login'),
-                    'session_expired' => true
+                    'session_expired' => true,
                 ], 419);
             }
 
@@ -74,7 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'Session expired due to token mismatch.',
                     'error' => 'token_mismatch',
-                    'redirect' => route('login')
+                    'redirect' => route('login'),
                 ], 419);
             }
 
