@@ -75,7 +75,7 @@ const MAP_CONFIG = {
     POSITION_THRESHOLD: 0.0001,
     OFFSET_MULTIPLIER: 0.0001,
     MARKER_SIZE: [40, 40],
-    POPUP_MAX_WIDTH: 200,
+    POPUP_MAX_WIDTH: 160,
     UPDATE_INTERVAL: 30000 // 30 seconds
 };
 
@@ -638,8 +638,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         
         // Build photo section HTML
         const photoSection = photoUrl ? `
-            <div style="margin-top: 8px; margin-bottom: 8px;">
-                <div style="color: ${textSecondary}; font-size: 9px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div style="margin-top: 6px; margin-bottom: 6px; overflow: hidden; border-radius: 4px;">
+                <div style="color: ${textSecondary}; font-size: 8px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px;">
                     ${photoLabel}
                 </div>
                 <img 
@@ -647,13 +647,12 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     data-fullscreen-photo="${photoUrl}"
                     style="
                         width: 100%; 
-                        max-height: 80px;
+                        height: 50px;
                         object-fit: cover; 
-                        border-radius: 6px;
+                        border-radius: 4px;
                         border: 1px solid ${alpha(primaryColor, 0.2)};
-                        background: rgba(0,0,0,0.02);
+                        display: block;
                         cursor: pointer;
-                        transition: opacity 0.2s;
                     " 
                     onmouseover="this.style.opacity='0.85'"
                     onmouseout="this.style.opacity='1'"
@@ -670,13 +669,13 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
             typeIndicator = `
                 <div style="
                     display: inline-block;
-                    padding: 2px 6px;
+                    padding: 1px 4px;
                     background: ${alpha(successColor, 0.1)};
                     color: ${successColor};
-                    border-radius: 4px;
-                    font-size: 10px;
+                    border-radius: 3px;
+                    font-size: 7px;
                     font-weight: 600;
-                    margin-left: 8px;
+                    margin-left: 4px;
                     border: 1px solid ${alpha(successColor, 0.2)};
                 ">CHECK IN</div>
             `;
@@ -685,13 +684,13 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
             typeIndicator = `
                 <div style="
                     display: inline-block;
-                    padding: 2px 6px;
+                    padding: 1px 4px;
                     background: ${alpha(dangerColor, 0.1)};
                     color: ${dangerColor};
-                    border-radius: 4px;
-                    font-size: 10px;
+                    border-radius: 3px;
+                    font-size: 7px;
                     font-weight: 600;
-                    margin-left: 8px;
+                    margin-left: 4px;
                     border: 1px solid ${alpha(dangerColor, 0.2)};
                 ">CHECK OUT</div>
             `;
@@ -703,8 +702,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         if (type === 'punchin') {
             timeSection = `
                 <div style="display: flex; align-items: center;">
-                    <span style="color: ${successColor}; margin-right: 8px;">📍</span>
-                    <span style="color: ${textSecondary}; font-size: 13px;">
+                    <span style="color: ${successColor}; margin-right: 4px; font-size: 10px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 9px;">
                         Time: ${formatTime(user.punchin_time)}
                     </span>
                 </div>
@@ -712,8 +711,8 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         } else if (type === 'punchout') {
             timeSection = `
                 <div style="display: flex; align-items: center;">
-                    <span style="color: ${dangerColor}; margin-right: 8px;">📍</span>
-                    <span style="color: ${textSecondary}; font-size: 13px;">
+                    <span style="color: ${dangerColor}; margin-right: 4px; font-size: 10px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 9px;">
                         Time: ${formatTime(user.punchout_time)}
                     </span>
                 </div>
@@ -721,15 +720,15 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         } else {
             // Combined view (legacy/fallback)
             timeSection = `
-                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                    <span style="color: ${successColor}; margin-right: 8px;">📍</span>
-                    <span style="color: ${textSecondary}; font-size: 13px;">
+                <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                    <span style="color: ${successColor}; margin-right: 4px; font-size: 10px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 9px;">
                         Check In: ${formatTime(user.punchin_time)}
                     </span>
                 </div>
                 <div style="display: flex; align-items: center;">
-                    <span style="color: ${dangerColor}; margin-right: 8px;">📍</span>
-                    <span style="color: ${textSecondary}; font-size: 13px;">
+                    <span style="color: ${dangerColor}; margin-right: 4px; font-size: 10px;">📍</span>
+                    <span style="color: ${textSecondary}; font-size: 9px;">
                         Check Out: ${formatTime(user.punchout_time)}
                     </span>
                 </div>
@@ -738,18 +737,21 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         
         return `
             <div style="
-                min-width: 250px;
-                padding: 16px;
+                min-width: 140px;
+                max-width: 160px;
+                padding: 8px;
                 background: linear-gradient(135deg, ${alpha(backgroundColor, 0.95)}, ${alpha(headerColor, 0.05)});
-                border-radius: 12px;
+                border-radius: 8px;
                 border: 1px solid ${alpha(headerColor, 0.2)};
                 backdrop-filter: blur(20px);
                 font-family: var(--fontFamily, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+                overflow: hidden;
             ">
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; margin-bottom: 6px;">
                     <div style="
-                        width: 32px;
-                        height: 32px;
+                        width: 22px;
+                        height: 22px;
+                        min-width: 22px;
                         border-radius: 50%;
                         background: linear-gradient(135deg, ${type === 'punchin' ? successColor : type === 'punchout' ? dangerColor : primaryColor}, ${secondaryColor});
                         display: flex;
@@ -757,21 +759,22 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         justify-content: center;
                         color: white;
                         font-weight: bold;
-                        margin-right: 12px;
+                        font-size: 10px;
+                        margin-right: 6px;
                     ">
                         ${user.profile_image_url || user.profile_image ? 
-                            `<img src="${user.profile_image_url || user.profile_image}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='${user.name?.charAt(0)?.toUpperCase() || '?'}';" />` :
+                            `<img src="${user.profile_image_url || user.profile_image}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='${user.name?.charAt(0)?.toUpperCase() || '?'}';" />` :
                             user.name?.charAt(0)?.toUpperCase() || '?'
                         }
                     </div>
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center;">
-                            <span style="font-weight: 600; color: ${textPrimary}; font-size: 16px;">
-                                ${user.name || 'Unknown User'}
+                    <div style="flex: 1; min-width: 0; overflow: hidden;">
+                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: ${textPrimary}; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70px;">
+                                ${user.name || 'Unknown'}
                             </span>
                             ${typeIndicator}
                         </div>
-                        <div style="color: ${textSecondary}; font-size: 12px;">
+                        <div style="color: ${textSecondary}; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${user.designation || 'No designation'}
                         </div>
                     </div>
@@ -779,19 +782,19 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 ${type === 'combined' ? `
                 <div style="
                     display: inline-block;
-                    padding: 4px 8px;
+                    padding: 2px 4px;
                     background: ${alpha(statusColor, 0.1)};
                     color: ${statusColor};
-                    border-radius: 6px;
-                    font-size: 12px;
+                    border-radius: 4px;
+                    font-size: 8px;
                     font-weight: 600;
-                    margin-bottom: 12px;
+                    margin-bottom: 6px;
                     border: 1px solid ${alpha(statusColor, 0.2)};
                 ">
                     ${user.punchout_time ? '✓ Completed' : '⏱ Active'}
                 </div>` : ''}
                 ${photoSection}
-                <div style="space-y: 8px;">
+                <div style="space-y: 4px;">
                     ${timeSection}
                 </div>
             </div>
@@ -1535,32 +1538,39 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
             {/* Fullscreen Photo Overlay */}
             {fullscreenPhotoUrl && (
                 <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center"
                     style={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        backdropFilter: 'blur(4px)',
+                        zIndex: 99999,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                        backdropFilter: 'blur(8px)',
                     }}
                     onClick={() => setFullscreenPhotoUrl(null)}
                 >
                     {/* Close button */}
                     <button
-                        className="absolute top-4 right-4 p-2 rounded-full transition-all hover:bg-white/20"
+                        className="absolute top-6 right-6 p-3 rounded-full transition-all hover:bg-white/30"
                         style={{
+                            zIndex: 100000,
                             color: 'white',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            border: '2px solid rgba(255, 255, 255, 0.3)',
                         }}
-                        onClick={() => setFullscreenPhotoUrl(null)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setFullscreenPhotoUrl(null);
+                        }}
                         aria-label="Close fullscreen"
                     >
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
-                            width="24" 
-                            height="24" 
+                            width="28" 
+                            height="28" 
                             viewBox="0 0 24 24" 
                             fill="none" 
                             stroke="currentColor" 
-                            strokeWidth="2" 
+                            strokeWidth="2.5" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
                         >
@@ -1571,22 +1581,29 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                     
                     {/* Photo container */}
                     <div 
-                        className="relative max-w-[95vw] max-h-[95vh] p-4"
-                        onClick={(e) => e.stopPropagation()}
+                        className="flex flex-col items-center justify-center p-4"
+                        style={{
+                            maxWidth: '95vw',
+                            maxHeight: '95vh',
+                        }}
                     >
                         <img
                             src={fullscreenPhotoUrl}
                             alt="Attendance photo"
-                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
                             style={{
-                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                                maxWidth: '90vw',
+                                maxHeight: '85vh',
+                                objectFit: 'contain',
+                                borderRadius: '12px',
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
                             }}
+                            onClick={(e) => e.stopPropagation()}
                         />
                         
                         {/* Hint text */}
                         <p 
-                            className="text-center mt-4 text-sm"
-                            style={{ color: 'rgba(255, 255, 255, 0.6)' }}
+                            className="text-center mt-6 text-base"
+                            style={{ color: 'rgba(255, 255, 255, 0.7)' }}
                         >
                             Click anywhere to close
                         </p>
