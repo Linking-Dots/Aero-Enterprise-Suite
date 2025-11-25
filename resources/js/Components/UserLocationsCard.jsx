@@ -75,7 +75,7 @@ const MAP_CONFIG = {
     POSITION_THRESHOLD: 0.0001,
     OFFSET_MULTIPLIER: 0.0001,
     MARKER_SIZE: [40, 40],
-    POPUP_MAX_WIDTH: 300,
+    POPUP_MAX_WIDTH: 150,
     UPDATE_INTERVAL: 30000 // 30 seconds
 };
 
@@ -644,6 +644,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 </div>
                 <img 
                     src="${photoUrl}" 
+                    data-fullscreen-photo="${photoUrl}"
                     style="
                         width: 100%; 
                         height: auto;
@@ -651,8 +652,13 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                         border-radius: 8px;
                         border: 1px solid ${alpha(primaryColor, 0.2)};
                         background: rgba(0,0,0,0.02);
+                        cursor: pointer;
+                        transition: opacity 0.2s;
                     " 
+                    onmouseover="this.style.opacity='0.85'"
+                    onmouseout="this.style.opacity='1'"
                     onerror="this.style.display='none';"
+                    title="Click to view full screen"
                 />
             </div>
         ` : '';
@@ -1044,6 +1050,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
     const [attendanceTypeConfigs, setAttendanceTypeConfigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [fullscreenPhotoUrl, setFullscreenPhotoUrl] = useState(null);
     const [loadingInitialized, setLoadingInitialized] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
     const [isPolling, setIsPolling] = useState(true);
@@ -1053,6 +1060,25 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
     const [lastChecked, setLastChecked] = useState(new Date());
     const prevUsersRef = useRef([]);
     const prevUpdateRef = useRef(null);
+    const mapContainerRef = useRef(null);
+    
+    // Handle click on popup photos for fullscreen view
+    useEffect(() => {
+        const handlePhotoClick = (e) => {
+            const photoUrl = e.target.dataset?.fullscreenPhoto;
+            if (photoUrl) {
+                setFullscreenPhotoUrl(photoUrl);
+            }
+        };
+        
+        // Add event listener to document for delegated click handling
+        document.addEventListener('click', handlePhotoClick);
+        
+        return () => {
+            document.removeEventListener('click', handlePhotoClick);
+        };
+    }, []);
+    
     const handleRefresh = useCallback(async () => {
         setLoading(true);
         try {
@@ -1505,6 +1531,68 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                     </CardBody>
                 </Card>
             </motion.div>
+            
+            {/* Fullscreen Photo Overlay */}
+            {fullscreenPhotoUrl && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        backdropFilter: 'blur(4px)',
+                    }}
+                    onClick={() => setFullscreenPhotoUrl(null)}
+                >
+                    {/* Close button */}
+                    <button
+                        className="absolute top-4 right-4 p-2 rounded-full transition-all hover:bg-white/20"
+                        style={{
+                            color: 'white',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                        }}
+                        onClick={() => setFullscreenPhotoUrl(null)}
+                        aria-label="Close fullscreen"
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="24" 
+                            height="24" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    
+                    {/* Photo container */}
+                    <div 
+                        className="relative max-w-[95vw] max-h-[95vh] p-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            src={fullscreenPhotoUrl}
+                            alt="Attendance photo"
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            style={{
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                            }}
+                        />
+                        
+                        {/* Hint text */}
+                        <p 
+                            className="text-center mt-4 text-sm"
+                            style={{ color: 'rgba(255, 255, 255, 0.6)' }}
+                        >
+                            Click anywhere to close
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 });
