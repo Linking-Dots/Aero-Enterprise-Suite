@@ -33,7 +33,7 @@ return new class extends Migration
     {
         Schema::table('leaves', function (Blueprint $table) {
             $table->dropForeign(['rejected_by']);
-            $table->dropIndex(['status', 'current_approval_level']);
+            $table->dropIndex(['status']);
             $table->dropIndex(['current_approval_level']);
             $table->dropColumn([
                 'approval_chain',
