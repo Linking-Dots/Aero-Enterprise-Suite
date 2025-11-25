@@ -189,6 +189,8 @@ const PunchStatusCard = React.memo(() => {
         isCapturing: false,
         stream: null,
         pendingPunchData: null,
+        facingMode: 'user', // 'user' for front camera (default), 'environment' for back camera
+        isSwitching: false,
     });
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -551,10 +553,19 @@ const PunchStatusCard = React.memo(() => {
     /**
      * Start camera for photo capture
      */
-    const startCamera = useCallback(async () => {
+    const startCamera = useCallback(async (facingMode = 'user') => {
         try {
+            // Stop existing stream first
+            if (cameraState.stream) {
+                cameraState.stream.getTracks().forEach(track => track.stop());
+            }
+            
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                video: { 
+                    facingMode: facingMode, 
+                    width: { ideal: 1280 }, 
+                    height: { ideal: 720 } 
+                }
             });
             
             if (videoRef.current) {
@@ -562,13 +573,47 @@ const PunchStatusCard = React.memo(() => {
                 await videoRef.current.play();
             }
             
-            setCameraState(prev => ({ ...prev, stream, isCapturing: false }));
+            setCameraState(prev => ({ 
+                ...prev, 
+                stream, 
+                isCapturing: false, 
+                isSwitching: false,
+                facingMode 
+            }));
         } catch (error) {
             console.error('Camera access error:', error);
-            toast.error('Unable to access camera. Please check permissions.');
-            setCameraState(prev => ({ ...prev, isOpen: false }));
+            // Try fallback to any available camera
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 } }
+                });
+                
+                if (videoRef.current) {
+                    videoRef.current.srcObject = fallbackStream;
+                    await videoRef.current.play();
+                }
+                
+                setCameraState(prev => ({ 
+                    ...prev, 
+                    stream: fallbackStream, 
+                    isCapturing: false, 
+                    isSwitching: false 
+                }));
+            } catch (fallbackError) {
+                toast.error('Unable to access camera. Please check permissions.');
+                setCameraState(prev => ({ ...prev, isOpen: false, isSwitching: false }));
+            }
         }
-    }, []);
+    }, [cameraState.stream]);
+
+    /**
+     * Switch between front and back camera
+     */
+    const switchCamera = useCallback(async () => {
+        const newFacingMode = cameraState.facingMode === 'environment' ? 'user' : 'environment';
+        setCameraState(prev => ({ ...prev, isSwitching: true }));
+        await startCamera(newFacingMode);
+    }, [cameraState.facingMode, startCamera]);
 
     /**
      * Stop camera stream
@@ -577,7 +622,14 @@ const PunchStatusCard = React.memo(() => {
         if (cameraState.stream) {
             cameraState.stream.getTracks().forEach(track => track.stop());
         }
-        setCameraState(prev => ({ ...prev, stream: null, isOpen: false, capturedPhoto: null }));
+        setCameraState(prev => ({ 
+            ...prev, 
+            stream: null, 
+            isOpen: false, 
+            capturedPhoto: null,
+            facingMode: 'user',
+            isSwitching: false 
+        }));
     }, [cameraState.stream]);
 
     /**
@@ -1617,13 +1669,35 @@ const PunchStatusCard = React.memo(() => {
                                     className="w-full h-auto max-h-[400px] object-contain"
                                 />
                             ) : (
-                                <video 
-                                    ref={videoRef}
-                                    autoPlay 
-                                    playsInline 
-                                    muted
-                                    className="w-full h-auto max-h-[400px] object-contain"
-                                />
+                                <>
+                                    <video 
+                                        ref={videoRef}
+                                        autoPlay 
+                                        playsInline 
+                                        muted
+                                        className="w-full h-auto max-h-[400px] object-contain"
+                                        style={{ transform: cameraState.facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+                                    />
+                                    
+                                    {/* Camera switch button */}
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="flat"
+                                        className="absolute top-3 right-3 bg-black/50 text-white hover:bg-black/70"
+                                        onPress={switchCamera}
+                                        isLoading={cameraState.isSwitching}
+                                        isDisabled={!cameraState.stream || cameraState.isSwitching}
+                                        style={{ borderRadius: '50%' }}
+                                    >
+                                        <ArrowPathIcon className="w-4 h-4" />
+                                    </Button>
+                                    
+                                    {/* Camera mode indicator */}
+                                    <div className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs text-white bg-black/50">
+                                        {cameraState.facingMode === 'user' ? '🤳 Front' : '📷 Back'}
+                                    </div>
+                                </>
                             )}
                             
                             {/* Hidden canvas for photo capture */}

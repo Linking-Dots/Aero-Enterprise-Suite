@@ -646,10 +646,11 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                     src="${photoUrl}" 
                     style="
                         width: 100%; 
-                        max-height: 150px; 
-                        object-fit: cover; 
+                        height: auto;
+                        object-fit: contain; 
                         border-radius: 8px;
                         border: 1px solid ${alpha(primaryColor, 0.2)};
+                        background: rgba(0,0,0,0.02);
                     " 
                     onerror="this.style.display='none';"
                 />
