@@ -20,9 +20,9 @@ return new class extends Migration
             $table->foreignId('rejected_by')->nullable()->constrained('users')->onDelete('set null')->after('rejection_reason');
             $table->timestamp('submitted_at')->nullable()->after('rejected_by');
 
-            // Index for better query performance
+            // Index for better query performance (no composite index due to MySQL key length limits)
             $table->index('current_approval_level');
-            $table->index(['status', 'current_approval_level']);
+            $table->index('status');
         });
     }
 
