@@ -20,15 +20,31 @@ import DeleteDesignationForm from '@/Forms/DeleteDesignationForm.jsx';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const Designations = ({ title, initialDesignations, departments, managers, parentDesignations, stats: initialStats, filters: initialFilters }) => {
+const Designations = ({ title, initialDesignations, departments, managers, parentDesignations, allDesignations, stats: initialStats, filters: initialFilters }) => {
     const { auth } = usePage().props;
 
     const [designationsData, setDesignationsData] = useState(initialDesignations || { data: [] });
     const [loading, setLoading] = useState(false);
     const [modalState, setModalState] = useState({ type: null, designation: null });
+    // Find department with most designations
+    const defaultDepartment = useMemo(() => {
+        if (!departments || departments.length === 0) return 'all';
+        
+        const deptCounts = {};
+        allDesignations?.forEach(des => {
+            if (des.department_id) {
+                deptCounts[des.department_id] = (deptCounts[des.department_id] || 0) + 1;
+            }
+        });
+        
+        const maxDept = Object.entries(deptCounts).sort((a, b) => b[1] - a[1])[0];
+        return maxDept ? String(maxDept[0]) : 'all';
+    }, [departments, allDesignations]);
+
     const [filters, setFilters] = useState({
         search: initialFilters?.search || '',
         status: initialFilters?.status || 'all',
+        department: initialFilters?.department || defaultDepartment,
         parentDesignation: initialFilters?.parentDesignation || 'all'
     });
     const [showFilters, setShowFilters] = useState(false);
@@ -65,6 +81,7 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                     per_page: pagination.perPage,
                     search: filters.search,
                     status: filters.status,
+                    department: filters.department !== 'all' ? filters.department : undefined,
                     parent_designation: filters.parentDesignation
                 }
             });
@@ -207,29 +224,66 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                         >
                             <div className="p-4 sm:p-6">
                                 <StatsCards stats={statsCards} className="mb-6" />
-                                <div className="mb-6">
-                                    <Input
-                                        label="Search"
-                                        placeholder="Search designations..."
-                                        value={filters.search}
-                                        onValueChange={(value) => handleFilterChange('search', value)}
-                                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
-                                        variant="bordered"
-                                        classNames={{
-                                            base: "w-full",
-                                            input: "bg-transparent",
-                                            inputWrapper: [
-                                                "backdrop-blur-xl",
-                                                "backdrop-saturate-200",
-                                                "bg-white/10",
-                                                "border",
-                                                "border-white/20",
-                                                "hover:bg-white/20",
-                                                "focus-within:!bg-white/20",
-                                                "!cursor-text",
-                                            ],
-                                        }}
-                                    />
+                                {/* Search and Filters Section */}
+                                <div className="mb-6 space-y-4">
+                                    {/* Search */}
+                                    <div className="flex-1">
+                                        <Input
+                                            label="Search Designations"
+                                            placeholder="Search by title..."
+                                            value={filters.search}
+                                            onValueChange={(value) => handleFilterChange('search', value)}
+                                            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                            variant="bordered"
+                                            size={isMobile ? "sm" : "md"}
+                                            classNames={{
+                                                base: "w-full",
+                                                input: "bg-transparent",
+                                                inputWrapper: "border-default-200 hover:border-default-300",
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Filters */}
+                                    <div className="flex flex-wrap gap-3">
+                                        <Select
+                                            label="Department"
+                                            selectedKeys={filters.department ? [filters.department] : []}
+                                            onSelectionChange={(keys) => handleFilterChange('department', Array.from(keys)[0])}
+                                            variant="bordered"
+                                            size={isMobile ? "sm" : "md"}
+                                            className="w-48"
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        >
+                                            <SelectItem key="all">All Departments</SelectItem>
+                                            {departments?.map((dept) => (
+                                                <SelectItem key={String(dept.id)}>
+                                                    {dept.name}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+
+                                        <Select
+                                            label="Status"
+                                            selectedKeys={filters.status ? [filters.status] : []}
+                                            onSelectionChange={(keys) => handleFilterChange('status', Array.from(keys)[0])}
+                                            variant="bordered"
+                                            size={isMobile ? "sm" : "md"}
+                                            className="w-32"
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                        >
+                                            <SelectItem key="all">All Status</SelectItem>
+                                            <SelectItem key="active">Active</SelectItem>
+                                            <SelectItem key="inactive">Inactive</SelectItem>
+                                        </Select>
+                                    </div>
                                 </div>
                                 <div>
                                     {loading ? (
@@ -262,11 +316,10 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
                 <DesignationForm
                     open={true}
                     departments={departments}
+                    designations={allDesignations}
                     onClose={closeModal}
                     onSuccess={(designation) => handleSuccess(designation, modalState.type === 'add_designation' ? 'add' : 'edit')}
                     designation={modalState.designation}
-                    managers={managers}
-                    parentDesignations={parentDesignations}
                 />
             )}
 

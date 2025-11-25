@@ -837,6 +837,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
           allUsers={users}
           departments={departments}
           designations={designations}
+          roles={roles}
           open={openModalType === 'add'}
           setUsers={handleUsersUpdate}
           closeModal={closeModal}
@@ -851,6 +852,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
           allUsers={users}
           departments={departments}
           designations={designations}
+          roles={roles}
           open={openModalType === 'edit'}
           setUsers={handleUsersUpdate}
           closeModal={closeModal}

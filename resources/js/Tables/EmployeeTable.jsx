@@ -132,9 +132,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       success: {
@@ -144,9 +144,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       error: {
@@ -156,9 +156,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
     });
@@ -199,9 +199,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       success: {
@@ -211,9 +211,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       error: {
@@ -223,9 +223,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
     });
@@ -272,9 +272,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       success: {
@@ -284,9 +284,9 @@ const EmployeeTable = ({
         icon: '🟢',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       error: {
@@ -296,9 +296,9 @@ const EmployeeTable = ({
         icon: '🔴',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
     });
@@ -363,9 +363,9 @@ const EmployeeTable = ({
         icon: false,
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       success: {
@@ -375,9 +375,9 @@ const EmployeeTable = ({
         icon: '✅',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
       error: {
@@ -387,9 +387,9 @@ const EmployeeTable = ({
         icon: '❌',
         style: {
           backdropFilter: 'blur(16px) saturate(200%)',
-          background: glassTheme.glassCard?.background || 'rgba(15, 20, 25, 0.15)',
-          border: glassTheme.glassCard?.border || '1px solid rgba(255, 255, 255, 0.2)',
-          color: glassTheme.palette?.text?.primary || '#ffffff',
+          background: 'var(--theme-content1)',
+          border: '1px solid var(--theme-divider)',
+          color: 'var(--theme-primary)',
         },
       },
     });

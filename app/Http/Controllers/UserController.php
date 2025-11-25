@@ -39,7 +39,7 @@ class UserController extends Controller
             'title' => 'User Management',
             'roles' => Role::all(),
             'departments' => Department::all(),
-            'designations' => Designation::all(),
+            'designations' => Designation::with('department')->orderBy('hierarchy_level', 'asc')->get(),
         ]);
     }
 
@@ -52,9 +52,17 @@ class UserController extends Controller
         try {
             $validated = $request->validated();
 
+            // Remove profile_image from validated data as it's handled by Media Library
+            unset($validated['profile_image']);
+
             // Hash password if provided
             if (isset($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
+            }
+
+            // Convert single_device_login_enabled to boolean
+            if (isset($validated['single_device_login_enabled'])) {
+                $validated['single_device_login_enabled'] = filter_var($validated['single_device_login_enabled'], FILTER_VALIDATE_BOOLEAN);
             }
 
             // Create user
@@ -96,16 +104,30 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, $id)
     {
+        DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
             $validated = $request->validated();
+
+            // Remove profile_image from validated data as it's handled by Media Library
+            unset($validated['profile_image']);
 
             // Hash password if provided
             if (isset($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
             }
 
+            // Convert single_device_login_enabled to boolean
+            if (isset($validated['single_device_login_enabled'])) {
+                $validated['single_device_login_enabled'] = filter_var($validated['single_device_login_enabled'], FILTER_VALIDATE_BOOLEAN);
+            }
+
             $user->update($validated);
+
+            // Update roles if provided
+            if ($request->has('roles')) {
+                $user->syncRoles($request->input('roles'));
+            }
 
             // Handle profile image
             if ($request->hasFile('profile_image')) {
@@ -114,11 +136,14 @@ class UserController extends Controller
                     ->toMediaCollection('profile_images');
             }
 
+            DB::commit();
+
             return response()->json([
                 'message' => 'User updated successfully.',
                 'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
 
             return response()->json([

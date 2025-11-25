@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { 
     Modal, 
     ModalContent, 
@@ -7,45 +7,104 @@ import {
     ModalBody, 
     ModalFooter, 
     Button, 
-    Divider,
-    CircularProgress
+    Divider
 } from '@heroui/react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+
+    // Helper function to convert theme borderRadius to HeroUI radius values
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
     
     // Handle department deletion
     const handleDelete = async () => {
-        if (!department) return;
+        if (!department) {
+            toast.error('Invalid department provided');
+            return;
+        }
         
         setLoading(true);
-        setError(null);
-        
-        try {
-            await axios.delete(`/departments/${department.id}`);
-            toast.success('Department deleted successfully');
-            onSuccess();
-            onClose();
-        } catch (error) {
-            console.error('Error deleting department:', error);
-            
-            if (error.response?.data?.message) {
-                setError(error.response.data.message);
-                toast.error(error.response.data.message);
-            } else if (error.response?.data?.errors) {
-                const firstError = Object.values(error.response.data.errors)[0];
-                setError(firstError);
-                toast.error(firstError);
-            } else {
-                setError('An error occurred while deleting the department');
-                toast.error('An error occurred while deleting the department');
+
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const response = await axios.delete(`/departments/${department.id}`);
+                
+                if (response.status === 200) {
+                    if (onSuccess) {
+                        onSuccess(department, 'delete');
+                    }
+                    resolve(response.data.message || 'Department deleted successfully');
+                }
+            } catch (error) {
+                console.error('Error deleting department:', error);
+                
+                if (error.response?.status === 422) {
+                    reject(error.response?.data?.message || 'Cannot delete department with active employees');
+                } else if (error.response?.status === 404) {
+                    reject('Department not found or already deleted');
+                } else if (error.response?.status === 403) {
+                    reject('You do not have permission to delete this department');
+                } else {
+                    reject('An error occurred while deleting the department');
+                }
+            } finally {
+                setLoading(false);
             }
-        } finally {
-            setLoading(false);
-        }
+        });
+
+        toast.promise(promise, {
+            pending: {
+                render() {
+                    return 'Deleting department...';
+                },
+                icon: false,
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
+                },
+            },
+            success: {
+                render({ data }) {
+                    onClose();
+                    return data;
+                },
+                icon: '✅',
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
+                },
+            },
+            error: {
+                render({ data }) {
+                    return data;
+                },
+                icon: '❌',
+                style: {
+                    backdropFilter: 'blur(16px) saturate(200%)',
+                    background: 'var(--theme-content1)',
+                    border: '1px solid var(--theme-divider)',
+                    color: 'var(--theme-primary)',
+                },
+            },
+        });
     };
     
     if (!department) return null;
@@ -55,57 +114,88 @@ const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
             isOpen={open}
             onOpenChange={loading ? undefined : onClose}
             size="lg"
+            radius={getThemeRadius()}
+            classNames={{
+                base: "bg-content1",
+                backdrop: "bg-black/50 backdrop-blur-sm",
+            }}
+            style={{
+                fontFamily: `var(--fontFamily, "Inter")`,
+            }}
         >
             <ModalContent>
-                <ModalHeader className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Delete Department</h3>
-                    <Button
-                        isIconOnly
-                        variant="light"
-                        onPress={onClose}
-                        isDisabled={loading}
-                        aria-label="close"
-                    >
-                        <XMarkIcon className="w-5 h-5" />
-                    </Button>
+                <ModalHeader className="flex gap-3 items-center" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                    borderBottom: '1px solid var(--theme-divider)'
+                }}>
+                    <div className="p-2 rounded-lg" style={{
+                        background: 'color-mix(in srgb, var(--theme-danger) 20%, transparent)',
+                        borderRadius: `var(--borderRadius, 8px)`,
+                    }}>
+                        <TrashIcon className="w-5 h-5" style={{ color: 'var(--theme-danger)' }} />
+                    </div>
+                    <span className="text-lg font-semibold" style={{
+                        fontFamily: `var(--fontFamily, "Inter")`,
+                    }}>Delete Department</span>
                 </ModalHeader>
                 
-                <Divider />
-                
-                <ModalBody>
+                <ModalBody className="py-6" style={{
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-2">
-                            <ExclamationTriangleIcon className="w-8 h-8 text-yellow-500" />
-                            <p className="text-sm">
-                                Are you sure you want to delete the department <strong>{department.name}</strong>?
-                            </p>
+                        <div className="flex items-start gap-3 p-4 rounded-lg" style={{
+                            background: 'color-mix(in srgb, var(--theme-warning) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--theme-warning) 30%, transparent)',
+                            borderRadius: `var(--borderRadius, 8px)`,
+                        }}>
+                            <ExclamationTriangleIcon className="w-6 h-6 flex-shrink-0" style={{ color: 'var(--theme-warning)' }} />
+                            <div>
+                                <p className="text-sm font-medium mb-1" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                }}>Are you sure you want to delete this department?</p>
+                                <p className="text-sm font-semibold" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    color: 'var(--theme-primary)'
+                                }}>{department.name}</p>
+                            </div>
                         </div>
                         
                         {department.employee_count > 0 && (
-                            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
-                                This department has {department.employee_count} employees assigned to it. You cannot delete a department with active employees. Please reassign these employees to other departments first.
+                            <div className="p-4 rounded-lg" style={{
+                                background: 'color-mix(in srgb, var(--theme-danger) 10%, transparent)',
+                                border: '1px solid color-mix(in srgb, var(--theme-danger) 30%, transparent)',
+                                borderRadius: `var(--borderRadius, 8px)`,
+                            }}>
+                                <p className="text-sm" style={{
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    color: 'var(--theme-danger)'
+                                }}>
+                                    This department has <strong>{department.employee_count}</strong> employees assigned to it. 
+                                    You cannot delete a department with active employees. Please reassign these employees to other departments first.
+                                </p>
                             </div>
                         )}
                         
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-                                {error}
-                            </div>
-                        )}
-                        
-                        <p className="text-sm text-default-500 mt-1">
+                        <p className="text-sm text-default-500" style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}>
                             This action cannot be undone. All associated data will be permanently removed.
                         </p>
                     </div>
                 </ModalBody>
             
-                <Divider />
-                
-                <ModalFooter>
+                <ModalFooter style={{
+                    borderTop: '1px solid var(--theme-divider)',
+                    fontFamily: `var(--fontFamily, "Inter")`,
+                }}>
                     <Button 
                         onPress={onClose} 
                         isDisabled={loading} 
                         variant="light"
+                        radius={getThemeRadius()}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         Cancel
                     </Button>
@@ -114,6 +204,11 @@ const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
                         color="danger"
                         isDisabled={loading || department.employee_count > 0}
                         isLoading={loading}
+                        radius={getThemeRadius()}
+                        startContent={!loading && <TrashIcon className="w-4 h-4" />}
+                        style={{
+                            fontFamily: `var(--fontFamily, "Inter")`,
+                        }}
                     >
                         {loading ? 'Deleting...' : 'Delete Department'}
                     </Button>

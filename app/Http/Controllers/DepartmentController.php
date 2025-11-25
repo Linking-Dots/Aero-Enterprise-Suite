@@ -37,12 +37,8 @@ class DepartmentController extends Controller
         // Get departments with pagination
         $departments = $query->paginate(10);
 
-        // Get managers for dropdown
-        $managers = User::whereHas('roles', function ($q) {
-            $q->where('name', 'like', '%Manager%')
-                ->orWhere('name', 'like', '%Director%')
-                ->orWhere('name', 'like', '%Head%');
-        })->get(['id', 'name']);
+        // Get all employees for manager dropdown
+        $managers = User::orderBy('name')->get(['id', 'name']);
 
         // Get parent departments for dropdown
         $parentDepartments = Department::whereNull('parent_id')

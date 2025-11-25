@@ -9,7 +9,12 @@ import {
     ModalContent,
     ModalHeader,
     ModalBody,
-    ModalFooter
+    ModalFooter,
+    User,
+    Switch,
+    Chip,
+    Autocomplete,
+    AutocompleteItem
 } from "@heroui/react";
 import React, { useEffect, useState } from "react";
 import { X, Camera, Eye, EyeOff, Lock, UserIcon, CalendarIcon } from 'lucide-react';
@@ -17,7 +22,7 @@ import { useForm } from 'laravel-precognition-react';
 import { toast } from "react-toastify";
 
 
-const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, open, closeModal, editMode = false }) => {
+const AddEditUserForm = ({user, allUsers, departments, designations, roles, setUsers, open, closeModal, editMode = false }) => {
     
     const [showPassword, setShowPassword] = useState(false);
     const [hover, setHover] = useState(false);
@@ -25,6 +30,8 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [allReportTo, setAllReportTo] = useState(allUsers);
     const [themeRadius, setThemeRadius] = useState('lg');
+    const [filteredDesignations, setFilteredDesignations] = useState(designations || []);
+    const [filteredReportTo, setFilteredReportTo] = useState(allUsers || []);
 
     // Helper function to convert theme borderRadius to HeroUI radius values
     const getThemeRadius = () => {
@@ -68,10 +75,111 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
             report_to: user?.report_to || '',
             password: '',
             password_confirmation: '',
-            roles: user?.roles || [],
+            roles: user?.roles?.map(r => typeof r === 'object' ? r.name : r) || [],
+            single_device_login_enabled: user?.single_device_login_enabled || user?.single_device_login || false,
             profile_image: null,
         }
     );
+
+    // Filter designations when department changes
+    useEffect(() => {
+        if (form.data.department_id) {
+            const filtered = designations?.filter(
+                designation => String(designation.department_id) === String(form.data.department_id)
+            ) || [];
+            setFilteredDesignations(filtered);
+            
+            // Clear designation if it doesn't belong to the selected department
+            if (form.data.designation_id) {
+                const isValid = filtered.some(
+                    d => String(d.id) === String(form.data.designation_id)
+                );
+                if (!isValid) {
+                    handleChange('designation_id', '');
+                }
+            }
+        } else {
+            // Show all designations if no department is selected
+            setFilteredDesignations(designations || []);
+        }
+    }, [form.data.department_id, designations]);
+
+    // Filter report to users when department and designation changes
+    useEffect(() => {
+        if (form.data.department_id && form.data.designation_id) {
+            // Find the selected designation to get its hierarchy level
+            const selectedDesignation = designations?.find(
+                d => String(d.id) === String(form.data.designation_id)
+            );
+            
+            if (!selectedDesignation) {
+                setFilteredReportTo([]);
+                handleChange('report_to', '');
+                return;
+            }
+
+            // Check if this is the top-level designation (hierarchy_level = 1)
+            if (selectedDesignation.hierarchy_level === 1) {
+                // Top-level positions don't report to anyone
+                setFilteredReportTo([]);
+                handleChange('report_to', '');
+                return;
+            }
+
+            // Filter users who:
+            // 1. Are in the same department
+            // 2. Have a designation with LOWER hierarchy_level (higher position)
+            // 3. Are not the current user (if editing)
+            const filtered = allUsers?.filter(u => {
+                const userDeptId = u.department_id || u.department?.id;
+                const deptMatch = String(userDeptId) === String(form.data.department_id);
+                
+                // Get the user's designation
+                const userDesignation = designations?.find(
+                    d => String(d.id) === String(u.designation_id)
+                );
+                
+                // Check if user has a higher hierarchy (lower hierarchy_level number)
+                const isHigherLevel = userDesignation && 
+                    userDesignation.hierarchy_level < selectedDesignation.hierarchy_level;
+                
+                const notSelf = !editMode || !form.data.id || u.id !== form.data.id;
+                
+                return deptMatch && isHigherLevel && notSelf;
+            }) || [];
+            
+            console.log('Selected designation:', selectedDesignation.title, 'Level:', selectedDesignation.hierarchy_level);
+            console.log('Filtered supervisors (higher hierarchy):', filtered.length, filtered);
+            
+            setFilteredReportTo(filtered);
+            
+            // Clear report_to if the selected user is no longer valid
+            if (form.data.report_to) {
+                const isValid = filtered.some(
+                    u => String(u.id) === String(form.data.report_to)
+                );
+                if (!isValid) {
+                    handleChange('report_to', '');
+                }
+            }
+        } else if (form.data.department_id) {
+            // If only department is selected, show all users in department
+            const filtered = allUsers?.filter(u => {
+                const userDeptId = u.department_id || u.department?.id;
+                const deptMatch = String(userDeptId) === String(form.data.department_id);
+                const notSelf = !editMode || !form.data.id || u.id !== form.data.id;
+                return deptMatch && notSelf;
+            }) || [];
+            
+            setFilteredReportTo(filtered);
+        } else {
+            // No department selected, show all users
+            const allExceptSelf = allUsers?.filter(u => !editMode || !form.data.id || u.id !== form.data.id) || [];
+            setFilteredReportTo(allExceptSelf);
+        }
+    }, [form.data.department_id, form.data.designation_id, allUsers, form.data.id, editMode, designations]);
+
+    
 
 
 
@@ -83,9 +191,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
         }
     }, [user]);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
+    const handleSubmit = async () => {
         // Validate file type if image is selected
         if (selectedImageFile) {
             const fileType = selectedImageFile.type;
@@ -98,62 +204,88 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
             form.setData('profile_image', selectedImageFile);
         }
 
-        try {
-            // Submit the form using Precognition
-            await form.submit({
-                onSuccess: (response) => {
-                    if (setUsers) {
-                        if (editMode) {
-                            // Update the user in the list
-                            setUsers(prevUsers => 
-                                prevUsers.map(u => 
-                                    u.id === response.data.user.id ? response.data.user : u
-                                )
-                            );
-                        } else {
-                            // Add new user to the list
-                            setUsers(prevUsers => [...prevUsers, response.data.user]);
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // Submit the form using Precognition with transform to handle boolean conversion
+                await form.submit({
+                    preserveScroll: true,
+                    transform: (data) => {
+                        // Convert boolean to proper format for backend
+                        // Laravel expects 0/1 or "0"/"1" for boolean fields when using FormData
+                        return {
+                            ...data,
+                            single_device_login_enabled: data.single_device_login_enabled ? 1 : 0,
+                        };
+                    },
+                    onSuccess: (response) => {
+                        if (setUsers) {
+                            if (editMode) {
+                                // Update the user in the list
+                                setUsers(prevUsers => 
+                                    prevUsers.map(u => 
+                                        u.id === response.data.user.id ? response.data.user : u
+                                    )
+                                );
+                            } else {
+                                // Add new user to the list
+                                setUsers(prevUsers => [...prevUsers, response.data.user]);
+                            }
                         }
+                        closeModal();
+                        resolve([response.data.message || `User ${editMode ? 'updated' : 'created'} successfully`]);
+                    },
+                    onError: (errors) => {
+                        // Laravel Precognition automatically sets form.errors
+                        // Extract error messages for toast display
+                        const errorMessages = Object.values(errors).flat();
+                        if (errorMessages.length > 0) {
+                            reject(errorMessages.join(', '));
+                        } else {
+                            reject(`Failed to ${editMode ? 'update' : 'create'} user. Please check the form for errors.`);
+                        }
+                    },
+                });
+            } catch (error) {
+                console.error('Form submission error:', error);
+                
+                if (error.response) {
+                    if (error.response.status === 422) {
+                        // Validation errors
+                        const errors = error.response.data.errors || {};
+                        const errorMessages = Object.values(errors).flat();
+                        reject(errorMessages.length > 0 ? errorMessages.join(', ') : 'Validation failed. Please check the form.');
+                    } else if (error.response.status === 500) {
+                        reject(error.response.data.message || 'Server error occurred. Please try again later.');
+                    } else {
+                        reject(`HTTP Error ${error.response.status}: ${error.response.data.message || 'An unexpected error occurred.'}`);
                     }
-                    
-                    toast.success(response.data.messages?.length > 0
-                        ? response.data.messages.join(' ')
-                        : `User ${editMode ? 'updated' : 'added'} successfully`, {
-                        icon: '🟢'
-                    });
-                    closeModal();
+                } else if (error.request) {
+                    reject('No response received from the server. Please check your internet connection.');
+                } else {
+                    reject('An error occurred while setting up the request.');
+                }
+            }
+        });
+
+        toast.promise(
+            promise,
+            {
+                pending: `${editMode ? 'Updating' : 'Creating'} user...`,
+                success: {
+                    render({ data }) {
+                        return data.join(', ');
+                    }
                 },
-                onError: (error) => {
-                    handleErrorResponse(error);
-                },
-            });
-        } catch (error) {
-            handleErrorResponse(error);
-        }
+                error: {
+                    render({ data }) {
+                        return data;
+                    }
+                }
+            }
+        );
     };
 
-    // Error handling for different scenarios
-    const handleErrorResponse = (error) => {
-        if (error.response) {
-            if (error.response.status === 422) {
-                toast.error(error.response.data.message || `Failed to ${editMode ? 'update' : 'add'} user.`, {
-                    icon: '🔴'
-                });
-            } else {
-                toast.error('An unexpected error occurred. Please try again later.', {
-                    icon: '🔴'
-                });
-            }
-        } else if (error.request) {
-            toast.error('No response received from the server. Please check your internet connection.', {
-                icon: '🔴'
-            });
-        } else {
-            toast.error('An error occurred while setting up the request.', {
-                icon: '🔴'
-            });
-        }
-    };
+
 
     // Handle file change for profile image preview and submission
     const handleImageChange = (event) => {
@@ -177,6 +309,26 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
     // Toggle password visibility
     const handleTogglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+
+    // Check if form is valid and ready to submit
+    const isFormValid = () => {
+        if (editMode) {
+            // For edit mode, check if form has changes
+            return form.isDirty && !form.processing;
+        } else {
+            // For new user, check required fields
+            const hasRequiredFields = 
+                form.data.name?.trim() && 
+                form.data.user_name?.trim() && 
+                form.data.email?.trim() && 
+                form.data.password?.trim() && 
+                form.data.password_confirmation?.trim();
+            
+            const passwordsMatch = form.data.password === form.data.password_confirmation;
+            
+            return hasRequiredFields && passwordsMatch && !form.processing;
+        }
     };
 
     return (
@@ -390,6 +542,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         onClose={() => form.validate('designation_id')}
                                         isInvalid={form.invalid('designation_id')}
                                         errorMessage={form.errors.designation_id}
+                                        isDisabled={!form.data.department_id || filteredDesignations.length === 0}
                                         variant="bordered"
                                         size="sm"
                                         radius={themeRadius}
@@ -401,9 +554,9 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                             fontFamily: `var(--fontFamily, "Inter")`,
                                         }}
                                     >
-                                        {designations?.map((designation) => (
+                                        {filteredDesignations?.map((designation) => (
                                             <SelectItem key={designation.id} value={designation.id}>
-                                                {designation.name}
+                                                {designation.title || designation.name}
                                             </SelectItem>
                                         ))}
                                     </Select>
@@ -495,34 +648,64 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         }}
                                     />
 
-                                    <Select
-                                        label="Reports To"
-                                        placeholder="Select supervisor"
-                                        selectedKeys={form.data.report_to ? new Set([String(form.data.report_to)]) : new Set()}
-                                        onSelectionChange={(keys) => {
-                                            const value = Array.from(keys)[0];
-                                            handleChange('report_to', value || '');
-                                        }}
-                                        onClose={() => form.validate('report_to')}
-                                        isInvalid={form.invalid('report_to')}
-                                        errorMessage={form.errors.report_to}
-                                        variant="bordered"
-                                        size="sm"
-                                        radius={themeRadius}
-                                        classNames={{
-                                            trigger: "min-h-unit-10",
-                                            value: "text-small"
-                                        }}
-                                        style={{
-                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                        }}
-                                    >
-                                        {allReportTo?.filter(u => u.id !== form.data.id).map((user) => (
-                                            <SelectItem key={user.id} value={user.id}>
-                                                {user.name}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
+                                    <div className="flex flex-col gap-1">
+                                        <Autocomplete
+                                            label="Reports To"
+                                            placeholder={
+                                                !form.data.department_id 
+                                                    ? "Select department first" 
+                                                    : !form.data.designation_id
+                                                    ? "Select designation first"
+                                                    : filteredReportTo.length === 0
+                                                    ? "No supervisor needed (Top-level position)"
+                                                    : "Search for a supervisor..."
+                                            }
+                                            selectedKey={form.data.report_to ? String(form.data.report_to) : null}
+                                            onSelectionChange={(key) => {
+                                                handleChange('report_to', key || '');
+                                            }}
+                                            isInvalid={form.invalid('report_to')}
+                                            errorMessage={form.errors.report_to}
+                                            isDisabled={!form.data.department_id || !form.data.designation_id || filteredReportTo.length === 0}
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={themeRadius}
+                                            classNames={{
+                                                base: "w-full",
+                                            }}
+                                            style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}
+                                            allowsCustomValue={false}
+                                            items={filteredReportTo || []}
+                                        >
+                                            {(user) => (
+                                                <AutocompleteItem key={user.id} textValue={user.name}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Avatar
+                                                            src={user.profile_image_url || user.profile_image}
+                                                            name={user.name}
+                                                            size="sm"
+                                                            className="flex-shrink-0"
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-small font-medium">{user.name}</span>
+                                                            {user.email && (
+                                                                <span className="text-tiny text-default-400">{user.email}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </AutocompleteItem>
+                                            )}
+                                        </Autocomplete>
+                                        {form.data.designation_id && filteredReportTo.length === 0 && (
+                                            <p className="text-xs text-default-400 px-1" style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}>
+                                                This designation is at the top of the hierarchy and doesn't require a supervisor.
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Address - Full Width */}
@@ -545,6 +728,81 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                         fontFamily: `var(--fontFamily, "Inter")`,
                                     }}
                                 />
+
+                                {/* Roles Selection */}
+                                <div className="col-span-full">
+                                    <Select
+                                        label="Roles"
+                                        placeholder="Select user roles"
+                                        selectionMode="multiple"
+                                        selectedKeys={new Set(form.data.roles)}
+                                        onSelectionChange={(keys) => {
+                                            const selectedRoles = Array.from(keys);
+                                            handleChange('roles', selectedRoles);
+                                        }}
+                                        onClose={() => form.validate('roles')}
+                                        isInvalid={form.invalid('roles')}
+                                        errorMessage={form.errors.roles}
+                                        variant="bordered"
+                                        size="sm"
+                                        radius={themeRadius}
+                                        classNames={{
+                                            trigger: "min-h-unit-10",
+                                            value: "text-small"
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                        }}
+                                        renderValue={(items) => {
+                                            return (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {items.map((item) => (
+                                                        <Chip key={item.key} size="sm" color="secondary" variant="flat">
+                                                            {item.textValue}
+                                                        </Chip>
+                                                    ))}
+                                                </div>
+                                            );
+                                        }}
+                                    >
+                                        {roles?.map((role) => {
+                                            const roleName = typeof role === 'object' ? role.name : role;
+                                            return (
+                                                <SelectItem key={roleName} value={roleName} textValue={roleName}>
+                                                    {roleName}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </Select>
+                                </div>
+
+                                {/* Single Device Login Toggle */}
+                                <div className="col-span-full">
+                                    <div className="flex items-center justify-between p-4 rounded-lg border" style={{
+                                        borderColor: 'var(--theme-divider, #E4E4E7)',
+                                        background: 'color-mix(in srgb, var(--theme-content2) 30%, transparent)'
+                                    }}>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <Lock className="w-4 h-4" style={{ color: 'var(--theme-primary)' }} />
+                                                <span className="text-sm font-semibold" style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                }}>Single Device Login</span>
+                                            </div>
+                                            <p className="text-xs text-default-500 mt-1" style={{
+                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                            }}>
+                                                Restrict user to login from only one device at a time
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            isSelected={form.data.single_device_login_enabled}
+                                            onValueChange={(checked) => handleChange('single_device_login_enabled', checked)}
+                                            color={form.data.single_device_login_enabled ? "warning" : "default"}
+                                            size="sm"
+                                        />
+                                    </div>
+                                </div>
 
                                 {/* Password fields (only for new users) */}
                                 {!editMode && (
@@ -645,8 +903,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, setUsers, o
                                 color="primary"
                                 onPress={handleSubmit}
                                 isLoading={form.processing}
-                                isDisabled={!form.isDirty || form.processing}
-                                startContent={!form.processing && <Lock className="w-4 h-4" />}
+                                isDisabled={!isFormValid()}
                                 radius={themeRadius}
                                 style={{
                                     borderRadius: `var(--borderRadius, 8px)`,

@@ -87,7 +87,6 @@ const projects = [
 
 const UserProfile = ({ title, allUsers, report_to, departments, designations }) => {
     const { auth } = usePage().props;
-    const { isDark } = useTheme();
     
     // Custom media queries
     const [isMobile, setIsMobile] = useState(false);

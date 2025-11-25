@@ -39,6 +39,7 @@ class StoreUserRequest extends FormRequest
             'active' => ['boolean'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['string', 'exists:roles,name'],
+            'single_device_login_enabled' => ['nullable'],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
             'user_name' => ['nullable', 'string', 'max:255'],
             'report_to' => ['nullable', 'exists:users,id'],
@@ -53,12 +54,24 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.required' => 'Full name is required.',
+            'name.max' => 'Full name cannot exceed 255 characters.',
+            'email.required' => 'Email address is required.',
+            'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email address is already registered.',
             'phone.unique' => 'This phone number is already in use.',
             'employee_id.unique' => 'This employee ID already exists.',
-            'birthday.before' => 'Birthday must be a date in the past.',
+            'password.required' => 'Password is required.',
             'password.confirmed' => 'The password confirmation does not match.',
+            'birthday.before' => 'Birthday must be a date in the past.',
+            'department_id.exists' => 'The selected department does not exist.',
+            'designation_id.exists' => 'The selected designation does not exist.',
+            'report_to.exists' => 'The selected reporting manager does not exist.',
+            'roles.array' => 'Roles must be provided as an array.',
             'roles.*.exists' => 'One or more selected roles do not exist.',
+            'profile_image.image' => 'Profile picture must be an image file.',
+            'profile_image.mimes' => 'Profile picture must be in JPEG, JPG, or PNG format.',
+            'profile_image.max' => 'Profile picture size cannot exceed 2MB.',
         ];
     }
 
