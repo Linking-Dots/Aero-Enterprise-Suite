@@ -454,6 +454,36 @@ class AttendanceController extends Controller
 
             $locations = [];
 
+            // Fetch ALL active attendance types with geo_polygon or route_waypoint configs
+            // This ensures boundaries are always shown on the map regardless of who punched in
+            $allAttendanceTypes = \App\Models\HRM\AttendanceType::where('is_active', true)
+                ->whereNotNull('config')
+                ->get();
+
+            $attendanceTypeConfigs = [];
+            foreach ($allAttendanceTypes as $attendanceType) {
+                $baseSlug = preg_replace('/_\d+$/', '', $attendanceType->slug);
+
+                // Only include types with polygon or route configs
+                if (in_array($baseSlug, ['geo_polygon', 'route_waypoint'])) {
+                    $config = $attendanceType->config;
+
+                    // Check if config has actual data
+                    $hasPolygonData = ! empty($config['polygon']) || ! empty($config['polygons']);
+                    $hasRouteData = ! empty($config['waypoints']) || ! empty($config['routes']);
+
+                    if ($hasPolygonData || $hasRouteData) {
+                        $attendanceTypeConfigs[$attendanceType->id] = [
+                            'id' => $attendanceType->id,
+                            'name' => $attendanceType->name,
+                            'slug' => $attendanceType->slug,
+                            'base_slug' => $baseSlug,
+                            'config' => $config,
+                        ];
+                    }
+                }
+            }
+
             foreach ($userAttendances as $userId => $userPunches) {
                 $user = $userPunches->first()->user;
                 $attendanceType = $user->attendanceType;
@@ -498,6 +528,7 @@ class AttendanceController extends Controller
                 'success' => true,
                 'date' => $selectedDate,
                 'locations' => $locations,
+                'attendance_type_configs' => array_values($attendanceTypeConfigs),
             ]);
         } catch (\Throwable $e) {
             Log::error('Error fetching user locations: '.$e->getMessage(), [

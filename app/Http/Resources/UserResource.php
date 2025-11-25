@@ -50,6 +50,7 @@ class UserResource extends JsonResource
             'attendance_type' => [
                 'id' => $this->attendance_type_id,
                 'name' => $this->attendanceType?->name,
+                'slug' => $this->attendanceType?->slug,
             ],
             'roles' => $this->roles->pluck('name')->toArray(),
 

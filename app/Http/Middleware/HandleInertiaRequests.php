@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         $user = $request->user();
-        $userWithDesignation = $user ? \App\Models\User::with('designation')->find($user->id) : null;
+        $userWithRelations = $user ? \App\Models\User::with(['designation', 'attendanceType'])->find($user->id) : null;
 
         // Get company settings for global use
         $companySettings = CompanySetting::first();
@@ -49,12 +49,19 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $userWithDesignation,
+                'user' => $userWithRelations ? [
+                    ...$userWithRelations->toArray(),
+                    'attendance_type' => $userWithRelations->attendanceType ? [
+                        'id' => $userWithRelations->attendanceType->id,
+                        'name' => $userWithRelations->attendanceType->name,
+                        'slug' => $userWithRelations->attendanceType->slug,
+                    ] : null,
+                ] : null,
                 'isAuthenticated' => (bool) $user,
                 'sessionValid' => $user && $request->session()->isStarted(),
                 'roles' => $user ? $user->roles->pluck('name')->toArray() : [],
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name')->toArray() : [],
-                'designation' => $userWithDesignation?->designation?->title,
+                'designation' => $userWithRelations?->designation?->title,
             ],
 
             // Company Settings

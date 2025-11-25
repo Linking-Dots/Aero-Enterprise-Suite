@@ -79,15 +79,289 @@ const MAP_CONFIG = {
     UPDATE_INTERVAL: 30000 // 30 seconds
 };
 
-const PROJECT_LOCATIONS = {
-    primary: { lat: 23.879132, lng: 90.502617, name: 'Primary Office' },
-    route: {
-        start: { lat: 23.987057, lng: 90.361908, name: 'Route Start' },
-        end: { lat: 23.690618, lng: 90.546729, name: 'Route End' }
-    }
-};
+// Default center if no attendance type configs
+const DEFAULT_CENTER = { lat: 23.8103, lng: 90.4125 }; // Dhaka, Bangladesh
 
-// Enhanced Routing Machine Component
+// Component to render attendance type boundaries (polygons and routes)
+const AttendanceTypeBoundaries = React.memo(({ attendanceTypeConfigs, theme }) => {
+    const map = useMap();
+    const routingControlsRef = useRef([]);
+    
+    useEffect(() => {
+        if (!map || !attendanceTypeConfigs?.length) return;
+        
+        // Clear existing boundary layers
+        map.eachLayer((layer) => {
+            if (layer.options && (layer.options.isAttendanceBoundary || layer.options.isPolygon || layer.options.isRoute)) {
+                map.removeLayer(layer);
+            }
+        });
+        
+        // Clear existing routing controls
+        routingControlsRef.current.forEach(control => {
+            try {
+                map.removeControl(control);
+            } catch (e) {
+                console.warn('Error removing routing control:', e);
+            }
+        });
+        routingControlsRef.current = [];
+        
+        // Remove routing UI elements
+        map.getContainer().querySelectorAll('.leaflet-routing-container').forEach(el => el.remove());
+        
+        const allBounds = [];
+        
+        attendanceTypeConfigs.forEach((typeConfig, typeIndex) => {
+            const { base_slug, config, name } = typeConfig;
+            const primaryColor = theme?.customColors?.primary || 'var(--theme-primary, #3b82f6)';
+            
+            // Generate unique colors for different attendance types
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            const typeColor = colors[typeIndex % colors.length];
+            
+            if (base_slug === 'geo_polygon' && config) {
+                // Render polygon(s)
+                const polygonPoints = config.polygon || [];
+                const polygons = config.polygons || [];
+                
+                // Handle single polygon format
+                if (polygonPoints.length >= 3) {
+                    const validPoints = polygonPoints.filter(p => p.lat && p.lng);
+                    if (validPoints.length >= 3) {
+                        const coords = validPoints.map(p => [parseFloat(p.lat), parseFloat(p.lng)]);
+                        
+                        const polygon = L.polygon(coords, {
+                            color: typeColor,
+                            fillColor: typeColor,
+                            fillOpacity: 0.15,
+                            weight: 2,
+                            opacity: 0.7,
+                            isAttendanceBoundary: true,
+                            isPolygon: true
+                        }).addTo(map);
+                        
+                        polygon.bindPopup(`
+                            <div style="font-family: var(--fontFamily, 'Inter'); text-align: center; padding: 4px;">
+                                <strong style="color: ${typeColor};">${name}</strong><br>
+                                <small>Geofence Zone</small><br>
+                                <small>Points: ${validPoints.length}</small>
+                            </div>
+                        `);
+                        
+                        allBounds.push(polygon.getBounds());
+                    }
+                }
+                
+                // Handle multiple polygons format
+                polygons.forEach((poly, polyIndex) => {
+                    const points = poly.points || [];
+                    if (points.length >= 3) {
+                        const validPoints = points.filter(p => p.lat && p.lng);
+                        if (validPoints.length >= 3) {
+                            const coords = validPoints.map(p => [parseFloat(p.lat), parseFloat(p.lng)]);
+                            
+                            const polygon = L.polygon(coords, {
+                                color: typeColor,
+                                fillColor: typeColor,
+                                fillOpacity: 0.15,
+                                weight: 2,
+                                opacity: 0.7,
+                                isAttendanceBoundary: true,
+                                isPolygon: true
+                            }).addTo(map);
+                            
+                            polygon.bindPopup(`
+                                <div style="font-family: var(--fontFamily, 'Inter'); text-align: center; padding: 4px;">
+                                    <strong style="color: ${typeColor};">${name}</strong><br>
+                                    <small>${poly.name || `Zone ${polyIndex + 1}`}</small>
+                                </div>
+                            `);
+                            
+                            allBounds.push(polygon.getBounds());
+                        }
+                    }
+                });
+            }
+            
+            if (base_slug === 'route_waypoint' && config) {
+                // Render route(s)
+                const waypoints = config.waypoints || [];
+                const routes = config.routes || [];
+                
+                // Handle single route format
+                if (waypoints.length >= 2) {
+                    const validWaypoints = waypoints.filter(w => w.lat && w.lng);
+                    if (validWaypoints.length >= 2) {
+                        const routeWaypoints = validWaypoints.map(w => 
+                            L.latLng(parseFloat(w.lat), parseFloat(w.lng))
+                        );
+                        
+                        // Add waypoint markers
+                        validWaypoints.forEach((wp, wpIndex) => {
+                            const isFirst = wpIndex === 0;
+                            const isLast = wpIndex === validWaypoints.length - 1;
+                            
+                            const markerHtml = `
+                                <div style="
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 50%;
+                                    background: ${isFirst ? '#10b981' : isLast ? '#ef4444' : typeColor};
+                                    border: 2px solid white;
+                                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    color: white;
+                                    font-weight: bold;
+                                    font-size: 11px;
+                                ">
+                                    ${wpIndex + 1}
+                                </div>
+                            `;
+                            
+                            const marker = L.marker([parseFloat(wp.lat), parseFloat(wp.lng)], {
+                                icon: L.divIcon({
+                                    html: markerHtml,
+                                    className: 'route-waypoint-marker',
+                                    iconSize: [24, 24],
+                                    iconAnchor: [12, 12]
+                                }),
+                                isAttendanceBoundary: true
+                            }).addTo(map);
+                            
+                            marker.bindPopup(`
+                                <div style="font-family: var(--fontFamily, 'Inter'); text-align: center; padding: 4px;">
+                                    <strong style="color: ${typeColor};">${name}</strong><br>
+                                    <small>Waypoint ${wpIndex + 1}${wp.name ? `: ${wp.name}` : ''}</small>
+                                </div>
+                            `);
+                        });
+                        
+                        // Create route using Leaflet Routing Machine
+                        try {
+                            const routingControl = L.Routing.control({
+                                waypoints: routeWaypoints,
+                                routeWhileDragging: false,
+                                addWaypoints: false,
+                                createMarker: () => null,
+                                lineOptions: {
+                                    styles: [{
+                                        color: typeColor,
+                                        weight: 4,
+                                        opacity: 0.7,
+                                        dashArray: '8, 4'
+                                    }],
+                                    extendToWaypoints: true,
+                                    missingRouteTolerance: 0
+                                },
+                                show: false,
+                                fitSelectedRoutes: false,
+                                router: L.Routing.osrmv1({
+                                    serviceUrl: 'https://router.project-osrm.org/route/v1'
+                                })
+                            }).addTo(map);
+                            
+                            routingControlsRef.current.push(routingControl);
+                            
+                            // Calculate bounds from waypoints
+                            const bounds = L.latLngBounds(routeWaypoints);
+                            allBounds.push(bounds);
+                        } catch (e) {
+                            console.warn('Error creating route:', e);
+                            // Fallback: draw simple polyline
+                            const polyline = L.polyline(routeWaypoints, {
+                                color: typeColor,
+                                weight: 3,
+                                opacity: 0.6,
+                                dashArray: '10, 10',
+                                isAttendanceBoundary: true,
+                                isRoute: true
+                            }).addTo(map);
+                            
+                            allBounds.push(polyline.getBounds());
+                        }
+                    }
+                }
+                
+                // Handle multiple routes format
+                routes.forEach((routeData, routeIndex) => {
+                    const routeWaypoints = routeData.waypoints || [];
+                    if (routeWaypoints.length >= 2) {
+                        const validWaypoints = routeWaypoints.filter(w => w.lat && w.lng);
+                        if (validWaypoints.length >= 2) {
+                            const waypts = validWaypoints.map(w => 
+                                L.latLng(parseFloat(w.lat), parseFloat(w.lng))
+                            );
+                            
+                            try {
+                                const routingControl = L.Routing.control({
+                                    waypoints: waypts,
+                                    routeWhileDragging: false,
+                                    addWaypoints: false,
+                                    createMarker: () => null,
+                                    lineOptions: {
+                                        styles: [{
+                                            color: typeColor,
+                                            weight: 4,
+                                            opacity: 0.7,
+                                            dashArray: '8, 4'
+                                        }]
+                                    },
+                                    show: false,
+                                    fitSelectedRoutes: false,
+                                    router: L.Routing.osrmv1({
+                                        serviceUrl: 'https://router.project-osrm.org/route/v1'
+                                    })
+                                }).addTo(map);
+                                
+                                routingControlsRef.current.push(routingControl);
+                                allBounds.push(L.latLngBounds(waypts));
+                            } catch (e) {
+                                console.warn('Error creating route:', e);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Fit map to show all boundaries if we have any
+        if (allBounds.length > 0) {
+            const combinedBounds = allBounds.reduce((acc, bounds) => {
+                return acc ? acc.extend(bounds) : bounds;
+            }, null);
+            
+            if (combinedBounds && combinedBounds.isValid()) {
+                setTimeout(() => {
+                    map.fitBounds(combinedBounds, { 
+                        padding: [50, 50],
+                        maxZoom: 14
+                    });
+                }, 500);
+            }
+        }
+        
+        return () => {
+            // Cleanup
+            routingControlsRef.current.forEach(control => {
+                try {
+                    map.removeControl(control);
+                } catch (e) {
+                    // Ignore cleanup errors
+                }
+            });
+            routingControlsRef.current = [];
+        };
+    }, [map, attendanceTypeConfigs, theme]);
+    
+    return null;
+});
+
+AttendanceTypeBoundaries.displayName = 'AttendanceTypeBoundaries';
+
+// Enhanced Routing Machine Component (kept for backward compatibility but typically unused now)
 const RoutingMachine = React.memo(({ startLocation, endLocation, theme }) => {
     const map = useMap();
 
@@ -126,7 +400,7 @@ RoutingMachine.displayName = 'RoutingMachine';
 
 
 // Enhanced User Markers Component
-const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, users, setUsers, setLoading, setError}) => {
+const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, users, setUsers, setLoading, setError, setAttendanceTypeConfigs }) => {
 
     const map = useMap();
     const prevLocationsRef = useRef([]);
@@ -135,6 +409,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
         if (!selectedDate) {
             setLoading(false);
             setUsers([]);
+            setAttendanceTypeConfigs?.([]);
             onUsersLoad?.([]);
             return;
         }
@@ -156,6 +431,7 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
             }
 
             const locations = data.locations;
+            const typeConfigs = data.attendance_type_configs || [];
 
             const hasChanges =
                 JSON.stringify(locations) !== JSON.stringify(prevLocationsRef.current);
@@ -164,6 +440,9 @@ const UserMarkers = React.memo(({ selectedDate, onUsersLoad, theme, lastUpdate, 
                 setUsers(locations);
                 prevLocationsRef.current = locations;
             }
+            
+            // Always update attendance type configs
+            setAttendanceTypeConfigs?.(typeConfigs);
 
             onUsersLoad?.(locations);
         } catch (error) {
@@ -761,6 +1040,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     
     const [users, setUsers] = useState([]);
+    const [attendanceTypeConfigs, setAttendanceTypeConfigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadingInitialized, setLoadingInitialized] = useState(false);
@@ -781,6 +1061,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
             });
             if (!selectedDate) {
                 setUsers([]);
+                setAttendanceTypeConfigs([]);
                 prevUsersRef.current = [];
                 setMapKey(prev => prev + 1);
                 setLastChecked(new Date());
@@ -793,7 +1074,9 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
             }
             const data = await response.json();
             const locations = Array.isArray(data.locations) ? data.locations : [];
+            const typeConfigs = Array.isArray(data.attendance_type_configs) ? data.attendance_type_configs : [];
             setUsers(locations);
+            setAttendanceTypeConfigs(typeConfigs);
             prevUsersRef.current = locations;
             setMapKey(prev => prev + 1);
             setLastChecked(new Date());
@@ -801,6 +1084,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
         } catch (error) {
             console.error('Error refreshing map:', error);
             setUsers([]);
+            setAttendanceTypeConfigs([]);
             prevUsersRef.current = [];
         } finally {
             setLoading(false);
@@ -1114,7 +1398,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                     )}
                                     <MapContainer
                                         key={`${updateMap}-${mapKey}`}
-                                        center={[PROJECT_LOCATIONS.primary.lat, PROJECT_LOCATIONS.primary.lng]}
+                                        center={[DEFAULT_CENTER.lat, DEFAULT_CENTER.lng]}
                                         zoom={MAP_CONFIG.DEFAULT_ZOOM}
                                         minZoom={MAP_CONFIG.MIN_ZOOM}
                                         maxZoom={MAP_CONFIG.MAX_ZOOM}
@@ -1132,9 +1416,8 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                             maxZoom={MAP_CONFIG.MAX_ZOOM}
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                         />
-                                        <RoutingMachine 
-                                            startLocation={PROJECT_LOCATIONS.route.start} 
-                                            endLocation={PROJECT_LOCATIONS.route.end}
+                                        <AttendanceTypeBoundaries 
+                                            attendanceTypeConfigs={attendanceTypeConfigs}
                                             theme={themeSettings}
                                         />
                                         <UserMarkers 
@@ -1142,6 +1425,7 @@ const UserLocationsCard = React.memo(({ updateMap, selectedDate }) => {
                                             setUsers={setUsers}
                                             setLoading={setLoading}
                                             setError={setError}
+                                            setAttendanceTypeConfigs={setAttendanceTypeConfigs}
                                             lastUpdate={lastUpdate}
                                             selectedDate={selectedDate}
                                             onUsersLoad={handleUsersLoad}
