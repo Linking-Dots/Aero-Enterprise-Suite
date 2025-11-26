@@ -114,12 +114,21 @@ class DailyWorkImportService
         $inChargeSummary[$inCharge]['totalDailyWorks']++;
         $this->updateTypeCounter($inChargeSummary[$inCharge], $importedDailyWork[2]);
 
-        // Handle existing or new daily work (include soft-deleted records)
-        $existingDailyWork = DailyWork::withTrashed()->where('number', $importedDailyWork[1])->first();
+        // Check for existing daily work (only active records, not soft-deleted)
+        $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
 
         if ($existingDailyWork) {
+            // This is a resubmission of an existing active RFI
             $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge], $inCharge);
         } else {
+            // This is a new submission - check if there are soft-deleted records
+            $softDeletedWork = DailyWork::onlyTrashed()->where('number', $importedDailyWork[1])->first();
+
+            if ($softDeletedWork) {
+                // Permanently delete old soft-deleted record to free up the RFI number
+                $softDeletedWork->forceDelete();
+            }
+
             $this->createNewDailyWork($importedDailyWork, $inCharge);
         }
 
