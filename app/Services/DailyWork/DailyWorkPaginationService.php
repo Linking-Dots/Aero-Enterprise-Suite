@@ -41,11 +41,17 @@ class DailyWorkPaginationService
 
         // Mobile mode detection: if perPage is very large (1000+), return all data without pagination
         if ($perPage >= 1000) {
-            Log::info('Mobile mode: fetching all data without pagination');
+            Log::info('Mobile mode: fetching all data without pagination', [
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'statusFilter' => $statusFilter,
+                'inChargeFilter' => $inChargeFilter,
+                'search' => $search,
+            ]);
 
-            // Limit to reasonable number to prevent memory issues
+            // Limit to reasonable number to prevent memory issues (increased for daily work dates)
             $allData = $query->orderBy('date', 'desc')
-                ->limit(500) // Safety limit for mobile
+                ->limit(2000) // Safety limit for mobile - increased to handle busy work days
                 ->get();
 
             $endTime = microtime(true);

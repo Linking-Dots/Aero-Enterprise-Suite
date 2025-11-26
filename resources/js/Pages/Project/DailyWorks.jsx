@@ -113,6 +113,9 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             }
 
             console.log('Fetching data with params:', params);
+            console.log('Mode:', isMobile ? 'mobile' : 'desktop');
+            console.log('selectedDate:', selectedDate);
+            console.log('dateRange:', dateRange);
             const response = await axios.get('/daily-works-paginate', { params });
             
             setData(Array.isArray(response.data.data) ? response.data.data : []);
@@ -474,6 +477,13 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     // Enhanced useEffect for mobile/desktop mode switching
     useEffect(() => {
         console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`);
+        
+        // When switching to mobile, ensure selectedDate is set (default to end date if not already set)
+        if (isMobile && !selectedDate) {
+            console.log('Mobile mode: setting selectedDate to overallEndDate:', overallEndDate);
+            setSelectedDate(overallEndDate);
+        }
+        
         setModeSwitch(true);
         setCurrentPage(1);
         fetchData(true).finally(() => setModeSwitch(false));
