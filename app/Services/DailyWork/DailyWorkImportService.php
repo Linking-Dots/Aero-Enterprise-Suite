@@ -215,7 +215,7 @@ class DailyWorkImportService
         $summary['resubmissions']++;
         $resubmissionCount = $existingDailyWork->resubmission_count ?? 0;
         $resubmissionCount++;
-        $resubmissionDate = $this->getResubmissionDate($existingDailyWork, $resubmissionCount);
+        $resubmissionDetails = $this->getResubmissionDetails($resubmissionCount);
 
         DailyWork::create([
             'date' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? $existingDailyWork->date : $importedDailyWork[0]),
@@ -230,7 +230,8 @@ class DailyWorkImportService
             'incharge' => $inChargeId,
             'assigned' => null, // Don't auto-assign to incharge
             'resubmission_count' => $resubmissionCount,
-            'resubmission_date' => $resubmissionDate,
+            'resubmission_date' => Carbon::now(),
+            'inspection_details' => $resubmissionDetails,
         ]);
     }
 
@@ -263,6 +264,14 @@ class DailyWorkImportService
             return $existingDailyWork->resubmission_date ?? $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
         }
 
+        return $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
+    }
+
+    /**
+     * Get resubmission details text for inspection_details field
+     */
+    private function getResubmissionDetails(int $resubmissionCount): string
+    {
         return $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
     }
 
