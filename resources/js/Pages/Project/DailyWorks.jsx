@@ -84,51 +84,86 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         endDate: overallEndDate
     });
     
-    // Simple data fetching optimized for mobile vs desktop
-    const fetchData = async (showLoader = true) => {
-        // Prevent multiple simultaneous requests
+    // Mobile data fetching - fetch all data for selected date without pagination
+    const fetchMobileData = async (showLoader = true) => {
         if (loading) return;
         
-        // Only show loader on initial load or mode switch
         if (showLoader && !modeSwitch) {
             setLoading(true);
         }
+        
         try {
             const params = {
                 search: search,
                 status: filterData.status !== 'all' ? filterData.status : '',
                 inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
-                startDate: isMobile ? selectedDate : dateRange.start,
-                endDate: isMobile ? selectedDate : dateRange.end,
+                startDate: selectedDate,
+                endDate: selectedDate,
             };
 
-            // Mobile: fetch all data without pagination for selected date
-            if (isMobile) {
-                params.page = 1;
-                params.perPage = 1000; // Large number to get all data
-            } else {
-                // Desktop: use pagination for date range
-                params.page = currentPage;
-                params.perPage = perPage;
-            }
+            console.log('Mobile mode: Fetching ALL data for date:', selectedDate, 'with params:', params);
+            
+            // Use the /daily-works-all endpoint to get all data without pagination
+            const response = await axios.get('/daily-works-all', { params });
+            
+            const dailyWorks = response.data.dailyWorks || [];
+            setData(Array.isArray(dailyWorks) ? dailyWorks : []);
+            setTotalRows(dailyWorks.length);
+            setLastPage(1);
+            
+            console.log(`Mobile: Loaded ${dailyWorks.length} total items for ${selectedDate}`);
+        } catch (error) {
+            console.error('Error fetching mobile data:', error);
+            setData([]);
+            toast.error('Failed to fetch data.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            console.log('Fetching data with params:', params);
-            console.log('Mode:', isMobile ? 'mobile' : 'desktop');
-            console.log('selectedDate:', selectedDate);
-            console.log('dateRange:', dateRange);
+    // Desktop data fetching - use pagination for date range
+    const fetchDesktopData = async (showLoader = true) => {
+        if (loading) return;
+        
+        if (showLoader && !modeSwitch) {
+            setLoading(true);
+        }
+        
+        try {
+            const params = {
+                search: search,
+                status: filterData.status !== 'all' ? filterData.status : '',
+                inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                startDate: dateRange.start,
+                endDate: dateRange.end,
+                page: currentPage,
+                perPage: perPage,
+            };
+
+            console.log('Desktop mode: Fetching paginated data with params:', params);
+            
             const response = await axios.get('/daily-works-paginate', { params });
             
             setData(Array.isArray(response.data.data) ? response.data.data : []);
             setTotalRows(response.data.total || 0);
             setLastPage(response.data.last_page || 1);
             
-            console.log(`Loaded ${response.data.data?.length || 0} items in ${isMobile ? 'mobile' : 'desktop'} mode`);
+            console.log(`Desktop: Loaded ${response.data.data?.length || 0} items (page ${currentPage} of ${response.data.last_page})`);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching desktop data:', error);
             setData([]);
             toast.error('Failed to fetch data.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Main fetch function that delegates to mobile or desktop
+    const fetchData = async (showLoader = true) => {
+        if (isMobile) {
+            await fetchMobileData(showLoader);
+        } else {
+            await fetchDesktopData(showLoader);
         }
     };
 

@@ -19,7 +19,7 @@ class DailyWorkPaginationService
         $startTime = microtime(true);
 
         $user = Auth::user();
-        $perPage = $request->get('perPage', 30);
+        $perPage = (int) $request->get('perPage', 30);
         $page = $request->get('search') != '' ? 1 : $request->get('page', 1);
         $search = $request->get('search');
         $statusFilter = $request->get('status');
@@ -30,10 +30,14 @@ class DailyWorkPaginationService
         // Log the request parameters for debugging
         Log::info('DailyWork pagination request', [
             'perPage' => $perPage,
+            'perPage_type' => gettype($perPage),
             'page' => $page,
             'is_mobile_mode' => $perPage >= 1000,
             'date_range' => [$startDate, $endDate],
             'user_id' => $user->id,
+            'search' => $search,
+            'statusFilter' => $statusFilter,
+            'inChargeFilter' => $inChargeFilter,
         ]);
 
         $query = $this->buildBaseQuery($user);
@@ -58,6 +62,9 @@ class DailyWorkPaginationService
             Log::info('DailyWork mobile query completed', [
                 'execution_time' => round(($endTime - $startTime) * 1000, 2).'ms',
                 'records_count' => $allData->count(),
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'records' => $allData->pluck('id')->toArray(),
             ]);
 
             // Create a manual paginator with all data on page 1
