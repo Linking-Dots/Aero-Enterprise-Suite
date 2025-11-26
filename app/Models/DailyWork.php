@@ -12,39 +12,31 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class DailyWork extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, SoftDeletes, LogsActivity;
+    use HasFactory, InteractsWithMedia, LogsActivity, SoftDeletes;
 
-    // Action Item 5: Define valid enum values
+    // Action Item 5: Define valid enum values (aligned with frontend)
     public const STATUS_NEW = 'new';
-    public const STATUS_IN_PROGRESS = 'in-progress';
+
     public const STATUS_COMPLETED = 'completed';
-    public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_RESUBMISSION = 'resubmission';
-    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_EMERGENCY = 'emergency';
 
     public const INSPECTION_PASS = 'pass';
+
     public const INSPECTION_FAIL = 'fail';
-    public const INSPECTION_CONDITIONAL = 'conditional';
-    public const INSPECTION_PENDING = 'pending';
-    public const INSPECTION_APPROVED = 'approved';
-    public const INSPECTION_REJECTED = 'rejected';
 
     public static array $statuses = [
         self::STATUS_NEW,
-        self::STATUS_IN_PROGRESS,
         self::STATUS_COMPLETED,
-        self::STATUS_REJECTED,
         self::STATUS_RESUBMISSION,
-        self::STATUS_PENDING,
+        self::STATUS_EMERGENCY,
     ];
 
     public static array $inspectionResults = [
         self::INSPECTION_PASS,
         self::INSPECTION_FAIL,
-        self::INSPECTION_CONDITIONAL,
-        self::INSPECTION_PENDING,
-        self::INSPECTION_APPROVED,
-        self::INSPECTION_REJECTED,
     ];
 
     protected $fillable = [
@@ -86,7 +78,7 @@ class DailyWork extends Model implements HasMedia
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Daily work has been {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Daily work has been {$eventName}");
     }
 
     // Relationships
@@ -180,12 +172,12 @@ class DailyWork extends Model implements HasMedia
 
         // Action Item 5: Validate status on saving
         static::saving(function ($dailyWork) {
-            if ($dailyWork->status && !self::isValidStatus($dailyWork->status)) {
-                throw new \InvalidArgumentException("Invalid status: {$dailyWork->status}. Must be one of: " . implode(', ', self::$statuses));
+            if ($dailyWork->status && ! self::isValidStatus($dailyWork->status)) {
+                throw new \InvalidArgumentException("Invalid status: {$dailyWork->status}. Must be one of: ".implode(', ', self::$statuses));
             }
 
-            if ($dailyWork->inspection_result && !self::isValidInspectionResult($dailyWork->inspection_result)) {
-                throw new \InvalidArgumentException("Invalid inspection result: {$dailyWork->inspection_result}. Must be one of: " . implode(', ', self::$inspectionResults));
+            if ($dailyWork->inspection_result && ! self::isValidInspectionResult($dailyWork->inspection_result)) {
+                throw new \InvalidArgumentException("Invalid inspection result: {$dailyWork->inspection_result}. Must be one of: ".implode(', ', self::$inspectionResults));
             }
         });
     }
