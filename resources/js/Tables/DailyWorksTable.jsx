@@ -1796,7 +1796,7 @@ const DailyWorksTable = ({
                     <TableCell>
                         <div className="flex items-center justify-center">
                             <span className="text-sm">
-                                {work.qty_layer ? `${work.qty_layer} layers` : 'N/A'}
+                                {work.qty_layer ? work.qty_layer : 'N/A'}
                             </span>
                         </div>
                     </TableCell>
