@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage } from "@inertiajs/react";
 import App from "@/Layouts/App";
 import { motion } from "framer-motion";
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import {
     Card,
@@ -152,7 +152,7 @@ const LeaveSettings = () => {
     // Add a new leave type
     const addLeaveType = async () => {
         if (!isFormValid) {
-            toast.error('Please fill in all required fields');
+            showToast.error('Please fill in all required fields');
             return;
         }
 
@@ -176,50 +176,10 @@ const LeaveSettings = () => {
             }
         });
 
-        toast.promise(promise, {
-            pending: {
-                render() {
-                    return (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Spinner size="sm" />
-                            <span style={{ marginLeft: '8px' }}>Adding leave type...</span>
-                        </div>
-                    );
-                },
-                icon: false,
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                },
-            },
-            success: {
-                render({ data }) {
-                    return data.map((message, index) => (
-                        <div key={index}>{message}</div>
-                    ));
-                },
-                icon: '✅',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
-            error: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-                icon: '❌',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Adding leave type...',
+            success: (data) => data.map((message, index) => message).join(', '),
+            error: (data) => data,
         });
     };
 
@@ -241,7 +201,7 @@ const LeaveSettings = () => {
     // Update leave type after editing
     const updateLeaveType = async () => {
         if (!isFormValid) {
-            toast.error('Please fill in all required fields');
+            showToast.error('Please fill in all required fields');
             return;
         }
 
@@ -268,50 +228,10 @@ const LeaveSettings = () => {
             }
         });
 
-        toast.promise(promise, {
-            pending: {
-                render() {
-                    return (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Spinner size="sm" />
-                            <span style={{ marginLeft: '8px' }}>Updating leave type...</span>
-                        </div>
-                    );
-                },
-                icon: false,
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                },
-            },
-            success: {
-                render({ data }) {
-                    return data.map((message, index) => (
-                        <div key={index}>{message}</div>
-                    ));
-                },
-                icon: '✅',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
-            error: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-                icon: '❌',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Updating leave type...',
+            success: (data) => data.map((message) => message).join(', '),
+            error: (data) => data,
         });
     };
 
@@ -346,50 +266,10 @@ const LeaveSettings = () => {
             }
         });
 
-        toast.promise(promise, {
-            pending: {
-                render() {
-                    return (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Spinner size="sm" />
-                            <span style={{ marginLeft: '8px' }}>Deleting leave type...</span>
-                        </div>
-                    );
-                },
-                icon: false,
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                },
-            },
-            success: {
-                render({ data }) {
-                    return data.map((message, index) => (
-                        <div key={index}>{message}</div>
-                    ));
-                },
-                icon: '✅',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
-            error: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-                icon: '❌',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Deleting leave type...',
+            success: (data) => data.map((message) => message).join(', '),
+            error: (data) => data,
         });
     };
 

@@ -17,7 +17,7 @@ import {
 } from "@heroui/react";
 import React, {useEffect, useState} from "react";
 import { X, Camera } from 'lucide-react';
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 const ProfileForm = ({user, allUsers, departments, designations,setUser, open, closeModal }) => {
 
@@ -58,7 +58,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
             // Validate file type
             const fileType = file.type;
             if (!['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
-                toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
+                showToast.error('Invalid file type. Only JPEG and PNG are allowed.', {
                     icon: '🔴',
                     style: {
                         background: 'var(--theme-content1, #FFFFFF)',
@@ -110,7 +110,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 }
             });
 
-            toast.promise(
+            showToast.promise(
                 promise,
                 {
                     pending: {
@@ -264,7 +264,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
 
             if (response.status === 200) {
                 setUser(response.data.user);
-                toast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Profile information updated successfully', {
+                showToast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Profile information updated successfully', {
                     icon: '🟢',
                     style: {
                    
@@ -286,7 +286,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 if (error.response.status === 422) {
                     // Handle validation errors
                     setErrors(error.response.data.errors || {});
-                    toast.error(error.response.data.error || 'Failed to update profile information.', {
+                    showToast.error(error.response.data.error || 'Failed to update profile information.', {
                         icon: '🔴',
                         style: {
                         
@@ -299,7 +299,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                     });
                 } else {
                     // Handle other HTTP errors
-                    toast.error('An unexpected error occurred. Please try again later.', {
+                    showToast.error('An unexpected error occurred. Please try again later.', {
                         icon: '🔴',
                         style: {
                  
@@ -314,7 +314,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 console.error(error.response.data);
             } else if (error.request) {
                 // The request was made but no response was received
-                toast.error('No response received from the server. Please check your internet connection.', {
+                showToast.error('No response received from the server. Please check your internet connection.', {
                     icon: '🔴',
                     style: {
                   
@@ -328,7 +328,7 @@ const ProfileForm = ({user, allUsers, departments, designations,setUser, open, c
                 console.error(error.request);
             } else {
                 // Something happened in setting up the request that triggered an Error
-                toast.error('An error occurred while setting up the request.', {
+                showToast.error('An error occurred while setting up the request.', {
                     icon: '🔴',
                     style: {
                    

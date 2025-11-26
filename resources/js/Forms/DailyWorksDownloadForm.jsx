@@ -17,7 +17,7 @@ import {
 } from "@heroui/react";
 import { X, Download } from 'lucide-react';
 
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 
 import * as XLSX from 'xlsx';
@@ -42,7 +42,7 @@ const DailyWorksDownloadForm = ({ open, closeModal, search, filterData, users })
                 setData(response.data);
             } catch (error) {
                 console.error(error);
-                toast.error('Failed to fetch data.', {
+                showToast.error('Failed to fetch data.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -137,7 +137,7 @@ const DailyWorksDownloadForm = ({ open, closeModal, search, filterData, users })
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: {

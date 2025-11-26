@@ -48,7 +48,7 @@ import PageHeader from "@/Components/PageHeader.jsx";
 import StatsCards from "@/Components/StatsCards.jsx";
 import useTheme from '@/theme';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
   const { theme } = useTheme();
@@ -160,11 +160,11 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
           setHolidays(prev => [...prev, response.data.holiday]);
         }
         
-        toast.success(selectedHoliday ? 'Holiday updated successfully!' : 'Holiday created successfully!');
+        showToast.success(selectedHoliday ? 'Holiday updated successfully!' : 'Holiday created successfully!');
         handleModalClose();
       }
     } catch (error) {
-      toast.error('Failed to save holiday. Please try again.');
+      showToast.error('Failed to save holiday. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -178,11 +178,11 @@ const HolidaysManagement = ({ title, holidays: initialHolidays, stats }) => {
     try {
       await axios.delete(route('holiday.destroy', selectedHoliday.id));
       setHolidays(prev => prev.filter(h => h.id !== selectedHoliday.id));
-      toast.success('Holiday deleted successfully!');
+      showToast.success('Holiday deleted successfully!');
       onDeleteClose();
       setSelectedHoliday(null);
     } catch (error) {
-      toast.error('Failed to delete holiday. Please try again.');
+      showToast.error('Failed to delete holiday. Please try again.');
     } finally {
       setLoading(false);
     }

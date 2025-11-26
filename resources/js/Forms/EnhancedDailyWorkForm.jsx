@@ -13,7 +13,7 @@ import {
     Chip,
 } from '@heroui/react';
 import { X, AlertCircle, CheckCircle } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import GlassDialog from '@/Components/GlassDialog.jsx';
 
 const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalType }) => {
@@ -137,7 +137,7 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
         
         // Validate all fields before submission
         if (!validateAllFields()) {
-            toast.error('Please correct the validation errors before submitting.');
+            showToast.error('Please correct the validation errors before submitting.');
             return;
         }
 
@@ -159,7 +159,7 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
                     setData(prevWorks => [...prevWorks, response.data.dailyWork]);
                 }
                 
-                toast.success(response.data.message || `Daily work ${modalType === 'add' ? 'created' : 'updated'} successfully!`);
+                showToast.success(response.data.message || `Daily work ${modalType === 'add' ? 'created' : 'updated'} successfully!`);
                 closeModal();
             }
         } catch (error) {
@@ -172,15 +172,15 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
                 
                 // Show specific error messages
                 const errorMessages = Object.values(backendErrors).flat();
-                toast.error(errorMessages.join(', ') || 'Please correct the errors and try again.');
+                showToast.error(errorMessages.join(', ') || 'Please correct the errors and try again.');
             } else if (error.response?.status === 403) {
-                toast.error('You do not have permission to perform this action.');
+                showToast.error('You do not have permission to perform this action.');
             } else if (error.response?.status === 409) {
-                toast.error('A daily work with this RFI number already exists.');
+                showToast.error('A daily work with this RFI number already exists.');
             } else if (error.response?.status === 500) {
-                toast.error('Server error occurred. Please try again later.');
+                showToast.error('Server error occurred. Please try again later.');
             } else {
-                toast.error('An unexpected error occurred. Please try again.');
+                showToast.error('An unexpected error occurred. Please try again.');
             }
         } finally {
             setProcessing(false);

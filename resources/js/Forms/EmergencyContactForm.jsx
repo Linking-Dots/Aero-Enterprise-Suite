@@ -11,7 +11,7 @@ import {
 import React, {useEffect, useState} from "react";
 import GlassCard from "@/Components/GlassCard.jsx";
 import { X, Phone } from 'lucide-react';
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
     // Helper function to convert theme borderRadius to HeroUI radius values
@@ -101,7 +101,7 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
 
             if (response.status === 200) {
                 setUser(response.data.user);
-                toast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Emergency contact updated successfully', {
+                showToast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Emergency contact updated successfully', {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -121,7 +121,7 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                 if (error.response.status === 422) {
                     // Handle validation errors
                     setErrors(error.response.data.errors || {});
-                    toast.error(error.response.data.error || 'Failed to update emergency contact.', {
+                    showToast.error(error.response.data.error || 'Failed to update emergency contact.', {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
@@ -132,7 +132,7 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                     });
                 } else {
                     // Handle other HTTP errors
-                    toast.error('An unexpected error occurred. Please try again later.', {
+                    showToast.error('An unexpected error occurred. Please try again later.', {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
@@ -145,7 +145,7 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                 console.error(error.response.data);
             } else if (error.request) {
                 // The request was made but no response was received
-                toast.error('No response received from the server. Please check your internet connection.', {
+                showToast.error('No response received from the server. Please check your internet connection.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -157,7 +157,7 @@ const EmergencyContactForm = ({user,setUser, open, closeModal }) => {
                 console.error(error.request);
             } else {
                 // Something happened in setting up the request that triggered an Error
-                toast.error('An error occurred while setting up the request.', {
+                showToast.error('An error occurred while setting up the request.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',

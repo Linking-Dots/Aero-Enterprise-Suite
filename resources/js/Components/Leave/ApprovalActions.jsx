@@ -11,7 +11,7 @@ import {
 } from '@heroui/react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import { route } from 'ziggy-js';
 
 export default function ApprovalActions({ leave, onApprovalComplete }) {
@@ -32,21 +32,21 @@ export default function ApprovalActions({ leave, onApprovalComplete }) {
             });
 
             if (response.data.success) {
-                toast.success(response.data.message || 'Leave approved successfully');
+                showToast.success(response.data.message || 'Leave approved successfully');
                 onApproveClose();
                 setComments('');
                 if (onApprovalComplete) {
                     onApprovalComplete(response.data);
                 }
             } else {
-                toast.error(response.data.message || 'Failed to approve leave');
+                showToast.error(response.data.message || 'Failed to approve leave');
             }
         } catch (error) {
             console.error('Approval error:', error);
             if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
+                showToast.error(error.response.data.message);
             } else {
-                toast.error('An error occurred while approving the leave');
+                showToast.error('An error occurred while approving the leave');
             }
         } finally {
             setProcessing(false);
@@ -69,23 +69,23 @@ export default function ApprovalActions({ leave, onApprovalComplete }) {
             });
 
             if (response.data.success) {
-                toast.success(response.data.message || 'Leave rejected successfully');
+                showToast.success(response.data.message || 'Leave rejected successfully');
                 onRejectClose();
                 setRejectionReason('');
                 if (onApprovalComplete) {
                     onApprovalComplete(response.data);
                 }
             } else {
-                toast.error(response.data.message || 'Failed to reject leave');
+                showToast.error(response.data.message || 'Failed to reject leave');
             }
         } catch (error) {
             console.error('Rejection error:', error);
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
             } else if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
+                showToast.error(error.response.data.message);
             } else {
-                toast.error('An error occurred while rejecting the leave');
+                showToast.error('An error occurred while rejecting the leave');
             }
         } finally {
             setProcessing(false);

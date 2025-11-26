@@ -30,7 +30,7 @@ import {
     Tooltip,
     Spinner
 } from '@heroui/react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import { useTheme } from '@/Contexts/ThemeContext';
 import { getDeviceId, getDeviceHeaders } from '@/utils/deviceAuth';
 
@@ -416,7 +416,7 @@ export default function Login({
                     // Show error toasts for non-field-specific errors
                     Object.entries(errors).forEach(([key, error]) => {
                         if (key !== 'email' && key !== 'password' && key !== 'device_blocked' && key !== 'device_blocked_data' && typeof error === 'string') {
-                            toast.error(error, {
+                            showToast.error(error, {
                                 style: {
                                     backdropFilter: 'blur(16px) saturate(200%)',
                                     background: 'var(--theme-danger)',
@@ -451,7 +451,7 @@ export default function Login({
         } catch (error) {
             console.error('Login submission error:', error);
             
-            toast.error('An unexpected error occurred. Please try again.', {
+            showToast.error('An unexpected error occurred. Please try again.', {
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
                     background: 'var(--theme-danger)',
@@ -508,7 +508,7 @@ export default function Login({
     useEffect(() => {
         if (deviceBlocked) {
             setUiState(prevState => ({ ...prevState, showDeviceAlert: true }));
-            toast.error(deviceMessage || 'Device access blocked');
+            showToast.error(deviceMessage || 'Device access blocked');
             
             const timer = setTimeout(() => {
                 dismissAlert('Device');

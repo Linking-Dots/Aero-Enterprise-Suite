@@ -44,7 +44,8 @@ import EmployeeTable from "@/Tables/EmployeeTable.jsx";
 import ProfileAvatar from "@/Components/ProfileAvatar.jsx";
 
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
+
 
 const EmployeesList = ({ title, departments, designations, attendanceTypes }) => {
 
@@ -69,6 +70,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
   
   // State for employee data with server-side pagination
   const [employees, setEmployees] = useState([]);
+  const [allManagers, setAllManagers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalRows, setTotalRows] = useState(0);
   const [lastPage, setLastPage] = useState(1);
@@ -162,8 +164,6 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
           attendanceType: filters.attendanceType
         }
       });
-
-    
       
       setEmployees(data.employees.data);
       setTotalRows(data.employees.total);
@@ -173,13 +173,18 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
         total: data.employees.total
       }));
       
+      // Update allManagers for Report To dropdown
+      if (data.allManagers) {
+        setAllManagers(data.allManagers);
+      }
+      
       // Update stats if included in response
       if (data.stats) {
         setStats(data.stats);
       }
     } catch (error) {
       console.error('Error fetching employees:', error);
-      toast.error('Failed to load employees data');
+      showToast.error('Failed to load employees. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -982,6 +987,7 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                       ) : viewMode === 'table' ? (
                         <EmployeeTable 
                       allUsers={employees} 
+                      allManagers={allManagers}
                       departments={departments}
                       designations={designations}
                       attendanceTypes={attendanceTypes}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import { Link, router } from '@inertiajs/react';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
+
 import axios from 'axios';
 
 import { 
@@ -58,6 +59,7 @@ import ProfileAvatar from '@/Components/ProfileAvatar';
 
 const EmployeeTable = ({ 
   allUsers, 
+  allManagers = [],
   departments, 
   designations, 
   attendanceTypes, 
@@ -215,7 +217,7 @@ const EmployeeTable = ({
       }
     });
 
-    toast.promise(promise, {
+    showToast.promise(promise, {
       pending: {
         render() {
           return (
@@ -282,7 +284,7 @@ const EmployeeTable = ({
       }
     });
 
-    toast.promise(promise, {
+    showToast.promise(promise, {
       pending: {
         render() {
           return (
@@ -355,7 +357,7 @@ const EmployeeTable = ({
       }
     });
 
-    toast.promise(promise, {
+    showToast.promise(promise, {
       pending: {
         render() {
           return (
@@ -446,7 +448,7 @@ const EmployeeTable = ({
       }
     });
 
-    toast.promise(promise, {
+    showToast.promise(promise, {
       pending: {
         render() {
           return (
@@ -532,60 +534,77 @@ const EmployeeTable = ({
 
     // Set new timeout
     reportToDebounceRef.current[userId] = setTimeout(async () => {
-      try {
-        const response = await axios.post(route('users.updateReportTo', { id: userId }), {
-          report_to: reportToId || null,
-        });
-        if (response.status === 200) {
-          // Update local state if needed
+      const promise = axios.post(route('users.updateReportTo', { id: userId }), {
+        report_to: reportToId || null,
+      });
+      
+      showToast.promise(promise, {
+        loading: 'Updating manager assignment...',
+        success: (response) => {
+          // Update local state on success
           if (updateEmployeeOptimized) {
             updateEmployeeOptimized(userId, {
               report_to: reportToId || null,
               reports_to: response.data.user?.reports_to || null
             });
           }
-          toast.success(response.data.message || 'Report to updated successfully');
-        }
-      } catch (error) {
-        console.error('Error updating report to:', error);
-        toast.error(error.response?.data?.error || 'Failed to update report to');
-      }
+          return response.data?.message || 'Manager assigned successfully!';
+        },
+        error: (err) => err.response?.data?.error || 'Failed to update manager'
+      });
     }, 500);
   }, [updateEmployeeOptimized]);
 
-  // Get eligible managers for a user (same department, higher hierarchy_level)
-  const getEligibleManagers = useCallback((user) => {
-    if (!allUsers || !designations) return [];
+  // Get eligible managers for a user
+  // Corporate Reporting Structure Rules:
+  // 1. Regular employees: Can ONLY report to higher-level employees in their SAME department
+  // 2. Department Heads (highest level in their dept): Can ALSO report to executives from OTHER departments
+  //    who have a higher level (e.g., CEO, COO in Executive department)
+  // 3. Always include current manager (regardless of level or department) for display purposes
+  // 4. Exclude self - can't report to yourself
+  const getEligibleManagers = useCallback((user, currentManagerId = null) => {
+    if (!allManagers || allManagers.length === 0) return [];
     
     const userDepartmentId = user?.department_id;
-    const userDesignationId = user?.designation_id;
+    const userHierarchyLevel = user?.designation_hierarchy_level ?? 999;
     
-    // Get user's designation hierarchy level
-    const userDesignation = designations?.find(d => String(d.id) === String(userDesignationId));
-    const userHierarchyLevel = userDesignation?.hierarchy_level;
+    // Check if user is the highest level in their department (Department Head)
+    const sameDeptEmployees = allManagers.filter(m => 
+      String(m.department_id) === String(userDepartmentId) && m.id !== user.id
+    );
+    const isDepartmentHead = !sameDeptEmployees.some(m => 
+      (m.designation_hierarchy_level ?? 999) < userHierarchyLevel
+    );
     
-    // If no hierarchy level, return empty (can't determine eligible managers)
-    if (userHierarchyLevel === undefined || userHierarchyLevel === null) {
-      return [];
-    }
-    
-    return allUsers.filter(potentialManager => {
+    return allManagers.filter(potentialManager => {
       // Can't report to yourself
       if (potentialManager.id === user.id) return false;
       
-      // Must be in same department
-      const managerDeptId = potentialManager?.department_id;
-      if (String(managerDeptId) !== String(userDepartmentId)) return false;
+      // Always include current manager (regardless of hierarchy or department)
+      if (currentManagerId && potentialManager.id === currentManagerId) {
+        return true;
+      }
+      
+      const managerDepartmentId = potentialManager.department_id;
+      const managerHierarchyLevel = potentialManager.designation_hierarchy_level ?? 999;
+      const isSameDepartment = String(managerDepartmentId) === String(userDepartmentId);
       
       // Must have higher hierarchy (lower number = higher position)
-      const managerDesignationId = potentialManager?.designation_id;
-      const managerDesignation = designations?.find(d => String(d.id) === String(managerDesignationId));
+      if (managerHierarchyLevel >= userHierarchyLevel) return false;
       
-      if (!managerDesignation || managerDesignation.hierarchy_level === undefined) return false;
+      // If same department, allow (regular reporting within department)
+      if (isSameDepartment) return true;
       
-      return managerDesignation.hierarchy_level < userHierarchyLevel;
+      // If user is Department Head, allow cross-department reporting to higher executives
+      if (isDepartmentHead) {
+        // Allow reporting to executives from other departments who are higher level
+        return true;
+      }
+      
+      // Regular employees can't report cross-department
+      return false;
     });
-  }, [allUsers, designations]);
+  }, [allManagers]);
 
   const columns = useMemo(() => {
     const baseColumns = [
@@ -770,8 +789,49 @@ const EmployeeTable = ({
           );
 
       case "report_to":
-        const eligibleManagers = getEligibleManagers(user);
-        const currentReportsTo = user.reports_to || (user.report_to ? allUsers?.find(u => u.id === user.report_to) : null);
+        // Get the current manager from reports_to (from backend) - this is always accurate
+        const currentReportsTo = user.reports_to;
+        const hasCurrentManager = !!currentReportsTo;
+        const currentManagerId = user.report_to;
+        
+        // Get eligible managers (higher hierarchy level, same dept or dept heads)
+        // Pass currentManagerId to always include current manager in list
+        const eligibleManagers = getEligibleManagers(user, currentManagerId);
+        
+        // Build the final list of managers for the Select dropdown
+        const selectItems = [];
+        
+        // Add eligible managers (sorted by hierarchy level)
+        eligibleManagers
+          .sort((a, b) => (a.designation_hierarchy_level ?? 999) - (b.designation_hierarchy_level ?? 999))
+          .forEach(manager => {
+            selectItems.push({
+              id: manager.id,
+              name: manager.name,
+              profile_image_url: manager.profile_image_url,
+              designation_name: manager.designation_name || '',
+              description: manager.designation_name || '',
+              isCurrent: currentManagerId && manager.id === currentManagerId,
+            });
+          });
+        
+        // If current manager exists but wasn't in eligibleManagers, add them
+        if (hasCurrentManager && !selectItems.some(m => m.id === currentReportsTo.id)) {
+          selectItems.unshift({
+            id: currentReportsTo.id,
+            name: currentReportsTo.name,
+            profile_image_url: currentReportsTo.profile_image_url,
+            designation_name: currentReportsTo.designation_name || '',
+            description: currentReportsTo.designation_name || 'Current manager',
+            isCurrent: true,
+          });
+        }
+        
+        // Determine if selected manager is in the list
+        const selectedManagerId = currentManagerId;
+        const selectedManagerInList = selectedManagerId && selectItems.some(m => m.id === selectedManagerId);
+        
+
         
         return (
           <div className="flex flex-col gap-2 min-w-[180px]">
@@ -779,8 +839,8 @@ const EmployeeTable = ({
               size="sm"
               variant="bordered"
               placeholder="Select manager"
-              isDisabled={!eligibleManagers.length}
-              selectedKeys={user.report_to ? [String(user.report_to)] : []}
+              isDisabled={selectItems.length === 0}
+              selectedKeys={selectedManagerInList ? [String(selectedManagerId)] : []}
               onSelectionChange={(keys) => {
                 const selectedKey = Array.from(keys)[0];
                 const newReportToId = selectedKey ? parseInt(selectedKey, 10) : null;
@@ -792,17 +852,19 @@ const EmployeeTable = ({
                 trigger: "min-h-unit-10 h-unit-10 backdrop-blur-md border-white/20 bg-white/10 hover:bg-white/15",
                 value: "text-small",
               }}
-              startContent={<UsersIcon className="w-4 h-4" />}
+
               renderValue={(items) => {
-                if (!currentReportsTo) {
+                if (items.length === 0 || !hasCurrentManager) {
                   return (
-                    <span className="text-default-400 text-sm">No manager</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">Select manager</span>
+                    </div>
                   );
                 }
-                return (
-                  <div className="flex items-center gap-2">
+                return items.map((item) => (
+                  <div key={item.key} className="flex items-center gap-2">
                     <Avatar
-                      src={currentReportsTo.profile_image_url || currentReportsTo.profile_image}
+                      src={currentReportsTo.profile_image_url}
                       size="sm"
                       className="w-6 h-6 flex-shrink-0"
                       showFallback
@@ -810,21 +872,21 @@ const EmployeeTable = ({
                     />
                     <span className="text-sm font-medium truncate">{currentReportsTo.name}</span>
                   </div>
-                );
+                ));
               }}
             >
-              {eligibleManagers.length === 0 ? (
+              {selectItems.length === 0 ? (
                 <SelectItem key="no-managers" isDisabled textValue="No eligible managers">
                   <span className="text-default-400">No eligible managers in department</span>
                 </SelectItem>
               ) : (
-                eligibleManagers.map((manager) => (
+                selectItems.map((manager) => (
                   <SelectItem key={String(manager.id)} textValue={manager.name}>
                     <User
                       name={manager.name}
-                      description={manager.designation_name || ''}
+                      description={manager.description}
                       avatarProps={{
-                        src: manager.profile_image_url || manager.profile_image,
+                        src: manager.profile_image_url,
                         size: "sm",
                         showFallback: true,
                         name: manager.name,
@@ -1087,7 +1149,7 @@ const EmployeeTable = ({
               return (
                 <TableRow 
                   key={item.id}
-                  className="transition-all duration-200 hover:scale-[1.01]"
+                  className="transition-all duration-200"
                   style={{
                     color: 'var(--theme-foreground)',
                     borderBottom: `1px solid color-mix(in srgb, var(--theme-content3) 30%, transparent)`,

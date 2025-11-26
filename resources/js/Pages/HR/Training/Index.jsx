@@ -70,7 +70,7 @@ import TrainingForm from '@/Forms/TrainingForm.jsx';
 import DeleteTrainingForm from '@/Forms/DeleteTrainingForm.jsx';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const Training = ({ 
     trainings = { data: [], current_page: 1, last_page: 1, total: 0 }, 

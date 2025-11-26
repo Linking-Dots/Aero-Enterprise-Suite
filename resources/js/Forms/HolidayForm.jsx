@@ -22,7 +22,7 @@ import {
     ClockIcon,
     CheckIcon
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { format, differenceInDays, addDays } from 'date-fns';
 import axios from 'axios';
 
@@ -156,15 +156,15 @@ const HolidayForm = ({
 
             if (response.status === 200) {
                 setHolidaysData(response.data.holidays);
-                toast.success(response.data.message || 'Holiday saved successfully!');
+                showToast.success(response.data.message || 'Holiday saved successfully!');
                 closeModal();
             }
         } catch (error) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
-                toast.error('Please check the form for errors');
+                showToast.error('Please check the form for errors');
             } else {
-                toast.error(error.response?.data?.message || 'Failed to save holiday');
+                showToast.error(error.response?.data?.message || 'Failed to save holiday');
             }
         } finally {
             setProcessing(false);

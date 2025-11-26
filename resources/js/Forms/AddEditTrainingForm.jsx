@@ -18,7 +18,7 @@ import {
     InputAdornment
 } from '@mui/material';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, currentPage, perPage, filterData }) => {
@@ -49,7 +49,7 @@ const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, curren
                 setCategories(response.data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
-                toast.error('Failed to load training categories.');
+                showToast.error('Failed to load training categories.');
             }
         };
         
@@ -136,7 +136,7 @@ const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, curren
                 response = await axios.post(route('hr.training.store'), formData);
             }
             
-            toast.success(response.data.message || `Training ${isEditing ? 'updated' : 'created'} successfully!`);
+            showToast.success(response.data.message || `Training ${isEditing ? 'updated' : 'created'} successfully!`);
             onClose();
             fetchData(currentPage, perPage, filterData);
         } catch (error) {
@@ -145,7 +145,7 @@ const AddEditTrainingForm = ({ open, onClose, training = null, fetchData, curren
             if (error.response && error.response.data && error.response.data.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                toast.error(`Failed to ${isEditing ? 'update' : 'create'} training session.`);
+                showToast.error(`Failed to ${isEditing ? 'update' : 'create'} training session.`);
             }
         } finally {
             setLoading(false);

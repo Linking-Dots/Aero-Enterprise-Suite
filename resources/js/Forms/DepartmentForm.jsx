@@ -14,7 +14,7 @@ import {
 } from '@heroui/react';
 import { Building2, Briefcase } from 'lucide-react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const DepartmentForm = ({ open, onClose, onSuccess, department = null, managers = [], parentDepartments = [] }) => {
     const [loading, setLoading] = useState(false);
@@ -126,7 +126,7 @@ const DepartmentForm = ({ open, onClose, onSuccess, department = null, managers 
             }
         });
 
-        toast.promise(promise, {
+        showToast.promise(promise, {
             pending: {
                 render() {
                     return (

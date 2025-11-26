@@ -8,7 +8,7 @@ import {
     Button
 } from '@heroui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const DeletePerformanceReviewForm = ({ open, onClose, performanceReview, fetchData, currentPage, perPage, filterData }) => {
@@ -21,12 +21,12 @@ const DeletePerformanceReviewForm = ({ open, onClose, performanceReview, fetchDa
         
         try {
             await axios.delete(route('hr.performance.reviews.destroy', performanceReview.id));
-            toast.success('Performance review deleted successfully');
+            showToast.success('Performance review deleted successfully');
             fetchData({ page: currentPage, perPage, ...filterData });
             onClose();
         } catch (error) {
             console.error('Error deleting performance review:', error);
-            toast.error('Failed to delete performance review');
+            showToast.error('Failed to delete performance review');
         } finally {
             setLoading(false);
         }

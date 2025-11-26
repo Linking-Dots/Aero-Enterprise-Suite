@@ -49,7 +49,7 @@ import BulkLeaveModal from '@/Components/BulkLeave/BulkLeaveModal.jsx';
 import BulkDeleteModal from '@/Components/BulkDelete/BulkDeleteModal.jsx';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 
 const LeavesAdmin = ({ title, allUsers }) => {
@@ -380,14 +380,14 @@ const LeavesAdmin = ({ title, allUsers }) => {
             if (response.status === 200) {
                 fetchLeavesData();
                 const toastPromise = Promise.resolve();
-                toast.promise(toastPromise, {
+                showToast.promise(toastPromise, {
                     success: 'Selected leaves approved successfully'
                 });
             }
         } catch (error) {
             console.error('Error bulk approving leaves:', error);
             const toastPromise = Promise.reject(error);
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Failed to approve selected leaves'
             });
         }
@@ -404,14 +404,14 @@ const LeavesAdmin = ({ title, allUsers }) => {
             if (response.status === 200) {
                 fetchLeavesData();
                 const toastPromise = Promise.resolve();
-                toast.promise(toastPromise, {
+                showToast.promise(toastPromise, {
                     success: 'Selected leaves rejected successfully'
                 });
             }
         } catch (error) {
             console.error('Error bulk rejecting leaves:', error);
             const toastPromise = Promise.reject(error);
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Failed to reject selected leaves'
             });
         }
@@ -574,7 +574,7 @@ const LeavesAdmin = ({ title, allUsers }) => {
                 }
             } catch (error) {
                 const toastPromise = Promise.reject(error);
-                toast.promise(toastPromise, {
+                showToast.promise(toastPromise, {
                     error: 'Error fetching additional items.'
                 });
                 console.error(`Error fetching additional items from page ${pagination.currentPage + 1}:`, error);

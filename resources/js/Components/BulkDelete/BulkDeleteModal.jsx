@@ -18,7 +18,7 @@ import {
     XMarkIcon
 } from '@heroicons/react/24/outline';
 
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const BulkDeleteModal = ({ 
@@ -62,7 +62,7 @@ const BulkDeleteModal = ({
     const handleDelete = useCallback(async () => {
         if (!canDelete) {
             const toastPromise = Promise.reject('Cannot delete approved leaves');
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Cannot delete approved leave requests'
             });
             return;
@@ -70,7 +70,7 @@ const BulkDeleteModal = ({
 
         if (selectedLeaves.length === 0) {
             const toastPromise = Promise.reject('No leaves selected');
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'No leave requests selected for deletion'
             });
             return;
@@ -134,7 +134,7 @@ const BulkDeleteModal = ({
         });
 
         // Use exact same toast promise structure as other forms
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Deleting leave requests...',

@@ -17,7 +17,7 @@ import {
 } from "@heroui/react";
 import { X, Download } from 'lucide-react';
 
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 
 import * as XLSX from 'xlsx';
@@ -122,7 +122,7 @@ const DailyWorkSummaryDownloadForm = ({ open, closeModal,  filteredData, users }
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: {

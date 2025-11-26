@@ -48,7 +48,7 @@ import {
     InformationCircleIcon,
     CameraIcon,
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import { usePage } from '@inertiajs/react';
 import ProfileAvatar from './ProfileAvatar';
@@ -296,7 +296,7 @@ const PunchStatusCard = React.memo(() => {
                 lastUpdate: new Date()
             });
 
-            toast.success('Location access granted successfully!', {
+            showToast.success('Location access granted successfully!', {
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
                     background: 'var(--theme-success)',
@@ -310,7 +310,7 @@ const PunchStatusCard = React.memo(() => {
                 error: 'Location access still denied. Please check your browser settings.'
             }));
 
-            toast.error('Please enable location in your browser settings manually.', {
+            showToast.error('Please enable location in your browser settings manually.', {
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
                     background: 'var(--theme-danger)',
@@ -524,7 +524,7 @@ const PunchStatusCard = React.memo(() => {
 
         } catch (error) {
             console.error('Error fetching current status:', error);
-            toast.error('Failed to fetch attendance status');
+            showToast.error('Failed to fetch attendance status');
         }
     }, []);
 
@@ -600,7 +600,7 @@ const PunchStatusCard = React.memo(() => {
                     isSwitching: false 
                 }));
             } catch (fallbackError) {
-                toast.error('Unable to access camera. Please check permissions.');
+                showToast.error('Unable to access camera. Please check permissions.');
                 setCameraState(prev => ({ ...prev, isOpen: false, isSwitching: false }));
             }
         }
@@ -677,10 +677,10 @@ const PunchStatusCard = React.memo(() => {
                 isCapturing: false 
             }));
 
-            toast.success('Photo captured successfully!');
+            showToast.success('Photo captured successfully!');
         } catch (error) {
             console.error('Photo capture error:', error);
-            toast.error('Failed to capture photo. Please try again.');
+            showToast.error('Failed to capture photo. Please try again.');
             setCameraState(prev => ({ ...prev, isCapturing: false }));
         }
     }, [locationState.coordinates]);
@@ -697,7 +697,7 @@ const PunchStatusCard = React.memo(() => {
      */
     const confirmPhotoAndPunch = useCallback(async () => {
         if (!cameraState.capturedPhoto || !cameraState.pendingPunchData) {
-            toast.error('Please capture a photo first.');
+            showToast.error('Please capture a photo first.');
             return;
         }
 
@@ -725,12 +725,12 @@ const PunchStatusCard = React.memo(() => {
                     fetchCurrentStatus();
                 }, 500);
             } else {
-                toast.error(response.data.message);
+                showToast.error(response.data.message);
             }
         } catch (error) {
             console.error('Punch operation failed:', error);
             const errorMessage = error.response?.data?.message || 'Unable to record attendance. Please try again.';
-            toast.error(errorMessage);
+            showToast.error(errorMessage);
         } finally {
             setAttendanceState(prev => ({ ...prev, loading: false }));
             setCameraState(prev => ({ ...prev, pendingPunchData: null, capturedPhoto: null }));
@@ -758,13 +758,13 @@ const PunchStatusCard = React.memo(() => {
     const handlePunch = useCallback(async () => {
         // Check if user is on leave
         if (attendanceState.userOnLeave) {
-            toast.warning('You are on leave today. Cannot punch in/out.');
+            showToast.warning('You are on leave today. Cannot punch in/out.');
             return;
         }
 
         // Check if location is active
         if (locationState.status !== GPS_STATUS.ACTIVE) {
-            toast.error('Location access required for attendance. Please enable GPS and try again.');
+            showToast.error('Location access required for attendance. Please enable GPS and try again.');
             return;
         }
 
@@ -829,14 +829,14 @@ const PunchStatusCard = React.memo(() => {
                     fetchCurrentStatus();
                 }, 500);
             } else {
-                toast.error(response.data.message);
+                showToast.error(response.data.message);
             }
         } catch (error) {
             console.error('Punch operation failed:', error);
             
             const errorMessage = error.response?.data?.message || 'Unable to record attendance. Please try again.';
             
-            toast.error(errorMessage, {
+            showToast.error(errorMessage, {
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
                     background: 'var(--theme-danger)',

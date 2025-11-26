@@ -44,7 +44,7 @@ import DepartmentForm from '@/Forms/DepartmentForm.jsx';
 import DeleteDepartmentForm from '@/Forms/DeleteDepartmentForm.jsx';
 import { useTheme } from '@/Contexts/ThemeContext';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import dayjs from 'dayjs';
 
 const Departments = ({ title, departments: initialDepartments, managers, parentDepartments, stats: initialStats, filters: initialFilters }) => {
@@ -117,7 +117,7 @@ const Departments = ({ title, departments: initialDepartments, managers, parentD
             setDepartmentsData(response.data.departments);
         } catch (error) {
             console.error('Error fetching departments:', error);
-            toast.error('Failed to load departments data');
+            showToast.error('Failed to load departments data');
         } finally {
             setLoading(false);
         }

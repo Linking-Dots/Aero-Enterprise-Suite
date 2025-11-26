@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { toast } from 'react-hot-toast';
+import { showToast } from '@/utils/toastUtils';
 import { 
     BriefcaseIcon, 
     PlusIcon,
@@ -115,7 +115,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         } catch (error) {
             console.error('Error fetching mobile data:', error);
             setData([]);
-            toast.error('Failed to fetch data.');
+            showToast.error('Failed to fetch data.');
         } finally {
             setLoading(false);
         }
@@ -152,7 +152,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         } catch (error) {
             console.error('Error fetching desktop data:', error);
             setData([]);
-            toast.error('Failed to fetch data.');
+            showToast.error('Failed to fetch data.');
         } finally {
             setLoading(false);
         }
@@ -243,7 +243,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         console.log('Delete function called with taskId:', taskIdToDelete);
         
         if (!taskIdToDelete) {
-            toast.error('No task selected for deletion');
+            showToast.error('No task selected for deletion');
             return;
         }
         
@@ -323,18 +323,10 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             }
         });
 
-        toast.promise(promise, {
-            pending: 'Deleting daily work...',
-            success: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-            },
-            error: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Deleting daily work...',
+            success: (data) => data,
+            error: (data) => data,
         });
     };
 
@@ -417,7 +409,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             setApiStats(response.data);
         } catch (error) {
             console.error('Error fetching statistics:', error);
-            toast.error('Failed to load statistics');
+            showToast.error('Failed to load statistics');
         } finally {
             setStatsLoading(false);
         }

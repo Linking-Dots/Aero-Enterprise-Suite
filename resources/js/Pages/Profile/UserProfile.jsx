@@ -57,7 +57,7 @@ import ExperienceInformationForm from "@/Forms/ExperienceInformationForm.jsx";
 import SalaryInformationForm from "@/Forms/SalaryInformationForm.jsx";
 import ProjectCard from "@/Components/ProjectCard.jsx";
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import dayjs from 'dayjs';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -225,7 +225,7 @@ const UserProfile = ({ title, allUsers, report_to, departments, designations }) 
         }
         calculateProfileCompletion();
         fetchProfileStats();
-        toast.success('Profile updated successfully');
+        showToast.success('Profile updated successfully');
     }, [calculateProfileCompletion, fetchProfileStats]);
 
     // Stats data for StatsCards component

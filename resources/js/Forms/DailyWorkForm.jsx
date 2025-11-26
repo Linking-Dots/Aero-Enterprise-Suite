@@ -29,7 +29,7 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { BuildingOfficeIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 
@@ -258,7 +258,7 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
     const handleGenerateNewRFI = () => {
         const newNumber = generateRFINumber();
         handleChange('number', newNumber);
-        toast.success('New RFI number generated!');
+        showToast.success('New RFI number generated!');
     };
 
     // Validate entire form
@@ -282,7 +282,7 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
         
         // Validate form before submission
         if (!validateForm()) {
-            toast.error('Please fix all validation errors before submitting');
+            showToast.error('Please fix all validation errors before submitting');
             return;
         }
 
@@ -327,7 +327,7 @@ const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: {

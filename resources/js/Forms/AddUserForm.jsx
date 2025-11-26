@@ -20,7 +20,7 @@ import GlassDialog from "@/Components/GlassDialog.jsx";
 import {PhotoCamera} from "@mui/icons-material";
 
 import LoadingButton from "@mui/lab/LoadingButton";
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import {TextField, SelectItem, Select} from "@mui/material";
 import PasswordIcon from "@mui/icons-material/Password";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -83,7 +83,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
             if (['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
                 formData.append('profile_image', selectedImageFile);
             } else {
-                toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
+                showToast.error('Invalid file type. Only JPEG and PNG are allowed.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -102,7 +102,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
 
             if (response.status === 200) {
                 setUser(response.data.user);
-                toast.success(response.data.messages?.length > 0
+                showToast.success(response.data.messages?.length > 0
                     ? response.data.messages.join(' ')
                     : 'Profile information updated successfully', {
                     icon: '🟢',
@@ -128,7 +128,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
         if (error.response) {
             if (error.response.status === 422) {
                 setErrors(error.response.data.errors || {});
-                toast.error(error.response.data.error || 'Failed to update profile information.', {
+                showToast.error(error.response.data.error || 'Failed to update profile information.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -138,7 +138,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
                     }
                 });
             } else {
-                toast.error('An unexpected error occurred. Please try again later.', {
+                showToast.error('An unexpected error occurred. Please try again later.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -149,7 +149,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
                 });
             }
         } else if (error.request) {
-            toast.error('No response received from the server. Please check your internet connection.', {
+            showToast.error('No response received from the server. Please check your internet connection.', {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',
@@ -159,7 +159,7 @@ const AddUserForm = ({user, allUsers, departments, designations,setUser, open, c
                 }
             });
         } else {
-            toast.error('An error occurred while setting up the request.', {
+            showToast.error('An error occurred while setting up the request.', {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',

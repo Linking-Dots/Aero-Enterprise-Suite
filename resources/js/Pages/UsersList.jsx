@@ -60,7 +60,7 @@ import StatsCards from "@/Components/StatsCards.jsx";
 import UsersTable from '@/Tables/UsersTable.jsx';
 import AddEditUserForm from "@/Forms/AddEditUserForm.jsx";
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const UsersList = ({ title, roles, departments, designations }) => {
   // Custom media query logic - matching AttendanceAdmin
@@ -264,7 +264,7 @@ const UsersList = ({ title, roles, departments, designations }) => {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to load users data');
+      showToast.error('Failed to load users data');
       setUsers([]);
     } finally {
       setLoading(false);
@@ -362,11 +362,11 @@ const UsersList = ({ title, roles, departments, designations }) => {
           } : user
         ));
         
-        toast.success(response.data.message);
+        showToast.success(response.data.message);
       }
     } catch (error) {
       console.error('Error toggling single device login:', error);
-      toast.error(error.response?.data?.message || 'Failed to toggle single device login');
+      showToast.error(error.response?.data?.message || 'Failed to toggle single device login');
     } finally {
       setDeviceActions(prev => ({ ...prev, [userId]: false }));
     }
@@ -390,11 +390,11 @@ const UsersList = ({ title, roles, departments, designations }) => {
           } : user
         ));
         
-        toast.success(response.data.message || 'User devices have been reset');
+        showToast.success(response.data.message || 'User devices have been reset');
       }
     } catch (error) {
       console.error('Error resetting user devices:', error);
-      toast.error('Failed to reset user devices');
+      showToast.error('Failed to reset user devices');
     } finally {
       setDeviceActions(prev => ({ ...prev, [userId]: false }));
     }
@@ -409,17 +409,17 @@ const UsersList = ({ title, roles, departments, designations }) => {
         const devices = response.data.devices;
         // Display device information in toast
         if (devices.length === 0) {
-          toast.info('User has no registered devices');
+          showToast.info('User has no registered devices');
         } else {
           const activeDevices = devices.filter(d => d.is_active).length;
-          toast.info(
+          showToast.info(
             `User has ${devices.length} device(s): ${activeDevices} active, ${devices.length - activeDevices} inactive`
           );
         }
       }
     } catch (error) {
       console.error('Error fetching user devices:', error);
-      toast.error('Failed to fetch device information');
+      showToast.error('Failed to fetch device information');
     }
   }, []);
 

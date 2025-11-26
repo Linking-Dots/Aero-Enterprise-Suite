@@ -15,7 +15,7 @@ import {
 } from "@heroui/react";
 import { X, CalendarIcon, UserIcon, ClockIcon } from 'lucide-react';
 
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
 import ApprovalChain from "@/Components/Leave/ApprovalChain.jsx";
@@ -322,20 +322,12 @@ const LeaveForm = ({
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
-                pending: 'Submitting leave application...',
-                success: {
-                    render({ data }) {
-                        return data.join(', ');
-                    }
-                },
-                error: {
-                    render({ data }) {
-                        return data;
-                    }
-                }
+                loading: 'Submitting leave application...',
+                success: (data) => Array.isArray(data) ? data.join(', ') : data,
+                error: (err) => typeof err === 'string' ? err : 'Failed to submit leave application'
             }
         );
     };

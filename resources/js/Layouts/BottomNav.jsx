@@ -16,7 +16,7 @@ import {
 import { Link, usePage, router } from "@inertiajs/react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/Contexts/ThemeContext';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 /**
  * Enhanced Bottom Navigation Component for Mobile ERP System
@@ -125,7 +125,7 @@ const BottomNav = ({ auth, contentRef, toggleSideBar, sideBarOpen, toggleThemeDr
             }
         } catch (error) {
             console.error('[BottomNav] Navigation error:', error);
-            toast.error('Navigation failed. Please try again.');
+            showToast.error('Navigation failed. Please try again.');
         }
     }, [toggleSideBar, toggleThemeDrawer]);
 

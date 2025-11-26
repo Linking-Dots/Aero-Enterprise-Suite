@@ -49,7 +49,7 @@ import BulkLeaveModal from '@/Components/BulkLeave/BulkLeaveModal.jsx';
 import BulkDeleteModal from '@/Components/BulkDelete/BulkDeleteModal.jsx';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 
 const LeavesAdmin = ({ title, allUsers }) => {

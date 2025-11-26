@@ -24,7 +24,7 @@ import {
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { parseDate } from "@internationalized/date";
@@ -101,13 +101,13 @@ const EnhancedDailyWorkSummaryExportForm = ({
                     break;
             }
 
-            toast.success(`Successfully exported ${exportData.length} summary records`, {
+            showToast.success(`Successfully exported ${exportData.length} summary records`, {
                 icon: <CheckCircleIcon className="w-5 h-5" />,
             });
             
             closeModal();
         } catch (error) {
-            toast.error('Export failed: ' + error.message);
+            showToast.error('Export failed: ' + error.message);
         } finally {
             setIsLoading(false);
         }

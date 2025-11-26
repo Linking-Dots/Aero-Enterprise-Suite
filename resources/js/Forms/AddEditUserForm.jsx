@@ -19,7 +19,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { X, Camera, Eye, EyeOff, Lock, UserIcon, CalendarIcon } from 'lucide-react';
 import { useForm } from 'laravel-precognition-react';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 
 const AddEditUserForm = ({user, allUsers, departments, designations, roles, setUsers, open, closeModal, editMode = false }) => {
@@ -196,7 +196,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, roles, setU
         if (selectedImageFile) {
             const fileType = selectedImageFile.type;
             if (!['image/jpeg', 'image/jpg', 'image/png'].includes(fileType)) {
-                toast.error('Invalid file type. Only JPEG and PNG are allowed.', {
+                showToast.error('Invalid file type. Only JPEG and PNG are allowed.', {
                     icon: '🔴'
                 });
                 return;
@@ -267,7 +267,7 @@ const AddEditUserForm = ({user, allUsers, departments, designations, roles, setU
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: `${editMode ? 'Updating' : 'Creating'} user...`,

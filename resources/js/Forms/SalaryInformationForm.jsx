@@ -11,7 +11,7 @@ import {
     Button
 } from '@heroui/react';
 import GlassCard from '@/Components/GlassCard';
-import { toast } from "react-toastify"; // Assuming GlassCard is a custom component
+import { showToast } from "@/utils/toastUtils"; // Using consistent toast utility
 
 
 const SalaryInformationForm = ({user, setUser}) => {
@@ -127,7 +127,7 @@ const SalaryInformationForm = ({user, setUser}) => {
             if (response.status === 200) {
                 setUser(response.data.user);
                 setProcessing(false);
-                toast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Salary information updated successfully', {
+                showToast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Salary information updated successfully', {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -139,7 +139,7 @@ const SalaryInformationForm = ({user, setUser}) => {
             } else {
                 setProcessing(false);
                 setErrors(response.data.errors);
-                toast.error(response.data.error || 'Failed to update salary information.', {
+                showToast.error(response.data.error || 'Failed to update salary information.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -151,7 +151,7 @@ const SalaryInformationForm = ({user, setUser}) => {
             }
         } catch (error) {
             setProcessing(false);
-            toast.error(error.response?.data?.message || 'An unexpected error occurred.', {
+            showToast.error(error.response?.data?.message || 'An unexpected error occurred.', {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',

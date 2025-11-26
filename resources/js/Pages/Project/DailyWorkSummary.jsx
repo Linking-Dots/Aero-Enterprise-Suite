@@ -40,7 +40,7 @@ import dayjs from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
 import isBetween from 'dayjs/plugin/isBetween';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 dayjs.extend(minMax);
 dayjs.extend(isBetween);
@@ -113,7 +113,7 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
             if (response.data && response.data.summary) {
                 // Update local state instead of full page reload
                 setDailyWorkSummary(response.data.summary);
-                toast.success('Summary data refreshed successfully');
+                showToast.success('Summary data refreshed successfully');
             } else if (response.data && response.data.message) {
                 // Fallback: fetch updated data
                 const summaryResponse = await axios.get(route('daily-works-summary.data'), {
@@ -124,15 +124,15 @@ const DailyWorkSummary = ({ auth, title, summary, jurisdictions, inCharges }) =>
                     setDailyWorkSummary(summaryResponse.data.summary);
                 }
                 
-                toast.success('Summary data refreshed successfully');
+                showToast.success('Summary data refreshed successfully');
             }
         } catch (error) {
             console.error('Failed to refresh summary:', error);
             
             if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
+                showToast.error(error.response.data.message);
             } else {
-                toast.error('Failed to refresh summary data');
+                showToast.error('Failed to refresh summary data');
             }
         } finally {
             setLoading(false);

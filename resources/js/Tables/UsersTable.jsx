@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from '@inertiajs/react';
-import { toast } from "react-toastify";
+import { showToast } from '@/utils/toastUtils';
 import { 
   Table, 
   TableBody, 
@@ -144,18 +144,10 @@ const UsersTable = ({
         setLoading(userId, 'role', false);
       }
     });
-    toast.promise(promise, {
-      pending: 'Updating employee role...',
-      success: {
-        render({ data }) {
-          return data.join(', ');
-        },
-      },
-      error: {
-        render({ data }) {
-          return Array.isArray(data) ? data.join(', ') : data;
-        },
-      },
+    showToast.promise(promise, {
+      loading: 'Updating employee role...',
+      success: (data) => data.join(', '),
+      error: (data) => Array.isArray(data) ? data.join(', ') : data,
     });
     
     // Return the promise to allow parent components to track completion
@@ -191,18 +183,10 @@ const UsersTable = ({
         setLoading(userId, 'delete', false);
       }
     });
-    toast.promise(promise, {
-      pending: 'Deleting user...',
-      success: {
-        render({ data }) {
-          return data.join(', ');
-        },
-      },
-      error: {
-        render({ data }) {
-          return Array.isArray(data) ? data.join(', ') : data;
-        },
-      },
+    showToast.promise(promise, {
+      loading: 'Deleting user...',
+      success: (data) => data.join(', '),
+      error: (data) => Array.isArray(data) ? data.join(', ') : data,
     });
   };
 
@@ -247,7 +231,7 @@ const UsersTable = ({
       // In this implementation, we use the handler passed from the parent
       if (toggleUserStatusOptimized) {
         toggleUserStatusOptimized(userId, !currentStatus);
-        toast.success(`User status ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+        showToast.success(`User status ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
       } else if (setUsers) {
         // Fallback to the older method if the optimized handler is not available
         setUsers(prevUsers => 
@@ -255,11 +239,11 @@ const UsersTable = ({
             user.id === userId ? { ...user, active: !currentStatus } : user
           )
         );
-        toast.success(`User status ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+        showToast.success(`User status ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
       }
     } catch (error) {
       console.error('Error toggling user status:', error);
-      toast.error('Failed to update user status');
+      showToast.error('Failed to update user status');
     } finally {
       setLoading(userId, 'status', false);
     }

@@ -12,7 +12,7 @@ import {
     ExclamationTriangleIcon,
     TrashIcon 
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import axios from 'axios';
 
 const DeleteLeaveForm = ({ open, closeModal, leaveId, setLeavesData, setLeaves, setTotalRows, setLastPage, setError, deleteLeaveOptimized, fetchLeavesStats }) => {
@@ -35,7 +35,7 @@ const DeleteLeaveForm = ({ open, closeModal, leaveId, setLeavesData, setLeaves, 
 
     const handleDelete = async () => {
         if (!leaveId) {
-            toast.error('Invalid leave ID provided');
+            showToast.error('Invalid leave ID provided');
             return;
         }
 
@@ -87,7 +87,7 @@ const DeleteLeaveForm = ({ open, closeModal, leaveId, setLeavesData, setLeaves, 
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Deleting leave application...',

@@ -32,7 +32,7 @@ import {
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const Show = ({ auth, registration, event }) => {
     const [showRejectModal, setShowRejectModal] = React.useState(false);
@@ -91,10 +91,10 @@ const Show = ({ auth, registration, event }) => {
                 event: event.id,
                 registration: registration.id
             }));
-            toast.success('Registration approved successfully');
+            showToast.success('Registration approved successfully');
             router.reload();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to approve registration');
+            showToast.error(error.response?.data?.message || 'Failed to approve registration');
         } finally {
             setProcessing(false);
         }
@@ -109,11 +109,11 @@ const Show = ({ auth, registration, event }) => {
             }), {
                 rejection_reason: rejectReason
             });
-            toast.success('Registration rejected successfully');
+            showToast.success('Registration rejected successfully');
             setShowRejectModal(false);
             router.reload();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to reject registration');
+            showToast.error(error.response?.data?.message || 'Failed to reject registration');
         } finally {
             setProcessing(false);
         }
@@ -128,10 +128,10 @@ const Show = ({ auth, registration, event }) => {
                 event: event.id,
                 registration: registration.id
             }));
-            toast.success('Payment verified successfully');
+            showToast.success('Payment verified successfully');
             router.reload();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to verify payment');
+            showToast.error(error.response?.data?.message || 'Failed to verify payment');
         } finally {
             setProcessing(false);
         }
