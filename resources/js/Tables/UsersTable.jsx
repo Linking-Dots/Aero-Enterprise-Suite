@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from '@inertiajs/react';
 import { toast } from "react-toastify";
 import { 
@@ -21,7 +21,6 @@ import {
   Spinner,
   Select,
   SelectItem,
-  Avatar,
 } from "@heroui/react";
 import {
   PencilIcon,
@@ -43,8 +42,7 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   ArrowPathIcon,
-  ClockIcon,
-  UsersIcon
+  ClockIcon
 } from "@heroicons/react/24/outline";
 
 // Theme utility function (consistent with UsersList)
@@ -54,8 +52,7 @@ const getThemeRadius = () => {
 
 const UsersTable = ({ 
   allUsers, 
-  roles,
-  designations,
+  roles, 
   isMobile, 
   isTablet, 
   setUsers,
@@ -75,9 +72,6 @@ const UsersTable = ({
   deviceActions = {},
 }) => {
   const [loadingStates, setLoadingStates] = useState({});
-  
-  // Debounce ref for report_to updates
-  const reportToDebounceRef = useRef({});
 
   // Device detection functions (copied from UserDeviceManagement)
   const getDeviceIcon = (userAgent, className = "w-5 h-5") => {
@@ -168,82 +162,6 @@ const UsersTable = ({
     return promise;
   }
 
-  // Debounced update for report_to field
-  const debouncedUpdateReportTo = useCallback((userId, reportToId) => {
-    // Clear existing timeout for this user
-    if (reportToDebounceRef.current[userId]) {
-      clearTimeout(reportToDebounceRef.current[userId]);
-    }
-
-    // Set new timeout
-    reportToDebounceRef.current[userId] = setTimeout(async () => {
-      setLoading(userId, 'reportTo', true);
-      try {
-        const response = await axios.post(route('users.updateReportTo', { id: userId }), {
-          report_to: reportToId || null,
-        });
-        if (response.status === 200) {
-          // Update local state if needed
-          if (setUsers) {
-            setUsers(prevUsers => 
-              prevUsers.map(user => 
-                user.id === userId 
-                  ? { 
-                      ...user, 
-                      report_to: reportToId || null,
-                      reports_to: response.data.user?.reports_to || null
-                    } 
-                  : user
-              )
-            );
-          }
-          toast.success(response.data.message || 'Report to updated successfully');
-        }
-      } catch (error) {
-        console.error('Error updating report to:', error);
-        toast.error(error.response?.data?.error || 'Failed to update report to');
-      } finally {
-        setLoading(userId, 'reportTo', false);
-      }
-    }, 500);
-  }, [setUsers]);
-
-  // Get eligible managers for a user (same department, higher hierarchy_level)
-  const getEligibleManagers = useCallback((user) => {
-    if (!allUsers || !designations) return [];
-    
-    const userDepartmentId = user?.department?.id || user?.department_id;
-    const userDesignationId = user?.designation?.id || user?.designation_id;
-    
-    // Get user's designation hierarchy level
-    const userDesignation = designations?.find(d => String(d.id) === String(userDesignationId));
-    const userHierarchyLevel = userDesignation?.hierarchy_level;
-    
-    // If no hierarchy level, return empty (can't determine eligible managers)
-    if (userHierarchyLevel === undefined || userHierarchyLevel === null) {
-      return [];
-    }
-    
-    return allUsers.filter(potentialManager => {
-      // Can't report to yourself
-      if (potentialManager.id === user.id) return false;
-      
-      // Must be active
-      if (!potentialManager.active) return false;
-      
-      // Must be in same department
-      const managerDeptId = potentialManager?.department?.id || potentialManager?.department_id;
-      if (String(managerDeptId) !== String(userDepartmentId)) return false;
-      
-      // Must have higher hierarchy (lower number = higher position)
-      const managerDesignationId = potentialManager?.designation?.id || potentialManager?.designation_id;
-      const managerDesignation = designations?.find(d => String(d.id) === String(managerDesignationId));
-      
-      if (!managerDesignation || managerDesignation.hierarchy_level === undefined) return false;
-      
-      return managerDesignation.hierarchy_level < userHierarchyLevel;
-    });
-  }, [allUsers, designations]);
 
 
   const handleDelete = async (userId) => {
@@ -294,7 +212,6 @@ const UsersTable = ({
       { name: "USER", uid: "user" },
       { name: "EMAIL", uid: "email" },
       { name: "DEPARTMENT", uid: "department" },
-      { name: "REPORT TO", uid: "report_to" },
       { name: "DEVICE STATUS", uid: "device_status" },
       { name: "STATUS", uid: "status" },
       { name: "ROLES", uid: "roles" },
@@ -305,9 +222,8 @@ const UsersTable = ({
     if (!isMobile && !isTablet) {
       baseColumns.splice(3, 0, { name: "PHONE", uid: "phone" });
     } else if (isMobile) {
-      // On mobile, remove phone, department, report_to to make room for essential columns
+      // On mobile, remove phone and department to make room for device status
       baseColumns.splice(baseColumns.findIndex(col => col.uid === "department"), 1);
-      baseColumns.splice(baseColumns.findIndex(col => col.uid === "report_to"), 1);
       baseColumns.splice(baseColumns.findIndex(col => col.uid === "device_status"), 1);
     } else if (isTablet) {
       // On tablet, keep device status but maybe adjust positioning
@@ -491,76 +407,6 @@ const UsersTable = ({
             >
               {user?.department?.name || "N/A"}
             </span>
-          </div>
-        );
-
-      case "report_to":
-        const eligibleManagers = getEligibleManagers(user);
-        const isUpdatingReportTo = isLoading(user.id, 'reportTo');
-        const currentReportsTo = user.reports_to || (user.report_to ? allUsers?.find(u => u.id === user.report_to) : null);
-        
-        return (
-          <div className="flex items-center min-w-[180px]">
-            <Select
-              size="sm"
-              variant="bordered"
-              radius={getThemeRadius()}
-              placeholder="Select manager"
-              isDisabled={isUpdatingReportTo || !eligibleManagers.length}
-              isLoading={isUpdatingReportTo}
-              selectedKeys={user.report_to ? [String(user.report_to)] : []}
-              onSelectionChange={(keys) => {
-                const selectedKey = Array.from(keys)[0];
-                const newReportToId = selectedKey ? parseInt(selectedKey, 10) : null;
-                if (newReportToId !== user.report_to) {
-                  debouncedUpdateReportTo(user.id, newReportToId);
-                }
-              }}
-              classNames={{
-                trigger: "min-h-unit-10 h-unit-10",
-                value: "text-small",
-              }}
-              renderValue={(items) => {
-                if (!currentReportsTo) {
-                  return (
-                    <span className="text-default-400 text-sm">No manager</span>
-                  );
-                }
-                return (
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      src={currentReportsTo.profile_image_url || currentReportsTo.profile_image}
-                      size="sm"
-                      className="w-6 h-6 flex-shrink-0"
-                      showFallback
-                      name={currentReportsTo.name}
-                    />
-                    <span className="text-sm font-medium truncate">{currentReportsTo.name}</span>
-                  </div>
-                );
-              }}
-            >
-              {eligibleManagers.length === 0 ? (
-                <SelectItem key="no-managers" isDisabled textValue="No eligible managers">
-                  <span className="text-default-400">No eligible managers in department</span>
-                </SelectItem>
-              ) : (
-                eligibleManagers.map((manager) => (
-                  <SelectItem key={String(manager.id)} textValue={manager.name}>
-                    <User
-                      name={manager.name}
-                      description={manager.designation?.title || manager.designation?.name || ''}
-                      avatarProps={{
-                        src: manager.profile_image_url || manager.profile_image,
-                        size: "sm",
-                        showFallback: true,
-                        name: manager.name,
-                      }}
-                    />
-                  </SelectItem>
-                ))
-              )}
-            </Select>
           </div>
         );
 
@@ -1012,7 +858,6 @@ const UsersTable = ({
                   column.uid === "email" ? 240 :
                   column.uid === "phone" ? 140 :
                   column.uid === "department" ? 160 :
-                  column.uid === "report_to" ? 200 :
                   column.uid === "device_status" ? 160 :
                   column.uid === "status" ? 120 :
                   column.uid === "roles" ? 180 :
@@ -1036,7 +881,6 @@ const UsersTable = ({
                   {column.uid === "email" && <EnvelopeIcon className="w-3 h-3 text-default-400" />}
                   {column.uid === "phone" && <PhoneIcon className="w-3 h-3 text-default-400" />}
                   {column.uid === "department" && <BuildingOfficeIcon className="w-3 h-3 text-default-400" />}
-                  {column.uid === "report_to" && <UsersIcon className="w-3 h-3 text-default-400" />}
                   {column.uid === "device_status" && <DevicePhoneMobileIcon className="w-3 h-3 text-default-400" />}
                   {column.uid === "status" && <CheckCircleIcon className="w-3 h-3 text-default-400" />}
                   {column.uid === "roles" && <ShieldCheckIcon className="w-3 h-3 text-default-400" />}

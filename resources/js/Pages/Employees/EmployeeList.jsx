@@ -801,6 +801,131 @@ const EmployeesList = ({ title, departments, designations, attendanceTypes }) =>
                         </Button>
                       </div>
                     </div>
+
+                    {/* Expanded Filters Section */}
+                    {showFilters && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-4"
+                      >
+                        <div 
+                          className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                          style={{
+                            background: 'color-mix(in srgb, var(--theme-content2) 50%, transparent)',
+                            border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                            borderRadius: getThemeRadius(),
+                            backdropFilter: 'blur(16px)',
+                          }}
+                        >
+                          {/* Department Filter */}
+                          <Select
+                            label="Department"
+                            placeholder="All Departments"
+                            selectedKeys={filters.department !== 'all' ? [filters.department] : []}
+                            onSelectionChange={(keys) => {
+                              const value = Array.from(keys)[0];
+                              handleDepartmentFilterChange(value || 'all');
+                            }}
+                            variant="bordered"
+                            size="sm"
+                            radius={getThemeRadius()}
+                            startContent={<BuildingOfficeIcon className="w-4 h-4 text-default-400" />}
+                            classNames={{
+                              trigger: "bg-white/10 backdrop-blur-md border-white/20",
+                            }}
+                          >
+                            {departments?.map((dept) => (
+                              <SelectItem key={String(dept.id)} textValue={dept.name}>
+                                {dept.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
+
+                          {/* Designation Filter */}
+                          <Select
+                            label="Designation"
+                            placeholder="All Designations"
+                            selectedKeys={filters.designation !== 'all' ? [filters.designation] : []}
+                            onSelectionChange={(keys) => {
+                              const value = Array.from(keys)[0];
+                              handleDesignationFilterChange(value || 'all');
+                            }}
+                            variant="bordered"
+                            size="sm"
+                            radius={getThemeRadius()}
+                            isDisabled={filters.department === 'all'}
+                            startContent={<BriefcaseIcon className="w-4 h-4 text-default-400" />}
+                            classNames={{
+                              trigger: "bg-white/10 backdrop-blur-md border-white/20",
+                            }}
+                          >
+                            {filteredDesignations?.map((desig) => (
+                              <SelectItem key={String(desig.id)} textValue={desig.title}>
+                                {desig.title}
+                              </SelectItem>
+                            ))}
+                          </Select>
+
+                          {/* Attendance Type Filter */}
+                          <Select
+                            label="Attendance Type"
+                            placeholder="All Attendance Types"
+                            selectedKeys={filters.attendanceType !== 'all' ? [filters.attendanceType] : []}
+                            onSelectionChange={(keys) => {
+                              const value = Array.from(keys)[0];
+                              handleAttendanceTypeFilterChange(value || 'all');
+                            }}
+                            variant="bordered"
+                            size="sm"
+                            radius={getThemeRadius()}
+                            startContent={<ClockIcon className="w-4 h-4 text-default-400" />}
+                            classNames={{
+                              trigger: "bg-white/10 backdrop-blur-md border-white/20",
+                            }}
+                          >
+                            {attendanceTypes?.map((type) => (
+                              <SelectItem key={String(type.id)} textValue={type.name}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
+
+                          {/* Clear Filters Button */}
+                          <div className="flex items-end">
+                            <Button
+                              variant="flat"
+                              size="sm"
+                              className="w-full"
+                              onPress={() => {
+                                setFilters({
+                                  search: '',
+                                  department: 'all',
+                                  designation: 'all',
+                                  attendanceType: 'all'
+                                });
+                                setPagination(prev => ({ ...prev, currentPage: 1 }));
+                              }}
+                              isDisabled={
+                                filters.search === '' && 
+                                filters.department === 'all' && 
+                                filters.designation === 'all' && 
+                                filters.attendanceType === 'all'
+                              }
+                              style={{
+                                background: 'color-mix(in srgb, var(--theme-danger) 20%, transparent)',
+                                color: 'var(--theme-danger)',
+                                borderRadius: getThemeRadius(),
+                              }}
+                            >
+                              Clear Filters
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
 
                 {/* Employee Table Section */}

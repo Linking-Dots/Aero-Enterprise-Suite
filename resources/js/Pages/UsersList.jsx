@@ -1722,7 +1722,6 @@ const UsersList = ({ title, roles, departments, designations }) => {
                         <UsersTable 
                           allUsers={paginatedUsers.data}
                           roles={roles}
-                          designations={designations}
                           setUsers={handleUsersUpdate}
                           isMobile={isMobile}
                           isTablet={isTablet}

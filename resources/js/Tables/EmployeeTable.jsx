@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { Link, router } from '@inertiajs/react';
 import { toast } from "react-toastify";
 import axios from 'axios';
@@ -29,7 +29,8 @@ import {
   ModalFooter,
   Input,
   Switch,
-  Pagination
+  Pagination,
+  Avatar
 } from "@heroui/react";
 import {
   PencilIcon,
@@ -49,6 +50,7 @@ import {
   WifiIcon,
   MapIcon,
   QrCodeIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import DeleteEmployeeModal from '@/Components/DeleteEmployeeModal';
 import ProfilePictureModal from '@/Components/ProfilePictureModal';
@@ -518,12 +520,80 @@ const EmployeeTable = ({
     }
   };
 
+  // Debounce ref for report_to updates
+  const reportToDebounceRef = useRef({});
+
+  // Debounced update for report_to field
+  const debouncedUpdateReportTo = useCallback((userId, reportToId) => {
+    // Clear existing timeout for this user
+    if (reportToDebounceRef.current[userId]) {
+      clearTimeout(reportToDebounceRef.current[userId]);
+    }
+
+    // Set new timeout
+    reportToDebounceRef.current[userId] = setTimeout(async () => {
+      try {
+        const response = await axios.post(route('users.updateReportTo', { id: userId }), {
+          report_to: reportToId || null,
+        });
+        if (response.status === 200) {
+          // Update local state if needed
+          if (updateEmployeeOptimized) {
+            updateEmployeeOptimized(userId, {
+              report_to: reportToId || null,
+              reports_to: response.data.user?.reports_to || null
+            });
+          }
+          toast.success(response.data.message || 'Report to updated successfully');
+        }
+      } catch (error) {
+        console.error('Error updating report to:', error);
+        toast.error(error.response?.data?.error || 'Failed to update report to');
+      }
+    }, 500);
+  }, [updateEmployeeOptimized]);
+
+  // Get eligible managers for a user (same department, higher hierarchy_level)
+  const getEligibleManagers = useCallback((user) => {
+    if (!allUsers || !designations) return [];
+    
+    const userDepartmentId = user?.department_id;
+    const userDesignationId = user?.designation_id;
+    
+    // Get user's designation hierarchy level
+    const userDesignation = designations?.find(d => String(d.id) === String(userDesignationId));
+    const userHierarchyLevel = userDesignation?.hierarchy_level;
+    
+    // If no hierarchy level, return empty (can't determine eligible managers)
+    if (userHierarchyLevel === undefined || userHierarchyLevel === null) {
+      return [];
+    }
+    
+    return allUsers.filter(potentialManager => {
+      // Can't report to yourself
+      if (potentialManager.id === user.id) return false;
+      
+      // Must be in same department
+      const managerDeptId = potentialManager?.department_id;
+      if (String(managerDeptId) !== String(userDepartmentId)) return false;
+      
+      // Must have higher hierarchy (lower number = higher position)
+      const managerDesignationId = potentialManager?.designation_id;
+      const managerDesignation = designations?.find(d => String(d.id) === String(managerDesignationId));
+      
+      if (!managerDesignation || managerDesignation.hierarchy_level === undefined) return false;
+      
+      return managerDesignation.hierarchy_level < userHierarchyLevel;
+    });
+  }, [allUsers, designations]);
+
   const columns = useMemo(() => {
     const baseColumns = [
       { name: "#", uid: "sl", width: 60 },
       { name: "EMPLOYEE", uid: "employee", width: "auto", minWidth: 200 },
       { name: "DEPARTMENT", uid: "department", width: 180 },
       { name: "DESIGNATION", uid: "designation", width: 180 },
+      { name: "REPORT TO", uid: "report_to", width: 200 },
       { name: "ACTIONS", uid: "actions", width: 80 }
     ];
 
@@ -533,7 +603,15 @@ const EmployeeTable = ({
     }
     
     if (!isMobile && !isTablet) {
-      baseColumns.splice(baseColumns.length - 1, 0, { name: "ATTENDANCE TYPE", uid: "attendance_type", width: 180 });
+      baseColumns.splice(baseColumns.length - 2, 0, { name: "ATTENDANCE TYPE", uid: "attendance_type", width: 180 });
+    }
+
+    // On mobile, remove report_to column
+    if (isMobile) {
+      const reportToIndex = baseColumns.findIndex(col => col.uid === "report_to");
+      if (reportToIndex > -1) {
+        baseColumns.splice(reportToIndex, 1);
+      }
     }
     
     return baseColumns;
@@ -690,6 +768,74 @@ const EmployeeTable = ({
               </Dropdown>
             </div>
           );
+
+      case "report_to":
+        const eligibleManagers = getEligibleManagers(user);
+        const currentReportsTo = user.reports_to || (user.report_to ? allUsers?.find(u => u.id === user.report_to) : null);
+        
+        return (
+          <div className="flex flex-col gap-2 min-w-[180px]">
+            <Select
+              size="sm"
+              variant="bordered"
+              placeholder="Select manager"
+              isDisabled={!eligibleManagers.length}
+              selectedKeys={user.report_to ? [String(user.report_to)] : []}
+              onSelectionChange={(keys) => {
+                const selectedKey = Array.from(keys)[0];
+                const newReportToId = selectedKey ? parseInt(selectedKey, 10) : null;
+                if (newReportToId !== user.report_to) {
+                  debouncedUpdateReportTo(user.id, newReportToId);
+                }
+              }}
+              classNames={{
+                trigger: "min-h-unit-10 h-unit-10 backdrop-blur-md border-white/20 bg-white/10 hover:bg-white/15",
+                value: "text-small",
+              }}
+              startContent={<UsersIcon className="w-4 h-4" />}
+              renderValue={(items) => {
+                if (!currentReportsTo) {
+                  return (
+                    <span className="text-default-400 text-sm">No manager</span>
+                  );
+                }
+                return (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      src={currentReportsTo.profile_image_url || currentReportsTo.profile_image}
+                      size="sm"
+                      className="w-6 h-6 flex-shrink-0"
+                      showFallback
+                      name={currentReportsTo.name}
+                    />
+                    <span className="text-sm font-medium truncate">{currentReportsTo.name}</span>
+                  </div>
+                );
+              }}
+            >
+              {eligibleManagers.length === 0 ? (
+                <SelectItem key="no-managers" isDisabled textValue="No eligible managers">
+                  <span className="text-default-400">No eligible managers in department</span>
+                </SelectItem>
+              ) : (
+                eligibleManagers.map((manager) => (
+                  <SelectItem key={String(manager.id)} textValue={manager.name}>
+                    <User
+                      name={manager.name}
+                      description={manager.designation_name || ''}
+                      avatarProps={{
+                        src: manager.profile_image_url || manager.profile_image,
+                        size: "sm",
+                        showFallback: true,
+                        name: manager.name,
+                      }}
+                    />
+                  </SelectItem>
+                ))
+              )}
+            </Select>
+          </div>
+        );
 
       case "attendance_type":
         const hasConfiguredTypes = groupedAttendanceTypes.length > 0;

@@ -538,11 +538,11 @@ class UserController extends Controller
             }
 
             if (! empty($department) && $department !== 'all') {
-                $query->where('department', $department);
+                $query->where('department_id', $department);
             }
 
             if (! empty($designation) && $designation !== 'all') {
-                $query->where('designation', $designation);
+                $query->where('designation_id', $designation);
             }
 
             if (! empty($attendanceType) && $attendanceType !== 'all') {
@@ -550,7 +550,7 @@ class UserController extends Controller
             }
 
             // Execute query with pagination
-            $employees = $query->paginate($perPage, ['*'], 'page', $page);
+            $employees = $query->with('reportsTo')->paginate($perPage, ['*'], 'page', $page);
 
             // Transform employee data to include department and designation names
             $transformedEmployees = $employees->map(function ($employee) {
@@ -562,14 +562,22 @@ class UserController extends Controller
                     'employee_id' => $employee->employee_id,
                     'profile_image_url' => $employee->profile_image_url,
                     'active' => $employee->active,
-                    // Include both ID and full name for department
-                    'department' => $employee->department,
-                    // Include both ID and name for designation
-                    'designation' => $employee->designation,
-
+                    // Include department ID and name
+                    'department_id' => $employee->department_id,
+                    'department_name' => $employee->department?->name,
+                    // Include designation ID and name
+                    'designation_id' => $employee->designation_id,
+                    'designation_name' => $employee->designation?->title,
                     // Include attendance type
                     'attendance_type_id' => $employee->attendance_type_id,
-                    'attendance_type' => $employee->attendanceType ? $employee->attendanceType->name : null,
+                    'attendance_type_name' => $employee->attendanceType?->name,
+                    // Include report_to for manager assignment
+                    'report_to' => $employee->report_to,
+                    'reports_to' => $employee->reportsTo ? [
+                        'id' => $employee->reportsTo->id,
+                        'name' => $employee->reportsTo->name,
+                        'profile_image_url' => $employee->reportsTo->profile_image_url,
+                    ] : null,
                     'created_at' => $employee->created_at,
                     'updated_at' => $employee->updated_at,
                 ];
