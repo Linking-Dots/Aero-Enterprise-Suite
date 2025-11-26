@@ -85,11 +85,14 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     });
     
     // Simple data fetching optimized for mobile vs desktop
-    const fetchData = async () => {
+    const fetchData = async (showLoader = true) => {
         // Prevent multiple simultaneous requests
         if (loading) return;
         
-        setLoading(true);
+        // Only show loader on initial load or mode switch
+        if (showLoader && !modeSwitch) {
+            setLoading(true);
+        }
         try {
             const params = {
                 search: search,
@@ -138,40 +141,30 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     const handleSearch = (event) => {
         setSearch(event.target.value);
         setCurrentPage(1);
-        // Simple debounced search
-        setTimeout(() => fetchData(), 100);
+        // Will trigger via useEffect
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        // Only relevant for desktop mode
-        if (!isMobile) {
-            fetchData();
-        }
+        // Will trigger via useEffect
     };
 
     const handleFilterChange = (newFilterData) => {
         setFilterData(newFilterData);
         setCurrentPage(1);
-        fetchData();
+        // Will trigger via useEffect
     };
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
-        // Mobile mode: refetch when date changes
-        if (isMobile) {
-            setCurrentPage(1);
-            fetchData();
-        }
+        setCurrentPage(1);
+        // Will trigger via useEffect
     };
 
     const handleDateRangeChange = (range) => {
         setDateRange(range);
-        // Desktop mode: refetch when date range changes
-        if (!isMobile) {
-            setCurrentPage(1);
-            fetchData();
-        }
+        setCurrentPage(1);
+        // Will trigger via useEffect
     };
 
     // Fetch additional items if needed after deletion
@@ -481,17 +474,29 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     // Enhanced useEffect for mobile/desktop mode switching
     useEffect(() => {
         console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`);
-        setModeSwitch(true); // Indicate mode switch is happening
-        // Reset pagination when switching modes
+        setModeSwitch(true);
         setCurrentPage(1);
-        // Force immediate refetch when switching between mobile/desktop
-        fetchData().finally(() => setModeSwitch(false));
-    }, [isMobile]); // Separate effect for mode changes
+        fetchData(true).finally(() => setModeSwitch(false));
+    }, [isMobile]);
 
-    // Data loading effect
+    // Debounced data fetching effect for search, filter, pagination
     useEffect(() => {
-        fetchData();
-    }, [currentPage, perPage, search, filterData, selectedDate, dateRange]);
+        // Skip if mode is switching
+        if (modeSwitch) return;
+        
+        // Debounce search, instant for others
+        const timeoutId = search ? setTimeout(() => {
+            fetchData(false); // No loader for filter/search/pagination
+        }, 300) : null;
+        
+        if (!search) {
+            fetchData(false); // Instant for pagination/filter changes
+        }
+        
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [currentPage, perPage, search, filterData, selectedDate, dateRange, isMobile]);
 
     // Load statistics on mount
     useEffect(() => {
@@ -670,54 +675,39 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                 />
                             </div>
                             
-                            {/* Search Section with Loading Skeleton */}
+                            {/* Search Section */}
                             <div className="mb-6">
                                 <div className="w-full sm:w-auto sm:min-w-[300px]">
-                                    {loading || modeSwitch ? (
-                                        <Skeleton className="w-full h-10 rounded-lg" />
-                                    ) : (
-                                        <Input
-                                            type="text"
-                                            placeholder="Search by description, location, or notes..."
-                                            value={search}
-                                            onChange={(e) => handleSearch(e)}
-                                            variant="bordered"
-                                            size={isMobile ? "sm" : "md"}
-                                            radius={getThemeRadius()}
-                                            startContent={
-                                                <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                            }
-                                            classNames={{
-                                                input: "text-foreground",
-                                                inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                             focus-within:bg-content2/90 border-divider/50 
-                                                             hover:border-divider data-[focus]:border-primary`,
-                                            }}
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                borderRadius: `var(--borderRadius, 12px)`,
-                                            }}
-                                        />
-                                    )}
+                                    <Input
+                                        type="text"
+                                        placeholder="Search by description, location, or notes..."
+                                        value={search}
+                                        onChange={(e) => handleSearch(e)}
+                                        variant="bordered"
+                                        size={isMobile ? "sm" : "md"}
+                                        radius={getThemeRadius()}
+                                        startContent={
+                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                        }
+                                        classNames={{
+                                            input: "text-foreground",
+                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                         focus-within:bg-content2/90 border-divider/50 
+                                                         hover:border-divider data-[focus]:border-primary`,
+                                        }}
+                                        style={{
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                            borderRadius: `var(--borderRadius, 12px)`,
+                                        }}
+                                    />
                                 </div>
                             </div>
 
-                            {/* Date Selector Section with Loading Skeleton */}
+                            {/* Date Selector Section */}
                             <div className="mb-6">
-                                {loading || modeSwitch ? (
-                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                        <div className="flex items-center gap-2">
-                                            <Skeleton className="w-5 h-5 rounded" />
-                                            <Skeleton className="w-20 h-4 rounded" />
-                                        </div>
-                                        <div className="w-full sm:w-auto">
-                                            <Skeleton className="w-full sm:w-48 h-10 rounded-lg" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                        <div className="flex items-center gap-2">
-                                            <CalendarIcon className="w-5 h-5 text-default-500" />
+                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                    <div className="flex items-center gap-2">
+                                        <CalendarIcon className="w-5 h-5 text-default-500" />
                                             <span className="text-sm font-medium text-foreground">
                                                 {isMobile ? 'Select Date:' : 'Date Range:'}
                                             </span>
@@ -800,10 +790,11 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                 }}
                                             />
                                         </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>                            {/* Daily Works Table */}
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Daily Works Table */}
                             <Card 
                                 radius={getThemeRadius()}
                                 className="bg-content2/50 backdrop-blur-md border border-divider/30"
