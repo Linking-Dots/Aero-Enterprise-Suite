@@ -114,21 +114,14 @@ class DailyWorkImportService
         $inChargeSummary[$inCharge]['totalDailyWorks']++;
         $this->updateTypeCounter($inChargeSummary[$inCharge], $importedDailyWork[2]);
 
-        // Check for existing daily work (only active records, not soft-deleted)
+        // Check for existing daily work
         $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
 
         if ($existingDailyWork) {
-            // This is a resubmission of an existing active RFI
-            $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge], $inCharge);
+            // This is a resubmission - update the existing RFI
+            $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge]);
         } else {
-            // This is a new submission - check if there are soft-deleted records
-            $softDeletedWork = DailyWork::onlyTrashed()->where('number', $importedDailyWork[1])->first();
-
-            if ($softDeletedWork) {
-                // Permanently delete old soft-deleted record to free up the RFI number
-                $softDeletedWork->forceDelete();
-            }
-
+            // This is a new submission
             $this->createNewDailyWork($importedDailyWork, $inCharge);
         }
 
@@ -219,33 +212,26 @@ class DailyWorkImportService
     /**
      * Handle resubmission of existing daily work
      */
-    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary, int $inChargeId): void
+    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary): void
     {
         $summary['resubmissions']++;
-        $resubmissionCount = $existingDailyWork->resubmission_count ?? 0;
-        $resubmissionCount++;
+
+        // Increment resubmission count
+        $resubmissionCount = ($existingDailyWork->resubmission_count ?? 0) + 1;
         $resubmissionDetails = $this->getResubmissionDetails($resubmissionCount);
 
-        // Only soft delete if status is NOT completed
-        if (! $existingDailyWork->trashed() && $existingDailyWork->status !== DailyWork::STATUS_COMPLETED) {
-            $existingDailyWork->delete();
-        }
-
-        DailyWork::create([
-            'date' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? $existingDailyWork->date : $importedDailyWork[0]),
-            'number' => $importedDailyWork[1],
-            'status' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? DailyWork::STATUS_COMPLETED : DailyWork::STATUS_NEW),
+        // Update the existing daily work with resubmission info
+        $existingDailyWork->update([
+            'resubmission_count' => $resubmissionCount,
+            'resubmission_date' => Carbon::now(),
+            'inspection_details' => $resubmissionDetails,
+            // Update other fields from the import
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
             'qty_layer' => $importedDailyWork[5] ?? null,
             'side' => $importedDailyWork[6] ?? null,
             'planned_time' => $importedDailyWork[7] ?? null,
-            'incharge' => $inChargeId,
-            'assigned' => null, // Don't auto-assign to incharge
-            'resubmission_count' => $resubmissionCount,
-            'resubmission_date' => Carbon::now(),
-            'inspection_details' => $resubmissionDetails,
         ]);
     }
 
