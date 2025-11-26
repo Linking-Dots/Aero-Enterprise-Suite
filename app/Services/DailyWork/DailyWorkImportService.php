@@ -114,8 +114,8 @@ class DailyWorkImportService
         $inChargeSummary[$inCharge]['totalDailyWorks']++;
         $this->updateTypeCounter($inChargeSummary[$inCharge], $importedDailyWork[2]);
 
-        // Handle existing or new daily work
-        $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
+        // Handle existing or new daily work (include soft-deleted records)
+        $existingDailyWork = DailyWork::withTrashed()->where('number', $importedDailyWork[1])->first();
 
         if ($existingDailyWork) {
             $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge], $inCharge);
@@ -216,6 +216,11 @@ class DailyWorkImportService
         $resubmissionCount = $existingDailyWork->resubmission_count ?? 0;
         $resubmissionCount++;
         $resubmissionDetails = $this->getResubmissionDetails($resubmissionCount);
+
+        // Only soft delete if status is NOT completed
+        if (! $existingDailyWork->trashed() && $existingDailyWork->status !== DailyWork::STATUS_COMPLETED) {
+            $existingDailyWork->delete();
+        }
 
         DailyWork::create([
             'date' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? $existingDailyWork->date : $importedDailyWork[0]),
