@@ -264,8 +264,8 @@ class DailyWorkController extends Controller
         try {
             $request->validate([
                 'id' => 'required|exists:daily_works,id',
-                'status' => 'required|in:'.implode(',', DailyWork::$statuses),
-                'inspection_result' => 'nullable|in:'.implode(',', DailyWork::$inspectionResults),
+                'status' => 'required|in:new,completed,resubmission,emergency',
+                'inspection_result' => 'nullable|in:pass,fail',
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);

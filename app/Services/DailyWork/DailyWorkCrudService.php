@@ -46,7 +46,7 @@ class DailyWorkCrudService
         // Create new daily work
         $dailyWork = new DailyWork($validatedData);
         $dailyWork->incharge = $inCharge;
-        $dailyWork->status = DailyWork::STATUS_NEW;
+        $dailyWork->status = 'new';
         $dailyWork->save();
 
         return [

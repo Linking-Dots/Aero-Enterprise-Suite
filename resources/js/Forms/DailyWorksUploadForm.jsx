@@ -45,9 +45,9 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
         { column: 'C', field: 'Work Type', example: 'Structure, Embankment, Pavement', required: true, processed: true },
         { column: 'D', field: 'Description', example: 'Isolation Barrier (Type-2, Steel Post) Installation Work', required: true, processed: true },
         { column: 'E', field: 'Location/Chainage', example: 'K05+560-K05+660', required: true, processed: true },
-        { column: 'F', field: 'Quantity/Layer', example: '150 MT, 2 Layers, 500 SQM', required: false, processed: true },
-        { column: 'G', field: 'Side (Optional)', example: 'TR-R, TR-L, SR-L, SR-R', required: false, processed: true },
-        { column: 'H', field: 'Time (Optional)', example: '3:00 PM, 4:00 PM, 9:00 AM', required: false, processed: true },
+        { column: 'F', field: 'Quantity/Layer', example: '150 MT, 2 Layers, 500 SQM', required: false, processed: false },
+        { column: 'G', field: 'Side (Optional)', example: 'TR-R, TR-L, SR-L, SR-R', required: false, processed: false },
+        { column: 'H', field: 'Time (Optional)', example: '3:00 PM, 4:00 PM, 9:00 AM', required: false, processed: false },
     ];
 
     const [file, setFile] = useState(null);
@@ -188,46 +188,20 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
                 });
 
                 if (response.status === 200) {
-                    const results = response.data.results || [];
-                    
-                    // Collect all warnings from all sheets
-                    const allWarnings = [];
-                    let totalProcessed = 0;
-                    let totalFailed = 0;
-                    
-                    results.forEach(sheetResult => {
-                        totalProcessed += sheetResult.processed_count || 0;
-                        totalFailed += sheetResult.failed_count || 0;
-                        
-                        if (sheetResult.warnings && sheetResult.warnings.length > 0) {
-                            allWarnings.push(...sheetResult.warnings);
-                        }
-                    });
-                    
-                    // Store warnings for display
-                    if (allWarnings.length > 0) {
-                        setServerErrors({ warnings: allWarnings });
-                    }
-                    
                     setData(response.data.data);
                     setTotalRows(response.data.total);
                     
-                    // Clear file but keep warnings visible for user review
-                    setFile(null);
-                    setUploadProgress(0);
+                    // Clear form data and close modal
+                    clearFile();
+                    setServerErrors({});
+                    closeModal();
                     
                     // Refresh parent component data if callback provided
                     if (typeof refreshData === 'function') {
                         refreshData();
                     }
                     
-                    // Build success message with stats
-                    let successMessage = `Successfully processed ${totalProcessed} RFI(s).`;
-                    if (totalFailed > 0) {
-                        successMessage += ` ${totalFailed} RFI(s) had issues (see details below).`;
-                    }
-                    
-                    resolve(successMessage);
+                    resolve(response.data.message || 'Daily works imported successfully.');
                 }
             } catch (error) {
                 console.error('Upload error:', error);
@@ -466,123 +440,30 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
                                     {Object.keys(serverErrors).length > 0 && (
                                         <Card className="border border-danger/20 bg-danger/5">
                                             <CardBody className="p-4">
-                                                {serverErrors.warnings ? (
-                                                    // Display warnings table with detailed information
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-start gap-3">
-                                                            <InformationCircleIcon className="w-5 h-5 text-warning mt-0.5" />
-                                                            <div>
-                                                                <h4 className="font-medium text-warning mb-1">
-                                                                    Upload Issues Detected ({serverErrors.warnings.length})
-                                                                </h4>
-                                                                <p className="text-sm text-warning/80 mb-3">
-                                                                    The following RFIs encountered issues during import. Please review and fix them in your file.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <ScrollShadow className="max-h-[400px]">
-                                                            <Table
-                                                                aria-label="Import warnings table"
-                                                                removeWrapper
-                                                                classNames={{
-                                                                    th: "bg-warning/10 text-warning-700 text-xs font-semibold",
-                                                                    td: "py-2 text-sm"
-                                                                }}
-                                                            >
-                                                                <TableHeader>
-                                                                    <TableColumn>Row</TableColumn>
-                                                                    <TableColumn>RFI Number</TableColumn>
-                                                                    <TableColumn>Location</TableColumn>
-                                                                    <TableColumn>Issue Type</TableColumn>
-                                                                    <TableColumn>Message</TableColumn>
-                                                                </TableHeader>
-                                                                <TableBody>
-                                                                    {serverErrors.warnings.map((warning, index) => (
-                                                                        <TableRow key={index}>
-                                                                            <TableCell>
-                                                                                <Chip size="sm" variant="flat" color="default">
-                                                                                    {warning.row}
-                                                                                </Chip>
-                                                                            </TableCell>
-                                                                            <TableCell className="font-medium font-mono text-xs">
-                                                                                {warning.rfi_number}
-                                                                            </TableCell>
-                                                                            <TableCell className="text-default-600 text-xs">
-                                                                                {warning.location}
-                                                                            </TableCell>
-                                                                            <TableCell>
-                                                                                <Chip 
-                                                                                    size="sm" 
-                                                                                    color={warning.severity === 'error' ? 'danger' : 'warning'} 
-                                                                                    variant="flat"
-                                                                                >
-                                                                                    {warning.type.replace('_', ' ').toUpperCase()}
-                                                                                </Chip>
-                                                                            </TableCell>
-                                                                            <TableCell className="text-danger/80 text-xs">
-                                                                                {warning.message}
-                                                                                {warning.details && warning.details.available_jurisdictions && (
-                                                                                    <div className="mt-1 text-[10px] text-default-500">
-                                                                                        Available: {warning.details.available_jurisdictions}
-                                                                                    </div>
-                                                                                )}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </ScrollShadow>
-                                                        
-                                                        <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
-                                                            <ExclamationTriangleIcon className="w-4 h-4 text-warning mt-0.5" />
-                                                            <div className="text-xs text-warning-700">
-                                                                <strong>Note:</strong> Only RFIs with valid data were imported. 
-                                                                Please correct the issues above and re-upload the file to import the remaining RFIs.
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div className="flex justify-end">
-                                                            <Button
-                                                                size="sm"
-                                                                color="primary"
-                                                                variant="flat"
-                                                                onPress={() => {
-                                                                    setServerErrors({});
-                                                                    closeModal();
-                                                                }}
-                                                            >
-                                                                Close and Continue
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    // Display regular errors
-                                                    <div className="flex items-start gap-3">
-                                                        <ExclamationTriangleIcon className="w-5 h-5 text-danger mt-0.5" />
-                                                        <div>
-                                                            <h4 className="font-medium text-danger mb-1">Upload Errors</h4>
-                                                            <div className="space-y-2">
-                                                                {Object.entries(serverErrors).map(([field, errors]) => (
-                                                                    <div key={field}>
-                                                                        {field !== 'general' && (
-                                                                            <p className="text-sm font-medium text-danger capitalize">{field.replace('_', ' ')}:</p>
+                                                <div className="flex items-start gap-3">
+                                                    <ExclamationTriangleIcon className="w-5 h-5 text-danger mt-0.5" />
+                                                    <div>
+                                                        <h4 className="font-medium text-danger mb-1">Upload Errors</h4>
+                                                        <div className="space-y-2">
+                                                            {Object.entries(serverErrors).map(([field, errors]) => (
+                                                                <div key={field}>
+                                                                    {field !== 'general' && (
+                                                                        <p className="text-sm font-medium text-danger capitalize">{field.replace('_', ' ')}:</p>
+                                                                    )}
+                                                                    <ul className="space-y-1">
+                                                                        {Array.isArray(errors) ? errors.map((error, index) => (
+                                                                            <li key={index} className="text-sm text-danger/80">
+                                                                                • {error}
+                                                                            </li>
+                                                                        )) : (
+                                                                            <li className="text-sm text-danger/80">• {errors}</li>
                                                                         )}
-                                                                        <ul className="space-y-1">
-                                                                            {Array.isArray(errors) ? errors.map((error, index) => (
-                                                                                <li key={index} className="text-sm text-danger/80">
-                                                                                    • {error}
-                                                                                </li>
-                                                                            )) : (
-                                                                                <li className="text-sm text-danger/80">• {errors}</li>
-                                                                            )}
-                                                                        </ul>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
+                                                                    </ul>
+                                                                </div>
+                                                            ))}
                                                         </div>
                                                     </div>
-                                                )}
+                                                </div>
                                             </CardBody>
                                         </Card>
                                     )}
@@ -655,8 +536,7 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
                                                 <InformationCircleIcon className="w-4 h-4 text-primary mt-0.5" />
                                                 <div className="text-xs text-primary-700">
                                                     <strong>Format Tips:</strong> 
-                                                    • All columns A-H are processed by the system
-                                                    • Columns A-E are required, columns F-H are optional but recommended
+                                                    • Only columns A-E are processed by the system (columns F-H are for reference only)
                                                     • Work Type examples: Structure, Embankment, Pavement
                                                     • Quantity/Layer examples: 150 MT (metric tons), 2 Layers, 500 SQM (square meters)
                                                     • Side values: TR-R (Traffic Right), TR-L (Traffic Left), SR-R (Service Right), SR-L (Service Left)

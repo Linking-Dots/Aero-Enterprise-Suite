@@ -61,79 +61,12 @@ class DailyWorkImportService
     {
         $date = $importedDailyWorks[0][0];
         $inChargeSummary = [];
-        $processedRfiNumbers = []; // Track RFI numbers processed in this batch
-        $warnings = []; // Track all warnings/errors for reporting
-        $successCount = 0;
-        $rowNumber = 1; // Track row number for better error reporting
 
         foreach ($importedDailyWorks as $importedDailyWork) {
-            $rowNumber++;
-            $rfiNumber = $importedDailyWork[1] ?? 'Unknown';
-            $location = $importedDailyWork[4] ?? 'Unknown';
-
-            // Check for missing required fields
-            $missingFields = [];
-            if (empty($importedDailyWork[0])) {
-                $missingFields[] = 'Date';
-            }
-            if (empty($importedDailyWork[1])) {
-                $missingFields[] = 'RFI Number';
-            }
-            if (empty($importedDailyWork[2])) {
-                $missingFields[] = 'Work Type';
-            }
-            if (empty($importedDailyWork[3])) {
-                $missingFields[] = 'Description';
-            }
-            if (empty($importedDailyWork[4])) {
-                $missingFields[] = 'Location/Chainage';
-            }
-
-            if (! empty($missingFields)) {
-                $warnings[] = [
-                    'row' => $rowNumber,
-                    'rfi_number' => $rfiNumber,
-                    'location' => $location,
-                    'type' => 'missing_data',
-                    'message' => 'Missing required fields: '.implode(', ', $missingFields),
-                    'severity' => 'error',
-                ];
-
-                continue; // Skip this row
-            }
-
-            // Check if this RFI number was already processed in this batch
-            if (in_array($rfiNumber, $processedRfiNumbers)) {
-                $warnings[] = [
-                    'row' => $rowNumber,
-                    'rfi_number' => $rfiNumber,
-                    'location' => $location,
-                    'type' => 'duplicate',
-                    'message' => 'Duplicate RFI number in same upload batch',
-                    'severity' => 'warning',
-                ];
-                Log::warning("Skipping duplicate RFI number in same batch: {$rfiNumber}");
-
-                continue;
-            }
-
-            $result = $this->processDailyWorkRow($importedDailyWork, $date, $inChargeSummary, $rowNumber);
+            $result = $this->processDailyWorkRow($importedDailyWork, $date, $inChargeSummary);
 
             if ($result['processed']) {
                 $inChargeSummary = $result['summary'];
-                $processedRfiNumbers[] = $rfiNumber;
-                $successCount++;
-            } else {
-                // Add warning for failed processing
-                $warnings[] = [
-                    'row' => $rowNumber,
-                    'rfi_number' => $rfiNumber,
-                    'location' => $location,
-                    'type' => $result['error_type'] ?? 'processing_error',
-                    'message' => $result['error_message'] ?? 'Failed to process RFI',
-                    'severity' => 'error',
-                    'details' => $result['error_details'] ?? null,
-                ];
             }
         }
 
@@ -144,68 +77,27 @@ class DailyWorkImportService
             'sheet' => $sheetIndex + 1,
             'date' => $date,
             'summaries' => $inChargeSummary,
-            'total_rows' => count($importedDailyWorks),
-            'processed_count' => $successCount,
-            'failed_count' => count($warnings),
-            'warnings' => $warnings,
+            'processed_count' => count($importedDailyWorks),
         ];
     }
 
     /**
      * Process a single daily work row
      */
-    private function processDailyWorkRow(array $importedDailyWork, string $date, array &$inChargeSummary, int $rowNumber): array
+    private function processDailyWorkRow(array $importedDailyWork, string $date, array &$inChargeSummary): array
     {
-        $location = $importedDailyWork[4];
-        $rfiNumber = $importedDailyWork[1];
-
         // Extract chainages and find jurisdiction
-        $jurisdiction = $this->findJurisdictionForLocation($location);
+        $jurisdiction = $this->findJurisdictionForLocation($importedDailyWork[4]);
 
         if (! $jurisdiction) {
-            Log::warning("Row {$rowNumber}: No jurisdiction found for location: {$location}");
+            Log::warning('No jurisdiction found for location: '.$importedDailyWork[4]);
 
-            // Get available jurisdiction ranges for helpful error message
-            $jurisdictions = Jurisdiction::select('name', 'start_chainage', 'end_chainage')
-                ->orderBy('start_chainage')
-                ->get();
-
-            $jurisdictionRanges = $jurisdictions->map(function ($j) {
-                return "{$j->name}: {$j->start_chainage} to {$j->end_chainage}";
-            })->join(', ');
-
-            return [
-                'processed' => false,
-                'summary' => $inChargeSummary,
-                'error_type' => 'jurisdiction_not_found',
-                'error_message' => "No jurisdiction found for location: {$location}",
-                'error_details' => [
-                    'available_jurisdictions' => $jurisdictionRanges,
-                    'parsed_location' => $this->parseLocationChainage($location),
-                ],
-            ];
+            return ['processed' => false, 'summary' => $inChargeSummary];
         }
 
         $inCharge = $jurisdiction->incharge;
         $inChargeUser = User::find($inCharge);
-
-        // Check if incharge user exists
-        if (! $inChargeUser) {
-            Log::warning("Row {$rowNumber}: Incharge user not found for jurisdiction: {$jurisdiction->name}");
-
-            return [
-                'processed' => false,
-                'summary' => $inChargeSummary,
-                'error_type' => 'incharge_not_found',
-                'error_message' => "Incharge user (ID: {$inCharge}) not found for jurisdiction {$jurisdiction->name}",
-                'error_details' => [
-                    'jurisdiction' => $jurisdiction->name,
-                    'incharge_id' => $inCharge,
-                ],
-            ];
-        }
-
-        $inChargeName = $inChargeUser->user_name;
+        $inChargeName = $inChargeUser ? $inChargeUser->user_name : 'unknown';
 
         // Initialize incharge summary if not exists
         if (! isset($inChargeSummary[$inCharge])) {
@@ -222,34 +114,16 @@ class DailyWorkImportService
         $inChargeSummary[$inCharge]['totalDailyWorks']++;
         $this->updateTypeCounter($inChargeSummary[$inCharge], $importedDailyWork[2]);
 
-        try {
-            // Check for existing daily work
-            $existingDailyWork = DailyWork::where('number', $rfiNumber)->first();
+        // Handle existing or new daily work
+        $existingDailyWork = DailyWork::where('number', $importedDailyWork[1])->first();
 
-            if ($existingDailyWork) {
-                // This is a resubmission - update the existing RFI
-                $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge]);
-            } else {
-                // This is a new submission
-                $this->createNewDailyWork($importedDailyWork, $inCharge);
-            }
-
-            return ['processed' => true, 'summary' => $inChargeSummary];
-        } catch (\Exception $e) {
-            Log::error("Row {$rowNumber}: Error creating/updating daily work: {$e->getMessage()}");
-
-            return [
-                'processed' => false,
-                'summary' => $inChargeSummary,
-                'error_type' => 'database_error',
-                'error_message' => "Database error: {$e->getMessage()}",
-                'error_details' => [
-                    'exception' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ],
-            ];
+        if ($existingDailyWork) {
+            $this->handleResubmission($existingDailyWork, $importedDailyWork, $inChargeSummary[$inCharge], $inCharge);
+        } else {
+            $this->createNewDailyWork($importedDailyWork, $inCharge);
         }
+
+        return ['processed' => true, 'summary' => $inChargeSummary];
     }
 
     /**
@@ -336,26 +210,27 @@ class DailyWorkImportService
     /**
      * Handle resubmission of existing daily work
      */
-    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary): void
+    private function handleResubmission(DailyWork $existingDailyWork, array $importedDailyWork, array &$summary, int $inChargeId): void
     {
         $summary['resubmissions']++;
+        $resubmissionCount = $existingDailyWork->resubmission_count ?? 0;
+        $resubmissionCount++;
+        $resubmissionDate = $this->getResubmissionDate($existingDailyWork, $resubmissionCount);
 
-        // Increment resubmission count
-        $resubmissionCount = ($existingDailyWork->resubmission_count ?? 0) + 1;
-        $resubmissionDetails = $this->getResubmissionDetails($resubmissionCount);
-
-        // Update the existing daily work with resubmission info
-        $existingDailyWork->update([
-            'resubmission_count' => $resubmissionCount,
-            'resubmission_date' => Carbon::now(),
-            'inspection_details' => $resubmissionDetails,
-            // Update other fields from the import
+        DailyWork::create([
+            'date' => ($existingDailyWork->status === 'completed' ? $existingDailyWork->date : $importedDailyWork[0]),
+            'number' => $importedDailyWork[1],
+            'status' => ($existingDailyWork->status === 'completed' ? 'completed' : 'new'),
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
             'qty_layer' => $importedDailyWork[5] ?? null,
             'side' => $importedDailyWork[6] ?? null,
             'planned_time' => $importedDailyWork[7] ?? null,
+            'incharge' => $inChargeId,
+            'assigned' => null, // Don't auto-assign to incharge
+            'resubmission_count' => $resubmissionCount,
+            'resubmission_date' => $resubmissionDate,
         ]);
     }
 
@@ -367,7 +242,7 @@ class DailyWorkImportService
         DailyWork::create([
             'date' => $importedDailyWork[0],
             'number' => $importedDailyWork[1],
-            'status' => DailyWork::STATUS_NEW,
+            'status' => 'new',
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
@@ -388,14 +263,6 @@ class DailyWorkImportService
             return $existingDailyWork->resubmission_date ?? $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
         }
 
-        return $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
-    }
-
-    /**
-     * Get resubmission details text for inspection_details field
-     */
-    private function getResubmissionDetails(int $resubmissionCount): string
-    {
         return $this->getOrdinalNumber($resubmissionCount).' Resubmission on '.Carbon::now()->format('jS F Y');
     }
 
@@ -432,32 +299,6 @@ class DailyWorkImportService
                 ]
             );
         }
-    }
-
-    /**
-     * Parse location chainage for error reporting
-     */
-    private function parseLocationChainage(string $location): array
-    {
-        $chainageRegex = '/(.*K[0-9]+(?:\+[0-9]+(?:\.[0-9]+)?)?)-(.*K[0-9]+(?:\+[0-9]+(?:\.[0-9]+)?)?)|(.*K[0-9]+)(.*)/';
-
-        if (preg_match($chainageRegex, $location, $matches)) {
-            $startChainage = $matches[1] === '' ? $matches[0] : $matches[1];
-            $endChainage = $matches[2] === '' ? null : $matches[2];
-
-            return [
-                'original' => $location,
-                'start_chainage' => $startChainage,
-                'end_chainage' => $endChainage,
-                'formatted_start' => $this->formatChainage($startChainage),
-                'formatted_end' => $endChainage ? $this->formatChainage($endChainage) : null,
-            ];
-        }
-
-        return [
-            'original' => $location,
-            'error' => 'Could not parse chainage format',
-        ];
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App\Services\DailyWork;
 
-use App\Models\DailyWork;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -58,14 +57,14 @@ class DailyWorkValidationService
             'date' => 'required|date',
             'number' => 'required|string',
             'time' => 'required|string',
-            'status' => 'required|in:' . implode(',', DailyWork::$statuses),
-            'inspection_result' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|in:' . implode(',', DailyWork::$inspectionResults) : 'nullable|in:' . implode(',', DailyWork::$inspectionResults),
+            'status' => 'required|in:new,completed,resubmission,emergency',
+            'inspection_result' => $request->input('status') === 'completed' ? 'required|in:pass,fail' : 'nullable|in:pass,fail',
             'type' => 'required|string',
             'description' => 'required|string',
             'location' => 'required|string|custom_location',
             'side' => 'required|string',
             'qty_layer' => $request->input('type') === 'Embankment' ? 'required|string' : '',
-            'completion_time' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|string' : '',
+            'completion_time' => $request->input('status') === 'completed' ? 'required|string' : '',
             'inspection_details' => 'nullable|string',
         ], [
             'date.required' => 'RFI Date is required.',
@@ -73,9 +72,9 @@ class DailyWorkValidationService
             'time.required' => 'RFI Time is required.',
             'time.string' => 'RFI Time is not string.',
             'status.required' => 'Status is required.',
-            'status.in' => 'Status must be one of: ' . implode(', ', DailyWork::$statuses) . '.',
-            'inspection_result.required' => 'Inspection result is required for completed work.',
-            'inspection_result.in' => 'Inspection result must be one of: ' . implode(', ', DailyWork::$inspectionResults) . '.',
+            'status.in' => 'Status must be one of: new, completed, resubmission, emergency.',
+            'inspection_result.required' => 'Inspection result (Pass/Fail) is required for completed work.',
+            'inspection_result.in' => 'Inspection result must be either pass or fail.',
             'type.required' => 'Type is required.',
             'description.required' => 'Description is required.',
             'location.required' => 'Location is required.',
@@ -97,14 +96,14 @@ class DailyWorkValidationService
             'date' => 'required|date',
             'number' => 'required|string',
             'planned_time' => 'required|string',
-            'status' => 'required|in:' . implode(',', DailyWork::$statuses),
-            'inspection_result' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|in:' . implode(',', DailyWork::$inspectionResults) : 'nullable|in:' . implode(',', DailyWork::$inspectionResults),
+            'status' => 'required|in:new,completed,resubmission,emergency',
+            'inspection_result' => $request->input('status') === 'completed' ? 'required|in:pass,fail' : 'nullable|in:pass,fail',
             'type' => 'required|string',
             'description' => 'required|string',
             'location' => 'required|string|custom_location',
             'side' => 'required|string',
             'qty_layer' => $request->input('type') === 'Embankment' ? 'required|string' : '',
-            'completion_time' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|string' : '',
+            'completion_time' => $request->input('status') === 'completed' ? 'required|string' : '',
             'inspection_details' => 'nullable|string',
         ], [
             'id.required' => 'Daily Work ID is required.',
@@ -114,9 +113,9 @@ class DailyWorkValidationService
             'number.required' => 'RFI Number is required.',
             'planned_time.required' => 'RFI Time is required.',
             'status.required' => 'Status is required.',
-            'status.in' => 'Status must be one of: ' . implode(', ', DailyWork::$statuses) . '.',
-            'inspection_result.required' => 'Inspection result is required for completed work.',
-            'inspection_result.in' => 'Inspection result must be one of: ' . implode(', ', DailyWork::$inspectionResults) . '.',
+            'status.in' => 'Status must be one of: new, completed, resubmission, emergency.',
+            'inspection_result.required' => 'Inspection result (Pass/Fail) is required for completed work.',
+            'inspection_result.in' => 'Inspection result must be either pass or fail.',
             'type.required' => 'Type is required.',
             'description.required' => 'Description is required.',
             'location.required' => 'Location is required.',
