@@ -45,9 +45,9 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
         { column: 'C', field: 'Work Type', example: 'Structure, Embankment, Pavement', required: true, processed: true },
         { column: 'D', field: 'Description', example: 'Isolation Barrier (Type-2, Steel Post) Installation Work', required: true, processed: true },
         { column: 'E', field: 'Location/Chainage', example: 'K05+560-K05+660', required: true, processed: true },
-        { column: 'F', field: 'Quantity/Layer', example: '150 MT, 2 Layers, 500 SQM', required: false, processed: false },
-        { column: 'G', field: 'Side (Optional)', example: 'TR-R, TR-L, SR-L, SR-R', required: false, processed: false },
-        { column: 'H', field: 'Time (Optional)', example: '3:00 PM, 4:00 PM, 9:00 AM', required: false, processed: false },
+        { column: 'F', field: 'Quantity/Layer', example: '150 MT, 2 Layers, 500 SQM', required: false, processed: true },
+        { column: 'G', field: 'Side (Optional)', example: 'TR-R, TR-L, SR-L, SR-R', required: false, processed: true },
+        { column: 'H', field: 'Time (Optional)', example: '3:00 PM, 4:00 PM, 9:00 AM', required: false, processed: true },
     ];
 
     const [file, setFile] = useState(null);
@@ -536,7 +536,8 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
                                                 <InformationCircleIcon className="w-4 h-4 text-primary mt-0.5" />
                                                 <div className="text-xs text-primary-700">
                                                     <strong>Format Tips:</strong> 
-                                                    • Only columns A-E are processed by the system (columns F-H are for reference only)
+                                                    • All columns A-H are processed by the system
+                                                    • Columns A-E are required, columns F-H are optional but recommended
                                                     • Work Type examples: Structure, Embankment, Pavement
                                                     • Quantity/Layer examples: 150 MT (metric tons), 2 Layers, 500 SQM (square meters)
                                                     • Side values: TR-R (Traffic Right), TR-L (Traffic Left), SR-R (Service Right), SR-L (Service Left)

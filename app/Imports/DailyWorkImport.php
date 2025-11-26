@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\DailyWork;
 use Maatwebsite\Excel\Concerns\ToModel;
 
 class DailyWorkImport implements ToModel
@@ -14,9 +15,9 @@ class DailyWorkImport implements ToModel
             'type' => $row[2],
             'description' => $row[3],
             'location' => $row[4],
-            'side' => $row[5],
-            'qty_layer' => $row[6],
-            'planned_time' => $row[7],
+            'qty_layer' => $row[5],  // Column F
+            'side' => $row[6],       // Column G
+            'planned_time' => $row[7], // Column H
         ]);
     }
 }

@@ -218,9 +218,9 @@ class DailyWorkImportService
         $resubmissionDate = $this->getResubmissionDate($existingDailyWork, $resubmissionCount);
 
         DailyWork::create([
-            'date' => ($existingDailyWork->status === 'completed' ? $existingDailyWork->date : $importedDailyWork[0]),
+            'date' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? $existingDailyWork->date : $importedDailyWork[0]),
             'number' => $importedDailyWork[1],
-            'status' => ($existingDailyWork->status === 'completed' ? 'completed' : 'new'),
+            'status' => ($existingDailyWork->status === DailyWork::STATUS_COMPLETED ? DailyWork::STATUS_COMPLETED : DailyWork::STATUS_NEW),
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
@@ -242,7 +242,7 @@ class DailyWorkImportService
         DailyWork::create([
             'date' => $importedDailyWork[0],
             'number' => $importedDailyWork[1],
-            'status' => 'new',
+            'status' => DailyWork::STATUS_NEW,
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
