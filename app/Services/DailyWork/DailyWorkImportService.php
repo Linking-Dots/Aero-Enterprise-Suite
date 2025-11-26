@@ -224,8 +224,8 @@ class DailyWorkImportService
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
-            'qty_layer' => $importedDailyWork[5] ?? null,
-            'side' => $importedDailyWork[6] ?? null,
+            'side' => $importedDailyWork[5] ?? null,
+            'qty_layer' => $importedDailyWork[6] ?? null,
             'planned_time' => $importedDailyWork[7] ?? null,
             'incharge' => $inChargeId,
             'assigned' => null, // Don't auto-assign to incharge
@@ -246,8 +246,8 @@ class DailyWorkImportService
             'type' => $importedDailyWork[2],
             'description' => $importedDailyWork[3],
             'location' => $importedDailyWork[4],
-            'qty_layer' => $importedDailyWork[5] ?? null,
-            'side' => $importedDailyWork[6] ?? null,
+            'side' => $importedDailyWork[5] ?? null,
+            'qty_layer' => $importedDailyWork[6] ?? null,
             'planned_time' => $importedDailyWork[7] ?? null,
             'incharge' => $inChargeId,
             'assigned' => null, // Don't auto-assign to incharge
@@ -308,11 +308,12 @@ class DailyWorkImportService
     {
         // Create sample data for the template
         $templateData = [
-            ['Date', 'RFI Number', 'Work Type', 'Description', 'Location/Chainage', 'Quantity/Layer', 'Side (Optional)', 'Time (Optional)'],
-            ['4/27/2025', 'S2025-0425-9663', 'Structure', 'Isolation Barrier (Type-2, Steel Post) Installation Work', 'K05+560-K05+660', '150 MT', 'TR-R', '3:00 PM'],
-            ['4/27/2025', 'E2025-0426-14687', 'Embankment', 'Embankment Compaction and Grading Work', 'K06+100-K06+250', '2 Layers', 'TR-L', '9:00 AM'],
-            ['4/27/2025', 'P2025-0427-3180', 'Pavement', 'Asphalt Pavement Laying and Compaction', 'K07+300-K07+500', '500 SQM', 'SR-R', '4:00 PM'],
-            ['4/28/2025', 'S2025-0428-1234, E2025-0428-5678', 'Structure', 'Bridge Foundation Excavation Work', 'K08+200-K08+350', '75 MT', 'SR-L', '10:00 AM'],
+            ['Date', 'RFI Number', 'Work Type', 'Description', 'Location/Chainage', 'Road Side', 'Layer/Quantity', 'Time'],
+            ['2025-11-26', 'S2025-0527-10207', 'Structure', 'Retaining wall module: RE wall Block Installation Check', 'K38+060-K38+110', 'TR-R', '2:30 PM', '2:30 PM'],
+            ['2025-11-26', 'DSW-060', 'Structure', 'Dismantling of Shoulder Wall and Cantilever retaining wall: RE-wall Dismantling Work Check', 'K24+395-K24+418', 'TR-L', '11:00 AM', '11:00 AM'],
+            ['2025-11-26', 'E2025-1126-23676', 'Embankment', 'Embankment Stacking on site: Roadway Excavation in Suitable Soil (Re-Work) Before Level Check', 'K24+395-K24+418', 'TR-L', '1.4m1', '5:00 PM'],
+            ['2025-11-26', 'E2025-1119-23562', 'Embankment', 'Roadway excavation in suitable soil including stocking on site: Roadway Excavation in Suitable Soil After Level', 'SCK0+220-SCK0+345.060', 'SR-L', '', '3:00 PM'],
+            ['2025-11-26', 'E2025-1126-23677', 'Embankment', 'Embankment Fill from the source approved by Engineer: Embankment Sand Filling Level Check & Compaction Test (RE Wall Section)', 'SCK0+440-SCK0+450', 'SR-L', '17th', '10:00 AM'],
         ];
 
         // Create a temporary file
