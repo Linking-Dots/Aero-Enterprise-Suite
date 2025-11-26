@@ -61,12 +61,22 @@ class DailyWorkImportService
     {
         $date = $importedDailyWorks[0][0];
         $inChargeSummary = [];
+        $processedRfiNumbers = []; // Track RFI numbers processed in this batch
 
         foreach ($importedDailyWorks as $importedDailyWork) {
+            // Skip if this RFI number was already processed in this batch
+            $rfiNumber = $importedDailyWork[1];
+            if (in_array($rfiNumber, $processedRfiNumbers)) {
+                Log::warning("Skipping duplicate RFI number in same batch: {$rfiNumber}");
+
+                continue;
+            }
+
             $result = $this->processDailyWorkRow($importedDailyWork, $date, $inChargeSummary);
 
             if ($result['processed']) {
                 $inChargeSummary = $result['summary'];
+                $processedRfiNumbers[] = $rfiNumber; // Mark as processed
             }
         }
 
@@ -78,6 +88,7 @@ class DailyWorkImportService
             'date' => $date,
             'summaries' => $inChargeSummary,
             'processed_count' => count($importedDailyWorks),
+            'skipped_duplicates' => count($importedDailyWorks) - count($processedRfiNumbers),
         ];
     }
 
