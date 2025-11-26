@@ -305,6 +305,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
         Route::post('/users/{id}/roles', [UserController::class, 'updateUserRole'])->name('users.updateRole');
         Route::post('/users/{id}/attendance-type', [UserController::class, 'updateUserAttendanceType'])->name('users.updateAttendanceType');
+        Route::post('/users/{id}/report-to', [UserController::class, 'updateReportTo'])->name('users.updateReportTo');
 
         // Legacy routes for backward compatibility
         Route::post('/user/{id}/update-department', [DepartmentController::class, 'updateUserDepartment'])->name('user.updateDepartment');
@@ -312,6 +313,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/user/{id}/update-role', [UserController::class, 'updateUserRole'])->name('user.updateRole');
         Route::put('/user/toggle-status/{id}', [UserController::class, 'toggleStatus'])->name('user.toggleStatus');
         Route::post('/user/{id}/update-attendance-type', [UserController::class, 'updateUserAttendanceType'])->name('user.updateAttendanceType');
+        Route::post('/user/{id}/update-report-to', [UserController::class, 'updateReportTo'])->name('user.updateReportTo');
     });
 
     Route::middleware(['permission:users.delete'])->group(function () {

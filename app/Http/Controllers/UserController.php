@@ -174,6 +174,34 @@ class UserController extends Controller
         }
     }
 
+    public function updateReportTo(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $this->authorize('update', $user);
+
+            $request->validate([
+                'report_to' => ['nullable', 'exists:users,id'],
+            ]);
+
+            $user->report_to = $request->input('report_to');
+            $user->save();
+
+            return response()->json([
+                'message' => 'Report to updated successfully',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice', 'reportsTo'])),
+            ], 200);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to update report to.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function toggleStatus($id, UpdateUserStatusRequest $request)
     {
         $user = User::withTrashed()->findOrFail($id);
@@ -296,7 +324,7 @@ class UserController extends Controller
 
             // Base query
             $query = User::withTrashed()
-                ->with(['department', 'designation', 'roles', 'currentDevice']);
+                ->with(['department', 'designation', 'roles', 'currentDevice', 'reportsTo']);
 
             // Filters
             if ($search) {
