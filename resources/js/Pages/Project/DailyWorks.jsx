@@ -392,10 +392,59 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         closeModal();
     };
 
-    const handleImportSuccess = () => {
-        // Import might add multiple items, so full refresh is needed
-        refreshData();
+    const handleImportSuccess = (importResults) => {
+        console.log('Import success callback with results:', importResults);
+        
+        // Close the modal first
         closeModal();
+        
+        // Extract the latest date from import results
+        if (importResults && Array.isArray(importResults) && importResults.length > 0) {
+            // Find the latest date from all imported sheets
+            const importedDates = importResults
+                .filter(result => result.date)
+                .map(result => result.date);
+            
+            if (importedDates.length > 0) {
+                // Sort dates to find the latest one
+                const sortedDates = importedDates.sort((a, b) => new Date(b) - new Date(a));
+                const latestImportDate = sortedDates[0];
+                
+                console.log('Latest imported date:', latestImportDate);
+                
+                // Update date range to include the imported date
+                if (isMobile) {
+                    // For mobile: set selectedDate to the latest imported date
+                    setSelectedDate(latestImportDate);
+                } else {
+                    // For desktop: update dateRange end if imported date is newer
+                    const currentEnd = new Date(dateRange.end);
+                    const importDate = new Date(latestImportDate);
+                    
+                    if (importDate > currentEnd) {
+                        setDateRange(prev => ({
+                            ...prev,
+                            end: latestImportDate
+                        }));
+                    } else {
+                        // If within range, just set end to the imported date to show new data
+                        setDateRange(prev => ({
+                            ...prev,
+                            end: latestImportDate
+                        }));
+                    }
+                }
+            }
+        }
+        
+        // Reset to first page and refresh data
+        setCurrentPage(1);
+        
+        // Use setTimeout to ensure state updates have propagated
+        setTimeout(() => {
+            fetchData(true);
+            fetchStatistics();
+        }, 100);
     };
 
     // Simple statistics

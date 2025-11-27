@@ -37,7 +37,7 @@ import { showToast } from "@/utils/toastUtils";
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 
-const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refreshData }) => {
+const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refreshData, onSuccess }) => {
     // Expected Excel format data - based on actual project format
     const expectedFormat = [
         { column: 'A', field: 'Date', example: '4/27/2025', required: true, processed: true },
@@ -188,17 +188,26 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
                 });
 
                 if (response.status === 200) {
-                    setData(response.data.data);
-                    setTotalRows(response.data.total);
-                    
-                    // Clear form data and close modal
+                    // Clear form data and close modal first
                     clearFile();
                     setServerErrors({});
                     closeModal();
                     
-                    // Refresh parent component data if callback provided
-                    if (typeof refreshData === 'function') {
-                        refreshData();
+                    // Call onSuccess callback with import results (includes date info)
+                    // This allows parent to update date range/selectedDate
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response.data.results);
+                    } else {
+                        // Fallback: Legacy behavior - set data directly and refresh
+                        if (response.data.data) {
+                            setData(response.data.data);
+                        }
+                        if (response.data.total) {
+                            setTotalRows(response.data.total);
+                        }
+                        if (typeof refreshData === 'function') {
+                            refreshData();
+                        }
                     }
                     
                     resolve(response.data.message || 'Daily works imported successfully.');

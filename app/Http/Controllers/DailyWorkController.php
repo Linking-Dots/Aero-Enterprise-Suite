@@ -392,6 +392,16 @@ class DailyWorkController extends Controller
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);
+
+            // Check authorization: only admin or incharge can update assigned
+            $user = User::with('roles')->find(Auth::id());
+            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
+            $isIncharge = $dailyWork->incharge === $user->id;
+
+            if (! $isAdmin && ! $isIncharge) {
+                return response()->json(['error' => 'Unauthorized to update assigned user for this work'], 403);
+            }
+
             $dailyWork->update(['assigned' => $request->assigned]);
 
             return response()->json([

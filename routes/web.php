@@ -124,6 +124,7 @@ Route::middleware($middlewareStack)->group(function () {
         Route::get('/daily-works-all', [DailyWorkController::class, 'all'])->name('dailyWorks.all');
         Route::get('/daily-works-summary', [DailyWorkSummaryController::class, 'index'])->name('daily-works-summary');
         Route::post('/daily-works-summary/filter', [DailyWorkSummaryController::class, 'filterSummary'])->name('daily-works-summary.filter');
+        Route::get('/daily-works/statistics', [DailyWorkSummaryController::class, 'getStatistics'])->name('dailyWorks.statistics');
     });
 
     Route::middleware(['permission:daily-works.create'])->group(function () {
@@ -134,7 +135,6 @@ Route::middleware($middlewareStack)->group(function () {
         Route::post('/update-daily-work', [DailyWorkController::class, 'update'])->name('dailyWorks.update');
         Route::post('/update-rfi-file', [DailyWorkController::class, 'uploadRFIFile'])->name('dailyWorks.uploadRFI');
         Route::post('/daily-works-summary/refresh', [DailyWorkSummaryController::class, 'refresh'])->name('daily-works-summary.refresh');
-        Route::get('/daily-works/statistics', [DailyWorkSummaryController::class, 'getStatistics'])->name('dailyWorks.statistics');
         Route::post('/daily-works/status', [DailyWorkController::class, 'updateStatus'])->name('dailyWorks.updateStatus');
         Route::post('/daily-works/completion-time', [DailyWorkController::class, 'updateCompletionTime'])->name('dailyWorks.updateCompletionTime');
         Route::post('/daily-works/submission-time', [DailyWorkController::class, 'updateSubmissionTime'])->name('dailyWorks.updateSubmissionTime');

@@ -157,6 +157,16 @@ const DailyWorksTable = ({
     const userIsAdmin = auth.roles?.includes('Administrator') || auth.roles?.includes('Super Administrator') || false;
     const userIsSE = auth.designation === 'Supervision Engineer' || false;
     const userIsQCI = auth.designation === 'Quality Control Inspector' || auth.designation === 'Asst. Quality Control Inspector' || false;
+    
+    // Helper function to check if current user is the incharge of a specific work
+    const isUserInchargeOfWork = (work) => {
+        return work?.incharge && String(work.incharge) === String(auth.user?.id);
+    };
+    
+    // Check if user can assign for a specific work (admin or incharge of the work)
+    const canUserAssign = (work) => {
+        return userIsAdmin || isUserInchargeOfWork(work);
+    };
 
     // Use available data with fallbacks
     const availableInCharges = allInCharges || users || [];
@@ -1187,7 +1197,7 @@ const DailyWorksTable = ({
                                         <UserIcon className="w-4 h-4 text-default-500" />
                                         <span className="text-xs font-medium text-default-600">Assigned to:</span>
                                     </div>
-                                    {userIsAdmin ? (
+                                    {canUserAssign(work) ? (
                                         <Select
                                             size="sm"
                                             variant="bordered"
@@ -1873,7 +1883,7 @@ const DailyWorksTable = ({
                 return (
                     <TableCell className="w-64 text-center">
                         <div className="flex items-center justify-center">
-                            {userIsAdmin ? (
+                            {canUserAssign(work) ? (
                                 <Select
                                     size="sm"
                                     variant="bordered"
