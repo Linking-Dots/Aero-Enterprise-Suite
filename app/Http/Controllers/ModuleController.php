@@ -44,9 +44,9 @@ class ModuleController extends Controller
 
         $modules = Module::with([
             'subModules' => fn ($q) => $q->ordered(),
-            'subModules.components',
+            'subModules.components.permissionRequirements.permission',
             'subModules.permissionRequirements.permission',
-            'components',
+            'components.permissionRequirements.permission',
             'permissionRequirements.permission',
         ])->ordered()->get();
 
