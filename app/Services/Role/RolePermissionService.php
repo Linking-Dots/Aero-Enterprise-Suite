@@ -150,34 +150,134 @@ class RolePermissionService
     ];
 
     /**
-     * Get all permissions grouped by module for frontend display
+     * Get all permissions grouped dynamically by entity prefix for frontend display
+     *
+     * This method dynamically groups ALL permissions from the database by their entity prefix
+     * (e.g., "departments.view" -> "Departments", "modules.create" -> "Modules")
+     * No hardcoded module definitions needed - permissions are auto-discovered and grouped.
      */
     public function getPermissionsGroupedByModule(): array
     {
         $groupedPermissions = [];
 
-        foreach (self::ENTERPRISE_MODULES as $moduleKey => $moduleConfig) {
-            $groupedPermissions[$moduleKey] = [
-                'name' => $moduleConfig['name'],
-                'description' => $moduleConfig['description'],
-                'category' => $moduleConfig['category'],
-                'permissions' => [],
-            ];
+        // Fetch ALL permissions from database and group dynamically by entity prefix
+        $allPermissions = Permission::orderBy('name')->get();
 
-            // Get actual permissions from database that match this module
-            foreach ($moduleConfig['permissions'] as $permissionName) {
-                $permission = Permission::where('name', $permissionName)->first();
-                if ($permission) {
-                    $groupedPermissions[$moduleKey]['permissions'][] = [
-                        'id' => $permission->id,
-                        'name' => $permission->name,
-                        'display_name' => $this->formatPermissionDisplayName($permission->name),
-                    ];
-                }
+        foreach ($allPermissions as $permission) {
+            // Extract entity prefix from permission name (e.g., "departments" from "departments.view")
+            $parts = explode('.', $permission->name);
+            $entityKey = $parts[0];
+
+            // Initialize the entity group if it doesn't exist
+            if (! isset($groupedPermissions[$entityKey])) {
+                $groupedPermissions[$entityKey] = [
+                    'name' => $this->formatEntityDisplayName($entityKey),
+                    'description' => "Permissions for {$this->formatEntityDisplayName($entityKey)}",
+                    'category' => $this->inferEntityCategory($entityKey),
+                    'permissions' => [],
+                ];
             }
+
+            // Add permission to its entity group
+            $groupedPermissions[$entityKey]['permissions'][] = [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'display_name' => $this->formatPermissionDisplayName($permission->name),
+            ];
         }
 
+        // Sort groups alphabetically by entity name for consistent display
+        ksort($groupedPermissions);
+
         return $groupedPermissions;
+    }
+
+    /**
+     * Format entity key to display name
+     * Converts "departments" to "Departments", "daily-works" to "Daily Works"
+     */
+    private function formatEntityDisplayName(string $entityKey): string
+    {
+        return ucwords(str_replace(['-', '_'], ' ', $entityKey));
+    }
+
+    /**
+     * Infer category for an entity based on its name
+     * This provides logical grouping for UI organization
+     */
+    private function inferEntityCategory(string $entityKey): string
+    {
+        $categoryMap = [
+            // Core System
+            'core' => 'core_system',
+
+            // Self Service
+            'profile' => 'self_service',
+
+            // Human Resources
+            'employees' => 'human_resources',
+            'departments' => 'human_resources',
+            'designations' => 'human_resources',
+            'attendance' => 'human_resources',
+            'holidays' => 'human_resources',
+            'leaves' => 'human_resources',
+            'leave' => 'human_resources',
+            'leave-settings' => 'human_resources',
+            'jurisdiction' => 'human_resources',
+
+            // Project Management
+            'daily-works' => 'project_management',
+            'projects' => 'project_management',
+            'tasks' => 'project_management',
+            'reports' => 'project_management',
+
+            // Document Management
+            'letters' => 'document_management',
+            'documents' => 'document_management',
+
+            // CRM
+            'customers' => 'customer_relations',
+            'leads' => 'customer_relations',
+            'feedback' => 'customer_relations',
+
+            // Supply Chain
+            'inventory' => 'supply_chain',
+            'suppliers' => 'supply_chain',
+            'purchase-orders' => 'supply_chain',
+            'warehousing' => 'supply_chain',
+
+            // Retail
+            'pos' => 'retail_sales',
+            'sales' => 'retail_sales',
+
+            // Finance
+            'accounts-payable' => 'financial_management',
+            'accounts-receivable' => 'financial_management',
+            'ledger' => 'financial_management',
+            'financial-reports' => 'financial_management',
+
+            // System Administration
+            'users' => 'system_administration',
+            'roles' => 'system_administration',
+            'permissions' => 'system_administration',
+            'settings' => 'system_administration',
+            'company' => 'system_administration',
+            'email' => 'system_administration',
+            'notification' => 'system_administration',
+            'theme' => 'system_administration',
+            'localization' => 'system_administration',
+            'performance' => 'system_administration',
+            'approval' => 'system_administration',
+            'invoice' => 'system_administration',
+            'salary' => 'system_administration',
+            'system' => 'system_administration',
+            'audit' => 'system_administration',
+            'backup' => 'system_administration',
+            'modules' => 'system_administration',
+            'communications' => 'communications',
+        ];
+
+        return $categoryMap[$entityKey] ?? 'other';
     }
 
     /**
