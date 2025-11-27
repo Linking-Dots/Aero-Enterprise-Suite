@@ -226,7 +226,7 @@ class DailyWorkPaginationService
         if ($userDesignationTitle === 'Supervision Engineer') {
             return [
                 'allInCharges' => [],
-                'juniors' => User::where('incharge', $user->user_name)->get(),
+                'juniors' => User::where('report_to', $user->id)->get(),
             ];
         }
 
