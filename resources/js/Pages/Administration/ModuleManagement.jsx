@@ -105,6 +105,110 @@ const categoryColors = {
     system_administration: 'danger'
 };
 
+// Permission action display names and descriptions
+const actionDisplayMap = {
+    view: { label: 'View', description: 'Can view/read data' },
+    create: { label: 'Create', description: 'Can create new records' },
+    update: { label: 'Edit', description: 'Can modify existing records' },
+    delete: { label: 'Delete', description: 'Can remove records' },
+    import: { label: 'Import', description: 'Can import data from files' },
+    export: { label: 'Export', description: 'Can export data to files' },
+    approve: { label: 'Approve', description: 'Can approve requests' },
+    assign: { label: 'Assign', description: 'Can assign to users' },
+    manage: { label: 'Manage', description: 'Full management access' },
+    operate: { label: 'Operate', description: 'Can operate/execute' },
+    punch: { label: 'Punch', description: 'Can punch attendance' },
+    change: { label: 'Change', description: 'Can change settings' },
+    impersonate: { label: 'Impersonate', description: 'Can act as another user' },
+    analytics: { label: 'Analytics', description: 'Can view analytics' },
+    settings: { label: 'Settings', description: 'Can configure settings' },
+    log: { label: 'Log', description: 'Can view logs' },
+    schedule: { label: 'Schedule', description: 'Can manage schedules' },
+    restore: { label: 'Restore', description: 'Can restore data' },
+    own: { label: 'Own', description: 'Access to own records only' }
+};
+
+/**
+ * Format entity key to display name
+ * Converts "accounts-payable" to "Accounts Payable", "daily-works" to "Daily Works"
+ */
+const formatEntityDisplayName = (entityKey) => {
+    return entityKey
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
+/**
+ * Format permission name to a readable display name
+ * Converts "employees.view" to "View Employees"
+ */
+const formatPermissionDisplayName = (permissionName) => {
+    const parts = permissionName.split('.');
+    if (parts.length >= 2) {
+        const entity = formatEntityDisplayName(parts[0]);
+        const action = parts[1];
+        
+        // Handle "own" permissions like "attendance.own.view"
+        if (parts.length >= 3 && action === 'own') {
+            const actualAction = parts[2];
+            const actionInfo = actionDisplayMap[actualAction] || { label: actualAction.charAt(0).toUpperCase() + actualAction.slice(1) };
+            return `${actionInfo.label} Own ${entity}`;
+        }
+        
+        const actionInfo = actionDisplayMap[action] || { label: action.charAt(0).toUpperCase() + action.slice(1) };
+        return `${actionInfo.label} ${entity}`;
+    }
+    return permissionName;
+};
+
+/**
+ * Get the description for a permission action
+ */
+const getPermissionDescription = (permissionName) => {
+    const parts = permissionName.split('.');
+    if (parts.length >= 2) {
+        const action = parts.length >= 3 && parts[1] === 'own' ? parts[2] : parts[1];
+        return actionDisplayMap[action]?.description || `Permission for ${permissionName}`;
+    }
+    return `Permission for ${permissionName}`;
+};
+
+/**
+ * Group permissions by their entity prefix
+ * Returns an object with entity keys and arrays of permissions
+ */
+const groupPermissionsByEntity = (permissions) => {
+    const grouped = {};
+    
+    permissions.forEach(permission => {
+        const parts = permission.name.split('.');
+        const entityKey = parts[0];
+        
+        if (!grouped[entityKey]) {
+            grouped[entityKey] = {
+                name: formatEntityDisplayName(entityKey),
+                permissions: []
+            };
+        }
+        
+        grouped[entityKey].permissions.push({
+            ...permission,
+            displayName: formatPermissionDisplayName(permission.name),
+            description: getPermissionDescription(permission.name)
+        });
+    });
+    
+    // Sort entities alphabetically
+    const sortedKeys = Object.keys(grouped).sort();
+    const sortedGrouped = {};
+    sortedKeys.forEach(key => {
+        sortedGrouped[key] = grouped[key];
+    });
+    
+    return sortedGrouped;
+};
+
 // Debounce hook
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -1105,32 +1209,130 @@ const ModuleManagement = (props) => {
             </Modal>
 
             {/* Permission Modal */}
-            <Modal isOpen={permissionModalOpen} onClose={() => setPermissionModalOpen(false)} size="3xl" scrollBehavior="inside">
+            <Modal isOpen={permissionModalOpen} onClose={() => setPermissionModalOpen(false)} size="4xl" scrollBehavior="inside">
                 <ModalContent>
-                    <ModalHeader>
-                        Manage Permissions - {permissionTarget?.name}
+                    <ModalHeader className="flex flex-col gap-1">
+                        <span className="flex items-center gap-2">
+                            <KeyIcon className="w-5 h-5 text-primary" />
+                            Manage Permissions - {permissionTarget?.name}
+                        </span>
                     </ModalHeader>
                     <ModalBody>
                         <p className="text-sm text-default-500 mb-4">
                             Select the permissions required to access this {permissionTarget?.type?.replace('_', '-')}.
                         </p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-                            {allPermissions.map(permission => (
-                                <Checkbox
-                                    key={permission.id}
-                                    isSelected={selectedPermissions.includes(permission.id)}
-                                    onValueChange={(checked) => {
-                                        if (checked) {
-                                            setSelectedPermissions([...selectedPermissions, permission.id]);
-                                        } else {
-                                            setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id));
-                                        }
-                                    }}
+                        
+                        {/* Search and quick actions */}
+                        <div className="flex items-center justify-between mb-4 gap-4">
+                            <Input
+                                placeholder="Search permissions..."
+                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                size="sm"
+                                className="max-w-xs"
+                                id="permission-search"
+                                onValueChange={(value) => {
+                                    // Store search value in a data attribute for filtering
+                                    document.getElementById('permission-search')?.setAttribute('data-search', value.toLowerCase());
+                                    // Trigger re-render by dispatching custom event
+                                    document.dispatchEvent(new CustomEvent('permission-search-change'));
+                                }}
+                            />
+                            <div className="flex gap-2">
+                                <Button
                                     size="sm"
+                                    variant="flat"
+                                    color="primary"
+                                    onPress={() => setSelectedPermissions(allPermissions.map(p => p.id))}
                                 >
-                                    <span className="text-sm">{permission.name}</span>
-                                </Checkbox>
-                            ))}
+                                    Select All
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="flat"
+                                    onPress={() => setSelectedPermissions([])}
+                                >
+                                    Clear All
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Grouped permissions */}
+                        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                            {Object.entries(groupPermissionsByEntity(allPermissions)).map(([entityKey, entityData]) => {
+                                const entityPermissionIds = entityData.permissions.map(p => p.id);
+                                const selectedInEntity = entityPermissionIds.filter(id => selectedPermissions.includes(id)).length;
+                                const allSelected = selectedInEntity === entityPermissionIds.length;
+                                const someSelected = selectedInEntity > 0 && selectedInEntity < entityPermissionIds.length;
+                                
+                                return (
+                                    <Card key={entityKey} className="bg-default-50 dark:bg-default-100/10">
+                                        <CardHeader className="py-2 px-4">
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-3">
+                                                    <Checkbox
+                                                        isSelected={allSelected}
+                                                        isIndeterminate={someSelected}
+                                                        onValueChange={(checked) => {
+                                                            if (checked) {
+                                                                setSelectedPermissions(prev => [...new Set([...prev, ...entityPermissionIds])]);
+                                                            } else {
+                                                                setSelectedPermissions(prev => prev.filter(id => !entityPermissionIds.includes(id)));
+                                                            }
+                                                        }}
+                                                        size="sm"
+                                                    />
+                                                    <span className="font-semibold text-foreground">{entityData.name}</span>
+                                                </div>
+                                                <Chip size="sm" variant="flat" color={allSelected ? "success" : someSelected ? "warning" : "default"}>
+                                                    {selectedInEntity}/{entityPermissionIds.length}
+                                                </Chip>
+                                            </div>
+                                        </CardHeader>
+                                        <CardBody className="pt-0 pb-3 px-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                                {entityData.permissions.map(permission => (
+                                                    <div
+                                                        key={permission.id}
+                                                        className={`flex items-start gap-2 p-2 rounded-lg border transition-colors cursor-pointer ${
+                                                            selectedPermissions.includes(permission.id)
+                                                                ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
+                                                                : 'bg-default-100/50 dark:bg-default-50/10 border-transparent hover:border-default-300'
+                                                        }`}
+                                                        onClick={() => {
+                                                            if (selectedPermissions.includes(permission.id)) {
+                                                                setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id));
+                                                            } else {
+                                                                setSelectedPermissions([...selectedPermissions, permission.id]);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Checkbox
+                                                            isSelected={selectedPermissions.includes(permission.id)}
+                                                            onValueChange={(checked) => {
+                                                                if (checked) {
+                                                                    setSelectedPermissions([...selectedPermissions, permission.id]);
+                                                                } else {
+                                                                    setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id));
+                                                                }
+                                                            }}
+                                                            size="sm"
+                                                            className="mt-0.5"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-foreground truncate">
+                                                                {permission.displayName}
+                                                            </p>
+                                                            <p className="text-xs text-default-400 truncate">
+                                                                {permission.description}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     </ModalBody>
                     <ModalFooter>

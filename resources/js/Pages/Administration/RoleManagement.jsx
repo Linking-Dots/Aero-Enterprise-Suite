@@ -146,7 +146,8 @@ const RoleManagement = (props) => {
     const users = props.users || [];
 
     // Refs for performance optimization
-    const abortControllerRef = useRef(null);
+    const permissionAbortControllers = useRef(new Map()); // Per-permission abort controllers
+    const moduleAbortControllers = useRef(new Map()); // Per-module abort controllers
     const lastUpdateRef = useRef(Date.now());
     
     // Theme and responsive hooks
@@ -842,14 +843,19 @@ const RoleManagement = (props) => {
         }
     };
 
-    // Enhanced toggle permission with better state management and error handling
+    // Enhanced toggle permission with independent state management and error handling
     const togglePermission = useCallback(async (permissionName) => {
-        if (!activeRole || isLoading) return;
+        if (!activeRole) return;
+        
+        // Check if this specific permission is already loading
+        if (loadingStates.permissions[permissionName] === LOADING_STATES.LOADING) return;
 
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
+        // Cancel only this permission's previous request (if any)
+        if (permissionAbortControllers.current.has(permissionName)) {
+            permissionAbortControllers.current.get(permissionName).abort();
         }
-        abortControllerRef.current = new AbortController();
+        const controller = new AbortController();
+        permissionAbortControllers.current.set(permissionName, controller);
 
         setLoadingStates(prev => ({
             ...prev,
@@ -865,7 +871,7 @@ const RoleManagement = (props) => {
                 permission: permissionName,
                 action: action
             }, {
-                signal: abortControllerRef.current.signal
+                signal: controller.signal
             });
 
             if (response.status === 200) {
@@ -906,7 +912,9 @@ const RoleManagement = (props) => {
                 lastUpdateRef.current = Date.now();
             }
         } catch (error) {
-            if (error.name !== 'AbortError') {
+            // Handle both AbortError (native) and CanceledError (axios)
+            const isCanceled = error.name === 'AbortError' || error.name === 'CanceledError' || error.code === 'ERR_CANCELED';
+            if (!isCanceled) {
                 console.error('Error updating permission:', error);
                 setLoadingStates(prev => ({
                     ...prev,
@@ -922,19 +930,24 @@ const RoleManagement = (props) => {
                 setErrorMessage(error.response?.data?.message || 'Failed to update permission');
             }
         } finally {
-            setIsLoading(false);
+            // Clean up the abort controller for this permission
+            permissionAbortControllers.current.delete(permissionName);
         }
-    }, [activeRole, isLoading, roleHasPermission, permissions]);
+    }, [activeRole, loadingStates.permissions, roleHasPermission, permissions]);
 
-    // Enhanced toggle module permissions with better state management
+    // Enhanced toggle module permissions with independent state management
     const toggleModulePermissions = useCallback(async (module) => {
-        if (!activeRole || isLoading) return;
+        if (!activeRole) return;
+        
+        // Check if this specific module is already loading
+        if (loadingStates.modules[module] === LOADING_STATES.LOADING) return;
 
-        // Cancel any previous request
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
+        // Cancel only this module's previous request (if any)
+        if (moduleAbortControllers.current.has(module)) {
+            moduleAbortControllers.current.get(module).abort();
         }
-        abortControllerRef.current = new AbortController();
+        const controller = new AbortController();
+        moduleAbortControllers.current.set(module, controller);
 
         // Set loading state for module
         setLoadingStates(prev => ({
@@ -948,7 +961,7 @@ const RoleManagement = (props) => {
                 module: module,
                 action: 'toggle'
             }, {
-                signal: abortControllerRef.current.signal
+                signal: controller.signal
             });
 
             if (response.status === 200) {
@@ -979,7 +992,9 @@ const RoleManagement = (props) => {
                 lastUpdateRef.current = Date.now();
             }
         } catch (error) {
-            if (error.name !== 'AbortError') {
+            // Handle both AbortError (native) and CanceledError (axios)
+            const isCanceled = error.name === 'AbortError' || error.name === 'CanceledError' || error.code === 'ERR_CANCELED';
+            if (!isCanceled) {
                 console.error('Error updating module permissions:', error);
                 
                 // Set error state
@@ -999,8 +1014,11 @@ const RoleManagement = (props) => {
                 showToast.error(error.response?.data?.message || 'Failed to update module permissions');
                 setErrorMessage(error.response?.data?.message || 'Failed to update module permissions');
             }
+        } finally {
+            // Clean up the abort controller for this module
+            moduleAbortControllers.current.delete(module);
         }
-    }, [activeRole, isLoading]);
+    }, [activeRole, loadingStates.modules]);
 
     // Enhanced form field handlers with validation
     const handleFormFieldChange = useCallback((field, value) => {
@@ -1015,9 +1033,13 @@ const RoleManagement = (props) => {
     // Cleanup function for component unmount
     useEffect(() => {
         return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
+            // Abort all pending permission requests
+            permissionAbortControllers.current.forEach(controller => controller.abort());
+            permissionAbortControllers.current.clear();
+            
+            // Abort all pending module requests
+            moduleAbortControllers.current.forEach(controller => controller.abort());
+            moduleAbortControllers.current.clear();
         };
     }, []);
 
