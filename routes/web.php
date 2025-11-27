@@ -125,6 +125,13 @@ Route::middleware($middlewareStack)->group(function () {
         Route::get('/daily-works-summary', [DailyWorkSummaryController::class, 'index'])->name('daily-works-summary');
         Route::post('/daily-works-summary/filter', [DailyWorkSummaryController::class, 'filterSummary'])->name('daily-works-summary.filter');
         Route::get('/daily-works/statistics', [DailyWorkSummaryController::class, 'getStatistics'])->name('dailyWorks.statistics');
+
+        // Routes that incharge/assigned users can access (authorization checked in controller)
+        Route::post('/daily-works/status', [DailyWorkController::class, 'updateStatus'])->name('dailyWorks.updateStatus');
+        Route::post('/daily-works/completion-time', [DailyWorkController::class, 'updateCompletionTime'])->name('dailyWorks.updateCompletionTime');
+        Route::post('/daily-works/submission-time', [DailyWorkController::class, 'updateSubmissionTime'])->name('dailyWorks.updateSubmissionTime');
+        Route::post('/daily-works/assigned', [DailyWorkController::class, 'updateAssigned'])->name('dailyWorks.updateAssigned');
+        Route::post('/update-rfi-file', [DailyWorkController::class, 'uploadRFIFile'])->name('dailyWorks.uploadRFI');
     });
 
     Route::middleware(['permission:daily-works.create'])->group(function () {
@@ -133,14 +140,9 @@ Route::middleware($middlewareStack)->group(function () {
 
     Route::middleware(['permission:daily-works.update'])->group(function () {
         Route::post('/update-daily-work', [DailyWorkController::class, 'update'])->name('dailyWorks.update');
-        Route::post('/update-rfi-file', [DailyWorkController::class, 'uploadRFIFile'])->name('dailyWorks.uploadRFI');
         Route::post('/daily-works-summary/refresh', [DailyWorkSummaryController::class, 'refresh'])->name('daily-works-summary.refresh');
-        Route::post('/daily-works/status', [DailyWorkController::class, 'updateStatus'])->name('dailyWorks.updateStatus');
-        Route::post('/daily-works/completion-time', [DailyWorkController::class, 'updateCompletionTime'])->name('dailyWorks.updateCompletionTime');
-        Route::post('/daily-works/submission-time', [DailyWorkController::class, 'updateSubmissionTime'])->name('dailyWorks.updateSubmissionTime');
         Route::post('/daily-works/inspection-details', [DailyWorkController::class, 'updateInspectionDetails'])->name('dailyWorks.updateInspectionDetails');
         Route::post('/daily-works/incharge', [DailyWorkController::class, 'updateIncharge'])->name('dailyWorks.updateIncharge');
-        Route::post('/daily-works/assigned', [DailyWorkController::class, 'updateAssigned'])->name('dailyWorks.updateAssigned');
         Route::post('/daily-works/assign', [DailyWorkController::class, 'assignWork'])->name('dailyWorks.assign');
     });
 

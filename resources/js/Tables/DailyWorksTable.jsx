@@ -1254,7 +1254,7 @@ const DailyWorksTable = ({
                                                         />
                                                         <div>
                                                             <div className="text-sm font-medium">{user.name}</div>
-                                                            <div className="text-xs text-default-400">{user.role_name || 'Team Member'}</div>
+                                                            <div className="text-xs text-default-400">{user.designation_title || user.designation?.title || 'Staff'}</div>
                                                         </div>
                                                     </div>
                                                 </SelectItem>
@@ -1946,7 +1946,7 @@ const DailyWorksTable = ({
                                         <User
                                             size="sm"
                                             name={assignee.name}
-                                            description={`Employee ID: ${assignee.employee_id || 'N/A'}`}
+                                            description={assignee.designation_title || assignee.designation?.title || 'Staff'}
                                             avatarProps={{
                                                 size: "sm",
                                                 src: assignee.profile_image_url || assignee.profile_image,

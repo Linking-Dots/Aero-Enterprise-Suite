@@ -62,11 +62,12 @@ class DailyWorkController extends Controller
             );
         $reports = Report::all();
         $reports_with_daily_works = Report::with('daily_works')->has('daily_works')->get();
-        $users = User::with('roles')->get();
+        $users = User::with(['roles', 'designation'])->get();
 
-        // Loop through each user and add a new field 'role' with the role name
+        // Loop through each user and add role and designation_title fields
         $users->transform(function ($user) {
-            $user->role = $user->roles->first()->name;
+            $user->role = $user->roles->first()?->name;
+            $user->designation_title = $user->designation?->title;
 
             return $user;
         });
@@ -270,6 +271,16 @@ class DailyWorkController extends Controller
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
+            // Check authorization: admin, incharge, or assigned user can update status
+            $user = User::with('roles')->find(Auth::id());
+            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
+            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
+            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
+
+            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
+                return response()->json(['error' => 'Unauthorized to update status for this work'], 403);
+            }
+
             $updateData = [
                 'status' => $request->status,
             ];
@@ -312,6 +323,17 @@ class DailyWorkController extends Controller
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);
+
+            // Check authorization: admin, incharge, or assigned user can update completion time
+            $user = User::with('roles')->find(Auth::id());
+            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
+            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
+            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
+
+            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
+                return response()->json(['error' => 'Unauthorized to update completion time for this work'], 403);
+            }
+
             $dailyWork->update(['completion_time' => $request->completion_time]);
 
             return response()->json([
@@ -332,6 +354,17 @@ class DailyWorkController extends Controller
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);
+
+            // Check authorization: admin, incharge, or assigned user can update submission time
+            $user = User::with('roles')->find(Auth::id());
+            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
+            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
+            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
+
+            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
+                return response()->json(['error' => 'Unauthorized to update submission date for this work'], 403);
+            }
+
             $dailyWork->update(['rfi_submission_date' => $request->rfi_submission_date]);
 
             return response()->json([
@@ -396,7 +429,7 @@ class DailyWorkController extends Controller
             // Check authorization: only admin or incharge can update assigned
             $user = User::with('roles')->find(Auth::id());
             $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
-            $isIncharge = $dailyWork->incharge === $user->id;
+            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
 
             if (! $isAdmin && ! $isIncharge) {
                 return response()->json(['error' => 'Unauthorized to update assigned user for this work'], 403);
