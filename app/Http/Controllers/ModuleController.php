@@ -572,9 +572,9 @@ class ModuleController extends Controller
     public function syncModulePermissions(Request $request, $moduleId)
     {
         $validator = Validator::make($request->all(), [
-            'permissions' => 'required|array',
-            'permissions.*.permission' => 'required|string|exists:permissions,name',
-            'permissions.*.type' => 'required|in:required,any,all',
+            'permissions' => 'present|array',
+            'permissions.*.permission' => 'required_with:permissions.*|string|exists:permissions,name',
+            'permissions.*.type' => 'required_with:permissions.*|in:required,any,all',
             'permissions.*.group' => 'nullable|string|max:50',
         ]);
 
@@ -616,9 +616,9 @@ class ModuleController extends Controller
     public function syncSubModulePermissions(Request $request, $subModuleId)
     {
         $validator = Validator::make($request->all(), [
-            'permissions' => 'required|array',
-            'permissions.*.permission' => 'required|string|exists:permissions,name',
-            'permissions.*.type' => 'required|in:required,any,all',
+            'permissions' => 'present|array',
+            'permissions.*.permission' => 'required_with:permissions.*|string|exists:permissions,name',
+            'permissions.*.type' => 'required_with:permissions.*|in:required,any,all',
             'permissions.*.group' => 'nullable|string|max:50',
         ]);
 
@@ -660,9 +660,9 @@ class ModuleController extends Controller
     public function syncComponentPermissions(Request $request, $componentId)
     {
         $validator = Validator::make($request->all(), [
-            'permissions' => 'required|array',
-            'permissions.*.permission' => 'required|string|exists:permissions,name',
-            'permissions.*.type' => 'required|in:required,any,all',
+            'permissions' => 'present|array',
+            'permissions.*.permission' => 'required_with:permissions.*|string|exists:permissions,name',
+            'permissions.*.type' => 'required_with:permissions.*|in:required,any,all',
             'permissions.*.group' => 'nullable|string|max:50',
         ]);
 

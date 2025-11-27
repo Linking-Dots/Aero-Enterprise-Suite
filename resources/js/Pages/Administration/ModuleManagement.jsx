@@ -565,13 +565,21 @@ const ModuleManagement = (props) => {
                 };
             }).filter(p => p.permission); // Filter out any without valid permission names
 
-            await axios.post(endpoint, { permissions: permissionsPayload });
+            console.log('Saving permissions:', { endpoint, permissionsPayload });
+            
+            const response = await axios.post(endpoint, { permissions: permissionsPayload });
+            console.log('Save response:', response.data);
+            
             showToast.success('Permissions updated successfully');
             setPermissionModalOpen(false);
             refreshData();
         } catch (error) {
             console.error('Error saving permissions:', error);
-            showToast.error(error.response?.data?.message || 'Failed to save permissions');
+            console.error('Error response:', error.response?.data);
+            const errorMessage = error.response?.data?.errors 
+                ? Object.values(error.response.data.errors).flat().join(', ')
+                : error.response?.data?.message || 'Failed to save permissions';
+            showToast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
