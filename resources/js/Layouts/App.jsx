@@ -137,7 +137,7 @@ const App = React.memo(({ children }) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Get global page props
-  const { auth, app, url } = usePage().props;
+  const { auth, app, url, roles } = usePage().props;
 
   // Version manager for update notifications
   const {
@@ -154,19 +154,22 @@ const App = React.memo(({ children }) => {
     const currentAuth = {
       user: auth?.user,
       permissions: auth?.permissions,
+      roles: auth?.roles,
       id: auth?.user?.id,
       permissionCount: auth?.permissions?.length
     };
 
     const permissions = currentAuth?.permissions || [];
+    const roles = currentAuth?.roles || [];
     const isSettingsPage = url.startsWith('/settings') || url.includes('settings');
     const pages = isSettingsPage 
       ? getSettingsPages(permissions, currentAuth) 
-      : getPages(permissions, currentAuth);
+      : getPages(roles, permissions, currentAuth);
 
     return {
       currentAuth,
       permissions,
+      roles,
       pages,
       app,
       url

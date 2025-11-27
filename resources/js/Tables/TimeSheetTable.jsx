@@ -345,7 +345,9 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 return 'warning';
         }
     };    // Check permissions using new system
+    console.log(auth.permissions)
     const canViewAllAttendance = auth.permissions?.includes('attendance.view') || false;
+    const canViewOwnAttendance = auth.permissions?.includes('attendance.own.view') || false;
     const canManageAttendance = auth.permissions?.includes('attendance.manage') || false;
     const canExportAttendance = auth.permissions?.includes('attendance.export') || canManageAttendance || false;    // Filter absent users for export functions only - backend now handles search filtering
     const filteredAbsentUsers = useMemo(() => {
@@ -722,522 +724,401 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
 
 
 
-      // Employee view - render only table and pagination without wrapper
-    if (url === '/attendance-employee') {
-    
-        return (
-            <div 
-                role="region"
-                aria-label="Attendance data table"
-                className="w-full"
-            >
-                {error ? (
-                    <Card 
-                        className="p-4 transition-all duration-200"
-                        style={{
-                            background: `color-mix(in srgb, var(--theme-danger, #F31260) 10%, transparent)`,
-                            borderColor: `color-mix(in srgb, var(--theme-danger, #F31260) 25%, transparent)`,
-                            borderWidth: `var(--borderWidth, 2px)`,
-                            borderRadius: `var(--borderRadius, 12px)`,
-                            fontFamily: `var(--fontFamily, "Inter")`,
-                            transform: `scale(var(--scale, 1))`
-                        }}
-                    >
-                        <div className="flex items-center gap-3">
-                            <ExclamationTriangleIcon 
-                                className="w-5 h-5"
-                                style={{ color: 'var(--theme-danger)' }}
-                            />
-                            <p 
-                                className="text-sm"
-                                style={{ color: 'var(--theme-danger)' }}
-                            >
-                                {error}
-                            </p>
-                        </div>
-                    </Card>
-                ) : (
-                    <>
-                        <ScrollShadow
-                            orientation="horizontal"
-                            className="overflow-y-hidden"
-                        >
-                            <Skeleton className="rounded-lg" isLoaded={isLoaded}>
-                                <Table
-                                    selectionMode="multiple"
-                                    selectionBehavior="toggle"
-                                    isCompact
-                                    removeWrapper
-                                    aria-label="Employee attendance timesheet table"
-                                    isHeaderSticky
-                                    radius={getThemeRadius()}
-                                    classNames={{
-                                        base: "max-h-[520px] overflow-auto",
-                                        table: "min-h-[200px] w-full",
-                                        thead: "z-10",
-                                        tbody: "overflow-y-auto",
-                                        th: "bg-default-100 text-default-700 font-semibold",
-                                        td: "text-default-600",
-                                    }}
-                                    style={{
-                                        borderRadius: `var(--borderRadius, 12px)`,
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}
-                                >
-                                    <TableHeader columns={columns}>
-                                        {(column) => (
-                                            <TableColumn 
-                                                key={column.uid} 
-                                                align="start"
-                                                aria-label={column.ariaLabel || column.name}
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    {column.icon && <column.icon className="w-4 h-4" />}
-                                                    <span className="text-sm font-medium">{column.name}</span>
-                                                </div>
-                                            </TableColumn>
-                                        )}
-                                    </TableHeader>
-                                    <TableBody 
-                                        items={attendances}
-                                        emptyContent={
-                                            <div className="flex flex-col items-center justify-center py-12">
-                                                <ClockIcon className="w-16 h-16 text-default-300 mb-4" />
-                                                <h6 className="text-lg font-semibold mb-2">
-                                                    No Attendance Records
-                                                </h6>
-                                                <p className="text-default-500">
-                                                    No attendance records found for the selected date
-                                                </p>
-                                            </div>
-                                        }
-                                    >
-                                        {(attendance) => (
-                                            <TableRow key={attendance.id || attendance.user_id}>
-                                                {(columnKey) => renderCell(attendance, columnKey)}
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </Skeleton>
-                        </ScrollShadow>
-                        {totalRows > perPage && (
-                           
-                            <div 
-                                className="flex justify-center items-center"
-                            >
-                                <Pagination
-                                    initialPage={1}
-                                    isCompact
-                                    showControls
-                                    showShadow
-                                    color="primary"
-                                    variant="bordered"
-                                    radius={getThemeRadius()}
-                                    page={currentPage}
-                                    total={lastPage}
-                                    onChange={handlePageChange}
-                                    aria-label="Timesheet pagination"
-                                    style={{
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}
-                                />
-                                
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-        );
-    }    
-    // Admin view - render full layout with combined Card wrapper
+    // Employee view - render only table and pagination without wrapper
+
     return (
-        <div 
-            className="flex flex-col w-full h-full p-4"
-            role="main"
-            aria-label="Timesheet Management"
-        >
-            <div className="space-y-4">
-                {/* Combined Attendance and Absent Users Card */}
-                <div className="w-full">
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <Card 
-                            className="transition-all duration-200"
-                            style={{
-                                border: `var(--borderWidth, 2px) solid transparent`,
-                                borderRadius: `var(--borderRadius, 12px)`,
-                                fontFamily: `var(--fontFamily, "Inter")`,
-                                transform: `scale(var(--scale, 1))`,
-                                background: `linear-gradient(135deg, 
-                                    var(--theme-content1, #FAFAFA) 20%, 
-                                    var(--theme-content2, #F4F4F5) 10%, 
-                                    var(--theme-content3, #F1F3F4) 20%)`,
-                            }}
+    <>
+        { canViewAllAttendance && (
+            <div 
+                className="flex flex-col w-full h-full p-4"
+                role="main"
+                aria-label="Timesheet Management"
+            >
+                <div className="space-y-4">
+                    {/* Combined Attendance and Absent Users Card */}
+                    <div className="w-full">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5 }}
                         >
-                            {/* Main Card Content */}
-                            <CardHeader 
-                                className="border-b p-0"
+                            <Card 
+                                className="transition-all duration-200"
                                 style={{
-                                    borderColor: `var(--theme-divider, #E4E4E7)`,
+                                    border: `var(--borderWidth, 2px) solid transparent`,
+                                    borderRadius: `var(--borderRadius, 12px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    transform: `scale(var(--scale, 1))`,
                                     background: `linear-gradient(135deg, 
-                                        color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
-                                        color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                        var(--theme-content1, #FAFAFA) 20%, 
+                                        var(--theme-content2, #F4F4F5) 10%, 
+                                        var(--theme-content3, #F1F3F4) 20%)`,
                                 }}
                             >
-                                <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
-                                        <div className="flex flex-col space-y-4">
-                                            {/* Main Header Content */}
-                                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                                {/* Title Section */}
-                                                <div className="flex items-center gap-3 lg:gap-4">
-                                                    <div 
-                                                        className={`
-                                                            ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
-                                                            rounded-xl flex items-center justify-center
-                                                        `}
-                                                        style={{
-                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
-                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
-                                                            borderWidth: `var(--borderWidth, 2px)`,
-                                                            borderRadius: `var(--borderRadius, 12px)`,
-                                                        }}
-                                                    >
-                                                        <ClockIcon 
+                                {/* Main Card Content */}
+                                <CardHeader 
+                                    className="border-b p-0"
+                                    style={{
+                                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                                        background: `linear-gradient(135deg, 
+                                            color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                            color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                    }}
+                                >
+                                    <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
+                                            <div className="flex flex-col space-y-4">
+                                                {/* Main Header Content */}
+                                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                    {/* Title Section */}
+                                                    <div className="flex items-center gap-3 lg:gap-4">
+                                                        <div 
                                                             className={`
-                                                                ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
-                                                            `}
-                                                            style={{ color: 'var(--theme-primary)' }}
-                                                        />
-                                                    </div>
-                                                    <div className="min-w-0 flex-1">
-                                                        <h4 
-                                                            className={`
-                                                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
-                                                                font-bold text-foreground
-                                                                ${!isLargeScreen ? 'truncate' : ''}
+                                                                ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
+                                                                rounded-xl flex items-center justify-center
                                                             `}
                                                             style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                                background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                                borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                                borderWidth: `var(--borderWidth, 2px)`,
+                                                                borderRadius: `var(--borderRadius, 12px)`,
                                                             }}
                                                         >
-                                                            Daily Timesheet
-                                                        </h4>
-                                                        <p 
-                                                            className={`
-                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
-                                                                text-default-500
-                                                                ${!isLargeScreen ? 'truncate' : ''}
-                                                            `}
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        >
-                                                            {new Date(selectedDate).toLocaleString('en-US', {
-                                                                month: isLargeScreen ? 'long' : 'short',
-                                                                day: 'numeric',
-                                                                year: isLargeScreen ? 'numeric' : undefined,
-                                                            })}
-                                                        </p>
-                                                    </div>
-                                                </div>                                                {/* Action Buttons */}
-                                                <div className="flex items-center gap-4">
-                                                    {lastCheckedText && (
-                                                        <span className="text-xs text-default-500">
-                                                            Updated: {lastCheckedText}
-                                                        </span>
-                                                    )}
-                                                    <div className="flex items-center gap-2">
-                                                        {canExportAttendance && (
-                                                            <>
-                                                                <HeroButton
-                                                                    color="success"
-                                                                    variant="flat"
-                                                                    size={isLargeScreen ? "md" : "sm"}
-                                                                    radius={getThemeRadius()}
-                                                                    startContent={
-                                                                        <DocumentArrowDownIcon className={`
-                                                                            ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
-                                                                        `} />
-                                                                    }
-                                                                    onPress={exportExcel}
-                                                                    isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
-                                                                    isLoading={downloading === 'excel'}
-                                                                    style={{
-                                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                                    }}
-                                                                >
-                                                                    {isLargeScreen ? 'Excel' : 'XLS'}
-                                                                </HeroButton>
-                                                                
-                                                                <HeroButton
-                                                                    color="danger"
-                                                                    variant="flat"
-                                                                    size={isLargeScreen ? "md" : "sm"}
-                                                                    radius={getThemeRadius()}
-                                                                    startContent={
-                                                                        <DocumentArrowDownIcon className={`
-                                                                            ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
-                                                                        `} />
-                                                                    }
-                                                                    onPress={downloadPDF}
-                                                                    isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
-                                                                    isLoading={downloading === 'pdf'}
-                                                                    style={{
-                                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                                    }}
-                                                                >
-                                                                    PDF
-                                                                </HeroButton>
-                                                            </>
+                                                            <ClockIcon 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
+                                                                `}
+                                                                style={{ color: 'var(--theme-primary)' }}
+                                                            />
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <h4 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
+                                                                    font-bold text-foreground
+                                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                                `}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Daily Timesheet
+                                                            </h4>
+                                                            <p 
+                                                                className={`
+                                                                    ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                                    text-default-500
+                                                                    ${!isLargeScreen ? 'truncate' : ''}
+                                                                `}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                {new Date(selectedDate).toLocaleString('en-US', {
+                                                                    month: isLargeScreen ? 'long' : 'short',
+                                                                    day: 'numeric',
+                                                                    year: isLargeScreen ? 'numeric' : undefined,
+                                                                })}
+                                                            </p>
+                                                        </div>
+                                                    </div>                                                {/* Action Buttons */}
+                                                    <div className="flex items-center gap-4">
+                                                        {lastCheckedText && (
+                                                            <span className="text-xs text-default-500">
+                                                                Updated: {lastCheckedText}
+                                                            </span>
                                                         )}
-                                                    </div>
-                                                    
-                                                    
-                                                </div>
-                                            </div>
-
-                                            {/* Stats Bar - Only show on larger screens */}
-                                            {isLargeScreen && (
-                                                <div className="flex items-center gap-6 pt-2 border-t border-white/10">
-                                                    <div className="flex items-center gap-2">
-                                                        <CheckCircleIcon className="w-4 h-4 text-success" />
-                                                        <span className="text-xs text-gray-500">
-                                                            Present: {totalRows}
-                                                        </span>
-                                                    </div>
-                                                    {canViewAllAttendance && (
                                                         <div className="flex items-center gap-2">
-                                                            <ExclamationTriangleIcon className="w-4 h-4 text-warning" />
+                                                            {canExportAttendance && (
+                                                                <>
+                                                                    <HeroButton
+                                                                        color="success"
+                                                                        variant="flat"
+                                                                        size={isLargeScreen ? "md" : "sm"}
+                                                                        radius={getThemeRadius()}
+                                                                        startContent={
+                                                                            <DocumentArrowDownIcon className={`
+                                                                                ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
+                                                                            `} />
+                                                                        }
+                                                                        onPress={exportExcel}
+                                                                        isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
+                                                                        isLoading={downloading === 'excel'}
+                                                                        style={{
+                                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                                        }}
+                                                                    >
+                                                                        {isLargeScreen ? 'Excel' : 'XLS'}
+                                                                    </HeroButton>
+                                                                    
+                                                                    <HeroButton
+                                                                        color="danger"
+                                                                        variant="flat"
+                                                                        size={isLargeScreen ? "md" : "sm"}
+                                                                        radius={getThemeRadius()}
+                                                                        startContent={
+                                                                            <DocumentArrowDownIcon className={`
+                                                                                ${isLargeScreen ? 'w-4 h-4' : 'w-3.5 h-3.5'}
+                                                                            `} />
+                                                                        }
+                                                                        onPress={downloadPDF}
+                                                                        isDisabled={!isLoaded || attendances.length === 0 || downloading !== ''}
+                                                                        isLoading={downloading === 'pdf'}
+                                                                        style={{
+                                                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                                                        }}
+                                                                    >
+                                                                        PDF
+                                                                    </HeroButton>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        
+                                                    </div>
+                                                </div>
+
+                                                {/* Stats Bar - Only show on larger screens */}
+                                                {isLargeScreen && (
+                                                    <div className="flex items-center gap-6 pt-2 border-t border-white/10">
+                                                        <div className="flex items-center gap-2">
+                                                            <CheckCircleIcon className="w-4 h-4 text-success" />
                                                             <span className="text-xs text-gray-500">
-                                                                Absent: {absentUsers.length}
+                                                                Present: {totalRows}
                                                             </span>
                                                         </div>
+                                                        {canViewAllAttendance && (
+                                                            <div className="flex items-center gap-2">
+                                                                <ExclamationTriangleIcon className="w-4 h-4 text-warning" />
+                                                                <span className="text-xs text-gray-500">
+                                                                    Absent: {absentUsers.length}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            <UserGroupIcon className="w-4 h-4 text-primary" />
+                                                            <span className="text-xs text-gray-500">
+                                                                Total: {totalRows + absentUsers.length}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody>
+                                    <div 
+                                        role="search"
+                                        aria-label="Timesheet filters"
+                                    >
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                            {canViewAllAttendance && (
+                                                <>
+                                                    <div className="col-span-1">
+                                                        <Input
+                                                            type="text"
+                                                            label="Search Employee"
+                                                            placeholder="Enter employee name"
+                                                            value={employee}
+                                                            onChange={(e) => setEmployee(e.target.value)}
+                                                            variant="bordered"
+                                                            size="sm"
+                                                            radius={getThemeRadius()}
+                                                            startContent={
+                                                                <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                                            }
+                                                            classNames={{
+                                                                input: "text-sm",
+                                                            }}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                            aria-label="Search employees"
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-1">
+                                                        <Input
+                                                            label="Select Date"
+                                                            type="date"
+                                                            variant="bordered"
+                                                            onChange={handleDateChange}
+                                                            value={new Date(selectedDate).toISOString().slice(0, 10) || ''}
+                                                            size="sm"
+                                                            radius={getThemeRadius()}
+                                                            startContent={
+                                                                <CalendarDaysIcon className="w-4 h-4 text-default-400" />
+                                                            }
+                                                            classNames={{
+                                                                input: "text-sm",
+                                                            }}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                            aria-label="Select date for timesheet"
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardBody>
+                                <Divider />                           
+                                <CardBody>
+                                    {/* Two Column Layout for Present and Absent Users */}
+                                    <div className="flex flex-col lg:flex-row gap-6 h-full">
+                                        {/* Present Users - Attendance Table */}
+                                        <div className={`${canViewAllAttendance ? 'lg:flex-1 lg:w-0' : 'w-full'} min-h-0`}>
+                                            {error ? (
+                                                <Card 
+                                                    className="p-4 transition-all duration-200"
+                                                    style={{
+                                                        background: `color-mix(in srgb, var(--theme-danger, #F31260) 10%, transparent)`,
+                                                        borderColor: `color-mix(in srgb, var(--theme-danger, #F31260) 25%, transparent)`,
+                                                        borderWidth: `var(--borderWidth, 2px)`,
+                                                        borderRadius: `var(--borderRadius, 12px)`,
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                        transform: `scale(var(--scale, 1))`
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <ExclamationTriangleIcon 
+                                                            className="w-5 h-5"
+                                                            style={{ color: 'var(--theme-danger)' }}
+                                                        />
+                                                        <p 
+                                                            className="text-sm"
+                                                            style={{ color: 'var(--theme-danger)' }}
+                                                        >
+                                                            {error}
+                                                        </p>
+                                                    </div>
+                                                </Card>
+                                            ) : (                                            
+                                                <div 
+                                                    role="region"
+                                                    aria-label="Present employees attendance table"
+                                                    className="h-full flex flex-col"
+                                                >
+                                                    
+                                                
+                                                    <div className="mb-4 flex-shrink-0">
+                                                        <h6 
+                                                            className="text-lg font-semibold text-foreground flex items-center gap-2"
+                                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                        >
+                                                            <CheckCircleIcon 
+                                                                className="w-5 h-5"
+                                                                style={{ color: 'var(--theme-success)' }}
+                                                            />
+                                                            Present Employees ({totalRows})
+                                                        </h6>
+                                                    </div>
+                                                    <div className="flex-1 min-h-0 flex flex-col">
+                                                        <ScrollShadow
+                                                            orientation="horizontal"
+                                                            className="overflow-y-hidden flex-1"
+                                                        >
+                                                        <Skeleton className="rounded-lg" isLoaded={isLoaded}>
+                                                            <Table
+                                                            
+                                                                isCompact
+                                                                removeWrapper
+                                                                aria-label="Employee attendance timesheet table"
+                                                                isHeaderSticky
+                                                                radius={getThemeRadius()}
+                                                                classNames={{
+                                                                    base: "max-h-[520px] overflow-auto",
+                                                                    table: "min-h-[200px] w-full",
+                                                                    thead: "z-10",
+                                                                    tbody: "overflow-y-auto",
+                                                                    th: "bg-default-100 text-default-700 font-semibold",
+                                                                    td: "text-default-600",
+                                                                }}
+                                                                style={{
+                                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                <TableHeader columns={columns}>
+                                                                    {(column) => (
+                                                                        <TableColumn key={column.uid} align="start">
+                                                                            <div className="flex items-center gap-2">
+                                                                                {column.icon && <column.icon className="w-4 h-4" />}
+                                                                                <span className="text-sm font-medium">{column.name}</span>
+                                                                            </div>
+                                                                        </TableColumn>
+                                                                    )}
+                                                                </TableHeader>
+                                                                <TableBody 
+                                                                    items={attendances}
+                                                                    emptyContent={
+                                                                        <div className="flex flex-col items-center justify-center py-8">
+                                                                            <ClockIcon className="w-12 h-12 text-default-300 mb-4" />
+                                                                            <p className="text-default-500">
+                                                                                No attendance records found
+                                                                            </p>
+                                                                        </div>
+                                                                    }
+                                                                >
+                                                                    {(attendance) => (
+                                                                        <TableRow key={attendance.id || attendance.user_id}>
+                                                                            {(columnKey) => renderCell(attendance, columnKey)}
+                                                                        </TableRow>
+                                                                    )}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </Skeleton>
+                                                    </ScrollShadow>
+                                                    {totalRows > perPage && (
+                                                        <div className="py-4 flex justify-center">
+                                                            <Pagination
+                                                                initialPage={1}
+                                                                isCompact
+                                                                showControls
+                                                                showShadow
+                                                                color="primary"
+                                                                variant="bordered"
+                                                                radius={getThemeRadius()}
+                                                                page={currentPage}
+                                                                total={lastPage}
+                                                                onChange={handlePageChange}
+                                                                aria-label="Timesheet pagination"
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            />
+                                                        </div>
                                                     )}
-                                                    <div className="flex items-center gap-2">
-                                                        <UserGroupIcon className="w-4 h-4 text-primary" />
-                                                        <span className="text-xs text-gray-500">
-                                                            Total: {totalRows + absentUsers.length}
-                                                        </span>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                            </CardHeader>
-                            <Divider />
-                            <CardBody>
-                                <div 
-                                    role="search"
-                                    aria-label="Timesheet filters"
-                                >
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+                                        {/* Absent Users Section */}
                                         {canViewAllAttendance && (
-                                            <>
-                                                <div className="col-span-1">
-                                                    <Input
-                                                        type="text"
-                                                        label="Search Employee"
-                                                        placeholder="Enter employee name"
-                                                        value={employee}
-                                                        onChange={(e) => setEmployee(e.target.value)}
-                                                        variant="bordered"
-                                                        size="sm"
-                                                        radius={getThemeRadius()}
-                                                        startContent={
-                                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                                        }
-                                                        classNames={{
-                                                            input: "text-sm",
-                                                        }}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                        aria-label="Search employees"
-                                                    />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <Input
-                                                        label="Select Date"
-                                                        type="date"
-                                                        variant="bordered"
-                                                        onChange={handleDateChange}
-                                                        value={new Date(selectedDate).toISOString().slice(0, 10) || ''}
-                                                        size="sm"
-                                                        radius={getThemeRadius()}
-                                                        startContent={
-                                                            <CalendarDaysIcon className="w-4 h-4 text-default-400" />
-                                                        }
-                                                        classNames={{
-                                                            input: "text-sm",
-                                                        }}
-                                                        style={{
-                                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                                        }}
-                                                        aria-label="Select date for timesheet"
-                                                    />
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </CardBody>
-                            <Divider />                           
-                            <CardBody>
-                                {/* Two Column Layout for Present and Absent Users */}
-                                <div className="flex flex-col lg:flex-row gap-6 h-full">
-                                    {/* Present Users - Attendance Table */}
-                                    <div className={`${canViewAllAttendance ? 'lg:flex-1 lg:w-0' : 'w-full'} min-h-0`}>
-                                        {error ? (
-                                            <Card 
-                                                className="p-4 transition-all duration-200"
-                                                style={{
-                                                    background: `color-mix(in srgb, var(--theme-danger, #F31260) 10%, transparent)`,
-                                                    borderColor: `color-mix(in srgb, var(--theme-danger, #F31260) 25%, transparent)`,
-                                                    borderWidth: `var(--borderWidth, 2px)`,
-                                                    borderRadius: `var(--borderRadius, 12px)`,
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                    transform: `scale(var(--scale, 1))`
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <ExclamationTriangleIcon 
-                                                        className="w-5 h-5"
-                                                        style={{ color: 'var(--theme-danger)' }}
-                                                    />
-                                                    <p 
-                                                        className="text-sm"
-                                                        style={{ color: 'var(--theme-danger)' }}
-                                                    >
-                                                        {error}
-                                                    </p>
-                                                </div>
-                                            </Card>
-                                        ) : (                                            
-                                            <div 
-                                                role="region"
-                                                aria-label="Present employees attendance table"
-                                                className="h-full flex flex-col"
-                                            >
-                                                 
-                                            
-                                                <div className="mb-4 flex-shrink-0">
-                                                    <h6 
-                                                        className="text-lg font-semibold text-foreground flex items-center gap-2"
-                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
-                                                    >
-                                                        <CheckCircleIcon 
-                                                            className="w-5 h-5"
-                                                            style={{ color: 'var(--theme-success)' }}
-                                                        />
-                                                        Present Employees ({totalRows})
-                                                    </h6>
-                                                </div>
-                                                <div className="flex-1 min-h-0 flex flex-col">
-                                                    <ScrollShadow
-                                                        orientation="horizontal"
-                                                        className="overflow-y-hidden flex-1"
-                                                    >
-                                                    <Skeleton className="rounded-lg" isLoaded={isLoaded}>
-                                                        <Table
-                                                         
-                                                            isCompact
-                                                            removeWrapper
-                                                            aria-label="Employee attendance timesheet table"
-                                                            isHeaderSticky
-                                                            radius={getThemeRadius()}
-                                                            classNames={{
-                                                                base: "max-h-[520px] overflow-auto",
-                                                                table: "min-h-[200px] w-full",
-                                                                thead: "z-10",
-                                                                tbody: "overflow-y-auto",
-                                                                th: "bg-default-100 text-default-700 font-semibold",
-                                                                td: "text-default-600",
-                                                            }}
-                                                            style={{
-                                                                borderRadius: `var(--borderRadius, 12px)`,
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        >
-                                                            <TableHeader columns={columns}>
-                                                                {(column) => (
-                                                                    <TableColumn key={column.uid} align="start">
-                                                                        <div className="flex items-center gap-2">
-                                                                            {column.icon && <column.icon className="w-4 h-4" />}
-                                                                            <span className="text-sm font-medium">{column.name}</span>
-                                                                        </div>
-                                                                    </TableColumn>
-                                                                )}
-                                                            </TableHeader>
-                                                            <TableBody 
-                                                                items={attendances}
-                                                                emptyContent={
-                                                                    <div className="flex flex-col items-center justify-center py-8">
-                                                                        <ClockIcon className="w-12 h-12 text-default-300 mb-4" />
-                                                                        <p className="text-default-500">
-                                                                            No attendance records found
-                                                                        </p>
-                                                                    </div>
-                                                                }
-                                                            >
-                                                                {(attendance) => (
-                                                                    <TableRow key={attendance.id || attendance.user_id}>
-                                                                        {(columnKey) => renderCell(attendance, columnKey)}
-                                                                    </TableRow>
-                                                                )}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </Skeleton>
-                                                </ScrollShadow>
-                                                {totalRows > perPage && (
-                                                    <div className="py-4 flex justify-center">
-                                                        <Pagination
-                                                            initialPage={1}
-                                                            isCompact
-                                                            showControls
-                                                            showShadow
-                                                            color="primary"
-                                                            variant="bordered"
-                                                            radius={getThemeRadius()}
-                                                            page={currentPage}
-                                                            total={lastPage}
-                                                            onChange={handlePageChange}
-                                                            aria-label="Timesheet pagination"
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                )}
-                                                </div>
+                                            <div className="lg:w-80 lg:flex-shrink-0 h-full">
+                                                <AbsentUsersInlineCard 
+                                                    absentUsers={absentUsers}
+                                                    selectedDate={selectedDate}
+                                                    getUserLeave={getUserLeave}
+                                                    isLoaded={isLoaded}
+                                                    onMarkAsPresent={onMarkAsPresent}
+                                                />
                                             </div>
                                         )}
                                     </div>
-
-                                    {/* Absent Users Section */}
-                                    {canViewAllAttendance && (
-                                        <div className="lg:w-80 lg:flex-shrink-0 h-full">
-                                            <AbsentUsersInlineCard 
-                                                absentUsers={absentUsers}
-                                                selectedDate={selectedDate}
-                                                getUserLeave={getUserLeave}
-                                                isLoaded={isLoaded}
-                                                onMarkAsPresent={onMarkAsPresent}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </CardBody>
-                        </Card>
-                    </motion.div>
-                    {/* End of Main Card Content */}
+                                </CardBody>
+                            </Card>
+                        </motion.div>
+                        {/* End of Main Card Content */}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        )}
+
+        
+    </>
+);
 };
 
 

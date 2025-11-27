@@ -6,62 +6,45 @@ import {
   Card, 
   CardBody, 
   CardHeader,
-  Divider,
-  Button,
   Input,
-  Pagination,
-  CircularProgress,
-  Spinner
 } from "@heroui/react";
 import { useTheme } from '@/Contexts/ThemeContext';
-import { RefreshCcw, Download, FileText } from 'lucide-react';
 import App from "@/Layouts/App.jsx";
 import StatsCards from '@/Components/StatsCards.jsx';
-import TimeSheetTable from "@/Tables/TimeSheetTable.jsx";
+import AttendanceEmployeeTable from "@/Tables/AttendanceEmployeeTable.jsx";
 import { 
   ClockIcon, 
   CalendarDaysIcon,
   ChartBarIcon,
-  ClipboardDocumentListIcon,
   CheckCircleIcon,
-  UserGroupIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
   PresentationChartLineIcon,
-  DocumentArrowDownIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
 
 const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, absentDays, lateArrivals }) => {
     const { auth } = usePage().props;
-    const { isDark } = useTheme();
     
-    // Custom media query logic - matching TimeSheetTable
-    const [isMobile, setIsMobile] = useState(false);
-    const [isTablet, setIsTablet] = useState(false);
+    // Media query logic
     const [isLargeScreen, setIsLargeScreen] = useState(false);
     const [isMediumScreen, setIsMediumScreen] = useState(false);
     
     useEffect(() => {
         const checkScreenSize = () => {
-            setIsMobile(window.innerWidth < 640);
-            setIsTablet(window.innerWidth < 768);
             setIsLargeScreen(window.innerWidth >= 1025);
             setIsMediumScreen(window.innerWidth >= 641 && window.innerWidth <= 1024);
         };
-        
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
     
-    // Helper function to convert theme borderRadius to HeroUI radius values - matching TimeSheetTable
+    // Helper function for radius
     const getThemeRadius = () => {
         if (typeof window === 'undefined') return 'lg';
-        
         const rootStyles = getComputedStyle(document.documentElement);
         const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
         const radiusValue = parseInt(borderRadius);
         if (radiusValue === 0) return 'none';
         if (radiusValue <= 4) return 'sm';
@@ -72,193 +55,169 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
     
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
-    const [loading, setLoading] = useState(false);
     
-    // Filter data state - matching TimeSheetTable expectations
     const [filterData, setFilterData] = useState({
         currentMonth: new Date().toISOString().slice(0, 7), // YYYY-MM format
     });
 
-    // Enhanced attendance stats state - matching industry standards
-    const [attendanceStats, setAttendanceStats] = useState({
-        // Basic metrics
-        totalWorkingDays: 0,
-        totalDaysInMonth: 0,
-        holidaysCount: 0,
-        weekendsCount: 0,
-        
-        // Attendance metrics
-        presentDays: 0,
-        absentDays: 0,
-        lateArrivals: 0,
-        attendancePercentage: 0,
-        
-        // Work time metrics
-        averageWorkHours: 0,
-        overtimeHours: 0,
-        totalWorkHours: 0,
-        
-        // Leave metrics
-        totalLeaveDays: 0,
-        leaveBreakdown: {},
-        
-        // Meta
-        month: '',
-        generated_at: null
+    const [stats, setStats] = useState({
+        meta: { month: '', workingDays: 0, holidays: 0, weekends: 0 },
+        attendance: { present: 0, absent: 0, leaves: 0, lateArrivals: 0, percentage: 0 },
+        hours: { totalWork: 0, averageDaily: 0, overtime: 0 }
     });
 
     const handleDateChange = (event) => {
         const newDate = event.target.value;
-        setSelectedDate(new Date(newDate));
-        setUpdateTimeSheet(prev => !prev);
+        // Ensure we create the date correctly from the input string to avoid timezone shifts
+        if (newDate) {
+            setSelectedDate(new Date(newDate));
+        }
     };
 
-    // Handle filter changes
     const handleFilterChange = useCallback((key, value) => {
         setFilterData(prevState => ({
             ...prevState,
             [key]: value,
         }));
-        setUpdateTimeSheet(prev => !prev);
     }, []);
 
-    // Fetch enhanced monthly statistics for the current user
+    
+
+    
+
+    // ... date change handlers ...
+
+    // 2. UPDATED FETCH FUNCTION
     const fetchMonthlyStats = useCallback(async () => {
         try {
-            const statsResponse = await axios.get(route('attendance.myMonthlyStats'), {
+            const response = await axios.get(route('attendance.myMonthlyStats'), {
                 params: {
-                    currentYear: filterData.currentMonth ? new Date(filterData.currentMonth).getFullYear() : new Date().getFullYear(),
-                    currentMonth: filterData.currentMonth ? String(new Date(filterData.currentMonth).getMonth() + 1).padStart(2, '0') : String(new Date().getMonth() + 1).padStart(2, '0'),
-                    // userId is automatically determined from auth in backend
+                    currentYear: new Date(filterData.currentMonth).getFullYear(),
+                    currentMonth: String(new Date(filterData.currentMonth).getMonth() + 1).padStart(2, '0'),
                 }
             });
-          
 
-            if (statsResponse.data.success) {
-                setAttendanceStats(statsResponse.data.data);
+            if (response.data.success) {
+                setStats(response.data.data); // Set the structured data directly
             }
         } catch (error) {
-            console.error('Failed to fetch monthly stats:', error);
+            console.error('Failed to fetch stats:', error);
         }
-    }, [filterData.currentMonth]);    // Fetch stats when component mounts or filter changes
+    }, [filterData.currentMonth]);
+
     useEffect(() => {
         fetchMonthlyStats();
-    }, [fetchMonthlyStats]);    // Prepare all stats data for StatsCards component - Combined into one array
+    }, [fetchMonthlyStats]); 
+
+    // const allStatsData = [
+    //     { title: "Working Days", value: attendanceStats.totalWorkingDays, icon: <CalendarDaysIcon />, color: "text-primary", iconBg: "bg-primary/20", description: `Total for ${attendanceStats.month || 'this month'}` },
+    //     { title: "Present Days", value: attendanceStats.presentDays, icon: <CheckCircleIcon />, color: "text-success", iconBg: "bg-success/20", description: "Days attended" },
+    //     { title: "Absent Days", value: attendanceStats.absentDays, icon: <XCircleIcon />, color: "text-danger", iconBg: "bg-danger/20", description: "Days missed" },
+    //     { title: "Late Arrivals", value: attendanceStats.lateArrivals, icon: <ExclamationTriangleIcon />, color: "text-warning", iconBg: "bg-warning/20", description: "Times late" },
+    //     { title: "Attendance Rate", value: `${attendanceStats.attendancePercentage}%`, icon: <ChartBarIcon />, color: "text-success", iconBg: "bg-success/20", description: "Monthly performance" },
+    //     { title: "Avg Work Hours", value: `${attendanceStats.averageWorkHours}h`, icon: <ClockIcon />, color: "text-primary", iconBg: "bg-primary/20", description: "Daily average" },
+    //     { title: "Overtime", value: `${attendanceStats.overtimeHours}h`, icon: <ClockIcon />, color: "text-secondary", iconBg: "bg-secondary/20", description: "Extra hours" },
+    //     { title: "Leave Days", value: attendanceStats.totalLeaveDays, icon: <UserIcon />, color: "text-warning", iconBg: "bg-warning/20", description: "Leaves taken" }
+    // ];
+
     const allStatsData = [
-        {
-            title: "Working Days",
-            value: attendanceStats.totalWorkingDays,
-            icon: <CalendarDaysIcon />,
-            color: "text-primary",
-            iconBg: "bg-primary/20",
-            description: `Total for ${attendanceStats.month || 'this month'}`
+        { 
+            title: "Working Days", 
+            value: stats.meta.workingDays, 
+            icon: <CalendarDaysIcon />, 
+            color: "text-default-600", 
+            iconBg: "bg-default-100", 
+            description: `Calendar: ${stats.meta.month}` 
         },
-        {
-            title: "Present Days",
-            value: attendanceStats.presentDays,
-            icon: <CheckCircleIcon />,
-            color: "text-success",
-            iconBg: "bg-success/20",
-            description: "Days attended this month"
+        { 
+            title: "Present", 
+            value: stats.attendance.present, 
+            icon: <CheckCircleIcon />, 
+            color: "text-success", 
+            iconBg: "bg-success/20", 
+            description: `${stats.attendance.percentage}% Attendance Rate` 
         },
-        {
-            title: "Absent Days",
-            value: attendanceStats.absentDays,
-            icon: <XCircleIcon />,
-            color: "text-danger",
-            iconBg: "bg-danger/20",
-            description: "Days missed this month"
+        { 
+            title: "Absent", 
+            value: stats.attendance.absent, 
+            icon: <XCircleIcon />, 
+            color: "text-danger", 
+            iconBg: "bg-danger/20", 
+            description: "Unexcused absences" 
         },
-        {
-            title: "Late Arrivals",
-            value: attendanceStats.lateArrivals,
-            icon: <ExclamationTriangleIcon />,
-            color: "text-warning",
-            iconBg: "bg-warning/20",
-            description: "Times late this month"
+        { 
+            title: "On Leave", 
+            value: stats.attendance.leaves, 
+            icon: <UserIcon />, 
+            color: "text-warning", 
+            iconBg: "bg-warning/20", 
+            description: "Approved leaves" 
         },
-        {
-            title: "Attendance Rate",
-            value: `${attendanceStats.attendancePercentage}%`,
-            icon: <ChartBarIcon />,
-            color: "text-success",
-            iconBg: "bg-success/20",
-            description: "Your monthly performance"
+        { 
+            title: "Late Arrivals", 
+            value: stats.attendance.lateArrivals, 
+            icon: <ExclamationTriangleIcon />, 
+            color: "text-orange-500", 
+            iconBg: "bg-orange-100", 
+            description: "After grace period" 
         },
-        {
-            title: "Avg Work Hours",
-            value: `${attendanceStats.averageWorkHours}h`,
-            icon: <ClockIcon />,
-            color: "text-primary",
-            iconBg: "bg-primary/20",
-            description: "Daily average this month"
+        { 
+            title: "Total Hours", 
+            value: `${stats.hours.totalWork}h`, 
+            icon: <ClockIcon />, 
+            color: "text-primary", 
+            iconBg: "bg-primary/20", 
+            description: "Total production time" 
         },
-        {
-            title: "Overtime",
-            value: `${attendanceStats.overtimeHours}h`,
-            icon: <ClockIcon />,
-            color: "text-secondary",
-            iconBg: "bg-secondary/20",
-            description: "Extra hours this month"
+        { 
+            title: "Daily Avg", 
+            value: `${stats.hours.averageDaily}h`, 
+            icon: <PresentationChartLineIcon />, 
+            color: "text-secondary", 
+            iconBg: "bg-secondary/20", 
+            description: "Target: 8.0h" 
         },
-        {
-            title: "Leave Days",
-            value: attendanceStats.totalLeaveDays,
-            icon: <UserIcon />,
-            color: "text-warning",
-            iconBg: "bg-warning/20",
-            description: "Leaves taken this month"
+        { 
+            title: "Overtime", 
+            value: `${stats.hours.overtime}h`, 
+            icon: <ChartBarIcon />, 
+            color: "text-success-600", 
+            iconBg: "bg-success-100", 
+            description: "Extra hours logged" 
         }
     ];
+
+
 
     return (
         <>
             <Head title={title || "My Attendance"} />
-            <div 
-                className="flex flex-col w-full h-full p-4"
-                role="main"
-                aria-label="My Attendance Management"
-            >
+            <div className="flex flex-col w-full h-full p-4" role="main" aria-label="My Attendance Management">
                 <div className="space-y-4">
                     <div className="w-full">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                        >
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                             <Card 
                                 className="transition-all duration-200"
                                 style={{
                                     border: `var(--borderWidth, 2px) solid transparent`,
                                     borderRadius: `var(--borderRadius, 12px)`,
                                     fontFamily: `var(--fontFamily, "Inter")`,
-                                    transform: `scale(var(--scale, 1))`,
-                                    background: `linear-gradient(135deg, 
-                                        var(--theme-content1, #FAFAFA) 20%, 
-                                        var(--theme-content2, #F4F4F5) 10%, 
-                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                    background: `linear-gradient(135deg, var(--theme-content1, #FAFAFA) 20%, var(--theme-content2, #F4F4F5) 10%, var(--theme-content3, #F1F3F4) 20%)`,
                                 }}
                             >
                                 <CardHeader 
                                     className="border-b p-0"
                                     style={{
                                         borderColor: `var(--theme-divider, #E4E4E7)`,
-                                        background: `linear-gradient(135deg, 
-                                            color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
-                                            color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                        background: `linear-gradient(135deg, color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
                                     }}
                                 >
                                     <div className={`${isLargeScreen ? 'p-6' : isMediumScreen ? 'p-4' : 'p-3'} w-full`}>
                                         <div className="flex flex-col space-y-4">
-                                            {/* Main Header Content */}
                                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                                {/* Title Section */}
                                                 <div className="flex items-center gap-3 lg:gap-4">
                                                     <div 
-                                                        className={`
-                                                            ${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} 
-                                                            rounded-xl flex items-center justify-center
-                                                        `}
+                                                        className={`${isLargeScreen ? 'p-3' : isMediumScreen ? 'p-2.5' : 'p-2'} rounded-xl flex items-center justify-center`}
                                                         style={{
                                                             background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
                                                             borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
@@ -266,36 +225,13 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
                                                             borderRadius: `var(--borderRadius, 12px)`,
                                                         }}
                                                     >
-                                                        <PresentationChartLineIcon 
-                                                            className={`
-                                                                ${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}
-                                                            `}
-                                                            style={{ color: 'var(--theme-primary)' }}
-                                                        />
+                                                        <PresentationChartLineIcon className={`${isLargeScreen ? 'w-8 h-8' : isMediumScreen ? 'w-6 h-6' : 'w-5 h-5'}`} style={{ color: 'var(--theme-primary)' }} />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 
-                                                            className={`
-                                                                ${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'}
-                                                                font-bold text-foreground
-                                                                ${!isLargeScreen ? 'truncate' : ''}
-                                                            `}
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        >
+                                                        <h4 className={`${isLargeScreen ? 'text-2xl' : isMediumScreen ? 'text-xl' : 'text-lg'} font-bold text-foreground ${!isLargeScreen ? 'truncate' : ''}`} style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                                             My Attendance
                                                         </h4>
-                                                        <p 
-                                                            className={`
-                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
-                                                                text-default-500
-                                                                ${!isLargeScreen ? 'truncate' : ''}
-                                                            `}
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                        >
+                                                        <p className={`${isLargeScreen ? 'text-sm' : 'text-xs'} text-default-500 ${!isLargeScreen ? 'truncate' : ''}`} style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                                             View your attendance records and timesheet details
                                                         </p>
                                                     </div>
@@ -306,10 +242,8 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
                                 </CardHeader>
 
                                 <CardBody className="p-6">
-                                    {/* All Stats - Responsive Layout for 8 cards */}
                                     <StatsCards stats={allStatsData} className="mb-6" />
                                     
-                                    {/* Filters Section */}
                                     <div className="mb-6">
                                         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
                                             <div className="w-full sm:w-auto sm:min-w-[200px]">
@@ -322,37 +256,24 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
                                                     size="sm"
                                                     radius={getThemeRadius()}
                                                     startContent={<CalendarDaysIcon className="w-4 h-4 text-default-400" />}
-                                                    classNames={{
-                                                        input: "text-sm",
-                                                    }}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
+                                                    classNames={{ input: "text-sm" }}
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                     aria-label="Select month and year for attendance"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Attendance Table Section */}
                                     <Card 
                                         className="transition-all duration-200"
                                         style={{
                                             border: `var(--borderWidth, 2px) solid transparent`,
                                             borderRadius: `var(--borderRadius, 12px)`,
                                             fontFamily: `var(--fontFamily, "Inter")`,
-                                            background: `linear-gradient(135deg, 
-                                                var(--theme-content1, #FAFAFA) 20%, 
-                                                var(--theme-content2, #F4F4F5) 10%, 
-                                                var(--theme-content3, #F1F3F4) 20%)`,
+                                            background: `linear-gradient(135deg, var(--theme-content1, #FAFAFA) 20%, var(--theme-content2, #F4F4F5) 10%, var(--theme-content3, #F1F3F4) 20%)`,
                                         }}
                                     >
-                                        <CardHeader 
-                                            className="border-b pb-2"
-                                            style={{
-                                                borderColor: `var(--theme-divider, #E4E4E7)`,
-                                            }}
-                                        >
+                                        <CardHeader className="border-b pb-2" style={{ borderColor: `var(--theme-divider, #E4E4E7)` }}>
                                             <div className="flex items-center gap-3">
                                                 <div 
                                                     className="p-2 rounded-lg flex items-center justify-center"
@@ -361,29 +282,21 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
                                                         borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
                                                     }}
                                                 >
-                                                    <ClockIcon 
-                                                        className="w-6 h-6" 
-                                                        style={{ color: 'var(--theme-primary)' }}
-                                                    />
+                                                    <ClockIcon className="w-6 h-6" style={{ color: 'var(--theme-primary)' }} />
                                                 </div>
-                                                <h1 
-                                                    className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground"
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                    }}
-                                                >
+                                                <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground" style={{ fontFamily: `var(--fontFamily, "Inter")` }}>
                                                     My Attendance Records
                                                 </h1>
                                             </div>
                                         </CardHeader>
                                         <CardBody>
                                             <div className="max-h-[84vh] overflow-y-auto">
-                                                <TimeSheetTable 
+                                                <AttendanceEmployeeTable 
                                                     selectedDate={selectedDate} 
                                                     handleDateChange={handleDateChange}
                                                     updateTimeSheet={updateTimeSheet}
                                                     externalFilterData={filterData}
-                                                    key={`${selectedDate}-${filterData.currentMonth}`}
+                                                    // REMOVED KEY PROP to allow internal useEffects to work
                                                 />
                                             </div>
                                         </CardBody>
@@ -398,5 +311,4 @@ const AttendanceEmployee = React.memo(({ title, totalWorkingDays, presentDays, a
     );
 });
 AttendanceEmployee.layout = (page) => <App>{page}</App>;
-
 export default AttendanceEmployee;

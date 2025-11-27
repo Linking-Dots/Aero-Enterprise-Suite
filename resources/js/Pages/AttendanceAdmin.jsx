@@ -11,6 +11,7 @@ import {
 } from "@heroui/react";
 import {
     CalendarIcon,
+    CalendarDaysIcon,
     ChartBarIcon,
     CheckCircleIcon,
     ClipboardDocumentListIcon,
@@ -86,39 +87,10 @@ const AttendanceAdmin = React.memo(({title}) => {
     });
 
     // Monthly attendance statistics state - focused on attendance metrics only
-    const [attendanceStats, setAttendanceStats] = useState({
-        // Basic month info
-        month: '',
-        year: '',
-        
-        // Employee and day counts
-        totalEmployees: 0,
-        totalWorkingDays: 0,
-        totalWeekendDays: 0,
-        totalHolidays: 0,
-        
-        // Attendance metrics
-        totalPresentDays: 0,
-        totalAbsentDays: 0,
-        totalLateArrivals: 0,
-        totalEarlyLeaves: 0,
-        attendancePercentage: 0,
-        
-        // Leave statistics
-        totalLeaveDays: 0,
-        approvedLeaves: 0,
-        pendingLeaves: 0,
-        rejectedLeaves: 0,
-        
-        // Performance indicators
-        perfectAttendanceEmployees: 0,
-        averageAttendanceRate: 0,
-        mostAbsentEmployee: null,
-        bestAttendanceEmployee: null,
-        
-        // Meta information
-        lastUpdated: null,
-        generatedAt: null
+    const [stats, setStats] = useState({
+        meta: { month: '', workingDays: 0, holidays: 0, weekends: 0 },
+        attendance: { present: 0, absent: 0, leaves: 0, lateArrivals: 0, percentage: 0 },
+        hours: { totalWork: 0, averageDaily: 0, overtime: 0 }
     });
 
 
@@ -177,7 +149,8 @@ const AttendanceAdmin = React.memo(({title}) => {
             });
 
             if (statsResponse.data.success) {
-                setAttendanceStats(statsResponse.data.data);
+                console.log('Fetched stats:', statsResponse.data.data);
+                setStats(statsResponse.data.data);
             }
         } catch (error) {
             console.error(error);
@@ -275,92 +248,72 @@ const AttendanceAdmin = React.memo(({title}) => {
 
 
     // Prepare all stats data for StatsCards component - Monthly attendance focused
-    const allStatsData = useMemo(() => [
-        {
-            title: "Total Employees",
-            value: attendanceStats.totalEmployees,
-            icon: <UserGroupIcon/>,
-            color: "text-blue-400",
-            iconBg: "bg-blue-500/20",
+    const allStatsData = [
+        { 
+            title: "Total Employees", 
+            value: stats.meta.totalEmployees, // 17
+            icon: <UserGroupIcon />, 
+            color: "text-blue-600", 
+            iconBg: "bg-blue-100",
             description: "Active employees"
         },
-        {
-            title: "Working Days",
-            value: attendanceStats.totalWorkingDays,
-            icon: <CalendarIcon/>,
-            color: "text-indigo-600",
-            iconBg: "bg-indigo-500/20",
-            description: `This month (${attendanceStats.month || 'Current'})`
+        { 
+            title: "Working Days", 
+            value: stats.meta.workingDays, // 24
+            icon: <CalendarDaysIcon />, 
+            color: "text-purple-600", 
+            iconBg: "bg-purple-100",
+            description: `This month (${stats.meta.month})`
         },
-        {
-            title: "Present Days",
-            value: attendanceStats.totalPresentDays,
-            icon: <CheckCircleIcon/>,
-            color: "text-green-400",
-            iconBg: "bg-green-500/20",
+        { 
+            title: "Present Days", 
+            value: stats.attendance.present, // 306
+            icon: <CheckCircleIcon />, 
+            color: "text-success", 
+            iconBg: "bg-success/20",
             description: "Total present days this month"
         },
-        {
-            title: "Absent Days",
-            value: attendanceStats.totalAbsentDays,
-            icon: <XCircleIcon/>,
-            color: "text-red-400",
-            iconBg: "bg-red-500/20",
+        { 
+            title: "Absent Days", 
+            value: stats.attendance.absent, // 102
+            icon: <XCircleIcon />, 
+            color: "text-danger", 
+            iconBg: "bg-danger/20",
             description: "Total absent days this month"
         },
-        {
-            title: "Late Arrivals",
-            value: attendanceStats.totalLateArrivals,
-            icon: <ExclamationTriangleIcon/>,
-            color: "text-warning-500",
-            iconBg: "bg-warning-500/20",
+        { 
+            title: "Late Arrivals", 
+            value: stats.attendance.lateArrivals, // 179
+            icon: <ExclamationTriangleIcon />, 
+            color: "text-orange-500", 
+            iconBg: "bg-orange-100",
             description: "Total late arrivals this month"
         },
-        {
-            title: "Attendance Rate",
-            value: `${attendanceStats.attendancePercentage || 0}%`,
-            icon: <PresentationChartLineIcon/>,
-            color: "text-emerald-600",
-            iconBg: "bg-emerald-500/20",
+        { 
+            title: "Attendance Rate", 
+            value: `${stats.attendance.percentage}%`, // 75%
+            icon: <PresentationChartLineIcon />, 
+            color: "text-success", 
+            iconBg: "bg-success/20",
             description: "Monthly attendance percentage"
         },
-        {
-            title: "Approved Leaves",
-            value: attendanceStats.approvedLeaves,
-            icon: <ClipboardDocumentListIcon/>,
-            color: "text-blue-500",
-            iconBg: "bg-blue-500/20",
+        { 
+            title: "Approved Leaves", 
+            value: stats.attendance.leaves, // 74
+            icon: <ClipboardDocumentListIcon />, 
+            color: "text-blue-500", 
+            iconBg: "bg-blue-100",
             description: "Approved leave requests this month"
         },
-        {
-            title: "Perfect Attendance",
-            value: attendanceStats.perfectAttendanceEmployees,
-            icon: <CheckCircleIcon/>,
-            color: "text-success-500",
-            iconBg: "bg-success-500/20",
+        { 
+            title: "Perfect Attendance", 
+            value: stats.attendance.perfectCount, // 0
+            icon: <CheckCircleIcon />, 
+            color: "text-green-600", 
+            iconBg: "bg-green-100",
             description: "Employees with perfect attendance"
-        },
-        {
-            title: "Total Leave Days",
-            value: attendanceStats.totalLeaveDays,
-            icon: <UserIcon/>,
-            color: "text-amber-600",
-            iconBg: "bg-amber-500/20",
-            description: "Total leave days taken this month"
         }
-    ], [
-        attendanceStats.totalEmployees,
-        attendanceStats.totalWorkingDays,
-        attendanceStats.month,
-        attendanceStats.totalPresentDays,
-        attendanceStats.totalAbsentDays,
-        attendanceStats.totalLateArrivals,
-        attendanceStats.attendancePercentage,
-        attendanceStats.approvedLeaves,
-        attendanceStats.perfectAttendanceEmployees,
-        attendanceStats.totalLeaveDays
-    ]);
-
+    ];
 
     return (
         <>

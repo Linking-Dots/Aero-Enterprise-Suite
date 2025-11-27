@@ -12,12 +12,13 @@ const Breadcrumb = () => {
     
     // Get permissions and determine if we're on a settings page
     const permissions = auth?.permissions || [];
+    const roles = auth?.roles || [];
     const isSettingsPage = url.startsWith('/settings') || url.includes('settings');
     
     // Get the appropriate pages data
     const pages = isSettingsPage 
         ? getSettingsPages(permissions, auth) 
-        : getPages(permissions, auth);
+        : getPages(roles, permissions, auth);
     
     // Function to find a page by route name in nested structure
     const findPageByRoute = (pages, routeName) => {

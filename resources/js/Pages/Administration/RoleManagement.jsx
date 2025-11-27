@@ -517,6 +517,7 @@ const RoleManagement = (props) => {
 
     // Enhanced modal handlers
     const openRoleModal = useCallback((role = null) => {
+        console.log('Opening role modal for role:', role);
         setEditingRole(role);
         setRoleForm({
             name: role?.name || '',
@@ -867,41 +868,44 @@ const RoleManagement = (props) => {
             });
 
             if (response.status === 200) {
-                // Prefer server-authoritative data if provided
-                if (response.data.role_has_permissions) {
-                    setRolePermissions(response.data.role_has_permissions);
-                    const updated = response.data.role_has_permissions
-                        .filter(rp => rp.role_id === activeRole.id)
-                        .map(rp => rp.permission_id);
-                    setSelectedPermissions(new Set(updated));
-                } else {
-                    // Fallback to optimistic update
-                    const permission = permissions.find(p => p.name === permissionName);
-                    if (permission) {
-                        if (hasPermission) {
-                            setRolePermissions(prev => prev.filter(rp => !(rp.role_id === activeRole.id && rp.permission_id === permission.id)));
-                            setSelectedPermissions(prev => { const ns = new Set(prev); ns.delete(permission.id); return ns; });
-                        } else {
-                            setRolePermissions(prev => [...prev, { role_id: activeRole.id, permission_id: permission.id }]);
-                            setSelectedPermissions(prev => new Set([...prev, permission.id]));
+                    // Prefer server-authoritative data if provided
+                    if (response.data.role_has_permissions) {
+                        setRolePermissions(response.data.role_has_permissions);
+                        const updated = response.data.role_has_permissions
+                            .filter(rp => rp.role_id === activeRole.id)
+                            .map(rp => rp.permission_id);
+                        setSelectedPermissions(new Set(updated));
+                    } else {
+                        // Fallback to optimistic update
+                        const permission = permissions.find(p => p.name === permissionName);
+                        if (permission) {
+                            if (hasPermission) {
+                                setRolePermissions(prev => prev.filter(rp => !(rp.role_id === activeRole.id && rp.permission_id === permission.id)));
+                                setSelectedPermissions(prev => { const ns = new Set(prev); ns.delete(permission.id); return ns; });
+                            } else {
+                                setRolePermissions(prev => [...prev, { role_id: activeRole.id, permission_id: permission.id }]);
+                                setSelectedPermissions(prev => new Set([...prev, permission.id]));
+                            }
                         }
                     }
-                }
 
-                setLoadingStates(prev => ({
-                    ...prev,
-                    permissions: { ...prev.permissions, [permissionName]: LOADING_STATES.SUCCESS }
-                }));
-
-                setTimeout(() => {
                     setLoadingStates(prev => ({
                         ...prev,
-                        permissions: { ...prev.permissions, [permissionName]: LOADING_STATES.IDLE }
+                        permissions: { ...prev.permissions, [permissionName]: LOADING_STATES.SUCCESS }
                     }));
-                }, 2000);
 
-                showToast.success(`Permission ${action}ed successfully`);
-                lastUpdateRef.current = Date.now();
+                    setTimeout(() => {
+                        setLoadingStates(prev => ({
+                            ...prev,
+                            permissions: { ...prev.permissions, [permissionName]: LOADING_STATES.IDLE }
+                        }));
+                    }, 2000);
+
+                    showToast.success(`Permission ${action}ed successfully`);
+                    lastUpdateRef.current = Date.now();
+
+                    // Force reload roles and permissions so UI updates immediately
+                    router.reload({ only: ['roles', 'permissions'] });
             }
         } catch (error) {
             // Handle both AbortError (native) and CanceledError (axios)
@@ -1090,7 +1094,7 @@ const RoleManagement = (props) => {
         <>
             {/* Enhanced Role Modal */}
             <GlassDialog 
-                open={roleDialogOpen} 
+                isOpen={roleDialogOpen} 
                 onClose={!isLoading ? closeRoleModal : undefined}
                 maxWidth="md"
                 title={
@@ -1197,7 +1201,7 @@ const RoleManagement = (props) => {
 
             {/* Permission Creation/Edit Modal */}
             <GlassDialog 
-                open={permissionDialogOpen} 
+                isOpen={permissionDialogOpen} 
                 onClose={!isLoading ? closePermissionModal : undefined}
                 maxWidth="md"
                 title={
@@ -1340,7 +1344,7 @@ const RoleManagement = (props) => {
 
             {/* Delete Confirmation Modal */}
             <GlassDialog 
-                open={confirmDeleteOpen} 
+                isOpen={confirmDeleteOpen} 
                 onClose={() => setConfirmDeleteOpen(false)}
                 maxWidth="sm"
                 title={

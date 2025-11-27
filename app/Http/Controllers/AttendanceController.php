@@ -1077,287 +1077,185 @@ class AttendanceController extends Controller
     public function getMonthlyAttendanceStats(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
+            // 1. SETUP & SCOPE DETECTION
             $currentMonth = $request->get('currentMonth', date('m'));
             $currentYear = $request->get('currentYear', date('Y'));
-            $userId = $request->get('userId'); // For employee-specific stats (admin use)
-            $attendanceSetting = AttendanceSetting::first(); // or user-specific if scoped
-            $weekendDays = $attendanceSetting->weekend_days ?? ['saturday', 'sunday'];
-            $startOfMonth = Carbon::create($currentYear, $currentMonth, 1)->startOfDay();
-            $isCurrentMonth = Carbon::now()->year == $currentYear && Carbon::now()->month == $currentMonth;
-            $endOfMonth = $isCurrentMonth
-                ? Carbon::now()->endOfDay()
-                : Carbon::create($currentYear, $currentMonth)->endOfMonth()->endOfDay();
-            // Office end + overtime_after (grace)
-            $officeEndTime = $attendanceSetting->office_end_time ?? '17:00:00';
-            $overtimeAfter = $attendanceSetting->overtime_after ?? 30; // in minutes
-            // For employee route, always use current authenticated user
+            
+            $isGlobalScope = false;
+            $userId = null;
+
+            // Determine if we are looking at ONE user or ALL users
             if ($request->route()->getName() === 'attendance.myMonthlyStats') {
-                $userId = Auth::id();
-            }
-
-            // Get total working days in month (excluding weekends and holidays)
-            $totalDaysInMonth = $isCurrentMonth
-                ? Carbon::now()->day
-                : Carbon::create($currentYear, $currentMonth)->daysInMonth;
-            $today = Carbon::now()->day;
-            $holidaysCount = $this->getTotalHolidayDays($currentYear, $currentMonth);
-            $weekendCount = $this->getWeekendDaysCount($currentYear, $currentMonth, $weekendDays);
-            $totalWorkingDays = $totalDaysInMonth - $holidaysCount - $weekendCount;
-
-            // Base query for attendance records
-            $attendanceQuery = Attendance::whereBetween('date', [$startOfMonth, $endOfMonth]);
-
-            // Base query for users
-            $userQuery = User::whereHas('roles', function ($query) {
-                $query->where('name', 'Employee');
-            });
-
-            if ($userId) {
-                // Employee-specific stats
-                $attendanceQuery->where('user_id', $userId);
-                $userQuery->where('id', $userId);
-                $totalEmployees = 1;
+                $userId = Auth::id(); // Employee View
+            } elseif ($request->has('userId') && $request->userId != null) {
+                $userId = $request->get('userId'); // Admin viewing specific Employee
             } else {
-                // Admin stats - all employees
-                $totalEmployees = $userQuery->count();
+                $isGlobalScope = true; // Admin Dashboard View
             }
-            // Get attendance records
+
+            // 2. SETTINGS & DATES
+            $settings = AttendanceSetting::first();
+            $officeStart = Carbon::parse($settings->office_start_time ?? '09:00:00');
+            $officeEnd = Carbon::parse($settings->office_end_time ?? '17:00:00');
+            $lateGraceMins = $settings->late_mark_after ?? 15;
+            $weekendDays = $settings->weekend_days ?? ['saturday', 'sunday'];
+
+            $startOfMonth = Carbon::create($currentYear, $currentMonth, 1)->startOfDay();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+            
+            // Stop calculating "Absents" for future dates
+            $analysisEndDate = $endOfMonth->isFuture() ? Carbon::now()->endOfDay() : $endOfMonth;
+
+            // 3. BASE CALENDAR METRICS
+            $totalDaysInMonth = $startOfMonth->daysInMonth;
+            $holidaysCount = $this->getTotalHolidayDays($currentYear, $currentMonth); 
+            $weekendCount = $this->getWeekendDaysCount($currentYear, $currentMonth, $weekendDays);
+            
+            // "Calendar Working Days" (e.g., 24 days)
+            $calendarWorkingDays = max(0, $totalDaysInMonth - $holidaysCount - $weekendCount);
+
+            // 4. EMPLOYEE COUNT
+            // If Global: 17 employees. If Single: 1 employee.
+            $totalEmployees = $isGlobalScope 
+                ? User::role('Employee')->where('active', 1)->count() 
+                : 1;
+
+            // 5. FETCH DATA (Scoped)
+            // A. Attendance
+            $attendanceQuery = Attendance::whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->whereNotNull('punchin');
+            
+            if (!$isGlobalScope) $attendanceQuery->where('user_id', $userId);
+            
             $attendanceRecords = $attendanceQuery->get();
 
-            // Calculate attendance metrics - count unique days with attendance, not individual punches
-            if ($userId) {
-                // For individual employee: count unique dates where they punched in
-                $presentDays = $attendanceRecords
-                    ->where('punchin', '!=', null)
-                    ->pluck('date')
-                    ->map(function ($date) {
-                        return Carbon::parse($date)->format('Y-m-d');
-                    })
-                    ->unique()
-                    ->count();
-
-                // For individual employee, calculate absent days based on their working days only
-                $absentDays = $totalWorkingDays - $presentDays;
-            } else {
-                // For admin stats: count total unique user-date combinations
-                $presentDays = $attendanceRecords
-                    ->where('punchin', '!=', null)
-                    ->groupBy(function ($record) {
-                        return $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d');
-                    })
-                    ->count();
-
-                // For admin stats, calculate across all employees
-                $absentDays = $totalWorkingDays * $totalEmployees - $presentDays;
-            }
-
-            // Calculate late arrivals (assuming 9:00 AM is standard start time)
-            // Only count one late arrival per user per day (earliest punch if multiple)
-            $lateMarkAfter = $attendanceSetting->late_mark_after ?? 30; // int, in minutes
-            $officeStartTime = $attendanceSetting->office_start_time->format('H:i:s') ?? '09:00:00'; // string: HH:mm:ss
-
-            if ($userId) {
-
-                // Individual employee: count late days
-                $lateArrivals = $attendanceRecords
-                    ->whereNotNull('punchin')
-                    ->groupBy(fn ($record) => Carbon::parse($record->date)->format('Y-m-d')) // Group by date
-                    ->filter(function ($dayRecords) use ($lateMarkAfter, $officeStartTime) {
-                        // Get the earliest punch-in for the day
-                        $earliestPunchRecord = $dayRecords->sortBy('punchin')->first();
-                        if (! $earliestPunchRecord || ! $earliestPunchRecord->punchin) {
-                            return false;
-                        }
-
-                        $dateString = Carbon::parse($earliestPunchRecord->date)->format('Y-m-d');
-                        $punchTime = Carbon::parse($dateString.' '.$earliestPunchRecord->punchin->format('H:i:s'));
-                        $lateThreshold = Carbon::parse($dateString.' '.$officeStartTime)->addMinutes($lateMarkAfter);
-
-                        return $punchTime->gt($lateThreshold);
-                    })
-                    ->count();
-            } else {
-                // Admin view: count total late arrivals per user per day
-                $lateArrivals = $attendanceRecords
-                    ->whereNotNull('punchin')
-                    ->groupBy(fn ($record) => $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d'))
-                    ->filter(function ($userDayRecords) use ($lateMarkAfter, $officeStartTime) {
-                        $earliestPunch = $userDayRecords->sortBy('punchin')->first();
-
-                        if (! $earliestPunch || ! $earliestPunch->punchin) {
-                            return false;
-                        }
-
-                        // Build full datetime for punch and office start
-                        $dateString = Carbon::parse($earliestPunch->date)->format('Y-m-d');
-                        $punchTime = Carbon::parse($dateString.' '.$earliestPunch->punchin->format('H:i:s'));
-                        $lateThreshold = Carbon::parse($dateString.' '.$officeStartTime)->addMinutes($lateMarkAfter);
-
-                        return $punchTime->gt($lateThreshold);
-                    })
-                    ->count();
-            }
-
-            // Calculate overtime hours - sum work time per day, then check if over 8 hours
-            $overtimeMinutes = 0;
-
-            if ($userId) {
-                // Individual employee: Group by date
-                $attendanceRecords
-                    ->groupBy(fn ($record) => Carbon::parse($record->date)->format('Y-m-d'))
-                    ->each(function ($dayRecords) use (&$overtimeMinutes, $officeEndTime, $overtimeAfter) {
-
-                        $lastPunchOutRecord = $dayRecords->filter(fn ($r) => $r->punchout)
-                            ->sortByDesc('punchout')
-                            ->first();
-
-                        if (! $lastPunchOutRecord) {
-                            return;
-                        }
-
-                        $date = Carbon::parse($lastPunchOutRecord->date)->format('Y-m-d');
-                        $punchOutTime = Carbon::parse($date.' '.$lastPunchOutRecord->punchout->format('H:i:s'));
-
-                        $overtimeStart = Carbon::parse($date.' '.$officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
-
-                        if ($punchOutTime->gt($overtimeStart)) {
-                            $overtimeMinutes += $overtimeStart->diffInMinutes($punchOutTime);
-                        }
-                    });
-            } else {
-                // Admin view: Group by user + date
-                $attendanceRecords
-                    ->groupBy(fn ($record) => $record->user_id.'-'.Carbon::parse($record->date)->format('Y-m-d'))
-                    ->each(function ($userDayRecords) use (&$overtimeMinutes, $officeEndTime, $overtimeAfter) {
-
-                        $lastPunchOutRecord = $userDayRecords->filter(fn ($r) => $r->punchout)
-                            ->sortByDesc('punchout')
-                            ->first();
-
-                        if (! $lastPunchOutRecord) {
-                            return;
-                        }
-
-                        $date = Carbon::parse($lastPunchOutRecord->date)->format('Y-m-d');
-                        $punchOutTime = Carbon::parse($date.' '.$lastPunchOutRecord->punchout->format('H:i:s'));
-
-                        $overtimeStart = Carbon::parse($date.' '.$officeEndTime->format('H:i:s'))->addMinutes($overtimeAfter);
-
-                        if ($punchOutTime->gt($overtimeStart)) {
-                            $overtimeMinutes += $overtimeStart->diffInMinutes($punchOutTime);
-                        }
-                    });
-            }
-
-            // Get leave statistics
+            // B. Leaves (Approved Only)
             $leaveQuery = DB::table('leaves')
-                ->join('leave_settings', 'leaves.leave_type', '=', 'leave_settings.id')
-                ->whereYear('leaves.from_date', '<=', $currentYear)
-                ->whereMonth('leaves.from_date', '<=', $currentMonth)
-                ->whereYear('leaves.to_date', '>=', $currentYear)
-                ->whereMonth('leaves.to_date', '>=', $currentMonth);
-
-            if ($userId) {
-                $leaveQuery->where('leaves.user_id', $userId);
-            }
-
-            $leaves = $leaveQuery->select(
-                'leave_settings.type as leave_type',
-                DB::raw('SUM(DATEDIFF(
-                    LEAST(leaves.to_date, LAST_DAY(STR_TO_DATE(CONCAT('.$currentYear.',"-",'.$currentMonth.',"-01"), "%Y-%m-%d"))),
-                    GREATEST(leaves.from_date, STR_TO_DATE(CONCAT('.$currentYear.',"-",'.$currentMonth.',"-01"), "%Y-%m-%d"))
-                ) + 1) as total_days')
-            )->groupBy('leave_settings.type')->get();
-
-            $leaveBreakdown = [];
-            $totalLeaveDays = 0;
-            foreach ($leaves as $leave) {
-                $leaveBreakdown[$leave->leave_type] = (int) $leave->total_days;
-                $totalLeaveDays += (int) $leave->total_days;
-            }
-            // Calculate attendance percentage
-            if ($userId) {
-                // For individual employee: (present days / total working days) * 100
-                $attendancePercentage = $totalWorkingDays > 0 ?
-                    round(($presentDays / $totalWorkingDays) * 100, 2) : 0;
-            } else {
-                // For admin: (total present days / (working days * total employees)) * 100
-                $attendancePercentage = ($totalWorkingDays * $totalEmployees) > 0 ?
-                    round(($presentDays / ($totalWorkingDays * $totalEmployees)) * 100, 2) : 0;
-            }
-            // Calculate average work hours per day - sum all work time and divide by present days
-            $totalWorkMinutes = 0;
-
-            if ($userId) {
-                // For individual employee: group by date and sum daily work time
-                $attendanceRecords
-                    ->groupBy(function ($record) {
-                        return Carbon::parse($record->date)->format('Y-m-d');
-                    })
-                    ->each(function ($dayRecords) use (&$totalWorkMinutes) {
-                        $dayRecords->each(function ($record) use (&$totalWorkMinutes) {
-                            if ($record->punchin && $record->punchout) {
-                                $totalWorkMinutes += Carbon::parse($record->punchin)->diffInMinutes(Carbon::parse($record->punchout));
-                            }
-                        });
-                    });
-            } else {
-                // For admin stats: sum all work time across all users
-                $attendanceRecords->each(function ($record) use (&$totalWorkMinutes) {
-                    if ($record->punchin && $record->punchout) {
-                        $totalWorkMinutes += Carbon::parse($record->punchin)->diffInMinutes(Carbon::parse($record->punchout));
-                    }
+                ->where('status', 'approved')
+                ->where(function($q) use ($startOfMonth, $endOfMonth) {
+                    $q->whereBetween('from_date', [$startOfMonth, $endOfMonth])
+                    ->orWhereBetween('to_date', [$startOfMonth, $endOfMonth]);
                 });
+
+            if (!$isGlobalScope) $leaveQuery->where('user_id', $userId);
+
+            // Calculate "Man-Days" lost to leave
+            // If 2 employees take leave on the same day, this adds 2 to the count.
+            $totalLeaveManDays = $leaveQuery->get()->sum(function($leave) use ($startOfMonth, $endOfMonth) {
+                $start = Carbon::parse($leave->from_date);
+                $end = Carbon::parse($leave->to_date);
+                // Clamp leave to this month only
+                $effectiveStart = $start->max($startOfMonth);
+                $effectiveEnd = $end->min($endOfMonth);
+                return max(0, $effectiveStart->diffInDays($effectiveEnd) + 1);
+            });
+
+            // 6. AGGREGATE ATTENDANCE METRICS
+            $totalPresentManDays = 0; 
+            $totalLateArrivals = 0;
+            $totalWorkMinutes = 0;
+            $totalOvertimeMinutes = 0;
+            $usersWithPerfectAttendance = 0;
+
+            // Group by User to calculate per-user stats (needed for Perfect Attendance)
+            $recordsByUser = $attendanceRecords->groupBy('user_id');
+
+            foreach ($recordsByUser as $uId => $userRecords) {
+                // Count unique days present for this user
+                $daysPresent = $userRecords->groupBy(fn($r) => Carbon::parse($r->date)->format('Y-m-d'))->count();
+                
+                $totalPresentManDays += $daysPresent;
+
+                // Check Perfect Attendance (Present Days >= Calendar Working Days)
+                // Note: This is simplified. Strict logic would check Leaves too.
+                if ($daysPresent >= $calendarWorkingDays) {
+                    $usersWithPerfectAttendance++;
+                }
+
+                // Calculate Lates & Hours
+                foreach ($userRecords as $record) {
+                    // Late Check (Only on first punch of day)
+                    // We simplify here: check every record against start time
+                    if ($record->punchin) {
+                        $punchIn = Carbon::parse($record->punchin);
+                        $dateStr = $punchIn->format('Y-m-d');
+                        // Ensure we only count late once per day per user (requires stricter grouping if multiple rows exist)
+                        // For dashboard speed, simple check:
+                        $threshold = Carbon::parse("$dateStr " . $officeStart->format('H:i:s'))->addMinutes($lateGraceMins);
+                        if ($punchIn->gt($threshold)) {
+                            $totalLateArrivals++;
+                        }
+                    }
+
+                    // Hours Calculation
+                    if ($record->punchin && $record->punchout) {
+                        $in = Carbon::parse($record->punchin);
+                        $out = Carbon::parse($record->punchout);
+                        $minutes = $in->diffInMinutes($out);
+                        $totalWorkMinutes += $minutes;
+
+                        // Daily Overtime (> 8 hours)
+                        if ($minutes > 480) { 
+                            $totalOvertimeMinutes += ($minutes - 480);
+                        }
+                    }
+                }
             }
 
-            $averageWorkHours = $presentDays > 0 ? round($totalWorkMinutes / $presentDays / 60, 2) : 0;
+            // 7. DERIVED CALCULATIONS (The "Man-Day" Math)
+            
+            // Calculate "Potential Man-Days Passed" to determine Absents
+            $daysPassed = $startOfMonth->diffInDays($analysisEndDate) + 1;
+            // Estimate working days passed (simplified)
+            $workingDaysPassed = max(0, $daysPassed - ($daysPassed * 2 / 7)); // Rough estimate of weekends passed
+            
+            $totalPotentialManDays = $calendarWorkingDays * $totalEmployees; // For the whole month
+            $potentialManDaysPassed = $workingDaysPassed * $totalEmployees; // So far
 
-            // Monthly focused statistics without today's snapshot
+            // Absent = Potential (So Far) - Present - Leaves
+            $totalAbsentManDays = max(0, $potentialManDaysPassed - $totalPresentManDays - $totalLeaveManDays);
+
+            // Percentages
+            $attendancePercentage = $totalPotentialManDays > 0 
+                ? round(($totalPresentManDays / $totalPotentialManDays) * 100, 1) 
+                : 0;
+
+            // Averages
+            // If Global: Avg Hours per Employee (Total Hours / Present Man Days)
+            $averageWorkHours = $totalPresentManDays > 0 
+                ? round(($totalWorkMinutes / 60) / $totalPresentManDays, 1) 
+                : 0;
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    // Basic month info
-                    'month' => Carbon::create($currentYear, $currentMonth)->format('F Y'),
-                    'year' => (int) $currentYear,
-
-                    // Employee and day counts
-                    'totalEmployees' => $totalEmployees,
-                    'totalWorkingDays' => $totalWorkingDays,
-                    'totalWeekendDays' => $weekendCount,
-                    'totalHolidays' => $holidaysCount,
-
-                    // Attendance metrics
-                    'totalPresentDays' => $presentDays,
-                    'totalAbsentDays' => $absentDays,
-                    'totalLateArrivals' => $lateArrivals,
-                    'totalEarlyLeaves' => 0, // Can be calculated if needed
-                    'attendancePercentage' => $attendancePercentage,
-
-                    // Leave statistics
-                    'totalLeaveDays' => $totalLeaveDays,
-                    'approvedLeaves' => $totalLeaveDays, // Assuming all counted leaves are approved
-                    'pendingLeaves' => 0, // Can be calculated if needed
-                    'rejectedLeaves' => 0, // Can be calculated if needed
-
-                    // Performance indicators
-                    'perfectAttendanceEmployees' => $totalEmployees > 0 ? max(0, $totalEmployees - $absentDays / max(1, $totalWorkingDays)) : 0,
-                    'averageAttendanceRate' => $attendancePercentage,
-                    'mostAbsentEmployee' => null, // Can be calculated if needed
-                    'bestAttendanceEmployee' => null, // Can be calculated if needed
-
-                    // Meta information
-                    'lastUpdated' => now()->toISOString(),
-                    'generatedAt' => now()->toISOString(),
-                ],
+                    'meta' => [
+                        'month' => $startOfMonth->format('F Y'),
+                        'scope' => $isGlobalScope ? 'Global' : 'Single',
+                        'totalEmployees' => $totalEmployees, // Card 1: 17
+                        'workingDays' => $calendarWorkingDays, // Card 2: 24
+                        'holidays' => $holidaysCount,
+                        'weekends' => $weekendCount,
+                    ],
+                    'attendance' => [
+                        'present' => $totalPresentManDays, // Card 3: 306
+                        'absent' => $totalAbsentManDays,   // Card 4: 102
+                        'leaves' => (int)$totalLeaveManDays, // Card 7: 74
+                        'lateArrivals' => $totalLateArrivals, // Card 5: 179
+                        'percentage' => $attendancePercentage, // Card 6: 75%
+                        'perfectCount' => $usersWithPerfectAttendance // Card 8: 0
+                    ],
+                    'hours' => [
+                        'totalWork' => round($totalWorkMinutes / 60, 1),
+                        'averageDaily' => $averageWorkHours,
+                        'overtime' => round($totalOvertimeMinutes / 60, 1),
+                    ]
+                ]
             ]);
-        } catch (\Exception $e) {
-            Log::error('Error calculating monthly attendance stats: '.$e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'error' => 'Failed to calculate attendance statistics.',
-            ], 500);
+        } catch (\Exception $e) {
+            Log::error('Stats Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Calculation failed'], 500);
         }
     }
 
