@@ -487,7 +487,7 @@ export const getPages = (permissions, auth = null) => [
     ]
   }] : []),
   // 20. Admin (System Administration)
-  ...(permissions.includes('users.view') || permissions.includes('settings.view') || permissions.includes('roles.view') ? [{
+  ...(permissions.includes('users.view') || permissions.includes('settings.view') || permissions.includes('roles.view') || permissions.includes('modules.view') ? [{
     name: 'Admin',
     icon: <Cog6ToothIcon className="" />,
     priority: 20,
@@ -496,6 +496,9 @@ export const getPages = (permissions, auth = null) => [
       ...(permissions.includes('users.view') ? [{ name: 'Users', icon: <UsersIcon  />, route: 'users' }] : []),
       ...(permissions.includes('roles.view') ? [
         { name: 'Roles', icon: <UserGroupIcon  />, route: 'admin.roles-management' }
+      ] : []),
+      ...(permissions.includes('modules.view') ? [
+        { name: 'Modules', icon: <CubeIcon  />, route: 'modules.index' }
       ] : []),
       ...(auth?.user && auth?.roles?.includes('Super Administrator') ? [
         { name: 'Monitoring', icon: <ComputerDesktopIcon  />, route: 'admin.system-monitoring' }
