@@ -33,6 +33,13 @@ class UserResource extends JsonResource
             // Work Information
             'date_of_joining' => $this->date_of_joining,
             'report_to' => $this->report_to,
+            'reports_to' => $this->when($this->reportsTo, function () {
+                return [
+                    'id' => $this->reportsTo->id,
+                    'name' => $this->reportsTo->name,
+                    'profile_image_url' => $this->reportsTo->profile_image_url,
+                ];
+            }),
             'salary_amount' => $this->when(
                 $request->user()?->can('view-salary', $this->resource),
                 $this->salary_amount

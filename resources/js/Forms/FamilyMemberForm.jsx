@@ -10,7 +10,7 @@ import {
     ModalFooter,
 } from "@heroui/react";
 import { X, Users } from "lucide-react";
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => {
     // Helper function to convert theme borderRadius to HeroUI radius values
@@ -94,7 +94,7 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
 
             if (response.status === 200) {
                 setUser(response.data.user);
-                toast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Family information updated successfully', {
+                showToast.success(response.data.messages?.length > 0 ? response.data.messages.join(' ') : 'Family information updated successfully', {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -114,7 +114,7 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                 if (error.response.status === 422) {
                     // Handle validation errors
                     setErrors(error.response.data.errors || {});
-                    toast.error(error.response.data.error || 'Failed to update family information.', {
+                    showToast.error(error.response.data.error || 'Failed to update family information.', {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
@@ -125,7 +125,7 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                     });
                 } else {
                     // Handle other HTTP errors
-                    toast.error('An unexpected error occurred. Please try again later.', {
+                    showToast.error('An unexpected error occurred. Please try again later.', {
                         icon: '🔴',
                         style: {
                             backdropFilter: 'blur(16px) saturate(200%)',
@@ -138,7 +138,7 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                 console.error(error.response.data);
             } else if (error.request) {
                 // The request was made but no response was received
-                toast.error('No response received from the server. Please check your internet connection.', {
+                showToast.error('No response received from the server. Please check your internet connection.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -150,7 +150,7 @@ const FamilyMemberForm = ({ user, open, closeModal, handleDelete, setUser }) => 
                 console.error(error.request);
             } else {
                 // Something happened in setting up the request that triggered an Error
-                toast.error('An error occurred while setting up the request.', {
+                showToast.error('An error occurred while setting up the request.', {
                     icon: '🔴',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',

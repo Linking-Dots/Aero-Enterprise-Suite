@@ -32,7 +32,7 @@ import {
     DocumentTextIcon,
     ChartBarSquareIcon
 } from '@heroicons/react/24/outline';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import useTheme, { getThemePrimaryColor } from '@/theme';
 import axios from 'axios';
 

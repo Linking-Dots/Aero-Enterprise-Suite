@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage, router } from "@inertiajs/react";
-import { toast } from "react-toastify";
+import { showToast } from '@/utils/toastUtils';
 
 import {
     Table,
@@ -76,7 +76,7 @@ const WorkLocationsTable = ({
     // Handle refresh functionality
     const handleRefresh = useCallback(() => {
         router.reload({ only: ['jurisdictions'], onSuccess: () => {
-            toast.success('Work locations data refreshed successfully');
+            showToast.success('Work locations data refreshed successfully');
         }});
     }, []);
 

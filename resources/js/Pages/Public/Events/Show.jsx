@@ -23,7 +23,7 @@ import {
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 // Helper function to get theme radius from CSS variable
 const getThemeRadius = () => {
@@ -79,10 +79,10 @@ const PublicEventShow = ({ event, canRegister, registrationStatus, remainingSlot
             data: formData,
             forceFormData: true,
             onSuccess: () => {
-                toast.success('Registration submitted successfully!');
+                showToast.success('Registration submitted successfully!');
             },
             onError: (errors) => {
-                toast.error('Failed to submit registration. Please check the form.');
+                showToast.error('Failed to submit registration. Please check the form.');
                 console.error(errors);
             }
         });

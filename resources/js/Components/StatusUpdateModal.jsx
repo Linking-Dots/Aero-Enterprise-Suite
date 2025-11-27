@@ -23,7 +23,7 @@ import {
     EyeIcon
 } from "@heroicons/react/24/outline";
 import { CalendarIcon, User, Clock } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const StatusUpdateModal = ({ 
@@ -88,11 +88,11 @@ const StatusUpdateModal = ({
                 ...formData
             });
 
-            toast.success('Status updated successfully');
+            showToast.success('Status updated successfully');
             onStatusUpdated(response.data.dailyWork);
             closeModal();
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to update status');
+            showToast.error(error.response?.data?.error || 'Failed to update status');
         } finally {
             setIsLoading(false);
         }

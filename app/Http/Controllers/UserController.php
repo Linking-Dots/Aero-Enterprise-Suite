@@ -174,6 +174,34 @@ class UserController extends Controller
         }
     }
 
+    public function updateReportTo(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $this->authorize('update', $user);
+
+            $request->validate([
+                'report_to' => ['nullable', 'exists:users,id'],
+            ]);
+
+            $user->report_to = $request->input('report_to');
+            $user->save();
+
+            return response()->json([
+                'message' => 'Report to updated successfully',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice', 'reportsTo'])),
+            ], 200);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json([
+                'error' => 'Failed to update report to.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function toggleStatus($id, UpdateUserStatusRequest $request)
     {
         $user = User::withTrashed()->findOrFail($id);
@@ -296,7 +324,7 @@ class UserController extends Controller
 
             // Base query
             $query = User::withTrashed()
-                ->with(['department', 'designation', 'roles', 'currentDevice']);
+                ->with(['department', 'designation', 'roles', 'currentDevice', 'reportsTo']);
 
             // Filters
             if ($search) {
@@ -510,11 +538,11 @@ class UserController extends Controller
             }
 
             if (! empty($department) && $department !== 'all') {
-                $query->where('department', $department);
+                $query->where('department_id', $department);
             }
 
             if (! empty($designation) && $designation !== 'all') {
-                $query->where('designation', $designation);
+                $query->where('designation_id', $designation);
             }
 
             if (! empty($attendanceType) && $attendanceType !== 'all') {
@@ -522,7 +550,7 @@ class UserController extends Controller
             }
 
             // Execute query with pagination
-            $employees = $query->paginate($perPage, ['*'], 'page', $page);
+            $employees = $query->with('reportsTo')->paginate($perPage, ['*'], 'page', $page);
 
             // Transform employee data to include department and designation names
             $transformedEmployees = $employees->map(function ($employee) {
@@ -534,14 +562,24 @@ class UserController extends Controller
                     'employee_id' => $employee->employee_id,
                     'profile_image_url' => $employee->profile_image_url,
                     'active' => $employee->active,
-                    // Include both ID and full name for department
-                    'department' => $employee->department,
-                    // Include both ID and name for designation
-                    'designation' => $employee->designation,
-
+                    // Include department ID and name
+                    'department_id' => $employee->department_id,
+                    'department_name' => $employee->department?->name,
+                    // Include designation ID and name
+                    'designation_id' => $employee->designation_id,
+                    'designation_name' => $employee->designation?->title,
+                    'designation_hierarchy_level' => $employee->designation?->hierarchy_level,
                     // Include attendance type
                     'attendance_type_id' => $employee->attendance_type_id,
-                    'attendance_type' => $employee->attendanceType ? $employee->attendanceType->name : null,
+                    'attendance_type_name' => $employee->attendanceType?->name,
+                    // Include report_to for manager assignment
+                    'report_to' => $employee->report_to,
+                    'reports_to' => $employee->reportsTo ? [
+                        'id' => $employee->reportsTo->id,
+                        'name' => $employee->reportsTo->name,
+                        'profile_image_url' => $employee->reportsTo->profile_image_url,
+                        'designation_name' => $employee->reportsTo->designation?->title,
+                    ] : null,
                     'created_at' => $employee->created_at,
                     'updated_at' => $employee->updated_at,
                 ];
@@ -559,9 +597,27 @@ class UserController extends Controller
                 'designations' => Designation::count(),
             ];
 
+            // Get all potential managers (all users with their designation hierarchy)
+            // This is needed for the Report To dropdown since current page may not include all managers
+            $allManagers = User::with(['designation', 'department'])
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'profile_image_url' => $user->profile_image_url,
+                        'department_id' => $user->department_id,
+                        'department_name' => $user->department?->name,
+                        'designation_id' => $user->designation_id,
+                        'designation_name' => $user->designation?->title,
+                        'designation_hierarchy_level' => $user->designation?->hierarchy_level ?? 999,
+                    ];
+                });
+
             return response()->json([
                 'employees' => $employees, // This includes pagination metadata
                 'stats' => $stats,
+                'allManagers' => $allManagers, // All users for Report To dropdown
             ]);
         } catch (\Throwable $e) {
             report($e);

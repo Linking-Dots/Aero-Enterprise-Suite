@@ -10,7 +10,7 @@ import {
     Divider
 } from '@heroui/react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const DeleteDesignationForm = ({ open, onClose, onSuccess, designation }) => {
     const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const DeleteDesignationForm = ({ open, onClose, onSuccess, designation }) => {
     // Handle designation deletion
     const handleDelete = async () => {
         if (!designation) {
-            toast.error('Invalid designation provided');
+            showToast.error('Invalid designation provided');
             return;
         }
 
@@ -66,7 +66,7 @@ const DeleteDesignationForm = ({ open, onClose, onSuccess, designation }) => {
             }
         });
 
-        toast.promise(promise, {
+        showToast.promise(promise, {
             pending: {
                 render() {
                     return 'Deleting designation...';

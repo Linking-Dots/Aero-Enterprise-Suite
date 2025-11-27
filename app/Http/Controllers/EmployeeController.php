@@ -451,6 +451,32 @@ class EmployeeController extends Controller
                     $attendanceTypeName = $attType ? $attType->name : null;
                 }
 
+                // Get designation hierarchy level
+                $hierarchyLevel = 999;
+                if ($employee->designation_id) {
+                    $desig = \App\Models\HRM\Designation::find($employee->designation_id);
+                    $hierarchyLevel = $desig ? ($desig->hierarchy_level ?? 999) : 999;
+                }
+
+                // Get reports_to info (current manager)
+                $reportsTo = null;
+                if ($employee->report_to) {
+                    $manager = User::find($employee->report_to);
+                    if ($manager) {
+                        $managerDesigName = null;
+                        if ($manager->designation_id) {
+                            $managerDesig = \App\Models\HRM\Designation::find($manager->designation_id);
+                            $managerDesigName = $managerDesig ? $managerDesig->title : null;
+                        }
+                        $reportsTo = [
+                            'id' => $manager->id,
+                            'name' => $manager->name,
+                            'profile_image_url' => $manager->profile_image_url,
+                            'designation_name' => $managerDesigName,
+                        ];
+                    }
+                }
+
                 return [
                     'id' => $employee->id,
                     'name' => $employee->name,
@@ -463,8 +489,11 @@ class EmployeeController extends Controller
                     'department_name' => $departmentName,
                     'designation_id' => $employee->designation_id,
                     'designation_name' => $designationName,
+                    'designation_hierarchy_level' => $hierarchyLevel,
                     'attendance_type_id' => $employee->attendance_type_id,
                     'attendance_type_name' => $attendanceTypeName,
+                    'report_to' => $employee->report_to,
+                    'reports_to' => $reportsTo,
                     'date_of_joining' => $employee->date_of_joining,
                     'created_at' => $employee->created_at,
                     'updated_at' => $employee->updated_at,
@@ -472,8 +501,47 @@ class EmployeeController extends Controller
                 ];
             });
 
+            // Get all potential managers (all users with their designation hierarchy)
+            // This is needed for the Report To dropdown since current page may not include all managers
+            $allManagers = User::with(['designation', 'department'])
+                ->get()
+                ->map(function ($user) {
+                    // Get designation hierarchy level
+                    $hierarchyLevel = 999;
+                    if ($user->designation_id) {
+                        $desig = \App\Models\HRM\Designation::find($user->designation_id);
+                        $hierarchyLevel = $desig ? ($desig->hierarchy_level ?? 999) : 999;
+                    }
+
+                    // Get department name
+                    $deptName = null;
+                    if ($user->department_id) {
+                        $dept = \App\Models\HRM\Department::find($user->department_id);
+                        $deptName = $dept ? $dept->name : null;
+                    }
+
+                    // Get designation name
+                    $desigName = null;
+                    if ($user->designation_id) {
+                        $desig = \App\Models\HRM\Designation::find($user->designation_id);
+                        $desigName = $desig ? $desig->title : null;
+                    }
+
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'profile_image_url' => $user->profile_image_url,
+                        'department_id' => $user->department_id,
+                        'department_name' => $deptName,
+                        'designation_id' => $user->designation_id,
+                        'designation_name' => $desigName,
+                        'designation_hierarchy_level' => $hierarchyLevel,
+                    ];
+                });
+
             return response()->json([
                 'employees' => $employees,
+                'allManagers' => $allManagers,
                 'stats' => $this->getEmployeeStats(),
             ]);
         } catch (\Exception $e) {

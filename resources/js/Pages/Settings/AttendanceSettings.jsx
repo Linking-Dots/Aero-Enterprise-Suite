@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Head, usePage } from "@inertiajs/react";
 import App from "@/Layouts/App";
 import { motion } from "framer-motion";
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -448,11 +448,11 @@ const AttendanceSettings = () => {
             
             if (response.data.attendanceSettings) {
                 setSettings(response.data.attendanceSettings);
-                toast.success(response.data.message || 'Settings updated successfully');
+                showToast.success(response.data.message || 'Settings updated successfully');
             }
         } catch (error) {
             console.error('Settings update error:', error);
-            toast.error(error.response?.data?.message || 'Failed to update settings');
+            showToast.error(error.response?.data?.message || 'Failed to update settings');
         } finally {
             setLoading(false);
         }
@@ -526,7 +526,7 @@ const AttendanceSettings = () => {
                     setTypes(prev => prev.map(type => 
                         type.id === updatedType.id ? updatedType : type
                     ));
-                    toast.success(response.data.message || 'Attendance type updated successfully');
+                    showToast.success(response.data.message || 'Attendance type updated successfully');
                 }
             } else {
                 // Create new type
@@ -538,14 +538,14 @@ const AttendanceSettings = () => {
                 
                 if (response.data.attendanceType) {
                     setTypes(prev => [...prev, response.data.attendanceType]);
-                    toast.success(response.data.message || 'Attendance type created successfully');
+                    showToast.success(response.data.message || 'Attendance type created successfully');
                 }
             }
             
             onTypeModalClose();
         } catch (error) {
             console.error('Type update error:', error);
-            toast.error(error.response?.data?.message || 'Failed to save attendance type');
+            showToast.error(error.response?.data?.message || 'Failed to save attendance type');
         } finally {
             setTypeLoading(false);
         }
@@ -559,10 +559,10 @@ const AttendanceSettings = () => {
         try {
             await axios.delete(`/settings/attendance-type/${type.id}`);
             setTypes(prev => prev.filter(t => t.id !== type.id));
-            toast.success('Attendance type deleted successfully');
+            showToast.success('Attendance type deleted successfully');
         } catch (error) {
             console.error('Type delete error:', error);
-            toast.error(error.response?.data?.message || 'Failed to delete attendance type');
+            showToast.error(error.response?.data?.message || 'Failed to delete attendance type');
         }
     }, []);
 
@@ -653,7 +653,7 @@ const AttendanceSettings = () => {
 
     const addWaypoint = () => {
         setIsAddingWaypoint(true);
-        toast.info('Click on the map to add a waypoint');
+        showToast.info('Click on the map to add a waypoint');
     };
 
     const addWaypointFromMap = useCallback((coords) => {
@@ -662,7 +662,7 @@ const AttendanceSettings = () => {
             waypoints: [...prev.waypoints, coords]
         }));
         setIsAddingWaypoint(false);
-        toast.success('Waypoint added successfully');
+        showToast.success('Waypoint added successfully');
     }, []);
 
     const removeWaypoint = (index) => {
@@ -714,7 +714,7 @@ const AttendanceSettings = () => {
 
     const addPolygonPoint = () => {
         setIsAddingPolygonPoint(true);
-        toast.info('Click on the map to add a polygon point');
+        showToast.info('Click on the map to add a polygon point');
     };
 
     const addPolygonPointFromMap = useCallback((coords) => {
@@ -723,7 +723,7 @@ const AttendanceSettings = () => {
             polygon: [...prev.polygon, coords]
         }));
         setIsAddingPolygonPoint(false);
-        toast.success('Polygon point added successfully');
+        showToast.success('Polygon point added successfully');
     }, []);
 
     const removePolygonPoint = (index) => {
@@ -754,7 +754,7 @@ const AttendanceSettings = () => {
         const validPoints = polygonForm.polygon.filter(pt => pt.lat && pt.lng);
         
         if (validPoints.length < 3) {
-            toast.error('Polygon requires minimum 3 points');
+            showToast.error('Polygon requires minimum 3 points');
             return;
         }
 
@@ -772,10 +772,10 @@ const AttendanceSettings = () => {
                 type.id === editingType.id ? response.data.attendanceType : type
             ));
             
-            toast.success('Polygon updated successfully');
+            showToast.success('Polygon updated successfully');
             onPolygonModalClose();
         } catch (error) {
-            toast.error('Failed to update polygon');
+            showToast.error('Failed to update polygon');
         }
     }, [editingType, polygonForm, onPolygonModalClose]);
 
@@ -784,7 +784,7 @@ const AttendanceSettings = () => {
         const validWaypoints = waypointForm.waypoints.filter(w => w.lat && w.lng);
         
         if (validWaypoints.length < 2) {
-            toast.error('At least 2 waypoints are required for a route');
+            showToast.error('At least 2 waypoints are required for a route');
             return;
         }
 
@@ -803,10 +803,10 @@ const AttendanceSettings = () => {
                 type.id === editingType.id ? response.data.attendanceType : type
             ));
             
-            toast.success('Route waypoints updated successfully');
+            showToast.success('Route waypoints updated successfully');
             onWaypointModalClose();
         } catch (error) {
-            toast.error('Failed to update waypoints');
+            showToast.error('Failed to update waypoints');
         }
     }, [editingType, waypointForm, onWaypointModalClose]);
 
@@ -1609,7 +1609,7 @@ const AttendanceSettings = () => {
                                                     onPress={() => {
                                                         if (isAddingWaypoint) {
                                                             setIsAddingWaypoint(false);
-                                                            toast.info('Waypoint adding mode disabled');
+                                                            showToast.info('Waypoint adding mode disabled');
                                                         } else {
                                                             addWaypoint();
                                                         }
@@ -1922,7 +1922,7 @@ const AttendanceSettings = () => {
                                                     onPress={() => {
                                                         if (isAddingPolygonPoint) {
                                                             setIsAddingPolygonPoint(false);
-                                                            toast.info('Point adding mode disabled');
+                                                            showToast.info('Point adding mode disabled');
                                                         } else {
                                                             addPolygonPoint();
                                                         }

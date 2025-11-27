@@ -11,7 +11,7 @@ import {
 } from '@heroui/react';
 import { Plus, X, Briefcase } from 'lucide-react';
 import GlassCard from '@/Components/GlassCard'; // Ensure this component is correctly imported
-import {toast} from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
     // Helper function to convert theme borderRadius to HeroUI radius values
@@ -119,7 +119,7 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
                 }
             });
 
-            toast.promise(
+            showToast.promise(
                 promise,
                 {
                     pending: {
@@ -205,7 +205,7 @@ const ExperienceInformationForm = ({ user, open, closeModal, setUser }) => {
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: {

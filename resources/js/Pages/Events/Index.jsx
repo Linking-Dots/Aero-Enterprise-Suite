@@ -32,7 +32,7 @@ import App from '@/Layouts/App.jsx';
 import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import dayjs from 'dayjs';
 
 const EventsIndex = ({ events: initialEvents, filters: initialFilters }) => {
@@ -131,7 +131,7 @@ const EventsIndex = ({ events: initialEvents, filters: initialFilters }) => {
             setEvents(response.data.events);
         } catch (error) {
             console.error('Error fetching events:', error);
-            toast.error('Failed to load events');
+            showToast.error('Failed to load events');
         } finally {
             setLoading(false);
         }

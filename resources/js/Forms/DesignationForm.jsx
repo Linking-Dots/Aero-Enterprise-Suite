@@ -13,7 +13,7 @@ import {
 } from '@heroui/react';
 import { Briefcase, Building2 } from 'lucide-react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const DesignationForm = ({ 
     open, 
@@ -149,7 +149,7 @@ const DesignationForm = ({
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: `${designation ? 'Updating' : 'Creating'} designation...`,

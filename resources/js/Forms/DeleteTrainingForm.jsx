@@ -8,7 +8,7 @@ import {
     ModalFooter
 } from "@heroui/react";
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import axios from 'axios';
 
 const DeleteTrainingForm = ({
@@ -85,7 +85,7 @@ const DeleteTrainingForm = ({
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Deleting training program...',

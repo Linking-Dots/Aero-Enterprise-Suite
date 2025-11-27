@@ -25,7 +25,7 @@ import {
     CheckIcon,
     XMarkIcon
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { format } from 'date-fns';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -160,13 +160,13 @@ const BulkMarkAsPresentForm = ({
                 
                 // Show detailed results
                 if (summary.successful > 0) {
-                    toast.success(`Successfully marked ${summary.successful} employees as present!`);
+                    showToast.success(`Successfully marked ${summary.successful} employees as present!`);
                 }
                 if (summary.failed > 0) {
-                    toast.warning(`${summary.failed} employees failed to be marked present.`);
+                    showToast.warning(`${summary.failed} employees failed to be marked present.`);
                 }
                 if (summary.skipped > 0) {
-                    toast.info(`${summary.skipped} employees were skipped (already have attendance).`);
+                    showToast.info(`${summary.skipped} employees were skipped (already have attendance).`);
                 }
                 
                 refreshTimeSheet();
@@ -175,9 +175,9 @@ const BulkMarkAsPresentForm = ({
         } catch (error) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
-                toast.error(error.response.data.message || 'Please check the form for errors');
+                showToast.error(error.response.data.message || 'Please check the form for errors');
             } else {
-                toast.error(error.response?.data?.message || 'Failed to bulk mark users as present');
+                showToast.error(error.response?.data?.message || 'Failed to bulk mark users as present');
             }
         } finally {
             setProcessing(false);

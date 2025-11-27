@@ -12,7 +12,7 @@ import {
     Divider,
 } from "@heroui/react";
 import { MapPinIcon, UserIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 const WorkLocationForm = ({ modalType, open, closeModal, setData, currentRow, users }) => {
     const [formData, setFormData] = useState({
@@ -113,17 +113,17 @@ const WorkLocationForm = ({ modalType, open, closeModal, setData, currentRow, us
 
             if (response.ok) {
                 setData(result.work_locations);
-                toast.success(result.message || `Work location ${modalType === 'add' ? 'added' : 'updated'} successfully!`);
+                showToast.success(result.message || `Work location ${modalType === 'add' ? 'added' : 'updated'} successfully!`);
                 closeModal();
             } else {
                 if (result.error && typeof result.error === 'object') {
                     setErrors(result.error);
                 } else {
-                    toast.error(result.error || 'An error occurred');
+                    showToast.error(result.error || 'An error occurred');
                 }
             }
         } catch (error) {
-            toast.error('Network error occurred. Please try again.');
+            showToast.error('Network error occurred. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -28,7 +28,7 @@ import App from "@/Layouts/App.jsx";
 import AttendanceAdminTable from '@/Tables/AttendanceAdminTable.jsx';
 import { motion } from 'framer-motion';
 import axios from "axios";
-import {toast} from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import dayjs from "dayjs";
 
 // Theme utility function
@@ -181,7 +181,7 @@ const AttendanceAdmin = React.memo(({title}) => {
             }
         } catch (error) {
             console.error(error);
-            toast.error('Failed to fetch data.', {
+            showToast.error('Failed to fetch data.', {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',

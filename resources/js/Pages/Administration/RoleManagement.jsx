@@ -56,7 +56,7 @@ import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import App from '@/Layouts/App.jsx';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 // Utility functions
 const normalizeArray = (arr) => Array.isArray(arr) ? [...arr] : [];
@@ -607,7 +607,7 @@ const RoleManagement = (props) => {
         
         try {
             await axios.delete(`/api/roles/${roleToDelete.id}`);
-            toast.success('Role deleted successfully');
+            showToast.success('Role deleted successfully');
             setSuccessMessage('Role deleted successfully');
             setConfirmDeleteOpen(false);
             setRoleToDelete(null);
@@ -615,7 +615,7 @@ const RoleManagement = (props) => {
         } catch (error) {
             console.error('Error deleting role:', error);
             const errorMsg = error.response?.data?.message || 'Failed to delete role';
-            toast.error(errorMsg);
+            showToast.error(errorMsg);
             setErrorMessage(errorMsg);
         } finally {
             setIsLoading(false);
@@ -629,7 +629,7 @@ const RoleManagement = (props) => {
         
         try {
             await axios.delete(`/api/permissions/${permissionToDelete.id}`);
-            toast.success('Permission deleted successfully');
+            showToast.success('Permission deleted successfully');
             setSuccessMessage('Permission deleted successfully');
             setConfirmDeleteOpen(false);
             setPermissionToDelete(null);
@@ -637,7 +637,7 @@ const RoleManagement = (props) => {
         } catch (error) {
             console.error('Error deleting permission:', error);
             const errorMsg = error.response?.data?.message || 'Failed to delete permission';
-            toast.error(errorMsg);
+            showToast.error(errorMsg);
             setErrorMessage(errorMsg);
         } finally {
             setIsLoading(false);
@@ -677,11 +677,11 @@ const RoleManagement = (props) => {
             if (response.status === 200 || response.status === 201) {
                 if (editingRole) {
                     setRoles(prev => prev.map(r => r.id === editingRole.id ? response.data.role : r));
-                    toast.success('Role updated successfully');
+                    showToast.success('Role updated successfully');
                     setSuccessMessage('Role updated successfully');
                 } else {
                     setRoles(prev => [...prev, response.data.role]);
-                    toast.success('Role created successfully');
+                    showToast.success('Role created successfully');
                     setSuccessMessage('Role created successfully');
                 }
                 
@@ -704,7 +704,7 @@ const RoleManagement = (props) => {
                 setFormErrors(error.response.data.errors);
             } else {
                 const errorMsg = error.response?.data?.message || 'Failed to save role';
-                toast.error(errorMsg);
+                showToast.error(errorMsg);
                 setErrorMessage(errorMsg);
             }
             
@@ -748,10 +748,10 @@ const RoleManagement = (props) => {
             if (response.status === 200 || response.status === 201) {
                 if (editingPermission) {
                     setPermissions(prev => prev.map(p => p.id === editingPermission.id ? response.data.permission : p));
-                    toast.success('Permission updated successfully');
+                    showToast.success('Permission updated successfully');
                 } else {
                     setPermissions(prev => [...prev, response.data.permission]);
-                    toast.success('Permission created successfully');
+                    showToast.success('Permission created successfully');
                 }
                 
                 closePermissionModal();
@@ -764,7 +764,7 @@ const RoleManagement = (props) => {
                 setFormErrors(error.response.data.errors);
             } else {
                 const errorMsg = error.response?.data?.message || 'Failed to save permission';
-                toast.error(errorMsg);
+                showToast.error(errorMsg);
                 setErrorMessage(errorMsg);
             }
         } finally {
@@ -785,14 +785,14 @@ const RoleManagement = (props) => {
 
             if (response.status === 200) {
                 setRolePermissions(response.data.role_has_permissions);
-                toast.success('Role permissions updated successfully');
+                showToast.success('Role permissions updated successfully');
                 closeRolePermissionModal();
                 lastUpdateRef.current = Date.now();
             }
         } catch (error) {
             console.error('Error updating role permissions:', error);
             const errorMsg = error.response?.data?.message || 'Failed to update role permissions';
-            toast.error(errorMsg);
+            showToast.error(errorMsg);
             setErrorMessage(errorMsg);
         } finally {
             setIsLoading(false);
@@ -811,7 +811,7 @@ const RoleManagement = (props) => {
             });
 
             if (response.status === 200) {
-                toast.success('User roles updated successfully');
+                showToast.success('User roles updated successfully');
                 closeUserRoleModal();
                 // Optionally refresh user data here
                 lastUpdateRef.current = Date.now();
@@ -819,7 +819,7 @@ const RoleManagement = (props) => {
         } catch (error) {
             console.error('Error updating user roles:', error);
             const errorMsg = error.response?.data?.message || 'Failed to update user roles';
-            toast.error(errorMsg);
+            showToast.error(errorMsg);
             setErrorMessage(errorMsg);
         } finally {
             setIsLoading(false);
@@ -886,7 +886,7 @@ const RoleManagement = (props) => {
                     }));
                 }, 2000);
 
-                toast.success(`Permission ${action}ed successfully`);
+                showToast.success(`Permission ${action}ed successfully`);
                 lastUpdateRef.current = Date.now();
             }
         } catch (error) {
@@ -902,7 +902,7 @@ const RoleManagement = (props) => {
                         permissions: { ...prev.permissions, [permissionName]: LOADING_STATES.IDLE }
                     }));
                 }, 3000);
-                toast.error(error.response?.data?.message || 'Failed to update permission');
+                showToast.error(error.response?.data?.message || 'Failed to update permission');
                 setErrorMessage(error.response?.data?.message || 'Failed to update permission');
             }
         } finally {
@@ -959,7 +959,7 @@ const RoleManagement = (props) => {
                     }));
                 }, 2000);
 
-                toast.success('Module permissions updated successfully');
+                showToast.success('Module permissions updated successfully');
                 lastUpdateRef.current = Date.now();
             }
         } catch (error) {
@@ -980,7 +980,7 @@ const RoleManagement = (props) => {
                     }));
                 }, 3000);
 
-                toast.error(error.response?.data?.message || 'Failed to update module permissions');
+                showToast.error(error.response?.data?.message || 'Failed to update module permissions');
                 setErrorMessage(error.response?.data?.message || 'Failed to update module permissions');
             }
         }

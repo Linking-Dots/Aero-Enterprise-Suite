@@ -33,7 +33,7 @@ import LeaveForm from '@/Forms/LeaveForm.jsx';
 import DeleteLeaveForm from '@/Forms/DeleteLeaveForm.jsx';
 import BulkLeaveModal from '@/Components/BulkLeave/BulkLeaveModal.jsx';
 import BulkDeleteModal from '@/Components/BulkDelete/BulkDeleteModal.jsx';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const LeavesEmployee = ({ title, allUsers }) => {
@@ -173,7 +173,7 @@ const LeavesEmployee = ({ title, allUsers }) => {
         
         // Use toast promise pattern for safety
         const promise = Promise.reject('Failed to load leave data. Please try again.');
-        toast.promise(
+        showToast.promise(
           promise,
           {
             error: {
@@ -475,7 +475,7 @@ const LeavesEmployee = ({ title, allUsers }) => {
       
       // Use toast promise pattern for safety
       const promise = Promise.resolve();
-      toast.promise(
+      showToast.promise(
         promise,
         {
           success: {
@@ -509,7 +509,7 @@ const LeavesEmployee = ({ title, allUsers }) => {
     
     // Use toast promise pattern for safety
     const promise = Promise.resolve();
-    toast.promise(
+    showToast.promise(
       promise,
       {
         success: {

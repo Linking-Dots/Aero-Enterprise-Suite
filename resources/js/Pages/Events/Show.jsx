@@ -27,7 +27,7 @@ import {
 import App from '@/Layouts/App.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import dayjs from 'dayjs';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const ShowEvent = ({ event, analytics }) => {
@@ -99,10 +99,10 @@ const ShowEvent = ({ event, analytics }) => {
     const handleTogglePublish = async () => {
         try {
             await axios.post(route('events.toggle-publish', event.id));
-            toast.success(`Event ${event.is_published ? 'unpublished' : 'published'} successfully`);
+            showToast.success(`Event ${event.is_published ? 'unpublished' : 'published'} successfully`);
             router.reload();
         } catch (error) {
-            toast.error('Failed to update event status');
+            showToast.error('Failed to update event status');
         }
     };
     
@@ -453,7 +453,7 @@ const ShowEvent = ({ event, analytics }) => {
                                                                 variant="flat"
                                                                 onPress={() => {
                                                                     navigator.clipboard.writeText(`${window.location.origin}/events/${event.slug}`);
-                                                                    toast.success('Link copied!');
+                                                                    showToast.success('Link copied!');
                                                                 }}
                                                                 radius={getThemeRadius()}
                                                             >

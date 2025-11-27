@@ -15,7 +15,7 @@ import {
     Card,
     CardBody
 } from '@heroui/react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import GlassDialog from './GlassDialog';
 
@@ -118,7 +118,7 @@ const ProfilePictureModal = ({
             );
 
             if (response.data.success) {
-                toast.success(response.data.message || 'Profile picture updated successfully!');
+                showToast.success(response.data.message || 'Profile picture updated successfully!');
                 
                 // Callback to update the parent component with the new profile image URL
                 if (onImageUpdate) {
@@ -146,7 +146,7 @@ const ProfilePictureModal = ({
             }
             
             setError(errorMessage);
-            toast.error(errorMessage);
+            showToast.error(errorMessage);
         } finally {
             setUploading(false);
             setUploadProgress(0);
@@ -175,7 +175,7 @@ const ProfilePictureModal = ({
             );
 
             if (response.data.success) {
-                toast.success(response.data.message || 'Profile picture removed successfully!');
+                showToast.success(response.data.message || 'Profile picture removed successfully!');
                 
                 // Callback to update the parent component
                 if (onImageUpdate) {
@@ -192,7 +192,7 @@ const ProfilePictureModal = ({
             console.error('Remove error:', error);
             const errorMessage = error.response?.data?.message || error.message || 'Failed to remove profile picture';
             setError(errorMessage);
-            toast.error(errorMessage);
+            showToast.error(errorMessage);
         } finally {
             setUploading(false);
         }

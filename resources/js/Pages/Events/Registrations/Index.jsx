@@ -40,7 +40,7 @@ import {
 } from '@heroicons/react/24/outline';
 import App from '@/Layouts/App.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -117,10 +117,10 @@ const RegistrationsIndex = ({ event, registrations: initialRegistrations }) => {
     const handleApprove = async (registration) => {
         try {
             await axios.post(route('events.registrations.approve', [event.id, registration.id]));
-            toast.success('Registration approved successfully');
+            showToast.success('Registration approved successfully');
             router.reload();
         } catch (error) {
-            toast.error('Failed to approve registration');
+            showToast.error('Failed to approve registration');
         }
     };
     
@@ -135,28 +135,28 @@ const RegistrationsIndex = ({ event, registrations: initialRegistrations }) => {
             await axios.post(route('events.registrations.reject', [event.id, targetRegistration.id]), {
                 rejection_reason: rejectReason
             });
-            toast.success('Registration rejected');
+            showToast.success('Registration rejected');
             onClose();
             setRejectReason('');
             router.reload();
         } catch (error) {
-            toast.error('Failed to reject registration');
+            showToast.error('Failed to reject registration');
         }
     };
     
     const handleVerifyPayment = async (registration) => {
         try {
             await axios.post(route('events.registrations.verify-payment', [event.id, registration.id]));
-            toast.success('Payment verified successfully');
+            showToast.success('Payment verified successfully');
             router.reload();
         } catch (error) {
-            toast.error('Failed to verify payment');
+            showToast.error('Failed to verify payment');
         }
     };
     
     const handleBulkApprove = async () => {
         if (selectedKeys.size === 0) {
-            toast.warning('Please select registrations to approve');
+            showToast.warning('Please select registrations to approve');
             return;
         }
         
@@ -164,17 +164,17 @@ const RegistrationsIndex = ({ event, registrations: initialRegistrations }) => {
             await axios.post(route('events.registrations.bulk-approve', event.id), {
                 registration_ids: Array.from(selectedKeys)
             });
-            toast.success('Registrations approved successfully');
+            showToast.success('Registrations approved successfully');
             setSelectedKeys(new Set([]));
             router.reload();
         } catch (error) {
-            toast.error('Failed to approve registrations');
+            showToast.error('Failed to approve registrations');
         }
     };
     
     const handleBulkReject = () => {
         if (selectedKeys.size === 0) {
-            toast.warning('Please select registrations to reject');
+            showToast.warning('Please select registrations to reject');
             return;
         }
         setActionType('bulkReject');
@@ -187,13 +187,13 @@ const RegistrationsIndex = ({ event, registrations: initialRegistrations }) => {
                 registration_ids: Array.from(selectedKeys),
                 rejection_reason: rejectReason
             });
-            toast.success('Registrations rejected');
+            showToast.success('Registrations rejected');
             setSelectedKeys(new Set([]));
             onClose();
             setRejectReason('');
             router.reload();
         } catch (error) {
-            toast.error('Failed to reject registrations');
+            showToast.error('Failed to reject registrations');
         }
     };
     

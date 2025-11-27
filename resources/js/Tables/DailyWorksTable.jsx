@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import { usePage, router } from "@inertiajs/react";
-import { toast } from "react-toastify";
+import { showToast } from '@/utils/toastUtils';
 import { debounce } from "lodash";
 import StatsCards from '@/Components/StatsCards';
 
@@ -110,7 +110,7 @@ const DailyWorksTable = ({
     // Handle refresh functionality
     const handleRefresh = useCallback(() => {
         router.reload({ only: ['allData', 'reports_with_daily_works'], onSuccess: () => {
-            toast.success('Daily works data refreshed successfully');
+            showToast.success('Daily works data refreshed successfully');
         }});
     }, []);
 
@@ -493,54 +493,10 @@ const DailyWorksTable = ({
             }
         });
 
-        toast.promise(promise, {
-            pending: {
-                render() {
-                    return (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Spinner size="sm" />
-                            <span style={{ marginLeft: '8px' }}>Uploading RFI file...</span>
-                        </div>
-                    );
-                },
-                icon: false,
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
-            success: {
-                render({ data }) {
-                    return (
-                        <>
-                            {data.map((message, index) => (
-                                <div key={index}>{message}</div>
-                            ))}
-                        </>
-                    );
-                },
-                icon: '🟢',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
-            error: {
-                render({ data }) {
-                    return <>{data}</>;
-                },
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Uploading RFI file...',
+            success: (data) => data.join(', '),
+            error: (data) => data,
         });
     };
 
@@ -605,44 +561,10 @@ const DailyWorksTable = ({
             }
         });
 
-        toast.promise(promise, {
-            pending: {
-                render() {
-                    const statusLabel = statusConfig[newStatus]?.label || newStatus;
-                    return `Updating work status to ${statusLabel}...`;
-                },
-                icon: '⏳',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
-            success: {
-                render({ data }) {
-                    return data || "Work status updated successfully!";
-                },
-                icon: '🟢',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
-            error: {
-                render({ data }) {
-                    return data || "Failed to update work status";
-                },
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                },
-            },
+        showToast.promise(promise, {
+            loading: 'Updating work status...',
+            success: (data) => data || "Work status updated successfully!",
+            error: (data) => data || "Failed to update work status",
         });
     }, [setData, updatingWorkId]);
 
@@ -660,10 +582,10 @@ const DailyWorksTable = ({
                         w.id === work.id ? response.data.dailyWork : w
                     )
                 );
-                toast.success('Completion time updated successfully');
+                showToast.success('Completion time updated successfully');
             }
         } catch (error) {
-            toast.error('Failed to update completion time');
+            showToast.error('Failed to update completion time');
         }
     }, [setData]);
 
@@ -681,10 +603,10 @@ const DailyWorksTable = ({
                         w.id === work.id ? response.data.dailyWork : w
                     )
                 );
-                toast.success('Submission time updated successfully');
+                showToast.success('Submission time updated successfully');
             }
         } catch (error) {
-            toast.error('Failed to update submission time');
+            showToast.error('Failed to update submission time');
         }
     }, [setData]);
 
@@ -704,7 +626,7 @@ const DailyWorksTable = ({
             try {
                 const work = allDataRef.current?.find(w => w.id === workId);
                 if (!work) {
-                    toast.error('Work not found');
+                    showToast.error('Work not found');
                     return;
                 }
 
@@ -719,11 +641,11 @@ const DailyWorksTable = ({
                             w.id === work.id ? response.data.dailyWork : w
                         )
                     );
-                    toast.success('Incharge updated successfully');
+                    showToast.success('Incharge updated successfully');
                 }
             } catch (error) {
                 console.error('Error updating incharge:', error);
-                toast.error('Failed to update incharge');
+                showToast.error('Failed to update incharge');
             }
         }, 500), // 0.5 second delay for dropdowns
         []
@@ -735,7 +657,7 @@ const DailyWorksTable = ({
             try {
                 const work = allDataRef.current?.find(w => w.id === workId);
                 if (!work) {
-                    toast.error('Work not found');
+                    showToast.error('Work not found');
                     return;
                 }
 
@@ -750,11 +672,11 @@ const DailyWorksTable = ({
                             w.id === work.id ? response.data.dailyWork : w
                         )
                     );
-                    toast.success('Assigned user updated successfully');
+                    showToast.success('Assigned user updated successfully');
                 }
             } catch (error) {
                 console.error('Error updating assigned user:', error);
-                toast.error('Failed to update assigned user');
+                showToast.error('Failed to update assigned user');
             }
         }, 500), // 0.5 second delay for dropdowns
         []
@@ -766,7 +688,7 @@ const DailyWorksTable = ({
             try {
                 const work = allDataRef.current?.find(w => w.id === workId);
                 if (!work) {
-                    toast.error('Work not found');
+                    showToast.error('Work not found');
                     return;
                 }
 
@@ -781,11 +703,11 @@ const DailyWorksTable = ({
                             w.id === work.id ? response.data.dailyWork : w
                         )
                     );
-                    toast.success('Completion time updated successfully');
+                    showToast.success('Completion time updated successfully');
                 }
             } catch (error) {
                 console.error('Error updating completion time:', error);
-                toast.error('Failed to update completion time');
+                showToast.error('Failed to update completion time');
             }
         }, 800), // 0.8 second delay for time inputs
         []
@@ -797,7 +719,7 @@ const DailyWorksTable = ({
             try {
                 const work = allDataRef.current?.find(w => w.id === workId);
                 if (!work) {
-                    toast.error('Work not found');
+                    showToast.error('Work not found');
                     return;
                 }
 
@@ -812,11 +734,11 @@ const DailyWorksTable = ({
                             w.id === work.id ? response.data.dailyWork : w
                         )
                     );
-                    toast.success('RFI submission time updated successfully');
+                    showToast.success('RFI submission time updated successfully');
                 }
             } catch (error) {
                 console.error('Error updating RFI submission time:', error);
-                toast.error('Failed to update RFI submission time');
+                showToast.error('Failed to update RFI submission time');
             }
         }, 800), // 0.8 second delay for time inputs
         []
@@ -845,7 +767,7 @@ const DailyWorksTable = ({
             // Find the current work to get all its data
             const currentWork = allData?.find(work => work.id === taskId);
             if (!currentWork) {
-                toast.error('Work not found');
+                showToast.error('Work not found');
                 return;
             }
 
@@ -912,7 +834,7 @@ const DailyWorksTable = ({
                     )
                 );
 
-                toast.success(response.data.message || `Task updated successfully`, {
+                showToast.success(response.data.message || `Task updated successfully`, {
                     icon: '🟢',
                     style: {
                         backdropFilter: 'blur(16px) saturate(200%)',
@@ -937,7 +859,7 @@ const DailyWorksTable = ({
                 errorMessage = error.response.statusText;
             }
 
-            toast.error(errorMessage, {
+            showToast.error(errorMessage, {
                 icon: '🔴',
                 style: {
                     backdropFilter: 'blur(16px) saturate(200%)',

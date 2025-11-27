@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import {
   Navbar,
   NavbarBrand,
@@ -743,7 +743,7 @@ const DesktopHeader = React.memo(({
         onError: (errors) => {
           console.error('[Navigation] Navigation failed:', errors);
           // Implement user-friendly error handling
-          toast.error('Navigation failed. Please try again.');
+          showToast.error('Navigation failed. Please try again.');
         },
         onFinish: () => {
           console.log(`[Navigation] Navigation completed for: ${pageRoute}`);

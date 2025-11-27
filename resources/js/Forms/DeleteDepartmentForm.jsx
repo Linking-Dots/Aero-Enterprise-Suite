@@ -10,7 +10,7 @@ import {
     Divider
 } from '@heroui/react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
     const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
     // Handle department deletion
     const handleDelete = async () => {
         if (!department) {
-            toast.error('Invalid department provided');
+            showToast.error('Invalid department provided');
             return;
         }
         
@@ -66,7 +66,7 @@ const DeleteDepartmentForm = ({ open, onClose, onSuccess, department }) => {
             }
         });
 
-        toast.promise(promise, {
+        showToast.promise(promise, {
             pending: {
                 render() {
                     return 'Deleting department...';

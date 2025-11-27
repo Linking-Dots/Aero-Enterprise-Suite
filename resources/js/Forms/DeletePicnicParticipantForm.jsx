@@ -1,7 +1,7 @@
 import { Button, Spinner } from "@heroui/react";
 import GlassDialog from "@/Components/GlassDialog.jsx";
 import React from "react";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 
 
@@ -25,7 +25,7 @@ const DeleteLeaveForm = ({ open, handleClose, leaveIdToDelete, setLeavesData }) 
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: {

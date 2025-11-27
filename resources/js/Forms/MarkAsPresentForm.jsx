@@ -26,7 +26,7 @@ import {
     MapPinIcon,
     ShieldCheckIcon
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { format } from 'date-fns';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -153,7 +153,7 @@ const MarkAsPresentForm = ({
         try {
             // Ensure we have location data
             if (!formData.coordinates) {
-                toast.error('Please select a location on the map before submitting.');
+                showToast.error('Please select a location on the map before submitting.');
                 setProcessing(false);
                 return;
             }
@@ -174,16 +174,16 @@ const MarkAsPresentForm = ({
             const response = await axios.post(route('attendance.mark-as-present'), submitData);
 
             if (response.status === 200) {
-                toast.success(response.data.message || 'User marked as present successfully!');
+                showToast.success(response.data.message || 'User marked as present successfully!');
                 refreshTimeSheet();
                 closeModal();
             }
         } catch (error) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
-                toast.error(error.response.data.message || 'Please check the form for errors');
+                showToast.error(error.response.data.message || 'Please check the form for errors');
             } else {
-                toast.error(error.response?.data?.message || 'Failed to mark user as present');
+                showToast.error(error.response?.data?.message || 'Failed to mark user as present');
             }
         } finally {
             setProcessing(false);

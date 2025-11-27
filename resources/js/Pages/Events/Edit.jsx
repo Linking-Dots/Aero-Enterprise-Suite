@@ -21,7 +21,7 @@ import {
     ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import App from '@/Layouts/App.jsx';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const EditEvent = ({ event }) => {
@@ -109,7 +109,7 @@ const EditEvent = ({ event }) => {
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Updating event...',

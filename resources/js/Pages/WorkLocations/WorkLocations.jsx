@@ -27,7 +27,7 @@ import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 import WorkLocationForm from "@/Forms/WorkLocationForm.jsx";
 import DeleteWorkLocationForm from "@/Forms/DeleteWorkLocationForm.jsx";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 
 const WorkLocations = React.memo(({ auth, title, jurisdictions, users }) => {
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
@@ -86,7 +86,7 @@ const WorkLocations = React.memo(({ auth, title, jurisdictions, users }) => {
             }
         });
 
-        toast.promise(promise, {
+        showToast.promise(promise, {
             pending: 'Deleting work location...',
             success: {
                 render({ data }) {

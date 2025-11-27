@@ -33,7 +33,7 @@ import {
     ClockIcon,
     ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 
@@ -102,7 +102,7 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
             
             if (errors.length > 0) {
                 setValidationErrors(errors);
-                toast.error('File validation failed');
+                showToast.error('File validation failed');
                 return;
             }
 
@@ -159,7 +159,7 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
     // Handle form submission
     const handleSubmit = async () => {
         if (!file) {
-            toast.error('Please select a file to upload');
+            showToast.error('Please select a file to upload');
             return;
         }
 
@@ -242,7 +242,7 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
             }
         });
 
-        toast.promise(promise, {
+        showToast.promise(promise, {
             pending: 'Uploading file...',
             success: {
                 render({ data }) {

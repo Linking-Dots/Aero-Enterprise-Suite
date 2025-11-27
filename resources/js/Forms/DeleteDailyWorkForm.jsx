@@ -7,7 +7,7 @@ import {
     ModalFooter
 } from "@heroui/react";
 import React from "react";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { ExclamationTriangleIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const DeleteDailyWorkForm = ({ open, handleClose, handleDelete, isLoading = false }) => {

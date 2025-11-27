@@ -18,7 +18,7 @@ import DesignationTable from '@/Tables/DesignationTable.jsx';
 import DesignationForm from '@/Forms/DesignationForm.jsx';
 import DeleteDesignationForm from '@/Forms/DeleteDesignationForm.jsx';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const Designations = ({ title, initialDesignations, departments, managers, parentDesignations, allDesignations, stats: initialStats, filters: initialFilters }) => {
     const { auth } = usePage().props;
@@ -89,7 +89,7 @@ const Designations = ({ title, initialDesignations, departments, managers, paren
             setDesignationsData(response.data.designations || response.data);
         } catch (error) {
             console.error('Error fetching designations:', error);
-            toast.error('Failed to load designations data');
+            showToast.error('Failed to load designations data');
         } finally {
             setLoading(false);
         }

@@ -42,7 +42,7 @@ import {
     ExclamationTriangleIcon,
     InformationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 
 const BulkActionModal = ({ 
     isOpen, 
@@ -175,38 +175,38 @@ const BulkActionModal = ({
 
     const validateForm = () => {
         if (!actionType) {
-            toast.error('Please select an action to perform');
+            showToast.error('Please select an action to perform');
             return false;
         }
 
         switch (actionType) {
             case 'updatePriority':
                 if (!formData.priority) {
-                    toast.error('Please select a priority level');
+                    showToast.error('Please select a priority level');
                     return false;
                 }
                 break;
             case 'updateStatus':
                 if (!formData.status) {
-                    toast.error('Please select a status');
+                    showToast.error('Please select a status');
                     return false;
                 }
                 break;
             case 'assignLeader':
                 if (!formData.assignedLeader) {
-                    toast.error('Please select a project leader');
+                    showToast.error('Please select a project leader');
                     return false;
                 }
                 break;
             case 'archive':
                 if (!formData.archiveReason.trim()) {
-                    toast.error('Please provide a reason for archiving');
+                    showToast.error('Please provide a reason for archiving');
                     return false;
                 }
                 break;
             case 'delete':
                 if (!formData.notes.trim()) {
-                    toast.error('Please provide justification for deletion');
+                    showToast.error('Please provide justification for deletion');
                     return false;
                 }
                 break;
@@ -236,19 +236,19 @@ const BulkActionModal = ({
             // Route to appropriate bulk action endpoint
             await router.post(route('project-management.projects.bulk-action'), payload, {
                 onSuccess: (response) => {
-                    toast.success(`Successfully performed ${selectedAction.label} on ${selectedProjects.length} projects`);
+                    showToast.success(`Successfully performed ${selectedAction.label} on ${selectedProjects.length} projects`);
                     onBulkAction?.(payload);
                     onClose();
                     resetForm();
                 },
                 onError: (errors) => {
                     console.error('Bulk action failed:', errors);
-                    toast.error('Failed to perform bulk action. Please try again.');
+                    showToast.error('Failed to perform bulk action. Please try again.');
                 }
             });
         } catch (error) {
             console.error('Bulk action error:', error);
-            toast.error('An unexpected error occurred. Please try again.');
+            showToast.error('An unexpected error occurred. Please try again.');
         } finally {
             setIsLoading(false);
         }

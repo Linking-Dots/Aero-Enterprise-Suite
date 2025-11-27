@@ -22,7 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { usePage } from '@inertiajs/react';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import DepartmentEmployeeSelector from "@/Components/DepartmentEmployeeSelector.jsx";
 import BulkCalendar from './BulkCalendar';
@@ -199,7 +199,7 @@ const BulkLeaveModal = ({
     const handleValidate = useCallback(async () => {
         if (selectedDates.length === 0) {
             const toastPromise = Promise.reject(new Error('No dates selected'));
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Please select at least one date'
             });
             return;
@@ -207,7 +207,7 @@ const BulkLeaveModal = ({
         
         if (!selectedLeaveType) {
             const toastPromise = Promise.reject(new Error('No leave type selected'));
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Please select a leave type'
             });
             return;
@@ -215,7 +215,7 @@ const BulkLeaveModal = ({
         
         if (!reason.trim() || reason.trim().length < 5) {
             const toastPromise = Promise.reject('Please provide a reason for leave (at least 5 characters)');
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Please provide a reason for leave (at least 5 characters)'
             });
             return;
@@ -244,15 +244,15 @@ const BulkLeaveModal = ({
                 
                 const toastPromise = Promise.resolve();
                 if (conflictCount > 0) {
-                    toast.promise(toastPromise, {
+                    showToast.promise(toastPromise, {
                         success: `${conflictCount} date(s) have conflicts. Please review before submitting.`
                     });
                 } else if (warningCount > 0) {
-                    toast.promise(toastPromise, {
+                    showToast.promise(toastPromise, {
                         success: `${warningCount} date(s) have warnings. You may proceed if acceptable.`
                     });
                 } else {
-                    toast.promise(toastPromise, {
+                    showToast.promise(toastPromise, {
                         success: 'All dates validated successfully!'
                     });
                 }
@@ -263,7 +263,7 @@ const BulkLeaveModal = ({
                 setErrors(error.response.data.errors || {});
             }
             const toastPromise = Promise.reject(error);
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: error.response?.data?.message || 'Failed to validate dates'
             });
         } finally {
@@ -275,7 +275,7 @@ const BulkLeaveModal = ({
     const handleSubmit = useCallback(async () => {
         if (!hasValidated) {
             const toastPromise = Promise.reject(new Error('Not validated'));
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Please validate dates before submitting'
             });
             return;
@@ -284,7 +284,7 @@ const BulkLeaveModal = ({
         const conflictCount = validationResults.filter(r => r.status === 'conflict').length;
         if (conflictCount > 0 && !allowPartialSuccess) {
             const toastPromise = Promise.reject('Please resolve conflicts or enable partial success mode');
-            toast.promise(toastPromise, {
+            showToast.promise(toastPromise, {
                 error: 'Please resolve conflicts or enable partial success mode'
             });
             return;
@@ -345,7 +345,7 @@ const BulkLeaveModal = ({
         });
 
         // Use exact same toast promise structure as LeaveForm
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Creating bulk leave requests...',

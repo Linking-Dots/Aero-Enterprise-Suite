@@ -81,7 +81,7 @@ import {
     RadialBar,
     Legend
 } from 'recharts';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -142,7 +142,7 @@ const SystemMonitoringEnhanced = ({ title, initialData }) => {
             setData(response.data);
         } catch (error) {
             console.error('Failed to fetch monitoring data:', error);
-            toast.error('Failed to refresh system data');
+            showToast.error('Failed to refresh system data');
         } finally {
             setLoading(false);
         }
@@ -202,10 +202,10 @@ const SystemMonitoringEnhanced = ({ title, initialData }) => {
             link.remove();
             window.URL.revokeObjectURL(url);
             
-            toast.success('System report exported successfully');
+            showToast.success('System report exported successfully');
         } catch (error) {
             console.error('Failed to export report:', error);
-            toast.error('Failed to export system report');
+            showToast.error('Failed to export system report');
         } finally {
             setLoading(false);
         }

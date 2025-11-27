@@ -13,7 +13,7 @@ import {
     Chip
 } from "@heroui/react";
 import { CalendarIcon, UserIcon, ClockIcon, MapPinIcon, UsersIcon } from 'lucide-react';
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastUtils";
 import { usePage } from "@inertiajs/react";
 import axios from 'axios';
 
@@ -203,7 +203,7 @@ const TrainingForm = ({
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: isEditMode ? 'Updating training...' : 'Creating training...',

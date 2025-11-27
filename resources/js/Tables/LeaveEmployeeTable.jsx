@@ -7,7 +7,7 @@ import {
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 
 import { usePage } from "@inertiajs/react";
-import { toast } from "react-toastify";
+import { showToast } from '@/utils/toastUtils';
 import {
     Table,
     TableHeader,
@@ -214,7 +214,7 @@ const LeaveEmployeeTable = React.forwardRef(({
     const updateLeaveStatus = useCallback(async (leave, newStatus) => {
     // If the leave is already in the desired status, resolve early and do not trigger loader or API
     if (leave.status === newStatus) {
-        toast.info(`Leave is already ${newStatus}.`);
+        showToast.info(`Leave is already ${newStatus}.`);
         return Promise.resolve(`The leave status is already updated to ${newStatus}`);
     }
 
@@ -252,8 +252,8 @@ const LeaveEmployeeTable = React.forwardRef(({
         }
     });
 
-    toast.promise(promise, {
-        pending: "Updating leave status...",
+    showToast.promise(promise, {
+        loading: "Updating leave status...",
         success: "Leave status updated successfully!",
         error: "Failed to update leave status"
     });

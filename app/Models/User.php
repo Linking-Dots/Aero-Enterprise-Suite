@@ -277,6 +277,22 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Get the user's manager (who they report to).
+     */
+    public function reportsTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'report_to');
+    }
+
+    /**
+     * Get the users who report to this user.
+     */
+    public function directReports(): HasMany
+    {
+        return $this->hasMany(User::class, 'report_to');
+    }
+
+    /**
      * Get the user's devices.
      */
     public function devices(): HasMany

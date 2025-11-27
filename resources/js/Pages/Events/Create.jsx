@@ -21,7 +21,7 @@ import {
     ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import App from '@/Layouts/App.jsx';
-import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 
 const CreateEvent = () => {
@@ -106,7 +106,7 @@ const CreateEvent = () => {
             }
         });
 
-        toast.promise(
+        showToast.promise(
             promise,
             {
                 pending: 'Creating event...',
