@@ -27,7 +27,8 @@ import {
   useDisclosure,
   Switch
 } from "@heroui/react";
-import useTheme from '@/theme';
+import { useTheme } from '@/Contexts/ThemeContext.jsx';
+import useMediaQuery from '@/Hooks/useMediaQuery';
 import { 
   UserGroupIcon, 
   KeyIcon,
@@ -148,9 +149,24 @@ const RoleManagement = (props) => {
     const abortControllerRef = useRef(null);
     const lastUpdateRef = useRef(Date.now());
     
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    // Theme and responsive hooks
+    const { themeSettings } = useTheme();
+    const isDark = themeSettings?.mode === 'dark';
+    const isMobile = useMediaQuery('(max-width: 640px)');
+    const isTablet = useMediaQuery('(max-width: 768px)');
+    
+    // Helper function to get theme-aware radius for HeroUI components
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
     
     // Main tab management
     const [activeTab, setActiveTab] = useState(0);
@@ -1058,58 +1074,37 @@ const RoleManagement = (props) => {
 
     // Tab component functions with consistent theming
     const RolesManagementTab = () => (
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 mt-4">
-            <CardHeader className="p-4 border-b border-white/10">
+        <GlassCard className="mt-4">
+            <CardHeader className="p-4 border-b border-default-200/20">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-                    <Typography variant="h6" className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
                         <UserGroupIcon className="w-5 h-5" />
                         Roles Management
-                    </Typography>
+                    </div>
                     <Button
                         onPress={() => openRoleModal()}
                         startContent={<PlusIcon className="w-4 h-4" />}
-                        className="bg-linear-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 border border-blue-400/30 text-white"
+                        className="bg-primary/20 hover:bg-primary/30 border border-primary/30"
                         variant="bordered"
+                        radius={getThemeRadius()}
                     >
                         Add Role
                     </Button>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <TextField
+                    <Input
                         label="Search Roles"
-                        variant="outlined"
                         placeholder="Search by role name..."
                         value={roleSearchQuery}
-                        onChange={(e) => handleRoleSearchChange(e.target.value)}
-                        fullWidth
-                        size="medium"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <MagnifyingGlassIcon className="w-4 h-4" />
-                                </InputAdornment>
-                            ),
-                            style: {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: '8px',
-                                color: 'white'
-                            }
-                        }}
-                        InputLabelProps={{
-                            style: { color: 'rgba(255, 255, 255, 0.7)' }
-                        }}
-                        sx={{
-                            flex: 1,
-                            '& .MuiInputBase-input': {
-                                backgroundColor: 'transparent',
-                                color: 'white'
-                            },
-                            '& .MuiOutlinedInput-root:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                            }
+                        onValueChange={handleRoleSearchChange}
+                        className="flex-1"
+                        radius={getThemeRadius()}
+                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                        classNames={{
+                            inputWrapper: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            input: "text-foreground placeholder:text-default-400",
+                            label: "text-default-500"
                         }}
                     />
                     <Select
@@ -1118,10 +1113,11 @@ const RoleManagement = (props) => {
                         selectedKeys={[roleStatusFilter]}
                         onSelectionChange={(keys) => handleRoleStatusFilterChange(Array.from(keys)[0])}
                         className="min-w-[140px]"
+                        radius={getThemeRadius()}
                         classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70",
-                            value: "text-white"
+                            trigger: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            label: "text-default-500",
+                            value: "text-foreground"
                         }}
                     >
                         <SelectItem key="all" value="all">All Status</SelectItem>
@@ -1141,17 +1137,17 @@ const RoleManagement = (props) => {
                             .slice(0, 3);
                         
                         return (
-                            <div key={role.id} className="p-4 hover:bg-white/5 transition-colors">
+                            <div key={role.id} className="p-4 hover:bg-default-100/50 dark:hover:bg-default-50/10 transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-bold">
                                             {role.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <Typography variant="body1" className="font-medium">
+                                                <span className="font-medium text-foreground">
                                                     {role.name}
-                                                </Typography>
+                                                </span>
                                                 {role.name === 'Super Administrator' && (
                                                     <Chip size="sm" color="warning" variant="flat">
                                                         System
@@ -1166,9 +1162,9 @@ const RoleManagement = (props) => {
                                                 </Chip>
                                             </div>
                                             {role.description && (
-                                                <Typography variant="body2" color="textSecondary" className="mt-1">
+                                                <p className="mt-1 text-sm text-default-500">
                                                     {role.description}
-                                                </Typography>
+                                                </p>
                                             )}
                                             <div className="flex flex-wrap gap-1 mt-2">
                                                 {permissionNames.map((permission, index) => (
@@ -1203,7 +1199,7 @@ const RoleManagement = (props) => {
                                                 variant="light"
                                                 onPress={() => openRoleModal(role)}
                                                 isDisabled={!canManageRole(role)}
-                                                className="text-blue-400 hover:text-blue-300"
+                                                className="text-primary hover:text-primary/80"
                                             >
                                                 <PencilSquareIcon className="w-4 h-4" />
                                             </Button>
@@ -1215,7 +1211,7 @@ const RoleManagement = (props) => {
                                                 variant="light"
                                                 onPress={() => confirmDeleteRole(role)}
                                                 isDisabled={!canManageRole(role)}
-                                                className="text-red-400 hover:text-red-300"
+                                                className="text-danger hover:text-danger/80"
                                             >
                                                 <TrashIcon className="w-4 h-4" />
                                             </Button>
@@ -1229,18 +1225,18 @@ const RoleManagement = (props) => {
                 
                 {filteredRoles.length === 0 && (
                     <div className="text-center py-12">
-                        <UserGroupIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                        <Typography variant="body1" color="textSecondary">
+                        <UserGroupIcon className="w-16 h-16 text-default-300 mx-auto mb-4" />
+                        <p className="text-default-500">
                             No roles found matching your criteria
-                        </Typography>
+                        </p>
                     </div>
                 )}
                 
                 {filteredRoles.length > roleRowsPerPage && (
-                    <div className="flex justify-between items-center p-4 border-t border-white/10">
-                        <Typography variant="body2" color="textSecondary">
+                    <div className="flex justify-between items-center p-4 border-t border-default-200/20">
+                        <span className="text-sm text-default-500">
                             Showing {rolePage * roleRowsPerPage + 1} to {Math.min((rolePage + 1) * roleRowsPerPage, filteredRoles.length)} of {filteredRoles.length} roles
-                        </Typography>
+                        </span>
                         <div className="flex gap-2">
                             <Button
                                 isIconOnly
@@ -1248,7 +1244,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={rolePage === 0}
                                 onPress={() => setRolePage(prev => Math.max(0, prev - 1))}
-                                className="text-white"
                             >
                                 ‹
                             </Button>
@@ -1258,7 +1253,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={(rolePage + 1) * roleRowsPerPage >= filteredRoles.length}
                                 onPress={() => setRolePage(prev => prev + 1)}
-                                className="text-white"
                             >
                                 ›
                             </Button>
@@ -1266,62 +1260,41 @@ const RoleManagement = (props) => {
                     </div>
                 )}
             </CardBody>
-        </Card>
+        </GlassCard>
     );
 
     const PermissionsManagementTab = () => (
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 mt-4">
-            <CardHeader className="p-4 border-b border-white/10">
+        <GlassCard className="mt-4">
+            <CardHeader className="p-4 border-b border-default-200/20">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-                    <Typography variant="h6" className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
                         <KeyIcon className="w-5 h-5" />
                         Permissions Management
-                    </Typography>
+                    </div>
                     <Button
                         onPress={() => openPermissionModal()}
                         startContent={<PlusIcon className="w-4 h-4" />}
-                        className="bg-linear-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-400/30 text-white"
+                        className="bg-success/20 hover:bg-success/30 border border-success/30"
                         variant="bordered"
+                        radius={getThemeRadius()}
                     >
                         Add Permission
                     </Button>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <TextField
+                    <Input
                         label="Search Permissions"
-                        variant="outlined"
                         placeholder="Search by permission name..."
                         value={permissionSearchQuery}
-                        onChange={(e) => handlePermissionSearchChange(e.target.value)}
-                        fullWidth
-                        size="medium"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <MagnifyingGlassIcon className="w-4 h-4" />
-                                </InputAdornment>
-                            ),
-                            style: {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: '8px',
-                                color: 'white'
-                            }
-                        }}
-                        InputLabelProps={{
-                            style: { color: 'rgba(255, 255, 255, 0.7)' }
-                        }}
-                        sx={{
-                            flex: 1,
-                            '& .MuiInputBase-input': {
-                                backgroundColor: 'transparent',
-                                color: 'white'
-                            },
-                            '& .MuiOutlinedInput-root:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                            }
+                        onValueChange={handlePermissionSearchChange}
+                        className="flex-1"
+                        radius={getThemeRadius()}
+                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                        classNames={{
+                            inputWrapper: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            input: "text-foreground placeholder:text-default-400",
+                            label: "text-default-500"
                         }}
                     />
                     <Select
@@ -1330,10 +1303,11 @@ const RoleManagement = (props) => {
                         selectedKeys={[moduleFilter]}
                         onSelectionChange={(keys) => handleModuleFilterChange(Array.from(keys)[0])}
                         className="min-w-[180px]"
+                        radius={getThemeRadius()}
                         classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70",
-                            value: "text-white"
+                            trigger: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            label: "text-default-500",
+                            value: "text-foreground"
                         }}
                     >
                         <SelectItem key="all" value="all">All Modules</SelectItem>
@@ -1347,19 +1321,19 @@ const RoleManagement = (props) => {
             </CardHeader>
 
             <CardBody className="p-0">
-                <div className="divide-y divide-white/10">
+                <div className="divide-y divide-default-200/20">
                     {paginatedPermissions.map((permission) => (
-                        <div key={permission.id} className="p-4 hover:bg-white/5 transition-colors">
+                        <div key={permission.id} className="p-4 hover:bg-default-100/50 dark:hover:bg-default-50/10 transition-colors">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-success to-success/70 flex items-center justify-center text-white font-bold">
                                         {permission.name ? permission.name.charAt(0).toUpperCase() : 'P'}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <Typography variant="body1" className="font-medium">
+                                            <span className="font-medium text-foreground">
                                                 {permission.display_name || permission.name}
-                                            </Typography>
+                                            </span>
                                             <Chip
                                                 size="sm"
                                                 color="secondary"
@@ -1368,13 +1342,13 @@ const RoleManagement = (props) => {
                                                 {permission.module || (permission.name ? permission.name.split('.')[0] : 'General')}
                                             </Chip>
                                         </div>
-                                        <Typography variant="body2" color="textSecondary" className="mt-1">
+                                        <p className="mt-1 text-sm text-default-500">
                                             {permission.name}
-                                        </Typography>
+                                        </p>
                                         {permission.description && (
-                                            <Typography variant="body2" color="textSecondary" className="mt-1 max-w-md">
+                                            <p className="mt-1 text-sm text-default-500 max-w-md">
                                                 {permission.description}
-                                            </Typography>
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -1385,7 +1359,7 @@ const RoleManagement = (props) => {
                                             size="sm"
                                             variant="light"
                                             onPress={() => openPermissionModal(permission)}
-                                            className="text-blue-400 hover:text-blue-300"
+                                            className="text-primary hover:text-primary/80"
                                         >
                                             <PencilSquareIcon className="w-4 h-4" />
                                         </Button>
@@ -1396,7 +1370,7 @@ const RoleManagement = (props) => {
                                             size="sm"
                                             variant="light"
                                             onPress={() => confirmDeletePermission(permission)}
-                                            className="text-red-400 hover:text-red-300"
+                                            className="text-danger hover:text-danger/80"
                                         >
                                             <TrashIcon className="w-4 h-4" />
                                         </Button>
@@ -1409,18 +1383,18 @@ const RoleManagement = (props) => {
                 
                 {filteredPermissions.length === 0 && (
                     <div className="text-center py-12">
-                        <KeyIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                        <Typography variant="body1" color="textSecondary">
+                        <KeyIcon className="w-16 h-16 text-default-300 mx-auto mb-4" />
+                        <p className="text-default-500">
                             No permissions found matching your criteria
-                        </Typography>
+                        </p>
                     </div>
                 )}
                 
                 {filteredPermissions.length > permissionRowsPerPage && (
-                    <div className="flex justify-between items-center p-4 border-t border-white/10">
-                        <Typography variant="body2" color="textSecondary">
+                    <div className="flex justify-between items-center p-4 border-t border-default-200/20">
+                        <span className="text-sm text-default-500">
                             Showing {permissionPage * permissionRowsPerPage + 1} to {Math.min((permissionPage + 1) * permissionRowsPerPage, filteredPermissions.length)} of {filteredPermissions.length} permissions
-                        </Typography>
+                        </span>
                         <div className="flex gap-2">
                             <Button
                                 isIconOnly
@@ -1428,7 +1402,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={permissionPage === 0}
                                 onPress={() => setPermissionPage(prev => Math.max(0, prev - 1))}
-                                className="text-white"
                             >
                                 ‹
                             </Button>
@@ -1438,7 +1411,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={(permissionPage + 1) * permissionRowsPerPage >= filteredPermissions.length}
                                 onPress={() => setPermissionPage(prev => prev + 1)}
-                                className="text-white"
                             >
                                 ›
                             </Button>
@@ -1446,17 +1418,17 @@ const RoleManagement = (props) => {
                     </div>
                 )}
             </CardBody>
-        </Card>
+        </GlassCard>
     );
 
     const RolePermissionAssignmentTab = () => (
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 mt-4">
-            <CardHeader className="p-4 border-b border-white/10">
+        <GlassCard className="mt-4">
+            <CardHeader className="p-4 border-b border-default-200/20">
                 <div className="flex flex-col gap-4 w-full">
-                    <Typography variant="h6" className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
                         <AdjustmentsHorizontalIcon className="w-5 h-5" />
                         Role-Permission Assignment
-                    </Typography>
+                    </div>
                     
                     <Select
                         label="Select Role to Manage"
@@ -1469,10 +1441,11 @@ const RoleManagement = (props) => {
                             }
                         }}
                         className="max-w-md"
+                        radius={getThemeRadius()}
                         classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70",
-                            value: "text-white"
+                            trigger: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            label: "text-default-500",
+                            value: "text-foreground"
                         }}
                     >
                         {roles.map((role) => (
@@ -1487,14 +1460,14 @@ const RoleManagement = (props) => {
             <CardBody className="p-4">
                 {activeRole ? (
                     <div className="space-y-6">
-                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                        <div className="flex items-center justify-between p-4 bg-default-100/50 dark:bg-default-50/10 rounded-lg border border-default-200/20">
                             <div>
-                                <Typography variant="body1" className="font-medium">
+                                <p className="font-medium text-foreground">
                                     Managing permissions for: {activeRole.name}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
+                                </p>
+                                <p className="text-sm text-default-500">
                                     {selectedPermissions.size} of {permissions.length} permissions granted
-                                </Typography>
+                                </p>
                             </div>
                             <Progress 
                                 value={(selectedPermissions.size / permissions.length) * 100}
@@ -1516,12 +1489,12 @@ const RoleManagement = (props) => {
                                 const someGranted = grantedCount > 0 && grantedCount < totalCount;
 
                                 return (
-                                    <Card key={moduleKey} className="bg-white/5 border-white/10">
+                                    <Card key={moduleKey} className="bg-default-100/50 dark:bg-default-50/10 border-default-200/20" radius={getThemeRadius()}>
                                         <CardHeader className="pb-2">
                                             <div className="flex items-center justify-between w-full">
-                                                <Typography variant="body1" className="font-medium capitalize">
+                                                <span className="font-medium capitalize text-foreground">
                                                     {moduleKey}
-                                                </Typography>
+                                                </span>
                                                 <div className="flex items-center gap-2">
                                                     <Chip 
                                                         size="sm" 
@@ -1557,15 +1530,15 @@ const RoleManagement = (props) => {
                                                     return (
                                                         <div 
                                                             key={permission.id}
-                                                            className="flex items-center justify-between p-2 rounded-sm bg-white/5 hover:bg-white/10 transition-colors"
+                                                            className="flex items-center justify-between p-2 rounded-sm bg-default-100/50 dark:bg-default-50/10 hover:bg-default-100/70 dark:hover:bg-default-50/20 transition-colors"
                                                         >
                                                             <div>
-                                                                <Typography variant="body2" className="font-medium">
+                                                                <p className="text-sm font-medium text-foreground">
                                                                     {permission.display_name || permission.name}
-                                                                </Typography>
-                                                                <Typography variant="caption" color="textSecondary">
+                                                                </p>
+                                                                <p className="text-xs text-default-500">
                                                                     {permission.name}
-                                                                </Typography>
+                                                                </p>
                                                             </div>
                                                             <Switch
                                                                 key={`${permission.id}-${isGranted}-${loadingState}`}
@@ -1588,64 +1561,42 @@ const RoleManagement = (props) => {
                     </div>
                 ) : (
                     <div className="text-center py-12">
-                        <AdjustmentsHorizontalIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                        <Typography variant="body1" color="textSecondary" className="mb-2">
+                        <AdjustmentsHorizontalIcon className="w-16 h-16 text-default-300 mx-auto mb-4" />
+                        <p className="mb-2 text-default-500">
                             Select a role to manage permissions
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        </p>
+                        <p className="text-sm text-default-400">
                             Choose a role from the dropdown above to assign or revoke permissions
-                        </Typography>
+                        </p>
                     </div>
                 )}
             </CardBody>
-        </Card>
+        </GlassCard>
     );
 
     const UserRoleAssignmentTab = () => (
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 mt-4">
-            <CardHeader className="p-4 border-b border-white/10">
+        <GlassCard className="mt-4">
+            <CardHeader className="p-4 border-b border-default-200/20">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-                    <Typography variant="h6" className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
                         <UsersIcon className="w-5 h-5" />
                         User-Role Assignment
-                    </Typography>
+                    </div>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <TextField
+                    <Input
                         label="Search Users"
-                        variant="outlined"
                         placeholder="Search by user name or email..."
                         value={userSearchQuery}
-                        onChange={(e) => handleUserSearchChange(e.target.value)}
-                        fullWidth
-                        size="medium"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <MagnifyingGlassIcon className="w-4 h-4" />
-                                </InputAdornment>
-                            ),
-                            style: {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                borderRadius: '8px',
-                                color: 'white'
-                            }
-                        }}
-                        InputLabelProps={{
-                            style: { color: 'rgba(255, 255, 255, 0.7)' }
-                        }}
-                        sx={{
-                            flex: 1,
-                            '& .MuiInputBase-input': {
-                                backgroundColor: 'transparent',
-                                color: 'white'
-                            },
-                            '& .MuiOutlinedInput-root:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                            }
+                        onValueChange={handleUserSearchChange}
+                        className="flex-1"
+                        radius={getThemeRadius()}
+                        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                        classNames={{
+                            inputWrapper: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            input: "text-foreground placeholder:text-default-400",
+                            label: "text-default-500"
                         }}
                     />
                     <Select
@@ -1655,9 +1606,9 @@ const RoleManagement = (props) => {
                         onSelectionChange={(keys) => handleUserRoleFilterChange(Array.from(keys)[0])}
                         className="min-w-[160px]"
                         classNames={{
-                            trigger: "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15",
-                            label: "text-white/70",
-                            value: "text-white"
+                            trigger: "bg-default-100/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/20 hover:bg-default-100/70 dark:hover:bg-default-50/20",
+                            label: "text-default-500",
+                            value: "text-foreground"
                         }}
                     >
                         <SelectItem key="all" value="all">All Roles</SelectItem>
@@ -1672,21 +1623,21 @@ const RoleManagement = (props) => {
 
             <CardBody className="p-0">
                 {users && users.length > 0 ? (
-                    <div className="divide-y divide-white/10">
+                    <div className="divide-y divide-default-200/20">
                         {paginatedUsers.map((user) => (
-                            <div key={user.id} className="p-4 hover:bg-white/5 transition-colors">
+                            <div key={user.id} className="p-4 hover:bg-default-100/50 dark:hover:bg-default-50/10 transition-colors">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-linear-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-warning to-danger flex items-center justify-center text-white font-bold">
                                             {user.name?.charAt(0).toUpperCase() || 'U'}
                                         </div>
                                         <div>
-                                            <Typography variant="body1" className="font-medium">
+                                            <p className="font-medium text-foreground">
                                                 {user.name || 'Unknown User'}
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
+                                            </p>
+                                            <p className="text-sm text-default-500">
                                                 {user.email || 'No email'}
-                                            </Typography>
+                                            </p>
                                             <div className="flex flex-wrap gap-1 mt-2">
                                                 {user.roles && user.roles.length > 0 ? (
                                                     <>
@@ -1732,7 +1683,7 @@ const RoleManagement = (props) => {
                                                 size="sm"
                                                 variant="light"
                                                 onPress={() => openUserRoleModal(user)}
-                                                className="text-orange-400 hover:text-orange-300"
+                                                className="text-warning hover:text-warning/80"
                                             >
                                                 <Cog6ToothIcon className="w-4 h-4" />
                                             </Button>
@@ -1744,21 +1695,21 @@ const RoleManagement = (props) => {
                     </div>
                 ) : (
                     <div className="text-center py-12">
-                        <UsersIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                        <Typography variant="body1">
+                        <UsersIcon className="w-16 h-16 text-default-300 mx-auto mb-4" />
+                        <p className="text-foreground">
                             No users found
-                        </Typography>
-                        <Typography variant="body2">
+                        </p>
+                        <p className="text-sm text-default-500">
                             Users data is not available. Please ensure users are loaded from the backend.
-                        </Typography>
+                        </p>
                     </div>
                 )}
                 
                 {filteredUsers.length > userRowsPerPage && (
-                    <div className="flex justify-between items-center p-4 border-t border-white/10">
-                        <Typography variant="body2">
+                    <div className="flex justify-between items-center p-4 border-t border-default-200/20">
+                        <span className="text-sm text-default-500">
                             Showing {userPage * userRowsPerPage + 1} to {Math.min((userPage + 1) * userRowsPerPage, filteredUsers.length)} of {filteredUsers.length} users
-                        </Typography>
+                        </span>
                         <div className="flex gap-2">
                             <Button
                                 isIconOnly
@@ -1766,7 +1717,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={userPage === 0}
                                 onPress={() => setUserPage(prev => Math.max(0, prev - 1))}
-                                className="text-white"
                             >
                                 ‹
                             </Button>
@@ -1776,7 +1726,6 @@ const RoleManagement = (props) => {
                                 variant="light"
                                 isDisabled={(userPage + 1) * userRowsPerPage >= filteredUsers.length}
                                 onPress={() => setUserPage(prev => prev + 1)}
-                                className="text-white"
                             >
                                 ›
                             </Button>
@@ -1784,7 +1733,7 @@ const RoleManagement = (props) => {
                     </div>
                 )}
             </CardBody>
-        </Card>
+        </GlassCard>
     );    
 
     // Render all modals
@@ -1833,45 +1782,24 @@ const RoleManagement = (props) => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
                     <div className="col-span-1">
-                        <TextField
+                        <Input
                             label="Role Name"
                             placeholder="Enter role name"
                             value={roleForm.name}
-                            onChange={(e) => setRoleForm(prev => ({ ...prev, name: e.target.value }))}
-                            error={!!formErrors.name}
-                            helperText={formErrors.name || "Unique identifier for the role"}
-                            required
-                            disabled={isLoading}
-                            variant="outlined"
-                            fullWidth
-                            size="medium"
-                            InputProps={{
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '8px',
-                                    color: 'white'
-                                }
-                            }}
-                            InputLabelProps={{
-                                style: { color: 'rgba(255, 255, 255, 0.7)' }
-                            }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    color: 'white',
-                                    '&::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                    }
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                }
+                            onValueChange={(value) => setRoleForm(prev => ({ ...prev, name: value }))}
+                            isInvalid={!!formErrors.name}
+                            errorMessage={formErrors.name}
+                            description="Unique identifier for the role"
+                            isRequired
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500",
+                                description: "text-default-400",
+                                errorMessage: "text-danger"
                             }}
                         />
                     </div>
@@ -1886,11 +1814,12 @@ const RoleManagement = (props) => {
                             }}
                             isDisabled={isLoading}
                             variant="bordered"
+                            radius={getThemeRadius()}
                             classNames={{
-                                trigger: "border-white/20 bg-white/5 hover:border-white/30 data-[open]:border-primary/50",
-                                value: "text-white",
-                                label: "text-white/70",
-                                popoverContent: "bg-black/80 backdrop-blur-xl border border-white/20"
+                                trigger: "border-default-200/20 bg-default-100/50 dark:bg-default-50/10 hover:border-default-300/30 data-[open]:border-primary/50",
+                                value: "text-foreground",
+                                label: "text-default-500",
+                                popoverContent: "bg-content1 dark:bg-content1 backdrop-blur-xl border border-default-200/20"
                             }}
                         >
                             <SelectItem key="web" value="web">Web</SelectItem>
@@ -1898,41 +1827,19 @@ const RoleManagement = (props) => {
                         </Select>
                     </div>
                     <div className="col-span-2">
-                        <TextField
+                        <Textarea
                             label="Description"
                             placeholder="Optional description of role responsibilities"
                             value={roleForm.description}
-                            onChange={(e) => setRoleForm(prev => ({ ...prev, description: e.target.value }))}
-                            disabled={isLoading}
-                            variant="outlined"
-                            fullWidth
-                            multiline
-                            rows={2}
-                            size="medium"
-                            InputProps={{
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '8px',
-                                    color: 'white'
-                                }
-                            }}
-                            InputLabelProps={{
-                                style: { color: 'rgba(255, 255, 255, 0.7)' }
-                            }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    color: 'white',
-                                    '&::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                    }
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
-                                }
+                            onValueChange={(value) => setRoleForm(prev => ({ ...prev, description: value }))}
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            minRows={2}
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500"
                             }}
                         />
                     </div>
@@ -1971,88 +1878,46 @@ const RoleManagement = (props) => {
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
                     <div className="col-span-1">
-                        <TextField
+                        <Input
                             label="Permission Name"
                             placeholder="e.g., users.create"
                             value={permissionForm.name}
-                            onChange={(e) => setPermissionForm(prev => ({ ...prev, name: e.target.value }))}
-                            error={!!formErrors.name}
-                            helperText={formErrors.name || "Use format: module.action (e.g., users.create)"}
-                            required
-                            disabled={isLoading}
-                            variant="outlined"
-                            fullWidth
-                            size="medium"
-                            InputProps={{
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '8px',
-                                    color: 'white'
-                                }
-                            }}
-                            InputLabelProps={{
-                                style: { color: 'rgba(255, 255, 255, 0.7)' }
-                            }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    color: 'white',
-                                    '&::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                    }
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                }
+                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, name: value }))}
+                            isInvalid={!!formErrors.name}
+                            errorMessage={formErrors.name}
+                            description="Use format: module.action (e.g., users.create)"
+                            isRequired
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500",
+                                description: "text-default-400",
+                                errorMessage: "text-danger"
                             }}
                         />
                     </div>
                     <div className="col-span-1">
-                        <TextField
+                        <Input
                             label="Display Name"
                             placeholder="Human-readable name"
                             value={permissionForm.display_name}
-                            onChange={(e) => setPermissionForm(prev => ({ ...prev, display_name: e.target.value }))}
-                            error={!!formErrors.display_name}
-                            helperText={formErrors.display_name || "Human-readable name"}
-                            required
-                            disabled={isLoading}
-                            variant="outlined"
-                            fullWidth
-                            size="medium"
-                            InputProps={{
-                                style: {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '8px',
-                                    color: 'white'
-                                }
-                            }}
-                            InputLabelProps={{
-                                style: { color: 'rgba(255, 255, 255, 0.7)' }
-                            }}
-                            sx={{
-                                '& .MuiInputBase-input': {
-                                    color: 'white',
-                                    '&::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                    }
-                                },
-                                '& .MuiOutlinedInput-root:hover': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '& .MuiOutlinedInput-root.Mui-focused': {
-                                    borderColor: 'rgba(59, 130, 246, 0.5)', // primary/50
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                }
+                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, display_name: value }))}
+                            isInvalid={!!formErrors.display_name}
+                            errorMessage={formErrors.display_name}
+                            description="Human-readable name"
+                            isRequired
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500",
+                                description: "text-default-400",
+                                errorMessage: "text-danger"
                             }}
                         />
                     </div>
@@ -2069,11 +1934,12 @@ const RoleManagement = (props) => {
                             errorMessage={formErrors.module}
                             isDisabled={isLoading}
                             variant="bordered"
+                            radius={getThemeRadius()}
                             classNames={{
-                                trigger: "border-white/20 bg-white/5 hover:border-white/30 data-[open]:border-primary/50",
-                                value: "text-white",
-                                label: "text-white/70",
-                                popoverContent: "bg-black/80 backdrop-blur-xl border border-white/20"
+                                trigger: "border-default-200/20 bg-default-100/50 dark:bg-default-50/10 hover:border-default-300/30 data-[open]:border-primary/50",
+                                value: "text-foreground",
+                                label: "text-default-500",
+                                popoverContent: "bg-content1 dark:bg-content1 backdrop-blur-xl border border-default-200/20"
                             }}
                         >
                             {modules.map(module => (
@@ -2084,86 +1950,39 @@ const RoleManagement = (props) => {
                         </Select>
                     </div>
                     <div className="col-span-1">
-                        <TextField
+                        <Input
                             label="Guard Name"
                             placeholder="Usually 'web'"
                             value={permissionForm.guard_name}
-                            onChange={(e) => setPermissionForm(prev => ({ ...prev, guard_name: e.target.value }))}
-                            helperText="Usually 'web' for web permissions"
-                            disabled={isLoading}
-                            fullWidth
-                            size="small"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    backdropFilter: 'blur(10px)',
-                                    borderRadius: '12px',
-                                    color: 'white',
-                                    '& fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: 'var(--primary-color)',
-                                    },
-                                    '& input::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                        opacity: 1,
-                                    },
-                                },
-                                '& .MuiInputLabel-root': {
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    '&.Mui-focused': {
-                                        color: 'var(--primary-color)',
-                                    },
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                },
+                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, guard_name: value }))}
+                            description="Usually 'web' for web permissions"
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500",
+                                description: "text-default-400"
                             }}
                         />
                     </div>
                     <div className="col-span-2">
-                        <TextField
+                        <Textarea
                             label="Description"
                             placeholder="Optional description of what this permission allows"
                             value={permissionForm.description}
-                            onChange={(e) => setPermissionForm(prev => ({ ...prev, description: e.target.value }))}
-                            helperText="Optional description of what this permission allows"
-                            disabled={isLoading}
-                            fullWidth
-                            size="small"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    backdropFilter: 'blur(10px)',
-                                    borderRadius: '12px',
-                                    color: 'white',
-                                    '& fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: 'var(--primary-color)',
-                                    },
-                                    '& input::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                        opacity: 1,
-                                    },
-                                },
-                                '& .MuiInputLabel-root': {
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    '&.Mui-focused': {
-                                        color: 'var(--primary-color)',
-                                    },
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                },
+                            onValueChange={(value) => setPermissionForm(prev => ({ ...prev, description: value }))}
+                            description="Optional description of what this permission allows"
+                            isDisabled={isLoading}
+                            variant="bordered"
+                            minRows={2}
+                            radius={getThemeRadius()}
+                            classNames={{
+                                inputWrapper: "bg-default-100/50 dark:bg-default-50/10 border-default-200/20 hover:border-default-300/30 focus-within:!border-primary/50",
+                                input: "text-foreground placeholder:text-default-400",
+                                label: "text-default-500",
+                                description: "text-default-400"
                             }}
                         />
                     </div>
@@ -2199,7 +2018,7 @@ const RoleManagement = (props) => {
                     </div>
                 }
             >
-                <p className="text-white/90">
+                <p className="text-foreground/90">
                     Are you sure you want to delete {roleToDelete ? `the role "${roleToDelete.name}"` : permissionToDelete ? `the permission "${permissionToDelete.name}"` : 'this item'}? This action cannot be undone.
                 </p>
             </GlassDialog>
@@ -2210,182 +2029,163 @@ const RoleManagement = (props) => {
         <>
             <Head title={title} />
             
-            {/* Enhanced success/error notifications */}
-            <Snackbar 
-                open={!!successMessage} 
-                autoHideDuration={3000} 
-                onClose={() => setSuccessMessage('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert severity="success" variant="filled" onClose={() => setSuccessMessage('')}>
-                    {successMessage}
-                </Alert>
-            </Snackbar>
-
-            <Snackbar 
-                open={!!errorMessage} 
-                autoHideDuration={5000} 
-                onClose={() => setErrorMessage('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert severity="error" variant="filled" onClose={() => setErrorMessage('')}>
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
-
-            {/* Data validation error alerts */}
+            {/* Data validation error alerts - shown as a card instead of MUI Alert */}
             {dataValidationErrors.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                    <Alert 
-                        severity="warning" 
-                        variant="outlined"
-                        icon={<ExclamationTriangleIcon className="w-5 h-5" />}
-                        action={
+                <div className="mb-4 p-4">
+                    <Card className="bg-warning/10 border border-warning/30" radius={getThemeRadius()}>
+                        <CardBody className="flex flex-row items-start gap-4">
+                            <ExclamationTriangleIcon className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="font-semibold text-warning mb-2">
+                                    Data Integrity Issues Detected
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-default-600">
+                                    {dataValidationErrors.map((error, index) => (
+                                        <li key={index}>{error}</li>
+                                    ))}
+                                </ul>
+                                <p className="text-sm text-default-500 italic mt-2">
+                                    This may indicate a cache or database synchronization issue on the server.
+                                </p>
+                            </div>
                             <Button
                                 color="warning"
-                                size="small"
-                                onClick={() => {
-                                    // Instead of full reload, refresh the page data
+                                size="sm"
+                                variant="flat"
+                                onPress={() => {
                                     router.reload({ only: ['roles', 'permissions', 'users'] });
                                 }}
                                 startContent={<ArrowPathIcon className="w-4 h-4" />}
                             >
                                 Refresh Data
                             </Button>
-                        }
-                    >
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                                Data Integrity Issues Detected
-                            </Typography>
-                            <Box component="ul" sx={{ m: 0, pl: 2 }}>
-                                {dataValidationErrors.map((error, index) => (
-                                    <Typography 
-                                        key={index} 
-                                        component="li" 
-                                        variant="body2"
-                                        sx={{ mb: 0.5 }}
-                                    >
-                                        {error}
-                                    </Typography>
-                                ))}
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                                This may indicate a cache or database synchronization issue on the server.
-                            </Typography>
-                        </Box>
-                    </Alert>
-                </Box>
+                        </CardBody>
+                    </Card>
+                </div>
             )}
 
             {/* Main Container */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                <Grow in>
-                    <GlassCard>
-                        <PageHeader
-                            title="Role & Permission Management"
-                            subtitle="Comprehensive access control and permission management system"
-                            icon={<ShieldCheckIcon className="w-8 h-8" />}
-                            variant="default"
-                            actionButtons={[
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex justify-center p-2"
+            >
+                <GlassCard className="w-full max-w-7xl">
+                    <PageHeader
+                        title="Role & Permission Management"
+                        subtitle="Comprehensive access control and permission management system"
+                        icon={<ShieldCheckIcon className="w-8 h-8" />}
+                        variant="default"
+                        actionButtons={[
+                            {
+                                label: "Export Data",
+                                icon: <DocumentArrowDownIcon className="w-4 h-4" />,
+                                variant: "bordered",
+                                className: "border-success/30 bg-success/5 hover:bg-success/10"
+                            }
+                        ]}
+                    >
+                        <div className="p-6">
+                            {/* Enhanced Statistics Cards */}
+                            <StatsCards stats={[
                                 {
-                                    label: "Export Data",
-                                    icon: <DocumentArrowDownIcon className="w-4 h-4" />,
-                                    variant: "bordered",
-                                    className: "border-[rgba(var(--theme-success-rgb),0.3)] bg-[rgba(var(--theme-success-rgb),0.05)] hover:bg-[rgba(var(--theme-success-rgb),0.1)]"
+                                    title: "Total Roles",
+                                    value: roles.length,
+                                    icon: <UserGroupIcon />,
+                                    color: "text-primary",
+                                    iconBg: "bg-primary/20",
+                                    description: "System roles"
+                                },
+                                {
+                                    title: "Permissions", 
+                                    value: permissions.length,
+                                    icon: <KeyIcon />,
+                                    color: "text-success",
+                                    iconBg: "bg-success/20",
+                                    description: "Available permissions"
+                                },
+                                {
+                                    title: "Active Users",
+                                    value: users.length,
+                                    icon: <UsersIcon />,
+                                    color: "text-secondary",
+                                    iconBg: "bg-secondary/20", 
+                                    description: "System users"
+                                },
+                                {
+                                    title: "Modules",
+                                    value: modules.length,
+                                    icon: <CogIcon />,
+                                    color: "text-warning",
+                                    iconBg: "bg-warning/20",
+                                    description: "Permission modules"
                                 }
-                            ]}
-                        >
-                            <div className="p-6">
-                                {/* Enhanced Statistics Cards */}
-                                <StatsCards stats={[
-                                    {
-                                        title: "Total Roles",
-                                        value: roles.length,
-                                        icon: <UserGroupIcon />,
-                                        color: "text-blue-600",
-                                        iconBg: "bg-blue-500/20",
-                                        description: "System roles"
-                                    },
-                                    {
-                                        title: "Permissions", 
-                                        value: permissions.length,
-                                        icon: <KeyIcon />,
-                                        color: "text-green-600",
-                                        iconBg: "bg-green-500/20",
-                                        description: "Available permissions"
-                                    },
-                                    {
-                                        title: "Active Users",
-                                        value: users.length,
-                                        icon: <UsersIcon />,
-                                        color: "text-purple-600",
-                                        iconBg: "bg-purple-500/20", 
-                                        description: "System users"
-                                    },
-                                    {
-                                        title: "Modules",
-                                        value: modules.length,
-                                        icon: <CogIcon />,
-                                        color: "text-orange-600",
-                                        iconBg: "bg-orange-500/20",
-                                        description: "Permission modules"
-                                    }
-                                ]} />
+                            ]} />
 
-                                {/* Enhanced Tabbed Interface */}
-                                <Box sx={{ width: '100%', mt: 4 }}>
-                                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                        <Tabs 
-                                            value={activeTab} 
-                                            onChange={(event, newValue) => setActiveTab(newValue)}
-                                            aria-label="role management tabs"
-                                            sx={{
-                                                '& .MuiTab-root': {
-                                                    color: 'rgba(255, 255, 255, 0.7)',
-                                                    '&.Mui-selected': {
-                                                        color: '#3b82f6'
-                                                    }
-                                                },
-                                                '& .MuiTabs-indicator': {
-                                                    backgroundColor: '#3b82f6'
-                                                }
-                                            }}
-                                        >
-                                            <Tab 
-                                                label="Roles Management" 
-                                                icon={<UserGroupIcon className="w-5 h-5" />}
-                                                iconPosition="start"
-                                            />
-                                            <Tab 
-                                                label="Permissions Management" 
-                                                icon={<KeyIcon className="w-5 h-5" />}
-                                                iconPosition="start"
-                                            />
-                                            <Tab 
-                                                label="Role-Permission Assignment" 
-                                                icon={<AdjustmentsHorizontalIcon className="w-5 h-5" />}
-                                                iconPosition="start"
-                                            />
-                                            <Tab 
-                                                label="User-Role Assignment" 
-                                                icon={<UsersIcon className="w-5 h-5" />}
-                                                iconPosition="start"
-                                            />
-                                        </Tabs>
-                                    </Box>
+                            {/* Enhanced Tabbed Interface using HeroUI Tabs */}
+                            <div className="w-full mt-6">
+                                <Tabs 
+                                    selectedKey={activeTab.toString()} 
+                                    onSelectionChange={(key) => setActiveTab(parseInt(key))}
+                                    aria-label="Role management tabs"
+                                    color="primary"
+                                    variant="underlined"
+                                    classNames={{
+                                        tabList: "gap-6 w-full relative rounded-none p-0 border-b border-default-200/20",
+                                        cursor: "w-full bg-primary",
+                                        tab: "max-w-fit px-0 h-12 text-default-500 data-[selected=true]:text-primary",
+                                        tabContent: "group-data-[selected=true]:text-primary"
+                                    }}
+                                >
+                                    <Tab 
+                                        key="0"
+                                        title={
+                                            <div className="flex items-center gap-2">
+                                                <UserGroupIcon className="w-5 h-5" />
+                                                <span className={isMobile ? 'sr-only' : ''}>Roles Management</span>
+                                            </div>
+                                        }
+                                    />
+                                    <Tab 
+                                        key="1"
+                                        title={
+                                            <div className="flex items-center gap-2">
+                                                <KeyIcon className="w-5 h-5" />
+                                                <span className={isMobile ? 'sr-only' : ''}>Permissions Management</span>
+                                            </div>
+                                        }
+                                    />
+                                    <Tab 
+                                        key="2"
+                                        title={
+                                            <div className="flex items-center gap-2">
+                                                <AdjustmentsHorizontalIcon className="w-5 h-5" />
+                                                <span className={isMobile ? 'sr-only' : ''}>Role-Permission Assignment</span>
+                                            </div>
+                                        }
+                                    />
+                                    <Tab 
+                                        key="3"
+                                        title={
+                                            <div className="flex items-center gap-2">
+                                                <UsersIcon className="w-5 h-5" />
+                                                <span className={isMobile ? 'sr-only' : ''}>User-Role Assignment</span>
+                                            </div>
+                                        }
+                                    />
+                                </Tabs>
 
-                                    {/* Tab Content */}
-                                    {activeTab === 0 && <RolesManagementTab />}
-                                    {activeTab === 1 && <PermissionsManagementTab />}
-                                    {activeTab === 2 && <RolePermissionAssignmentTab />}
-                                    {activeTab === 3 && <UserRoleAssignmentTab />}
-                                </Box>
+                                {/* Tab Content */}
+                                {activeTab === 0 && <RolesManagementTab />}
+                                {activeTab === 1 && <PermissionsManagementTab />}
+                                {activeTab === 2 && <RolePermissionAssignmentTab />}
+                                {activeTab === 3 && <UserRoleAssignmentTab />}
                             </div>
-                        </PageHeader>
-                    </GlassCard>
-                </Grow>
-            </Box>
+                        </div>
+                    </PageHeader>
+                </GlassCard>
+            </motion.div>
 
             {/* Enhanced Modals */}
             {renderModals()}

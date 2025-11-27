@@ -15,7 +15,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -755,6 +757,262 @@ class UserController extends Controller
             return response()->json([
                 'error' => 'An error occurred while retrieving employee statistics.',
                 'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all roles assigned to a user
+     */
+    public function getUserRoles($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            return response()->json([
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'guard_name' => $role->guard_name,
+                    ];
+                }),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to get user roles: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to retrieve user roles',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all permissions for a user (both direct and via roles)
+     */
+    public function getUserPermissions($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Get direct permissions
+            $directPermissions = $user->getDirectPermissions()->map(function ($permission) {
+                return [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'source' => 'direct',
+                ];
+            });
+
+            // Get permissions via roles
+            $rolePermissions = $user->getPermissionsViaRoles()->map(function ($permission) {
+                return [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'source' => 'role',
+                ];
+            });
+
+            // Get all permissions (merged)
+            $allPermissions = $user->getAllPermissions()->pluck('name');
+
+            return response()->json([
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'direct_permissions' => $directPermissions,
+                'role_permissions' => $rolePermissions,
+                'all_permissions' => $allPermissions,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to get user permissions: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to retrieve user permissions',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync roles for a user (replaces existing roles)
+     */
+    public function syncUserRoles(Request $request, $id)
+    {
+        $request->validate([
+            'roles' => 'required|array',
+            'roles.*' => 'string|exists:roles,name',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+
+            // Store original roles for audit
+            $originalRoles = $user->roles->pluck('name')->toArray();
+
+            // Sync roles
+            $user->syncRoles($request->input('roles'));
+
+            Log::info('User roles synced', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'original_roles' => $originalRoles,
+                'new_roles' => $request->input('roles'),
+                'synced_by' => auth()->id(),
+            ]);
+
+            // Clear Spatie Permission cache
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+            return response()->json([
+                'message' => 'User roles synced successfully',
+                'user' => new UserResource($user->fresh(['department', 'designation', 'roles', 'currentDevice'])),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to sync user roles: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to sync user roles',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync direct permissions for a user (replaces existing direct permissions)
+     */
+    public function syncUserPermissions(Request $request, $id)
+    {
+        $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*' => 'string|exists:permissions,name',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+
+            // Store original permissions for audit
+            $originalPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
+
+            // Sync direct permissions
+            $user->syncPermissions($request->input('permissions'));
+
+            Log::info('User permissions synced', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'original_permissions' => $originalPermissions,
+                'new_permissions' => $request->input('permissions'),
+                'synced_by' => auth()->id(),
+            ]);
+
+            // Clear Spatie Permission cache
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+            return response()->json([
+                'message' => 'User permissions synced successfully',
+                'direct_permissions' => $user->getDirectPermissions()->pluck('name'),
+                'all_permissions' => $user->getAllPermissions()->pluck('name'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to sync user permissions: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to sync user permissions',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Give a specific permission directly to a user
+     */
+    public function giveUserPermission(Request $request, $id)
+    {
+        $request->validate([
+            'permission' => 'required|string|exists:permissions,name',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+            $permissionName = $request->input('permission');
+
+            // Check if user already has this permission directly
+            if ($user->hasDirectPermission($permissionName)) {
+                return response()->json([
+                    'message' => 'User already has this permission directly',
+                ], 200);
+            }
+
+            $user->givePermissionTo($permissionName);
+
+            Log::info('Permission granted to user', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'permission' => $permissionName,
+                'granted_by' => auth()->id(),
+            ]);
+
+            // Clear Spatie Permission cache
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+            return response()->json([
+                'message' => 'Permission granted successfully',
+                'direct_permissions' => $user->getDirectPermissions()->pluck('name'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to grant user permission: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to grant permission',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Revoke a specific permission from a user
+     */
+    public function revokeUserPermission(Request $request, $id)
+    {
+        $request->validate([
+            'permission' => 'required|string|exists:permissions,name',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+            $permissionName = $request->input('permission');
+
+            // Check if user has this permission directly
+            if (! $user->hasDirectPermission($permissionName)) {
+                return response()->json([
+                    'message' => 'User does not have this permission directly',
+                ], 200);
+            }
+
+            $user->revokePermissionTo($permissionName);
+
+            Log::info('Permission revoked from user', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'permission' => $permissionName,
+                'revoked_by' => auth()->id(),
+            ]);
+
+            // Clear Spatie Permission cache
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+            return response()->json([
+                'message' => 'Permission revoked successfully',
+                'direct_permissions' => $user->getDirectPermissions()->pluck('name'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to revoke user permission: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to revoke permission',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\Role\RolePermissionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -175,6 +176,20 @@ class RoleController extends BaseController
                         'has_error' => isset($frontendData['error']),
                     ]);
 
+                    // Get users with their roles for the User-Role assignment tab
+                    $users = User::with('roles')
+                        ->select(['id', 'name', 'email'])
+                        ->orderBy('name')
+                        ->get()
+                        ->map(function ($user) {
+                            return [
+                                'id' => $user->id,
+                                'name' => $user->name,
+                                'email' => $user->email,
+                                'roles' => $user->roles->pluck('name'),
+                            ];
+                        });
+
                     return Inertia::render('Administration/RoleManagement', [
                         'title' => 'Enterprise Role Management',
                         'roles' => $roles->toArray(),
@@ -183,6 +198,7 @@ class RoleController extends BaseController
                         'role_has_permissions' => $roleHasPermissions->toArray(),
                         'enterprise_modules' => $this->rolePermissionService->getEnterpriseModules(),
                         'can_manage_super_admin' => $user->hasRole('Super Administrator'),
+                        'users' => $users,
                         'server_info' => [
                             'environment' => app()->environment(),
                             'timestamp' => now()->toISOString(),
@@ -233,6 +249,7 @@ class RoleController extends BaseController
                 'role_has_permissions' => [],
                 'enterprise_modules' => [],
                 'can_manage_super_admin' => false,
+                'users' => [],
                 'error' => [
                     'message' => 'Failed to load role management data',
                     'details' => $e->getMessage(),
@@ -1224,6 +1241,125 @@ class RoleController extends BaseController
             'roles' => Auth::user()->roles->pluck('name'),
             'timestamp' => now(),
         ]);
+    }
+
+    /**
+     * API: List all roles with their permissions (for API endpoints)
+     */
+    public function apiIndex()
+    {
+        try {
+            $user = Auth::user();
+
+            $roles = Role::with(['permissions'])
+                ->when(! $user->hasRole('Super Administrator'), function ($query) {
+                    return $query->whereNotIn('name', ['Super Administrator']);
+                })
+                ->get();
+
+            return response()->json([
+                'roles' => $roles,
+                'total' => $roles->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to list roles via API: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to retrieve roles',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Show a specific role with its permissions
+     */
+    public function apiShow($id)
+    {
+        try {
+            $role = Role::with(['permissions', 'users'])->findById($id);
+
+            if (! $role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+
+            return response()->json([
+                'role' => $role,
+                'permissions' => $role->permissions->pluck('name'),
+                'users_count' => $role->users->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to show role via API: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to retrieve role',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Sync all permissions for a role (replaces existing permissions)
+     */
+    public function syncRolePermissions(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'permissions' => 'required|array',
+            'permissions.*' => 'string|exists:permissions,name',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $role = Role::findById($id);
+
+            if (! $role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+
+            if (! $this->canManageRole(Auth::user(), $role)) {
+                return response()->json([
+                    'error' => 'Insufficient authority to manage this role',
+                ], 403);
+            }
+
+            // Store original permissions for audit
+            $originalPermissions = $role->permissions->pluck('name')->toArray();
+
+            // Sync permissions (replaces all existing)
+            $role->syncPermissions($request->permissions);
+
+            // Log the change
+            Log::info('Role permissions synced', [
+                'role_id' => $role->id,
+                'role_name' => $role->name,
+                'original_permissions' => $originalPermissions,
+                'new_permissions' => $request->permissions,
+                'synced_by' => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            // Clear Spatie Permission cache
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+            return response()->json([
+                'message' => 'Role permissions synced successfully',
+                'role' => $role->fresh('permissions'),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to sync role permissions: '.$e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to sync role permissions',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

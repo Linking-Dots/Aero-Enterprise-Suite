@@ -1,0 +1,1176 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Head, usePage, router } from "@inertiajs/react";
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Button,
+    Chip,
+    Card,
+    CardBody,
+    CardHeader,
+    Select,
+    SelectItem,
+    Input,
+    Checkbox,
+    Divider,
+    Tabs,
+    Tab,
+    Spinner,
+    Tooltip,
+    Progress,
+    Spacer,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    Switch,
+    Accordion,
+    AccordionItem,
+    Badge,
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem
+} from "@heroui/react";
+import {
+    CubeIcon,
+    PlusIcon,
+    PencilSquareIcon,
+    TrashIcon,
+    MagnifyingGlassIcon,
+    FolderIcon,
+    DocumentIcon,
+    ShieldCheckIcon,
+    ChevronRightIcon,
+    ChevronDownIcon,
+    Cog6ToothIcon,
+    ArrowPathIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    EyeIcon,
+    EllipsisVerticalIcon,
+    FunnelIcon,
+    AdjustmentsHorizontalIcon,
+    KeyIcon,
+    Square3Stack3DIcon,
+    RectangleGroupIcon,
+    CommandLineIcon,
+    GlobeAltIcon,
+    Squares2X2Icon
+} from "@heroicons/react/24/outline";
+import GlassCard from '@/Components/GlassCard.jsx';
+import GlassDialog from '@/Components/GlassDialog.jsx';
+import PageHeader from '@/Components/PageHeader.jsx';
+import StatsCards from '@/Components/StatsCards.jsx';
+import App from '@/Layouts/App.jsx';
+import axios from 'axios';
+import { showToast } from '@/utils/toastUtils';
+
+// Component type icons mapping
+const componentTypeIcons = {
+    page: <DocumentIcon className="w-4 h-4" />,
+    section: <RectangleGroupIcon className="w-4 h-4" />,
+    widget: <Squares2X2Icon className="w-4 h-4" />,
+    action: <CommandLineIcon className="w-4 h-4" />,
+    api: <GlobeAltIcon className="w-4 h-4" />
+};
+
+// Component type colors
+const componentTypeColors = {
+    page: 'primary',
+    section: 'secondary',
+    widget: 'success',
+    action: 'warning',
+    api: 'danger'
+};
+
+// Category colors mapping
+const categoryColors = {
+    core_system: 'primary',
+    self_service: 'secondary',
+    human_resources: 'success',
+    project_management: 'warning',
+    document_management: 'default',
+    customer_relations: 'primary',
+    supply_chain: 'secondary',
+    retail_sales: 'success',
+    financial_management: 'warning',
+    system_administration: 'danger'
+};
+
+// Debounce hook
+const useDebounce = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+
+    return debouncedValue;
+};
+
+const ModuleManagement = (props) => {
+    const {
+        modules: initialModules = [],
+        permissions: allPermissions = [],
+        statistics: initialStats = {},
+        categories = {},
+        componentTypes = {},
+        title = 'Module Permission Registry'
+    } = props;
+
+    // State management
+    const [modules, setModules] = useState(initialModules);
+    const [statistics, setStatistics] = useState(initialStats);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [expandedModules, setExpandedModules] = useState(new Set());
+    const [expandedSubModules, setExpandedSubModules] = useState(new Set());
+
+    // Modal states
+    const [moduleModalOpen, setModuleModalOpen] = useState(false);
+    const [subModuleModalOpen, setSubModuleModalOpen] = useState(false);
+    const [componentModalOpen, setComponentModalOpen] = useState(false);
+    const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+    // Edit states
+    const [editingModule, setEditingModule] = useState(null);
+    const [editingSubModule, setEditingSubModule] = useState(null);
+    const [editingComponent, setEditingComponent] = useState(null);
+    const [parentModuleId, setParentModuleId] = useState(null);
+    const [parentSubModuleId, setParentSubModuleId] = useState(null);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [permissionTarget, setPermissionTarget] = useState(null);
+
+    // Form states
+    const [moduleForm, setModuleForm] = useState({
+        code: '',
+        name: '',
+        description: '',
+        icon: '',
+        category: 'core_system',
+        route_prefix: '',
+        is_active: true,
+        priority: 100
+    });
+
+    const [subModuleForm, setSubModuleForm] = useState({
+        code: '',
+        name: '',
+        description: '',
+        icon: '',
+        route: '',
+        is_active: true,
+        priority: 100
+    });
+
+    const [componentForm, setComponentForm] = useState({
+        code: '',
+        name: '',
+        description: '',
+        type: 'page',
+        route: '',
+        is_active: true
+    });
+
+    const [selectedPermissions, setSelectedPermissions] = useState([]);
+
+    const debouncedSearch = useDebounce(searchQuery, 300);
+
+    // Filter modules
+    const filteredModules = useMemo(() => {
+        return modules.filter(module => {
+            const matchesSearch = !debouncedSearch ||
+                module.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                module.code.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                module.description?.toLowerCase().includes(debouncedSearch.toLowerCase());
+
+            const matchesCategory = categoryFilter === 'all' || module.category === categoryFilter;
+            const matchesStatus = statusFilter === 'all' ||
+                (statusFilter === 'active' && module.is_active) ||
+                (statusFilter === 'inactive' && !module.is_active);
+
+            return matchesSearch && matchesCategory && matchesStatus;
+        });
+    }, [modules, debouncedSearch, categoryFilter, statusFilter]);
+
+    // Stats cards data
+    const statsData = useMemo(() => [
+        {
+            title: 'Total Modules',
+            value: statistics.total_modules || 0,
+            icon: <CubeIcon className="w-6 h-6" />,
+            color: 'primary',
+            description: 'Top-level modules'
+        },
+        {
+            title: 'Sub-Modules',
+            value: statistics.total_sub_modules || 0,
+            icon: <FolderIcon className="w-6 h-6" />,
+            color: 'secondary',
+            description: 'Functional areas'
+        },
+        {
+            title: 'Components',
+            value: statistics.total_components || 0,
+            icon: <DocumentIcon className="w-6 h-6" />,
+            color: 'success',
+            description: 'UI components'
+        },
+        {
+            title: 'Permission Rules',
+            value: statistics.total_permission_requirements || 0,
+            icon: <ShieldCheckIcon className="w-6 h-6" />,
+            color: 'warning',
+            description: 'Access requirements'
+        }
+    ], [statistics]);
+
+    // Toggle module expansion
+    const toggleModuleExpand = (moduleId) => {
+        setExpandedModules(prev => {
+            const next = new Set(prev);
+            if (next.has(moduleId)) {
+                next.delete(moduleId);
+            } else {
+                next.add(moduleId);
+            }
+            return next;
+        });
+    };
+
+    // Toggle sub-module expansion
+    const toggleSubModuleExpand = (subModuleId) => {
+        setExpandedSubModules(prev => {
+            const next = new Set(prev);
+            if (next.has(subModuleId)) {
+                next.delete(subModuleId);
+            } else {
+                next.add(subModuleId);
+            }
+            return next;
+        });
+    };
+
+    // Refresh data
+    const refreshData = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(route('modules.api.index'));
+            setModules(response.data.modules || []);
+            setStatistics(response.data.statistics || {});
+            showToast('Data refreshed successfully', 'success');
+        } catch (error) {
+            showToast('Failed to refresh data', 'error');
+            console.error('Refresh error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Open module modal for create/edit
+    const openModuleModal = (module = null) => {
+        if (module) {
+            setEditingModule(module);
+            setModuleForm({
+                code: module.code,
+                name: module.name,
+                description: module.description || '',
+                icon: module.icon || '',
+                category: module.category || 'core_system',
+                route_prefix: module.route_prefix || '',
+                is_active: module.is_active,
+                priority: module.priority || 100
+            });
+        } else {
+            setEditingModule(null);
+            setModuleForm({
+                code: '',
+                name: '',
+                description: '',
+                icon: '',
+                category: 'core_system',
+                route_prefix: '',
+                is_active: true,
+                priority: 100
+            });
+        }
+        setModuleModalOpen(true);
+    };
+
+    // Open sub-module modal
+    const openSubModuleModal = (moduleId, subModule = null) => {
+        setParentModuleId(moduleId);
+        if (subModule) {
+            setEditingSubModule(subModule);
+            setSubModuleForm({
+                code: subModule.code,
+                name: subModule.name,
+                description: subModule.description || '',
+                icon: subModule.icon || '',
+                route: subModule.route || '',
+                is_active: subModule.is_active,
+                priority: subModule.priority || 100
+            });
+        } else {
+            setEditingSubModule(null);
+            setSubModuleForm({
+                code: '',
+                name: '',
+                description: '',
+                icon: '',
+                route: '',
+                is_active: true,
+                priority: 100
+            });
+        }
+        setSubModuleModalOpen(true);
+    };
+
+    // Open component modal
+    const openComponentModal = (subModuleId, component = null) => {
+        setParentSubModuleId(subModuleId);
+        if (component) {
+            setEditingComponent(component);
+            setComponentForm({
+                code: component.code,
+                name: component.name,
+                description: component.description || '',
+                type: component.type || 'page',
+                route: component.route || '',
+                is_active: component.is_active
+            });
+        } else {
+            setEditingComponent(null);
+            setComponentForm({
+                code: '',
+                name: '',
+                description: '',
+                type: 'page',
+                route: '',
+                is_active: true
+            });
+        }
+        setComponentModalOpen(true);
+    };
+
+    // Open permission modal
+    const openPermissionModal = (target) => {
+        setPermissionTarget(target);
+        // Get current permissions for this target
+        const currentPermissions = target.permission_requirements?.map(pr => pr.permission_id) || [];
+        setSelectedPermissions(currentPermissions);
+        setPermissionModalOpen(true);
+    };
+
+    // Save module
+    const saveModule = async () => {
+        setIsLoading(true);
+        try {
+            if (editingModule) {
+                await axios.put(route('modules.update', editingModule.id), moduleForm);
+                showToast('Module updated successfully', 'success');
+            } else {
+                await axios.post(route('modules.store'), moduleForm);
+                showToast('Module created successfully', 'success');
+            }
+            setModuleModalOpen(false);
+            refreshData();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to save module', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Save sub-module
+    const saveSubModule = async () => {
+        setIsLoading(true);
+        try {
+            if (editingSubModule) {
+                await axios.put(route('modules.sub-modules.update', editingSubModule.id), subModuleForm);
+                showToast('Sub-module updated successfully', 'success');
+            } else {
+                await axios.post(route('modules.sub-modules.store', parentModuleId), subModuleForm);
+                showToast('Sub-module created successfully', 'success');
+            }
+            setSubModuleModalOpen(false);
+            refreshData();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to save sub-module', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Save component
+    const saveComponent = async () => {
+        setIsLoading(true);
+        try {
+            if (editingComponent) {
+                await axios.put(route('modules.components.update', editingComponent.id), componentForm);
+                showToast('Component updated successfully', 'success');
+            } else {
+                await axios.post(route('modules.components.store', parentSubModuleId), componentForm);
+                showToast('Component created successfully', 'success');
+            }
+            setComponentModalOpen(false);
+            refreshData();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to save component', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Save permissions
+    const savePermissions = async () => {
+        setIsLoading(true);
+        try {
+            let endpoint;
+            if (permissionTarget.type === 'module') {
+                endpoint = route('modules.sync-permissions', permissionTarget.id);
+            } else if (permissionTarget.type === 'sub_module') {
+                endpoint = route('modules.sub-modules.sync-permissions', permissionTarget.id);
+            } else {
+                endpoint = route('modules.components.sync-permissions', permissionTarget.id);
+            }
+
+            await axios.post(endpoint, { permission_ids: selectedPermissions });
+            showToast('Permissions updated successfully', 'success');
+            setPermissionModalOpen(false);
+            refreshData();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to save permissions', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Delete item
+    const confirmDelete = (item, type) => {
+        setItemToDelete({ ...item, type });
+        setDeleteConfirmOpen(true);
+    };
+
+    const executeDelete = async () => {
+        if (!itemToDelete) return;
+
+        setIsLoading(true);
+        try {
+            let endpoint;
+            if (itemToDelete.type === 'module') {
+                endpoint = route('modules.destroy', itemToDelete.id);
+            } else if (itemToDelete.type === 'sub_module') {
+                endpoint = route('modules.sub-modules.destroy', itemToDelete.id);
+            } else {
+                endpoint = route('modules.components.destroy', itemToDelete.id);
+            }
+
+            await axios.delete(endpoint);
+            showToast(`${itemToDelete.type} deleted successfully`, 'success');
+            setDeleteConfirmOpen(false);
+            setItemToDelete(null);
+            refreshData();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to delete', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Render module tree item
+    const renderModuleItem = (module) => {
+        const isExpanded = expandedModules.has(module.id);
+        const subModules = module.sub_modules || [];
+        const permissionCount = module.permission_requirements?.length || 0;
+
+        return (
+            <Card key={module.id} className="mb-3">
+                <CardBody className="p-0">
+                    {/* Module Header */}
+                    <div
+                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-default-100 transition-colors ${!module.is_active ? 'opacity-60' : ''}`}
+                        onClick={() => toggleModuleExpand(module.id)}
+                    >
+                        <div className="flex items-center gap-3 flex-1">
+                            <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleModuleExpand(module.id);
+                                }}
+                            >
+                                {isExpanded ? (
+                                    <ChevronDownIcon className="w-4 h-4" />
+                                ) : (
+                                    <ChevronRightIcon className="w-4 h-4" />
+                                )}
+                            </Button>
+
+                            <CubeIcon className="w-6 h-6 text-primary" />
+
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold">{module.name}</span>
+                                    <Chip size="sm" variant="flat" color={categoryColors[module.category] || 'default'}>
+                                        {module.code}
+                                    </Chip>
+                                    {!module.is_active && (
+                                        <Chip size="sm" variant="flat" color="danger">Inactive</Chip>
+                                    )}
+                                </div>
+                                <p className="text-sm text-default-500 mt-1">{module.description}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Badge content={subModules.length} color="primary" size="sm">
+                                <Chip size="sm" variant="bordered">Sub-modules</Chip>
+                            </Badge>
+                            <Badge content={permissionCount} color="warning" size="sm">
+                                <Chip size="sm" variant="bordered">Permissions</Chip>
+                            </Badge>
+
+                            <Dropdown>
+                                <DropdownTrigger>
+                                    <Button isIconOnly size="sm" variant="light" onClick={(e) => e.stopPropagation()}>
+                                        <EllipsisVerticalIcon className="w-5 h-5" />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu>
+                                    <DropdownItem
+                                        key="edit"
+                                        startContent={<PencilSquareIcon className="w-4 h-4" />}
+                                        onClick={() => openModuleModal(module)}
+                                    >
+                                        Edit Module
+                                    </DropdownItem>
+                                    <DropdownItem
+                                        key="permissions"
+                                        startContent={<KeyIcon className="w-4 h-4" />}
+                                        onClick={() => openPermissionModal({ ...module, type: 'module' })}
+                                    >
+                                        Manage Permissions
+                                    </DropdownItem>
+                                    <DropdownItem
+                                        key="add-submodule"
+                                        startContent={<PlusIcon className="w-4 h-4" />}
+                                        onClick={() => openSubModuleModal(module.id)}
+                                    >
+                                        Add Sub-Module
+                                    </DropdownItem>
+                                    <DropdownItem
+                                        key="delete"
+                                        startContent={<TrashIcon className="w-4 h-4" />}
+                                        color="danger"
+                                        className="text-danger"
+                                        onClick={() => confirmDelete(module, 'module')}
+                                    >
+                                        Delete Module
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </div>
+                    </div>
+
+                    {/* Sub-modules */}
+                    <AnimatePresence>
+                        {isExpanded && subModules.length > 0 && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="border-t border-default-200"
+                            >
+                                <div className="pl-8 py-2">
+                                    {subModules.map(subModule => renderSubModuleItem(subModule, module.id))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </CardBody>
+            </Card>
+        );
+    };
+
+    // Render sub-module item
+    const renderSubModuleItem = (subModule, moduleId) => {
+        const isExpanded = expandedSubModules.has(subModule.id);
+        const components = subModule.components || [];
+        const permissionCount = subModule.permission_requirements?.length || 0;
+
+        return (
+            <div key={subModule.id} className="mb-2">
+                <div
+                    className={`flex items-center justify-between p-3 rounded-lg bg-default-50 hover:bg-default-100 cursor-pointer transition-colors ${!subModule.is_active ? 'opacity-60' : ''}`}
+                    onClick={() => toggleSubModuleExpand(subModule.id)}
+                >
+                    <div className="flex items-center gap-3 flex-1">
+                        <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSubModuleExpand(subModule.id);
+                            }}
+                        >
+                            {isExpanded ? (
+                                <ChevronDownIcon className="w-4 h-4" />
+                            ) : (
+                                <ChevronRightIcon className="w-4 h-4" />
+                            )}
+                        </Button>
+
+                        <FolderIcon className="w-5 h-5 text-secondary" />
+
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">{subModule.name}</span>
+                                <Chip size="sm" variant="flat" color="secondary">{subModule.code}</Chip>
+                                {!subModule.is_active && (
+                                    <Chip size="sm" variant="flat" color="danger">Inactive</Chip>
+                                )}
+                            </div>
+                            {subModule.description && (
+                                <p className="text-xs text-default-400 mt-0.5">{subModule.description}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Badge content={components.length} color="success" size="sm">
+                            <Chip size="sm" variant="bordered">Components</Chip>
+                        </Badge>
+
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button isIconOnly size="sm" variant="light" onClick={(e) => e.stopPropagation()}>
+                                    <EllipsisVerticalIcon className="w-4 h-4" />
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu>
+                                <DropdownItem
+                                    key="edit"
+                                    startContent={<PencilSquareIcon className="w-4 h-4" />}
+                                    onClick={() => openSubModuleModal(moduleId, subModule)}
+                                >
+                                    Edit Sub-Module
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="permissions"
+                                    startContent={<KeyIcon className="w-4 h-4" />}
+                                    onClick={() => openPermissionModal({ ...subModule, type: 'sub_module' })}
+                                >
+                                    Manage Permissions
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="add-component"
+                                    startContent={<PlusIcon className="w-4 h-4" />}
+                                    onClick={() => openComponentModal(subModule.id)}
+                                >
+                                    Add Component
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="delete"
+                                    startContent={<TrashIcon className="w-4 h-4" />}
+                                    color="danger"
+                                    className="text-danger"
+                                    onClick={() => confirmDelete(subModule, 'sub_module')}
+                                >
+                                    Delete Sub-Module
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                </div>
+
+                {/* Components */}
+                <AnimatePresence>
+                    {isExpanded && components.length > 0 && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="pl-10 mt-2"
+                        >
+                            {components.map(component => renderComponentItem(component, subModule.id))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        );
+    };
+
+    // Render component item
+    const renderComponentItem = (component, subModuleId) => {
+        const permissionCount = component.permission_requirements?.length || 0;
+
+        return (
+            <div
+                key={component.id}
+                className={`flex items-center justify-between p-2 rounded-md bg-default-100 hover:bg-default-200 mb-1 transition-colors ${!component.is_active ? 'opacity-60' : ''}`}
+            >
+                <div className="flex items-center gap-3 flex-1">
+                    <Tooltip content={component.type}>
+                        <span className={`text-${componentTypeColors[component.type]}`}>
+                            {componentTypeIcons[component.type]}
+                        </span>
+                    </Tooltip>
+
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{component.name}</span>
+                            <Chip size="sm" variant="flat" color={componentTypeColors[component.type]}>
+                                {component.type}
+                            </Chip>
+                            {component.route && (
+                                <Chip size="sm" variant="bordered" color="default">
+                                    {component.route}
+                                </Chip>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {permissionCount > 0 && (
+                        <Chip size="sm" variant="flat" color="warning">{permissionCount} perms</Chip>
+                    )}
+
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button isIconOnly size="sm" variant="light">
+                                <EllipsisVerticalIcon className="w-4 h-4" />
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu>
+                            <DropdownItem
+                                key="edit"
+                                startContent={<PencilSquareIcon className="w-4 h-4" />}
+                                onClick={() => openComponentModal(subModuleId, component)}
+                            >
+                                Edit Component
+                            </DropdownItem>
+                            <DropdownItem
+                                key="permissions"
+                                startContent={<KeyIcon className="w-4 h-4" />}
+                                onClick={() => openPermissionModal({ ...component, type: 'component' })}
+                            >
+                                Manage Permissions
+                            </DropdownItem>
+                            <DropdownItem
+                                key="delete"
+                                startContent={<TrashIcon className="w-4 h-4" />}
+                                color="danger"
+                                className="text-danger"
+                                onClick={() => confirmDelete(component, 'component')}
+                            >
+                                Delete Component
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <App>
+            <Head title={title} />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {/* Page Header */}
+                <PageHeader
+                    title={title}
+                    subtitle="Manage module permissions and access control hierarchy"
+                    icon={<Square3Stack3DIcon className="w-8 h-8" />}
+                    actions={
+                        <div className="flex gap-2">
+                            <Button
+                                variant="flat"
+                                startContent={<ArrowPathIcon className="w-4 h-4" />}
+                                onClick={refreshData}
+                                isLoading={isLoading}
+                            >
+                                Refresh
+                            </Button>
+                            <Button
+                                color="primary"
+                                startContent={<PlusIcon className="w-4 h-4" />}
+                                onClick={() => openModuleModal()}
+                            >
+                                Add Module
+                            </Button>
+                        </div>
+                    }
+                />
+
+                {/* Stats Cards */}
+                <StatsCards stats={statsData} className="mb-6" />
+
+                {/* Filters */}
+                <GlassCard className="mb-6">
+                    <CardBody>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Input
+                                placeholder="Search modules..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                className="flex-1"
+                            />
+                            <Select
+                                label="Category"
+                                selectedKeys={[categoryFilter]}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="w-full sm:w-48"
+                            >
+                                <SelectItem key="all" value="all">All Categories</SelectItem>
+                                {Object.entries(categories).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </Select>
+                            <Select
+                                label="Status"
+                                selectedKeys={[statusFilter]}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full sm:w-36"
+                            >
+                                <SelectItem key="all" value="all">All</SelectItem>
+                                <SelectItem key="active" value="active">Active</SelectItem>
+                                <SelectItem key="inactive" value="inactive">Inactive</SelectItem>
+                            </Select>
+                        </div>
+                    </CardBody>
+                </GlassCard>
+
+                {/* Module Tree */}
+                <GlassCard>
+                    <CardHeader className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Module Hierarchy</h3>
+                        <Chip variant="flat" color="default">
+                            {filteredModules.length} modules
+                        </Chip>
+                    </CardHeader>
+                    <CardBody>
+                        {isLoading ? (
+                            <div className="flex justify-center items-center py-12">
+                                <Spinner size="lg" />
+                            </div>
+                        ) : filteredModules.length === 0 ? (
+                            <div className="text-center py-12 text-default-500">
+                                <CubeIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                <p>No modules found</p>
+                                <Button
+                                    color="primary"
+                                    variant="flat"
+                                    className="mt-4"
+                                    onClick={() => openModuleModal()}
+                                >
+                                    Create First Module
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {filteredModules.map(module => renderModuleItem(module))}
+                            </div>
+                        )}
+                    </CardBody>
+                </GlassCard>
+            </div>
+
+            {/* Module Modal */}
+            <Modal isOpen={moduleModalOpen} onClose={() => setModuleModalOpen(false)} size="2xl">
+                <ModalContent>
+                    <ModalHeader>
+                        {editingModule ? 'Edit Module' : 'Create New Module'}
+                    </ModalHeader>
+                    <ModalBody>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Code"
+                                placeholder="MODULE_CODE"
+                                value={moduleForm.code}
+                                onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value.toUpperCase() })}
+                                isRequired
+                            />
+                            <Input
+                                label="Name"
+                                placeholder="Module Name"
+                                value={moduleForm.name}
+                                onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
+                                isRequired
+                            />
+                            <Input
+                                label="Icon"
+                                placeholder="Icon class name"
+                                value={moduleForm.icon}
+                                onChange={(e) => setModuleForm({ ...moduleForm, icon: e.target.value })}
+                                className="col-span-2"
+                            />
+                            <Input
+                                label="Route Prefix"
+                                placeholder="/module-route"
+                                value={moduleForm.route_prefix}
+                                onChange={(e) => setModuleForm({ ...moduleForm, route_prefix: e.target.value })}
+                            />
+                            <Select
+                                label="Category"
+                                selectedKeys={[moduleForm.category]}
+                                onChange={(e) => setModuleForm({ ...moduleForm, category: e.target.value })}
+                            >
+                                {Object.entries(categories).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </Select>
+                            <Input
+                                label="Priority"
+                                type="number"
+                                value={moduleForm.priority}
+                                onChange={(e) => setModuleForm({ ...moduleForm, priority: parseInt(e.target.value) })}
+                            />
+                            <div className="flex items-center">
+                                <Switch
+                                    isSelected={moduleForm.is_active}
+                                    onValueChange={(val) => setModuleForm({ ...moduleForm, is_active: val })}
+                                >
+                                    Active
+                                </Switch>
+                            </div>
+                            <Input
+                                label="Description"
+                                placeholder="Module description"
+                                value={moduleForm.description}
+                                onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })}
+                                className="col-span-2"
+                            />
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="flat" onClick={() => setModuleModalOpen(false)}>Cancel</Button>
+                        <Button color="primary" onClick={saveModule} isLoading={isLoading}>
+                            {editingModule ? 'Update' : 'Create'}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Sub-Module Modal */}
+            <Modal isOpen={subModuleModalOpen} onClose={() => setSubModuleModalOpen(false)} size="xl">
+                <ModalContent>
+                    <ModalHeader>
+                        {editingSubModule ? 'Edit Sub-Module' : 'Create New Sub-Module'}
+                    </ModalHeader>
+                    <ModalBody>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Code"
+                                placeholder="SUBMODULE_CODE"
+                                value={subModuleForm.code}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, code: e.target.value.toUpperCase() })}
+                                isRequired
+                            />
+                            <Input
+                                label="Name"
+                                placeholder="Sub-Module Name"
+                                value={subModuleForm.name}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, name: e.target.value })}
+                                isRequired
+                            />
+                            <Input
+                                label="Icon"
+                                placeholder="Icon class name"
+                                value={subModuleForm.icon}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, icon: e.target.value })}
+                            />
+                            <Input
+                                label="Route"
+                                placeholder="Named route"
+                                value={subModuleForm.route}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, route: e.target.value })}
+                            />
+                            <Input
+                                label="Priority"
+                                type="number"
+                                value={subModuleForm.priority}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, priority: parseInt(e.target.value) })}
+                            />
+                            <div className="flex items-center">
+                                <Switch
+                                    isSelected={subModuleForm.is_active}
+                                    onValueChange={(val) => setSubModuleForm({ ...subModuleForm, is_active: val })}
+                                >
+                                    Active
+                                </Switch>
+                            </div>
+                            <Input
+                                label="Description"
+                                placeholder="Sub-module description"
+                                value={subModuleForm.description}
+                                onChange={(e) => setSubModuleForm({ ...subModuleForm, description: e.target.value })}
+                                className="col-span-2"
+                            />
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="flat" onClick={() => setSubModuleModalOpen(false)}>Cancel</Button>
+                        <Button color="primary" onClick={saveSubModule} isLoading={isLoading}>
+                            {editingSubModule ? 'Update' : 'Create'}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Component Modal */}
+            <Modal isOpen={componentModalOpen} onClose={() => setComponentModalOpen(false)} size="xl">
+                <ModalContent>
+                    <ModalHeader>
+                        {editingComponent ? 'Edit Component' : 'Create New Component'}
+                    </ModalHeader>
+                    <ModalBody>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Code"
+                                placeholder="COMPONENT_CODE"
+                                value={componentForm.code}
+                                onChange={(e) => setComponentForm({ ...componentForm, code: e.target.value.toUpperCase() })}
+                                isRequired
+                            />
+                            <Input
+                                label="Name"
+                                placeholder="Component Name"
+                                value={componentForm.name}
+                                onChange={(e) => setComponentForm({ ...componentForm, name: e.target.value })}
+                                isRequired
+                            />
+                            <Select
+                                label="Type"
+                                selectedKeys={[componentForm.type]}
+                                onChange={(e) => setComponentForm({ ...componentForm, type: e.target.value })}
+                            >
+                                {Object.entries(componentTypes).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </Select>
+                            <Input
+                                label="Route"
+                                placeholder="Named route"
+                                value={componentForm.route}
+                                onChange={(e) => setComponentForm({ ...componentForm, route: e.target.value })}
+                            />
+                            <div className="flex items-center col-span-2">
+                                <Switch
+                                    isSelected={componentForm.is_active}
+                                    onValueChange={(val) => setComponentForm({ ...componentForm, is_active: val })}
+                                >
+                                    Active
+                                </Switch>
+                            </div>
+                            <Input
+                                label="Description"
+                                placeholder="Component description"
+                                value={componentForm.description}
+                                onChange={(e) => setComponentForm({ ...componentForm, description: e.target.value })}
+                                className="col-span-2"
+                            />
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="flat" onClick={() => setComponentModalOpen(false)}>Cancel</Button>
+                        <Button color="primary" onClick={saveComponent} isLoading={isLoading}>
+                            {editingComponent ? 'Update' : 'Create'}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Permission Modal */}
+            <Modal isOpen={permissionModalOpen} onClose={() => setPermissionModalOpen(false)} size="3xl" scrollBehavior="inside">
+                <ModalContent>
+                    <ModalHeader>
+                        Manage Permissions - {permissionTarget?.name}
+                    </ModalHeader>
+                    <ModalBody>
+                        <p className="text-sm text-default-500 mb-4">
+                            Select the permissions required to access this {permissionTarget?.type?.replace('_', '-')}.
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-96 overflow-y-auto">
+                            {allPermissions.map(permission => (
+                                <Checkbox
+                                    key={permission.id}
+                                    isSelected={selectedPermissions.includes(permission.id)}
+                                    onValueChange={(checked) => {
+                                        if (checked) {
+                                            setSelectedPermissions([...selectedPermissions, permission.id]);
+                                        } else {
+                                            setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id));
+                                        }
+                                    }}
+                                    size="sm"
+                                >
+                                    <span className="text-sm">{permission.name}</span>
+                                </Checkbox>
+                            ))}
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="flat" onClick={() => setPermissionModalOpen(false)}>Cancel</Button>
+                        <Button color="primary" onClick={savePermissions} isLoading={isLoading}>
+                            Save Permissions ({selectedPermissions.length})
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                <ModalContent>
+                    <ModalHeader className="text-danger">Confirm Delete</ModalHeader>
+                    <ModalBody>
+                        <p>
+                            Are you sure you want to delete <strong>{itemToDelete?.name}</strong>?
+                        </p>
+                        {itemToDelete?.type === 'module' && (
+                            <p className="text-sm text-warning mt-2">
+                                This will also delete all sub-modules and components within this module.
+                            </p>
+                        )}
+                        {itemToDelete?.type === 'sub_module' && (
+                            <p className="text-sm text-warning mt-2">
+                                This will also delete all components within this sub-module.
+                            </p>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="flat" onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+                        <Button color="danger" onClick={executeDelete} isLoading={isLoading}>
+                            Delete
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </App>
+    );
+};
+
+export default ModuleManagement;
