@@ -65,9 +65,7 @@ import {
     GlobeAltIcon,
     Squares2X2Icon
 } from "@heroicons/react/24/outline";
-import GlassCard from '@/Components/GlassCard.jsx';
 import GlassDialog from '@/Components/GlassDialog.jsx';
-import PageHeader from '@/Components/PageHeader.jsx';
 import StatsCards from '@/Components/StatsCards.jsx';
 import App from '@/Layouts/App.jsx';
 import axios from 'axios';
@@ -921,109 +919,332 @@ const ModuleManagement = (props) => {
         );
     };
 
+    // Helper to get theme radius
+    const getThemeRadius = () => {
+        if (typeof window === 'undefined') return 'lg';
+        const rootStyles = getComputedStyle(document.documentElement);
+        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
+        const radiusValue = parseInt(borderRadius);
+        if (radiusValue === 0) return 'none';
+        if (radiusValue <= 4) return 'sm';
+        if (radiusValue <= 8) return 'md';
+        if (radiusValue <= 16) return 'lg';
+        return 'full';
+    };
+
+    // Responsive screen checks
+    const [isMobile, setIsMobile] = React.useState(false);
+    const [isTablet, setIsTablet] = React.useState(false);
+    const [isLargeScreen, setIsLargeScreen] = React.useState(false);
+    
+    React.useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setIsTablet(window.innerWidth < 768);
+            setIsLargeScreen(window.innerWidth >= 1025);
+        };
+        
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
+
     return (
         <App>
             <Head title={title} />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                {/* Page Header */}
-                <PageHeader
-                    title={title}
-                    subtitle="Manage module permissions and access control hierarchy"
-                    icon={<Square3Stack3DIcon className="w-8 h-8" />}
-                    actions={
-                        <div className="flex gap-2">
-                            <Button
-                                variant="flat"
-                                startContent={<ArrowPathIcon className="w-4 h-4" />}
-                                onClick={refreshData}
-                                isLoading={isLoading}
+            <div 
+                className="flex flex-col w-full h-full p-4"
+                role="main"
+                aria-label="Module Permission Registry"
+            >
+                <div className="space-y-4">
+                    <div className="w-full">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Card 
+                                className="transition-all duration-200"
+                                style={{
+                                    border: `var(--borderWidth, 2px) solid transparent`,
+                                    borderRadius: `var(--borderRadius, 12px)`,
+                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                    transform: `scale(var(--scale, 1))`,
+                                    background: `linear-gradient(135deg, 
+                                        var(--theme-content1, #FAFAFA) 20%, 
+                                        var(--theme-content2, #F4F4F5) 10%, 
+                                        var(--theme-content3, #F1F3F4) 20%)`,
+                                }}
                             >
-                                Refresh
-                            </Button>
-                            <Button
-                                color="primary"
-                                startContent={<PlusIcon className="w-4 h-4" />}
-                                onClick={() => openModuleModal()}
-                            >
-                                Add Module
-                            </Button>
-                        </div>
-                    }
-                />
-
-                {/* Stats Cards */}
-                <StatsCards stats={statsData} className="mb-6" />
-
-                {/* Filters */}
-                <GlassCard className="mb-6">
-                    <CardBody>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <Input
-                                placeholder="Search modules..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
-                                className="flex-1"
-                            />
-                            <Select
-                                label="Category"
-                                selectedKeys={[categoryFilter]}
-                                onChange={(e) => setCategoryFilter(e.target.value)}
-                                className="w-full sm:w-48"
-                            >
-                                <SelectItem key="all" value="all">All Categories</SelectItem>
-                                {Object.entries(categories).map(([key, label]) => (
-                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                label="Status"
-                                selectedKeys={[statusFilter]}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full sm:w-36"
-                            >
-                                <SelectItem key="all" value="all">All</SelectItem>
-                                <SelectItem key="active" value="active">Active</SelectItem>
-                                <SelectItem key="inactive" value="inactive">Inactive</SelectItem>
-                            </Select>
-                        </div>
-                    </CardBody>
-                </GlassCard>
-
-                {/* Module Tree */}
-                <GlassCard>
-                    <CardHeader className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Module Hierarchy</h3>
-                        <Chip variant="flat" color="default">
-                            {filteredModules.length} modules
-                        </Chip>
-                    </CardHeader>
-                    <CardBody>
-                        {isLoading ? (
-                            <div className="flex justify-center items-center py-12">
-                                <Spinner size="lg" />
-                            </div>
-                        ) : filteredModules.length === 0 ? (
-                            <div className="text-center py-12 text-default-500">
-                                <CubeIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                <p>No modules found</p>
-                                <Button
-                                    color="primary"
-                                    variant="flat"
-                                    className="mt-4"
-                                    onClick={() => openModuleModal()}
+                                <CardHeader 
+                                    className="border-b p-0"
+                                    style={{
+                                        borderColor: `var(--theme-divider, #E4E4E7)`,
+                                        background: `linear-gradient(135deg, 
+                                            color-mix(in srgb, var(--theme-content1) 50%, transparent) 20%, 
+                                            color-mix(in srgb, var(--theme-content2) 30%, transparent) 10%)`,
+                                    }}
                                 >
-                                    Create First Module
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {filteredModules.map(module => renderModuleItem(module))}
-                            </div>
-                        )}
-                    </CardBody>
-                </GlassCard>
+                                    <div className={`${isLargeScreen ? 'p-6' : isTablet ? 'p-4' : isMobile ? 'p-3' : 'p-4'} w-full`}>
+                                        <div className="flex flex-col space-y-4">
+                                            {/* Main Header Content */}
+                                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                {/* Title Section */}
+                                                <div className="flex items-center gap-3 lg:gap-4">
+                                                    <div 
+                                                        className={`
+                                                            ${isLargeScreen ? 'p-3' : isMobile ? 'p-2' : 'p-2.5'} 
+                                                            rounded-xl flex items-center justify-center
+                                                        `}
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                            borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                            borderWidth: `var(--borderWidth, 2px)`,
+                                                            borderRadius: `var(--borderRadius, 12px)`,
+                                                        }}
+                                                    >
+                                                        <Square3Stack3DIcon 
+                                                            className={`
+                                                                ${isLargeScreen ? 'w-8 h-8' : isMobile ? 'w-5 h-5' : 'w-6 h-6'}
+                                                            `}
+                                                            style={{ color: 'var(--theme-primary)' }}
+                                                        />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <h4 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-2xl' : isMobile ? 'text-lg' : 'text-xl'}
+                                                                font-bold text-foreground
+                                                                ${isMobile ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                        >
+                                                            Module Permission Management
+                                                        </h4>
+                                                        <p 
+                                                            className={`
+                                                                ${isLargeScreen ? 'text-sm' : 'text-xs'} 
+                                                                text-default-500
+                                                                ${isMobile ? 'truncate' : ''}
+                                                            `}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                        >
+                                                            Manage module permissions and access control hierarchy
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Action Buttons */}
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Button
+                                                        className="font-medium"
+                                                        style={{
+                                                            background: `color-mix(in srgb, var(--theme-default) 15%, transparent)`,
+                                                            color: `var(--theme-foreground)`,
+                                                            borderRadius: getThemeRadius(),
+                                                            border: `1px solid color-mix(in srgb, var(--theme-default) 30%, transparent)`,
+                                                        }}
+                                                        startContent={<ArrowPathIcon className="w-4 h-4" />}
+                                                        onPress={refreshData}
+                                                        isLoading={isLoading}
+                                                    >
+                                                        Refresh
+                                                    </Button>
+                                                    <Button
+                                                        className="text-white font-medium"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 80%, var(--theme-secondary)))`,
+                                                            borderRadius: getThemeRadius(),
+                                                        }}
+                                                        startContent={<PlusIcon className="w-4 h-4" />}
+                                                        onPress={() => openModuleModal()}
+                                                    >
+                                                        {isMobile ? "Add" : "Add Module"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+
+                                <CardBody className="p-6">
+                                    {/* Stats Cards */}
+                                    <StatsCards stats={[
+                                        {
+                                            title: 'Total Modules',
+                                            value: statistics.total_modules || 0,
+                                            icon: <CubeIcon className="w-6 h-6" />,
+                                            color: 'text-blue-500',
+                                            iconBg: 'bg-blue-500/20',
+                                            description: 'Top-level modules'
+                                        },
+                                        {
+                                            title: 'Sub-Modules',
+                                            value: statistics.total_sub_modules || 0,
+                                            icon: <FolderIcon className="w-6 h-6" />,
+                                            color: 'text-purple-500',
+                                            iconBg: 'bg-purple-500/20',
+                                            description: 'Functional areas'
+                                        },
+                                        {
+                                            title: 'Components',
+                                            value: statistics.total_components || 0,
+                                            icon: <DocumentIcon className="w-6 h-6" />,
+                                            color: 'text-green-500',
+                                            iconBg: 'bg-green-500/20',
+                                            description: 'UI components'
+                                        },
+                                        {
+                                            title: 'Permission Rules',
+                                            value: statistics.total_permission_requirements || 0,
+                                            icon: <ShieldCheckIcon className="w-6 h-6" />,
+                                            color: 'text-orange-500',
+                                            iconBg: 'bg-orange-500/20',
+                                            description: 'Access requirements'
+                                        }
+                                    ]} className="mb-6" />
+
+                                    {/* Filters */}
+                                    <div 
+                                        className="mb-6 p-4"
+                                        style={{
+                                            background: `color-mix(in srgb, var(--theme-content2) 50%, transparent)`,
+                                            border: `1px solid color-mix(in srgb, var(--theme-content3) 50%, transparent)`,
+                                            borderRadius: getThemeRadius(),
+                                            backdropFilter: 'blur(16px)',
+                                        }}
+                                    >
+                                        <div className="flex flex-col sm:flex-row gap-4">
+                                            <Input
+                                                placeholder="Search modules..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400" />}
+                                                className="flex-1"
+                                                variant="bordered"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    inputWrapper: "bg-white/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/30",
+                                                    input: "text-foreground placeholder:text-default-400",
+                                                }}
+                                            />
+                                            <Select
+                                                label="Category"
+                                                selectedKeys={[categoryFilter]}
+                                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                                className="w-full sm:w-48"
+                                                variant="bordered"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    trigger: "bg-white/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/30",
+                                                    value: "text-foreground",
+                                                }}
+                                            >
+                                                <SelectItem key="all" value="all">All Categories</SelectItem>
+                                                {Object.entries(categories).map(([key, label]) => (
+                                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Select
+                                                label="Status"
+                                                selectedKeys={[statusFilter]}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                className="w-full sm:w-36"
+                                                variant="bordered"
+                                                radius={getThemeRadius()}
+                                                classNames={{
+                                                    trigger: "bg-white/50 dark:bg-default-50/10 backdrop-blur-md border-default-200/30",
+                                                    value: "text-foreground",
+                                                }}
+                                            >
+                                                <SelectItem key="all" value="all">All</SelectItem>
+                                                <SelectItem key="active" value="active">Active</SelectItem>
+                                                <SelectItem key="inactive" value="inactive">Inactive</SelectItem>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    {/* Module Tree Card */}
+                                    <Card 
+                                        className="transition-all duration-200"
+                                        style={{
+                                            border: `var(--borderWidth, 2px) solid transparent`,
+                                            borderRadius: `var(--borderRadius, 12px)`,
+                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                            background: `linear-gradient(135deg, 
+                                                var(--theme-content1, #FAFAFA) 20%, 
+                                                var(--theme-content2, #F4F4F5) 10%, 
+                                                var(--theme-content3, #F1F3F4) 20%)`,
+                                        }}
+                                    >
+                                        <CardHeader 
+                                            className="flex justify-between items-center border-b pb-2"
+                                            style={{
+                                                borderColor: `var(--theme-divider, #E4E4E7)`,
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div 
+                                                    className="p-2 rounded-lg flex items-center justify-center"
+                                                    style={{
+                                                        background: `color-mix(in srgb, var(--theme-primary) 15%, transparent)`,
+                                                        borderColor: `color-mix(in srgb, var(--theme-primary) 25%, transparent)`,
+                                                    }}
+                                                >
+                                                    <CubeIcon 
+                                                        className="w-6 h-6" 
+                                                        style={{ color: 'var(--theme-primary)' }}
+                                                    />
+                                                </div>
+                                                <h3 
+                                                    className="text-lg font-semibold text-foreground"
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                >
+                                                    Module Hierarchy
+                                                </h3>
+                                            </div>
+                                            <Chip variant="flat" color="default">
+                                                {filteredModules.length} modules
+                                            </Chip>
+                                        </CardHeader>
+                                        <CardBody>
+                                            {isLoading ? (
+                                                <div className="flex justify-center items-center py-12">
+                                                    <Spinner size="lg" />
+                                                </div>
+                                            ) : filteredModules.length === 0 ? (
+                                                <div className="text-center py-12 text-default-500">
+                                                    <CubeIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                                    <p>No modules found</p>
+                                                    <Button
+                                                        color="primary"
+                                                        variant="flat"
+                                                        className="mt-4"
+                                                        onClick={() => openModuleModal()}
+                                                    >
+                                                        Create First Module
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {filteredModules.map(module => renderModuleItem(module))}
+                                                </div>
+                                            )}
+                                        </CardBody>
+                                    </Card>
+                                </CardBody>
+                            </Card>
+                        </motion.div>
+                    </div>
+                </div>
             </div>
 
             {/* Module Modal */}

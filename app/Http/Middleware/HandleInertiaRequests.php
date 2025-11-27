@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\CompanySetting;
+use App\Services\Module\ModulePermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Inertia\Middleware;
@@ -62,6 +63,10 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $user ? $user->roles->pluck('name')->toArray() : [],
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name')->toArray() : [],
                 'designation' => $userWithRelations?->designation?->title,
+                // Module-based navigation from Module Permission Registry
+                'accessibleModules' => fn () => $user
+                    ? app(ModulePermissionService::class)->getNavigationForUser($user)
+                    : [],
             ],
 
             // Company Settings

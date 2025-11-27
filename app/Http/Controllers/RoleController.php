@@ -186,7 +186,12 @@ class RoleController extends BaseController
                                 'id' => $user->id,
                                 'name' => $user->name,
                                 'email' => $user->email,
-                                'roles' => $user->roles->pluck('name'),
+                                'roles' => $user->roles->map(function ($role) {
+                                    return [
+                                        'id' => $role->id,
+                                        'name' => $role->name,
+                                    ];
+                                }),
                             ];
                         });
 

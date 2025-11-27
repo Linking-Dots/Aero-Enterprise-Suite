@@ -26,25 +26,25 @@ class ModulePermissionService
 
     /**
      * Get all modules with their full structure and permission requirements
+     * Note: This method does NOT cache to avoid max_allowed_packet issues with large serialized models
      */
     public function getModulesWithStructure(): Collection
     {
-        return Cache::remember('module_permission_structure', self::CACHE_TTL, function () {
-            return Module::active()
-                ->ordered()
-                ->with([
-                    'subModules' => fn ($q) => $q->active()->ordered(),
-                    'subModules.components' => fn ($q) => $q->active(),
-                    'subModules.permissionRequirements.permission',
-                    'components' => fn ($q) => $q->active(),
-                    'permissionRequirements.permission',
-                ])
-                ->get();
-        });
+        return Module::active()
+            ->ordered()
+            ->with([
+                'subModules' => fn ($q) => $q->active()->ordered(),
+                'subModules.components' => fn ($q) => $q->active(),
+                'subModules.permissionRequirements.permission',
+                'components' => fn ($q) => $q->active(),
+                'permissionRequirements.permission',
+            ])
+            ->get();
     }
 
     /**
      * Get modules accessible by a specific user
+     * Note: Caching is done in getNavigationForUser() with lightweight arrays instead
      */
     public function getAccessibleModules($user = null): Collection
     {
@@ -56,35 +56,31 @@ class ModulePermissionService
             return collect();
         }
 
-        $cacheKey = 'user_accessible_modules_'.$user->id;
+        $modules = $this->getModulesWithStructure();
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
-            $modules = $this->getModulesWithStructure();
-
-            return $modules->filter(function ($module) use ($user) {
-                return $module->userCanAccess($user);
-            })->map(function ($module) use ($user) {
-                // Filter sub-modules the user can access
-                $module->accessible_sub_modules = $module->subModules->filter(function ($subModule) use ($user) {
-                    return $subModule->userCanAccess($user);
-                })->map(function ($subModule) use ($user) {
-                    // Filter components the user can access
-                    $subModule->accessible_components = $subModule->components->filter(function ($component) use ($user) {
-                        return $component->userCanAccess($user);
-                    });
-
-                    return $subModule;
+        return $modules->filter(function ($module) use ($user) {
+            return $module->userCanAccess($user);
+        })->map(function ($module) use ($user) {
+            // Filter sub-modules the user can access
+            $module->accessible_sub_modules = $module->subModules->filter(function ($subModule) use ($user) {
+                return $subModule->userCanAccess($user);
+            })->map(function ($subModule) use ($user) {
+                // Filter components the user can access
+                $subModule->accessible_components = $subModule->components->filter(function ($component) use ($user) {
+                    return $component->userCanAccess($user);
                 });
 
-                // Filter module-level components the user can access
-                $module->accessible_components = $module->components
-                    ->whereNull('sub_module_id')
-                    ->filter(function ($component) use ($user) {
-                        return $component->userCanAccess($user);
-                    });
-
-                return $module;
+                return $subModule;
             });
+
+            // Filter module-level components the user can access
+            $module->accessible_components = $module->components
+                ->whereNull('sub_module_id')
+                ->filter(function ($component) use ($user) {
+                    return $component->userCanAccess($user);
+                });
+
+            return $module;
         });
     }
 
@@ -343,46 +339,59 @@ class ModulePermissionService
 
     /**
      * Get navigation structure for frontend based on user permissions
+     * This method caches the lightweight array result (not Eloquent models)
      */
     public function getNavigationForUser($user = null): array
     {
-        $accessibleModules = $this->getAccessibleModules($user);
+        if (! $user) {
+            $user = auth()->user();
+        }
 
-        return $accessibleModules->map(function ($module) {
-            return [
-                'code' => $module->code,
-                'name' => $module->name,
-                'icon' => $module->icon,
-                'route_prefix' => $module->route_prefix,
-                'category' => $module->category,
-                'priority' => $module->priority,
-                'subModules' => $module->accessible_sub_modules->map(function ($subModule) {
-                    return [
-                        'code' => $subModule->code,
-                        'name' => $subModule->name,
-                        'icon' => $subModule->icon,
-                        'route' => $subModule->route,
-                        'priority' => $subModule->priority,
-                        'components' => $subModule->accessible_components->map(function ($component) {
-                            return [
-                                'code' => $component->code,
-                                'name' => $component->name,
-                                'type' => $component->type,
-                                'route' => $component->route,
-                            ];
-                        })->values()->toArray(),
-                    ];
-                })->values()->toArray(),
-                'components' => $module->accessible_components->map(function ($component) {
-                    return [
-                        'code' => $component->code,
-                        'name' => $component->name,
-                        'type' => $component->type,
-                        'route' => $component->route,
-                    ];
-                })->values()->toArray(),
-            ];
-        })->values()->toArray();
+        if (! $user) {
+            return [];
+        }
+
+        $cacheKey = 'user_navigation_'.$user->id;
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
+            $accessibleModules = $this->getAccessibleModules($user);
+
+            return $accessibleModules->map(function ($module) {
+                return [
+                    'code' => $module->code,
+                    'name' => $module->name,
+                    'icon' => $module->icon,
+                    'route_prefix' => $module->route_prefix,
+                    'category' => $module->category,
+                    'priority' => $module->priority,
+                    'subModules' => $module->accessible_sub_modules->map(function ($subModule) {
+                        return [
+                            'code' => $subModule->code,
+                            'name' => $subModule->name,
+                            'icon' => $subModule->icon,
+                            'route' => $subModule->route,
+                            'priority' => $subModule->priority,
+                            'components' => $subModule->accessible_components->map(function ($component) {
+                                return [
+                                    'code' => $component->code,
+                                    'name' => $component->name,
+                                    'type' => $component->type,
+                                    'route' => $component->route,
+                                ];
+                            })->values()->toArray(),
+                        ];
+                    })->values()->toArray(),
+                    'components' => $module->accessible_components->map(function ($component) {
+                        return [
+                            'code' => $component->code,
+                            'name' => $component->name,
+                            'type' => $component->type,
+                            'route' => $component->route,
+                        ];
+                    })->values()->toArray(),
+                ];
+            })->values()->toArray();
+        });
     }
 
     /**

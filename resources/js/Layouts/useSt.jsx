@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../css/theme-transitions.css';
 import Sidebar from "@/Layouts/Sidebar.jsx";
 import { Inertia } from '@inertiajs/inertia';
-import { getPages } from '@/Props/pages.jsx';
+import { getDynamicPages } from '@/Props/dynamicNavigation.jsx';
 import { getSettingsPages } from '@/Props/settings.jsx';
 import { HeroUIProvider, Button } from "@heroui/react";
 import SessionExpiredModal from '@/Components/SessionExpiredModal.jsx';
@@ -108,15 +108,17 @@ function App({ children }) {
     const [loading, setLoading] = useState(false);
 
     // Memoize pages to avoid unnecessary recalculations
+    // Navigation is now driven by the Module Permission Registry via auth.accessibleModules
     const pages = useMemo(() => {
         // Check if the current URL is specifically a settings page
-        // You can adjust this condition based on your actual settings routes
         const isSettingsPage = url.startsWith('/settings') || 
                               url.includes('settings') || 
                               url === '/settings';
         
-        return isSettingsPage ? getSettingsPages(permissions, auth) : getPages(permissions, auth);
-    }, [url, permissions]);
+        // For settings pages, use the settings navigation
+        // For all other pages, use dynamic navigation from Module Permission Registry
+        return isSettingsPage ? getSettingsPages(permissions, auth) : getDynamicPages(auth);
+    }, [url, permissions, auth?.accessibleModules]);
 
     // Theme and media query
     const theme = useTheme(darkMode ? 'dark' : 'light', themeId);
