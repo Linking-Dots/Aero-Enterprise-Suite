@@ -477,7 +477,8 @@ const ModuleManagement = (props) => {
         setPermissionTarget(target);
         // Get current permissions for this target - handle both snake_case and camelCase
         const requirements = target.permission_requirements || target.permissionRequirements || [];
-        const currentPermissions = requirements.map(pr => pr.permission_id) || [];
+        // Ensure permission IDs are numbers for consistent comparison
+        const currentPermissions = requirements.map(pr => Number(pr.permission_id));
         console.log('Opening permission modal:', { target, requirements, currentPermissions });
         setSelectedPermissions(currentPermissions);
         setPermissionModalOpen(true);
