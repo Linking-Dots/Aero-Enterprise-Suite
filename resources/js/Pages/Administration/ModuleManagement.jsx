@@ -377,9 +377,9 @@ const ModuleManagement = (props) => {
             const response = await axios.get(route('modules.api.index'));
             setModules(response.data.modules || []);
             setStatistics(response.data.statistics || {});
-            showToast('Data refreshed successfully', 'success');
+            showToast.success('Data refreshed successfully');
         } catch (error) {
-            showToast('Failed to refresh data', 'error');
+            showToast.error('Failed to refresh data');
             console.error('Refresh error:', error);
         } finally {
             setIsLoading(false);
@@ -487,15 +487,15 @@ const ModuleManagement = (props) => {
         try {
             if (editingModule) {
                 await axios.put(route('modules.update', editingModule.id), moduleForm);
-                showToast('Module updated successfully', 'success');
+                showToast.success('Module updated successfully');
             } else {
                 await axios.post(route('modules.store'), moduleForm);
-                showToast('Module created successfully', 'success');
+                showToast.success('Module created successfully');
             }
             setModuleModalOpen(false);
             refreshData();
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to save module', 'error');
+            showToast.error(error.response?.data?.message || 'Failed to save module');
         } finally {
             setIsLoading(false);
         }
@@ -507,15 +507,15 @@ const ModuleManagement = (props) => {
         try {
             if (editingSubModule) {
                 await axios.put(route('modules.sub-modules.update', editingSubModule.id), subModuleForm);
-                showToast('Sub-module updated successfully', 'success');
+                showToast.success('Sub-module updated successfully');
             } else {
                 await axios.post(route('modules.sub-modules.store', parentModuleId), subModuleForm);
-                showToast('Sub-module created successfully', 'success');
+                showToast.success('Sub-module created successfully');
             }
             setSubModuleModalOpen(false);
             refreshData();
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to save sub-module', 'error');
+            showToast.error(error.response?.data?.message || 'Failed to save sub-module');
         } finally {
             setIsLoading(false);
         }
@@ -527,15 +527,15 @@ const ModuleManagement = (props) => {
         try {
             if (editingComponent) {
                 await axios.put(route('modules.components.update', editingComponent.id), componentForm);
-                showToast('Component updated successfully', 'success');
+                showToast.success('Component updated successfully');
             } else {
                 await axios.post(route('modules.components.store', parentSubModuleId), componentForm);
-                showToast('Component created successfully', 'success');
+                showToast.success('Component created successfully');
             }
             setComponentModalOpen(false);
             refreshData();
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to save component', 'error');
+            showToast.error(error.response?.data?.message || 'Failed to save component');
         } finally {
             setIsLoading(false);
         }
@@ -554,12 +554,24 @@ const ModuleManagement = (props) => {
                 endpoint = route('modules.components.sync-permissions', permissionTarget.id);
             }
 
-            await axios.post(endpoint, { permission_ids: selectedPermissions });
-            showToast('Permissions updated successfully', 'success');
+            // Convert selected permission IDs to the expected format
+            // The backend expects: { permissions: [{ permission: 'name', type: 'required', group: null }] }
+            const permissionsPayload = selectedPermissions.map(permissionId => {
+                const permission = allPermissions.find(p => p.id === permissionId);
+                return {
+                    permission: permission?.name || '',
+                    type: 'required', // Default to 'required' type
+                    group: null
+                };
+            }).filter(p => p.permission); // Filter out any without valid permission names
+
+            await axios.post(endpoint, { permissions: permissionsPayload });
+            showToast.success('Permissions updated successfully');
             setPermissionModalOpen(false);
             refreshData();
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to save permissions', 'error');
+            console.error('Error saving permissions:', error);
+            showToast.error(error.response?.data?.message || 'Failed to save permissions');
         } finally {
             setIsLoading(false);
         }
@@ -586,12 +598,12 @@ const ModuleManagement = (props) => {
             }
 
             await axios.delete(endpoint);
-            showToast(`${itemToDelete.type} deleted successfully`, 'success');
+            showToast.success(`${itemToDelete.type.replace('_', ' ')} deleted successfully`);
             setDeleteConfirmOpen(false);
             setItemToDelete(null);
             refreshData();
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to delete', 'error');
+            showToast.error(error.response?.data?.message || 'Failed to delete');
         } finally {
             setIsLoading(false);
         }
