@@ -16,7 +16,8 @@ return new class extends Migration
             $table->json('approval_chain')->nullable()->after('status');
             $table->integer('current_approval_level')->default(0)->after('approval_chain');
             $table->timestamp('approved_at')->nullable()->after('current_approval_level');
-            $table->text('rejection_reason')->nullable()->after('approved_at');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null')->after('approved_at');
+            $table->text('rejection_reason')->nullable()->after('approved_by');
             $table->foreignId('rejected_by')->nullable()->constrained('users')->onDelete('set null')->after('rejection_reason');
             $table->timestamp('submitted_at')->nullable()->after('rejected_by');
 
@@ -32,6 +33,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('leaves', function (Blueprint $table) {
+            $table->dropForeign(['approved_by']);
             $table->dropForeign(['rejected_by']);
             $table->dropIndex(['status']);
             $table->dropIndex(['current_approval_level']);
@@ -39,6 +41,7 @@ return new class extends Migration
                 'approval_chain',
                 'current_approval_level',
                 'approved_at',
+                'approved_by',
                 'rejection_reason',
                 'rejected_by',
                 'submitted_at',
