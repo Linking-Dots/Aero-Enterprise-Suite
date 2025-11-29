@@ -421,6 +421,16 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Register media collections for the user.
+     * Defines the profile_images collection with singleFile() to ensure only one profile image per user.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('profile_images')
+            ->singleFile();
+    }
+
+    /**
      * Get the profile image URL.
      * Uses MediaLibrary standard methods with proper exception handling.
      */

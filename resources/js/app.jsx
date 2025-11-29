@@ -149,7 +149,7 @@ createInertiaApp({
                     const perfData = performance.getEntriesByType('navigation')[0];
                     if (perfData) {
                         const loadTime = perfData.loadEventEnd - perfData.fetchStart;
-                        console.log(`Page load time: ${loadTime.toFixed(2)}ms`);
+
                         
                         // Log to backend only if load time is significant and user opted in
                         if (loadTime > 5000 && localStorage.getItem('performance-logging') === 'true') {
@@ -185,8 +185,7 @@ createInertiaApp({
     // Initialize device authentication
     initializeDeviceAuth();
     
-    // Theme restoration is now handled by ThemeContext
-    console.log('App initialization complete - theme handled by ThemeContext');
+
     
     // Initialize application monitoring only in development
     if (ENABLE_MONITORING && typeof window !== 'undefined') {

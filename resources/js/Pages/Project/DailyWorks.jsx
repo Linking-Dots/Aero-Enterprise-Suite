@@ -144,7 +144,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                 endDate: selectedDate,
             };
 
-            console.log('Mobile mode: Fetching ALL data for date:', selectedDate, 'with params:', params);
+      
             
             // Use the /daily-works-all endpoint to get all data without pagination
             const response = await axios.get('/daily-works-all', { params });
@@ -154,7 +154,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             setTotalRows(dailyWorks.length);
             setLastPage(1);
             
-            console.log(`Mobile: Loaded ${dailyWorks.length} total items for ${selectedDate}`);
+         
         } catch (error) {
             console.error('Error fetching mobile data:', error);
             setData([]);
@@ -182,7 +182,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                 perPage,
             };
 
-            console.log('Desktop mode: Fetching paginated data with params:', params);
+        
             
             const response = await axios.get('/daily-works-paginate', { params });
             
@@ -190,7 +190,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             setTotalRows(response.data.total || 0);
             setLastPage(response.data.last_page || 1);
             
-            console.log(`Desktop: Loaded ${response.data.data?.length || 0} items (page ${currentPage} of ${response.data.last_page})`);
         } catch (error) {
             console.error('Error fetching desktop data:', error);
             setData([]);
@@ -211,7 +210,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
 
     // Enhanced refresh function that handles mobile/desktop modes
     const refreshData = () => {
-        console.log(`Refreshing data in ${isMobile ? 'mobile' : 'desktop'} mode`);
+    
         setCurrentPage(1); // Reset to first page
         fetchData();
         fetchStatistics(); // Also refresh statistics
@@ -291,7 +290,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     };
 
     const handleDelete = () => {
-        console.log('Delete function called with taskId:', taskIdToDelete);
+ 
         
         if (!taskIdToDelete) {
             showToast.error('No task selected for deletion');
@@ -302,7 +301,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         
         const promise = new Promise(async (resolve, reject) => {
             try {
-                console.log('Sending delete request for task:', taskIdToDelete);
+            
                 
                 // Use axios for delete operation with automatic CSRF handling
                 const response = await axios.delete('/delete-daily-work', {
@@ -313,7 +312,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                     }
                 });
 
-                console.log('Delete successful:', response.data);
                 
                 // Optimistic update - immediately remove from local state
                 const newTotal = Math.max(0, totalRows - 1);
@@ -401,7 +399,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
 
     // Optimized success callbacks for forms
     const handleAddSuccess = (newItem) => {
-        console.log('Add success callback:', newItem);
+
         
         if (newItem) {
             // Optimistic update - add to local state immediately
@@ -422,7 +420,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     };
 
     const handleEditSuccess = (updatedItem) => {
-        console.log('Edit success callback:', updatedItem);
+
         
         if (updatedItem) {
             // Optimistic update - update item in local state immediately
@@ -444,7 +442,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     };
 
     const handleImportSuccess = (importResults) => {
-        console.log('Import success callback with results:', importResults);
+   
         
         // Close the modal first
         closeModal();
@@ -461,7 +459,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                 const sortedDates = importedDates.sort((a, b) => new Date(b) - new Date(a));
                 const latestImportDate = sortedDates[0];
                 
-                console.log('Latest imported date:', latestImportDate);
+             
                 
                 // Update date range to include the imported date
                 if (isMobile) {
@@ -603,11 +601,11 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
 
     // Enhanced useEffect for mobile/desktop mode switching
     useEffect(() => {
-        console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`);
+   
         
         // When switching to mobile, ensure selectedDate is set (default to end date if not already set)
         if (isMobile && !selectedDate) {
-            console.log('Mobile mode: setting selectedDate to overallEndDate:', overallEndDate);
+       
             setSelectedDate(overallEndDate);
         }
         

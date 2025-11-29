@@ -346,7 +346,7 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                 return 'warning';
         }
     };    // Check permissions using new system
-    console.log(auth.permissions)
+
     const canViewAllAttendance = auth.permissions?.includes('attendance.view') || false;
     const canViewOwnAttendance = auth.permissions?.includes('attendance.own.view') || false;
     const canManageAttendance = auth.permissions?.includes('attendance.manage') || false;

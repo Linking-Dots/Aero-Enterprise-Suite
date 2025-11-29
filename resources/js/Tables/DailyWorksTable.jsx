@@ -163,10 +163,33 @@ const DailyWorksTable = ({
         return work?.incharge && String(work.incharge) === String(auth.user?.id);
     };
     
+    // Helper function to check if current user is the assignee of a specific work
+    const isUserAssigneeOfWork = (work) => {
+        return work?.assigned && String(work.assigned) === String(auth.user?.id);
+    };
+    
     // Check if user can assign for a specific work (admin or incharge of the work)
     const canUserAssign = (work) => {
         return userIsAdmin || isUserInchargeOfWork(work);
     };
+    
+    // Check if user can update status and completion time (admin, SE, or assignee of the work)
+    const canUserUpdateStatus = (work) => {
+        return userIsAdmin || userIsSE || isUserAssigneeOfWork(work);
+    };
+    
+    // Check if user should see the assigned column (not if they're just an assignee viewing their own work)
+    const shouldShowAssignedColumn = useMemo(() => {
+        // Admins and incharges should see the column
+        if (userIsAdmin) return true;
+        
+        // Check if user is incharge of any work
+        const isInchargeOfAnyWork = allData?.some(work => isUserInchargeOfWork(work));
+        if (isInchargeOfAnyWork) return true;
+        
+        // If user is only an assignee (not admin/incharge), hide the column
+        return false;
+    }, [userIsAdmin, allData, auth.user?.id]);
 
     // Use available data with fallbacks
     const availableInCharges = allInCharges || users || [];
@@ -1193,7 +1216,8 @@ const DailyWorksTable = ({
                                     </div>
                                 )}
 
-                                {/* Assigned To */}
+                                {/* Assigned To - Hidden for assignees viewing their own work */}
+                                {(canUserAssign(work) || !isUserAssigneeOfWork(work)) && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <UserIcon className="w-4 h-4 text-default-500" />
@@ -1291,11 +1315,12 @@ const DailyWorksTable = ({
                                         )
                                     )}
                                 </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Status Management - Compact */}
-                        {(userIsAdmin || userIsSE) && (
+                        {/* Status Management - Compact (visible to admin, SE, or assignee) */}
+                        {canUserUpdateStatus(work) && (
                             <div className="bg-content2/20 p-2.5 rounded-md">
                                 <h4 className="text-xs font-semibold text-default-700 mb-2">Status</h4>
                                 
@@ -1581,7 +1606,7 @@ const DailyWorksTable = ({
                 return (
                     <TableCell className="min-w-56">
                         <div className="flex items-center justify-center gap-2 w-full">
-                            {(userIsAdmin || userIsSE) ? (
+                            {canUserUpdateStatus(work) ? (
                                 <Select
                                     size="sm"
                                     color={(() => {
@@ -2145,7 +2170,7 @@ const DailyWorksTable = ({
         { name: "Road Side", uid: "side", sortable: true, width: "w-20" },
         { name: "Layer Quantity", uid: "qty_layer", sortable: true, width: "w-24" },
         ...(userIsAdmin ? [{ name: "In-Charge", uid: "incharge", icon: UserIcon, sortable: true, width: "w-64" }] : []),
-        { name: "Assigned To", uid: "assigned", icon: UserIcon, sortable: true, width: "w-64" },
+        ...(shouldShowAssignedColumn ? [{ name: "Assigned To", uid: "assigned", icon: UserIcon, sortable: true, width: "w-64" }] : []),
         { name: "Planned Time", uid: "planned_time", icon: ClockIcon, sortable: true, width: "w-28" },
         { name: "Completion Time", uid: "completion_time", icon: CheckCircleIcon, sortable: true, width: "w-56" },
         { name: "Resubmissions", uid: "resubmission_count", icon: ArrowPathIcon, sortable: true, width: "w-28" },
