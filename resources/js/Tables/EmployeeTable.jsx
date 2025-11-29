@@ -978,7 +978,9 @@ const EmployeeTable = ({
                 <DropdownItem 
                   key="edit" 
                   startContent={<PencilIcon className="w-4 h-4" />}
-                  onPress={() => router.visit(route('profile', { user: user.id }))}
+                  href={route('profile', { user: user.id })}
+                  as={Link}
+                  prefetch
                 >
                   Edit Profile
                 </DropdownItem>

@@ -337,6 +337,7 @@ export default function Register() {
                         <motion.span whileHover={{ scale: 1.05 }} className="inline-block">
                             <Link
                                 href={route('login')}
+                                prefetch
                                 className="font-medium transition-colors duration-200 hover:underline"
                                 style={{ color: 'var(--theme-primary)' }}
                             >

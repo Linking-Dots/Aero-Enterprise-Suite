@@ -1,8 +1,8 @@
 {
      "private": true,
      "type": "module",
-     "version": "1.2.5",
-     "homepage": "http://aeos365.com",
+     "version": "3.0.1",
+     "homepage": "http://erp.dhakabypass.com",
      "scripts": {
           "dev": "vite",
           "build": "npm run version:sync && vite build && npm run pwa:update",

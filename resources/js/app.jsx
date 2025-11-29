@@ -101,9 +101,15 @@ if (false) {
 createInertiaApp({
     progress: {
         color: '#29d',
-        delay: 100, // Reduced delay for better SPA feel
+        delay: 50, // Faster progress indicator
         includeCSS: true,
         showSpinner: false,
+    },
+    defaults: {
+        prefetch: {
+            cacheFor: '1m', // Cache prefetched pages for 1 minute
+            hoverDelay: 50, // Faster prefetch trigger (default 75ms)
+        },
     },
     title: (title) => {
         const page = window.Laravel?.inertiaProps || {};

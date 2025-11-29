@@ -26,6 +26,28 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    build: {
+        // Code-splitting optimization for faster route transitions
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Vendor chunks - cached separately for better performance
+                    'vendor-react': ['react', 'react-dom'],
+                    'vendor-inertia': ['@inertiajs/react'],
+                    'vendor-heroui': ['@heroui/react'],
+                    'vendor-framer': ['framer-motion'],
+                    // Common utilities
+                    'vendor-utils': ['axios', 'lodash'],
+                },
+                // Optimize chunk file naming for better caching
+                chunkFileNames: 'assets/js/[name]-[hash].js',
+                entryFileNames: 'assets/js/[name]-[hash].js',
+                assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+            },
+        },
+        // Increase chunk size warning limit (optional)
+        chunkSizeWarningLimit: 600,
+    },
     server: { 
         host, 
         hmr: { host },
