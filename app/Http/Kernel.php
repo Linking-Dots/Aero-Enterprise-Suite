@@ -67,6 +67,8 @@ class Kernel extends HttpKernel
         'api_security' => \App\Http\Middleware\ApiSecurityMiddleware::class,
         'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'role_hierarchy' => \App\Http\Middleware\RoleHierarchyMiddleware::class,
+        // Module Permission Registry Middleware
+        'module' => \App\Http\Middleware\CheckModuleAccess::class,
         // Device auth is now global middleware - no need for alias
     ];
 }

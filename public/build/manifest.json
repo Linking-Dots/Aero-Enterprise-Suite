@@ -1,11 +1,17 @@
 {
+<<<<<<< Updated upstream
   "_AdjustmentsHorizontalIcon-D1xPAH8a.js": {
     "file": "assets/AdjustmentsHorizontalIcon-D1xPAH8a.js",
+=======
+  "_AdjustmentsHorizontalIcon-CitW2k5z.js": {
+    "file": "assets/AdjustmentsHorizontalIcon-CitW2k5z.js",
+>>>>>>> Stashed changes
     "name": "AdjustmentsHorizontalIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_AreaChart-DSxRhK5Y.js": {
     "file": "assets/AreaChart-DSxRhK5Y.js",
     "name": "AreaChart",
@@ -16,11 +22,24 @@
   },
   "_ArrowLeftIcon-BMwNcZN0.js": {
     "file": "assets/ArrowLeftIcon-BMwNcZN0.js",
+=======
+  "_AreaChart-BLYWCxIh.js": {
+    "file": "assets/AreaChart-BLYWCxIh.js",
+    "name": "AreaChart",
+    "imports": [
+      "resources/js/app.jsx",
+      "_index-vyppYF7I.js"
+    ]
+  },
+  "_ArrowLeftIcon-DnPNnX4L.js": {
+    "file": "assets/ArrowLeftIcon-DnPNnX4L.js",
+>>>>>>> Stashed changes
     "name": "ArrowLeftIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_AuthLayout-DXyQ4Elo.js": {
     "file": "assets/AuthLayout-DXyQ4Elo.js",
     "name": "AuthLayout",
@@ -85,59 +104,161 @@
   },
   "_ChartBarIcon-D5tcyWKJ.js": {
     "file": "assets/ChartBarIcon-D5tcyWKJ.js",
+=======
+  "_AuthLayout-CVAwh7E9.js": {
+    "file": "assets/AuthLayout-CVAwh7E9.js",
+    "name": "AuthLayout",
+    "imports": [
+      "resources/js/app.jsx",
+      "_GlassCard-BA-7Eich.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js"
+    ]
+  },
+  "_BulkDeleteModal-CnlcIBbV.js": {
+    "file": "assets/BulkDeleteModal-CnlcIBbV.js",
+    "name": "BulkDeleteModal",
+    "imports": [
+      "resources/js/app.jsx",
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_index-CtBsO7PD.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_index-CerE71PA.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_ClockIcon-CRPRCI7H.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_HeartIcon-6D_JYTIB.js",
+      "_SunIcon-MA65_TKy.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_calendar-BTrj-jH5.js",
+      "_user-DMOfaRHA.js",
+      "_clock-BC9j8Whw.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js"
+    ]
+  },
+  "_Button-Weuw5w3x.js": {
+    "file": "assets/Button-Weuw5w3x.js",
+    "name": "Button",
+    "imports": [
+      "resources/js/app.jsx",
+      "_proxy-ByMbOVRp.js"
+    ]
+  },
+  "_ChartBarIcon-D4B8pfqE.js": {
+    "file": "assets/ChartBarIcon-D4B8pfqE.js",
+>>>>>>> Stashed changes
     "name": "ChartBarIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ChartPieIcon-CpF-OC-w.js": {
     "file": "assets/ChartPieIcon-CpF-OC-w.js",
+=======
+  "_ChartPieIcon-7ldQK5gQ.js": {
+    "file": "assets/ChartPieIcon-7ldQK5gQ.js",
+>>>>>>> Stashed changes
     "name": "ChartPieIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_CheckCircleIcon-D8zDee2T.js": {
     "file": "assets/CheckCircleIcon-D8zDee2T.js",
+=======
+  "_CheckCircleIcon-D-Xg8-Mx.js": {
+    "file": "assets/CheckCircleIcon-D-Xg8-Mx.js",
+>>>>>>> Stashed changes
     "name": "CheckCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_CheckCircleIcon-DC8cSzAY.js": {
     "file": "assets/CheckCircleIcon-DC8cSzAY.js",
+=======
+  "_CheckCircleIcon-mncIOFUm.js": {
+    "file": "assets/CheckCircleIcon-mncIOFUm.js",
+>>>>>>> Stashed changes
     "name": "CheckCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ClipboardDocumentListIcon-DrBPG-ad.js": {
     "file": "assets/ClipboardDocumentListIcon-DrBPG-ad.js",
+=======
+  "_ClipboardDocumentListIcon-Cb7A9EUL.js": {
+    "file": "assets/ClipboardDocumentListIcon-Cb7A9EUL.js",
+>>>>>>> Stashed changes
     "name": "ClipboardDocumentListIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ClockIcon-BGTat_Ll.js": {
     "file": "assets/ClockIcon-BGTat_Ll.js",
+=======
+  "_ClockIcon-4Z87G53P.js": {
+    "file": "assets/ClockIcon-4Z87G53P.js",
+>>>>>>> Stashed changes
     "name": "ClockIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ClockIcon-EFeSvc7X.js": {
     "file": "assets/ClockIcon-EFeSvc7X.js",
+=======
+  "_ClockIcon-CRPRCI7H.js": {
+    "file": "assets/ClockIcon-CRPRCI7H.js",
+>>>>>>> Stashed changes
     "name": "ClockIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_DailyWorks-BmZ9A6vo.js": {
     "file": "assets/DailyWorks-BmZ9A6vo.js",
+=======
+  "_DailyWorks-DiKlWM3s.js": {
+    "file": "assets/DailyWorks-DiKlWM3s.js",
+>>>>>>> Stashed changes
     "name": "DailyWorks",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_toastUtils-6YNuLodH.js",
       "_Dashboard-D1938BEl.js",
       "_ExclamationTriangleIcon-D0AsjF0p.js",
@@ -183,6 +304,53 @@
       "_proxy-CGLX1-DN.js",
       "_MagnifyingGlassIcon-xO36MbuW.js",
       "_PlusIcon-DgDq5LT8.js"
+=======
+      "_toastUtils-Iz8RhFxm.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_xlsx-AzvlBsUj.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_DocumentIcon-D8od2ICh.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_calendar-BTrj-jH5.js",
+      "_map-pin--VeH8B8Z.js",
+      "_clock-BC9j8Whw.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_useDateFieldState-ErDGQr8B.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_features-animation-D0YkvCDz.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_chunk-ITDNPVX3-ntzMB9Vi.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_index-vyppYF7I.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_PlusIcon-BQw3U6ju.js"
+>>>>>>> Stashed changes
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs",
@@ -195,12 +363,18 @@
     "file": "assets/Dashboard-BEih8O7c.css",
     "src": "_Dashboard-BEih8O7c.css"
   },
+<<<<<<< Updated upstream
   "_Dashboard-D1938BEl.js": {
     "file": "assets/Dashboard-D1938BEl.js",
+=======
+  "_Dashboard-PMT9L6iU.js": {
+    "file": "assets/Dashboard-PMT9L6iU.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_toastUtils-6YNuLodH.js",
       "_MapPinIcon-OO5CRGHq.js",
       "_EnvelopeIcon-D9i0PDbo.js",
@@ -219,6 +393,27 @@
       "_chunk-IHOGUXIG-Bvz9okur.js",
       "_CheckCircleIcon-DC8cSzAY.js",
       "_ExclamationTriangleIcon-nydRqaXF.js"
+=======
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+>>>>>>> Stashed changes
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs",
@@ -231,146 +426,247 @@
       "assets/Dashboard-BEih8O7c.css"
     ]
   },
+<<<<<<< Updated upstream
   "_DeviceTabletIcon-CsXC8cJ3.js": {
     "file": "assets/DeviceTabletIcon-CsXC8cJ3.js",
+=======
+  "_DeviceTabletIcon-D5tDUgpR.js": {
+    "file": "assets/DeviceTabletIcon-D5tDUgpR.js",
+>>>>>>> Stashed changes
     "name": "DeviceTabletIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_DocumentArrowDownIcon-BvKpnqO0.js": {
     "file": "assets/DocumentArrowDownIcon-BvKpnqO0.js",
+=======
+  "_DocumentArrowDownIcon-BayKnCWw.js": {
+    "file": "assets/DocumentArrowDownIcon-BayKnCWw.js",
+>>>>>>> Stashed changes
     "name": "DocumentArrowDownIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_DocumentIcon-BzZUTO07.js": {
     "file": "assets/DocumentIcon-BzZUTO07.js",
+=======
+  "_DocumentIcon-D8od2ICh.js": {
+    "file": "assets/DocumentIcon-D8od2ICh.js",
+>>>>>>> Stashed changes
     "name": "DocumentIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_EllipsisVerticalIcon-BjPX-ZJH.js": {
     "file": "assets/EllipsisVerticalIcon-BjPX-ZJH.js",
+=======
+  "_EllipsisVerticalIcon-DPAKH8XQ.js": {
+    "file": "assets/EllipsisVerticalIcon-DPAKH8XQ.js",
+>>>>>>> Stashed changes
     "name": "EllipsisVerticalIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_EnvelopeIcon-D9i0PDbo.js": {
     "file": "assets/EnvelopeIcon-D9i0PDbo.js",
+=======
+  "_EnvelopeIcon-CfR7cmdn.js": {
+    "file": "assets/EnvelopeIcon-CfR7cmdn.js",
+>>>>>>> Stashed changes
     "name": "EnvelopeIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ExclamationTriangleIcon-D0AsjF0p.js": {
     "file": "assets/ExclamationTriangleIcon-D0AsjF0p.js",
+=======
+  "_ExclamationTriangleIcon-BEZKRPCj.js": {
+    "file": "assets/ExclamationTriangleIcon-BEZKRPCj.js",
+>>>>>>> Stashed changes
     "name": "ExclamationTriangleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ExclamationTriangleIcon-nydRqaXF.js": {
     "file": "assets/ExclamationTriangleIcon-nydRqaXF.js",
+=======
+  "_ExclamationTriangleIcon-BHcQEwYT.js": {
+    "file": "assets/ExclamationTriangleIcon-BHcQEwYT.js",
+>>>>>>> Stashed changes
     "name": "ExclamationTriangleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_EyeIcon-DF2DudMh.js": {
     "file": "assets/EyeIcon-DF2DudMh.js",
+=======
+  "_EyeIcon-DWfYEIX7.js": {
+    "file": "assets/EyeIcon-DWfYEIX7.js",
+>>>>>>> Stashed changes
     "name": "EyeIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_EyeSlashIcon-B0mquRtz.js": {
     "file": "assets/EyeSlashIcon-B0mquRtz.js",
+=======
+  "_EyeSlashIcon-CXkoOyiP.js": {
+    "file": "assets/EyeSlashIcon-CXkoOyiP.js",
+>>>>>>> Stashed changes
     "name": "EyeSlashIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_FunnelIcon-CMeuFxpM.js": {
     "file": "assets/FunnelIcon-CMeuFxpM.js",
+=======
+  "_FunnelIcon-CIKQXU0-.js": {
+    "file": "assets/FunnelIcon-CIKQXU0-.js",
+>>>>>>> Stashed changes
     "name": "FunnelIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_GlassCard-_yH4RJEj.js": {
     "file": "assets/GlassCard-_yH4RJEj.js",
+=======
+  "_GlassCard-BA-7Eich.js": {
+    "file": "assets/GlassCard-BA-7Eich.js",
+>>>>>>> Stashed changes
     "name": "GlassCard",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_HashtagIcon-BtAYsjW5.js": {
     "file": "assets/HashtagIcon-BtAYsjW5.js",
+=======
+  "_HashtagIcon-D2YaOxd2.js": {
+    "file": "assets/HashtagIcon-D2YaOxd2.js",
+>>>>>>> Stashed changes
     "name": "HashtagIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_HeartIcon-Cwej6cZX.js": {
     "file": "assets/HeartIcon-Cwej6cZX.js",
+=======
+  "_HeartIcon-6D_JYTIB.js": {
+    "file": "assets/HeartIcon-6D_JYTIB.js",
+>>>>>>> Stashed changes
     "name": "HeartIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_InformationCircleIcon-CK6sOZT6.js": {
     "file": "assets/InformationCircleIcon-CK6sOZT6.js",
+=======
+  "_InformationCircleIcon-CKXmugUi.js": {
+    "file": "assets/InformationCircleIcon-CKXmugUi.js",
+>>>>>>> Stashed changes
     "name": "InformationCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_KeyIcon-BnKTLmQ4.js": {
     "file": "assets/KeyIcon-BnKTLmQ4.js",
+=======
+  "_KeyIcon-C67GVAFO.js": {
+    "file": "assets/KeyIcon-C67GVAFO.js",
+>>>>>>> Stashed changes
     "name": "KeyIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_LockClosedIcon-j9EWiTgZ.js": {
     "file": "assets/LockClosedIcon-j9EWiTgZ.js",
+=======
+  "_LockClosedIcon-C-3g3zEf.js": {
+    "file": "assets/LockClosedIcon-C-3g3zEf.js",
+>>>>>>> Stashed changes
     "name": "LockClosedIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_LockOpenIcon-BKGt9GRC.js": {
     "file": "assets/LockOpenIcon-BKGt9GRC.js",
+=======
+  "_LockOpenIcon-D_GZ8TCD.js": {
+    "file": "assets/LockOpenIcon-D_GZ8TCD.js",
+>>>>>>> Stashed changes
     "name": "LockOpenIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_MagnifyingGlassIcon-BuXU8DPf.js": {
     "file": "assets/MagnifyingGlassIcon-BuXU8DPf.js",
+=======
+  "_MagnifyingGlassIcon-Ch4BuJNt.js": {
+    "file": "assets/MagnifyingGlassIcon-Ch4BuJNt.js",
+>>>>>>> Stashed changes
     "name": "MagnifyingGlassIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_MagnifyingGlassIcon-xO36MbuW.js": {
     "file": "assets/MagnifyingGlassIcon-xO36MbuW.js",
+=======
+  "_MagnifyingGlassIcon-WrElD3YO.js": {
+    "file": "assets/MagnifyingGlassIcon-WrElD3YO.js",
+>>>>>>> Stashed changes
     "name": "MagnifyingGlassIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_MapPinIcon-OO5CRGHq.js": {
     "file": "assets/MapPinIcon-OO5CRGHq.js",
+=======
+  "_MapPinIcon-B-THB0O0.js": {
+    "file": "assets/MapPinIcon-B-THB0O0.js",
+>>>>>>> Stashed changes
     "name": "MapPinIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_Marker-LvSWs6as.js": {
     "file": "assets/Marker-LvSWs6as.js",
     "name": "Marker",
@@ -383,6 +679,20 @@
     "name": "NoDataMessage",
     "imports": [
       "_createLucideIcon-glyUy6AA.js",
+=======
+  "_Marker-CHxk6PAm.js": {
+    "file": "assets/Marker-CHxk6PAm.js",
+    "name": "Marker",
+    "imports": [
+      "_leaflet-TfS_ydne.js"
+    ]
+  },
+  "_NoDataMessage-DcR7Qyh_.js": {
+    "file": "assets/NoDataMessage-DcR7Qyh_.js",
+    "name": "NoDataMessage",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js",
+>>>>>>> Stashed changes
       "resources/js/app.jsx"
     ]
   },
@@ -390,55 +700,91 @@
     "file": "assets/NumberFormatter-DNR9MAW-.js",
     "name": "NumberFormatter"
   },
+<<<<<<< Updated upstream
   "_PageHeader-BcvZZaFC.js": {
     "file": "assets/PageHeader-BcvZZaFC.js",
+=======
+  "_PageHeader-CQH90OfM.js": {
+    "file": "assets/PageHeader-CQH90OfM.js",
+>>>>>>> Stashed changes
     "name": "PageHeader",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_PencilIcon-I6aag8pZ.js": {
     "file": "assets/PencilIcon-I6aag8pZ.js",
+=======
+  "_PencilIcon-BkSrTia3.js": {
+    "file": "assets/PencilIcon-BkSrTia3.js",
+>>>>>>> Stashed changes
     "name": "PencilIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_PencilSquareIcon-D4U5PIim.js": {
     "file": "assets/PencilSquareIcon-D4U5PIim.js",
+=======
+  "_PencilSquareIcon-C6YrQtNt.js": {
+    "file": "assets/PencilSquareIcon-C6YrQtNt.js",
+>>>>>>> Stashed changes
     "name": "PencilSquareIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_PlusIcon-DgDq5LT8.js": {
     "file": "assets/PlusIcon-DgDq5LT8.js",
+=======
+  "_PlusIcon-BQw3U6ju.js": {
+    "file": "assets/PlusIcon-BQw3U6ju.js",
+>>>>>>> Stashed changes
     "name": "PlusIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_PresentationChartLineIcon-cNRANHqb.js": {
     "file": "assets/PresentationChartLineIcon-cNRANHqb.js",
+=======
+  "_PresentationChartLineIcon-B50QN2cx.js": {
+    "file": "assets/PresentationChartLineIcon-B50QN2cx.js",
+>>>>>>> Stashed changes
     "name": "PresentationChartLineIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_PrinterIcon-15B4-6Y5.js": {
     "file": "assets/PrinterIcon-15B4-6Y5.js",
+=======
+  "_PrinterIcon-DYoSHEKn.js": {
+    "file": "assets/PrinterIcon-DYoSHEKn.js",
+>>>>>>> Stashed changes
     "name": "PrinterIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_ShieldCheckIcon-0qxwy5hJ.js": {
     "file": "assets/ShieldCheckIcon-0qxwy5hJ.js",
+=======
+  "_ShieldCheckIcon-Ci88VqTr.js": {
+    "file": "assets/ShieldCheckIcon-Ci88VqTr.js",
+>>>>>>> Stashed changes
     "name": "ShieldCheckIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_StatsCards-CpXnaZfD.js": {
     "file": "assets/StatsCards-CpXnaZfD.js",
     "name": "StatsCards",
@@ -450,18 +796,37 @@
   },
   "_SunIcon-CQK4Hv4h.js": {
     "file": "assets/SunIcon-CQK4Hv4h.js",
+=======
+  "_StatsCards-BAsbSv3i.js": {
+    "file": "assets/StatsCards-BAsbSv3i.js",
+    "name": "StatsCards",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js"
+    ]
+  },
+  "_SunIcon-MA65_TKy.js": {
+    "file": "assets/SunIcon-MA65_TKy.js",
+>>>>>>> Stashed changes
     "name": "SunIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_TableCellsIcon-CnN0XY8u.js": {
     "file": "assets/TableCellsIcon-CnN0XY8u.js",
+=======
+  "_TableCellsIcon-CMdh6MsC.js": {
+    "file": "assets/TableCellsIcon-CMdh6MsC.js",
+>>>>>>> Stashed changes
     "name": "TableCellsIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_TimeSheetTable-D_s3kqq2.js": {
     "file": "assets/TimeSheetTable-D_s3kqq2.js",
     "name": "TimeSheetTable",
@@ -493,60 +858,129 @@
   },
   "_TrashIcon-BH6TBrZS.js": {
     "file": "assets/TrashIcon-BH6TBrZS.js",
+=======
+  "_TimeSheetTable-CO1m3QfX.js": {
+    "file": "assets/TimeSheetTable-CO1m3QfX.js",
+    "name": "TimeSheetTable",
+    "imports": [
+      "resources/js/app.jsx",
+      "_dayjs.min-C28EdO6Z.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_PageHeader-CQH90OfM.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_proxy-ByMbOVRp.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-S574QCAN-D9KKzz51.js"
+    ]
+  },
+  "_TrashIcon-DcwicuGA.js": {
+    "file": "assets/TrashIcon-DcwicuGA.js",
+>>>>>>> Stashed changes
     "name": "TrashIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_TrophyIcon-Bj9voNnQ.js": {
     "file": "assets/TrophyIcon-Bj9voNnQ.js",
+=======
+  "_TrophyIcon-xC6RD9dI.js": {
+    "file": "assets/TrophyIcon-xC6RD9dI.js",
+>>>>>>> Stashed changes
     "name": "TrophyIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_UserGroupIcon-DKhnss-s.js": {
     "file": "assets/UserGroupIcon-DKhnss-s.js",
+=======
+  "_UserGroupIcon-CqYoflHv.js": {
+    "file": "assets/UserGroupIcon-CqYoflHv.js",
+>>>>>>> Stashed changes
     "name": "UserGroupIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_UserIcon-Bwzye6ms.js": {
     "file": "assets/UserIcon-Bwzye6ms.js",
+=======
+  "_UserIcon-RT0TlI1U.js": {
+    "file": "assets/UserIcon-RT0TlI1U.js",
+>>>>>>> Stashed changes
     "name": "UserIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_UserPlusIcon-DZQuLTZV.js": {
     "file": "assets/UserPlusIcon-DZQuLTZV.js",
+=======
+  "_UserPlusIcon-DWbDU3r4.js": {
+    "file": "assets/UserPlusIcon-DWbDU3r4.js",
+>>>>>>> Stashed changes
     "name": "UserPlusIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_WifiIcon-B5sav9Tf.js": {
     "file": "assets/WifiIcon-B5sav9Tf.js",
+=======
+  "_WifiIcon-CkBFZVge.js": {
+    "file": "assets/WifiIcon-CkBFZVge.js",
+>>>>>>> Stashed changes
     "name": "WifiIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_XCircleIcon--4D88jKD.js": {
     "file": "assets/XCircleIcon--4D88jKD.js",
+=======
+  "_XCircleIcon-Cjs2Oqui.js": {
+    "file": "assets/XCircleIcon-Cjs2Oqui.js",
+>>>>>>> Stashed changes
     "name": "XCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_XCircleIcon-CbrJfWc1.js": {
     "file": "assets/XCircleIcon-CbrJfWc1.js",
+=======
+  "_XCircleIcon-gac1YlSt.js": {
+    "file": "assets/XCircleIcon-gac1YlSt.js",
+>>>>>>> Stashed changes
     "name": "XCircleIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_XMarkIcon-CZXGrTVE.js": {
     "file": "assets/XMarkIcon-CZXGrTVE.js",
     "name": "XMarkIcon",
@@ -554,11 +988,21 @@
       "resources/js/app.jsx",
       "_toastUtils-6YNuLodH.js",
       "_chunk-SSA7SXE4-BJoh4X-s.js"
+=======
+  "_XMarkIcon-B57lrNTs.js": {
+    "file": "assets/XMarkIcon-B57lrNTs.js",
+    "name": "XMarkIcon",
+    "imports": [
+      "resources/js/app.jsx",
+      "_toastUtils-Iz8RhFxm.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js"
+>>>>>>> Stashed changes
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs"
     ]
   },
+<<<<<<< Updated upstream
   "_briefcase-DJeVj8L0.js": {
     "file": "assets/briefcase-DJeVj8L0.js",
     "name": "briefcase",
@@ -582,11 +1026,37 @@
   },
   "_chunk-57V4RE7B-DHVzMU1z.js": {
     "file": "assets/chunk-57V4RE7B-DHVzMU1z.js",
+=======
+  "_briefcase-Ct6aHhzs.js": {
+    "file": "assets/briefcase-Ct6aHhzs.js",
+    "name": "briefcase",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_calendar-BTrj-jH5.js": {
+    "file": "assets/calendar-BTrj-jH5.js",
+    "name": "calendar",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_camera-C20H_TkJ.js": {
+    "file": "assets/camera-C20H_TkJ.js",
+    "name": "camera",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_chunk-57V4RE7B-BFxJaW5n.js": {
+    "file": "assets/chunk-57V4RE7B-BFxJaW5n.js",
+>>>>>>> Stashed changes
     "name": "chunk-57V4RE7B",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-APIAPHLK-BUPxFkGM.js": {
     "file": "assets/chunk-APIAPHLK-BUPxFkGM.js",
     "name": "chunk-APIAPHLK",
@@ -605,11 +1075,24 @@
   },
   "_chunk-D5XJWRAV-cOYTpf9K.js": {
     "file": "assets/chunk-D5XJWRAV-cOYTpf9K.js",
+=======
+  "_chunk-BHGNW4BO-Ju-mgSqf.js": {
+    "file": "assets/chunk-BHGNW4BO-Ju-mgSqf.js",
+    "name": "chunk-BHGNW4BO",
+    "imports": [
+      "resources/js/app.jsx",
+      "_index-CVtaHEqw.js"
+    ]
+  },
+  "_chunk-D5XJWRAV-CmJIffgK.js": {
+    "file": "assets/chunk-D5XJWRAV-CmJIffgK.js",
+>>>>>>> Stashed changes
     "name": "chunk-D5XJWRAV",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-F3UDT23P-B0nzCBg1.js": {
     "file": "assets/chunk-F3UDT23P-B0nzCBg1.js",
     "name": "chunk-F3UDT23P",
@@ -639,11 +1122,51 @@
   },
   "_chunk-JOT4BT4P-BIa_9joS.js": {
     "file": "assets/chunk-JOT4BT4P-BIa_9joS.js",
+=======
+  "_chunk-EAPQ7RWQ-DARtrv5-.js": {
+    "file": "assets/chunk-EAPQ7RWQ-DARtrv5-.js",
+    "name": "chunk-EAPQ7RWQ",
+    "imports": [
+      "resources/js/app.jsx",
+      "_Dashboard-PMT9L6iU.js"
+    ]
+  },
+  "_chunk-F3UDT23P-CpKDAAZn.js": {
+    "file": "assets/chunk-F3UDT23P-CpKDAAZn.js",
+    "name": "chunk-F3UDT23P",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_Dashboard-PMT9L6iU.js"
+    ]
+  },
+  "_chunk-IHOGUXIG-qQB_28Ca.js": {
+    "file": "assets/chunk-IHOGUXIG-qQB_28Ca.js",
+    "name": "chunk-IHOGUXIG",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-SSA7SXE4-kGhgEhoz.js"
+    ]
+  },
+  "_chunk-ITDNPVX3-ntzMB9Vi.js": {
+    "file": "assets/chunk-ITDNPVX3-ntzMB9Vi.js",
+    "name": "chunk-ITDNPVX3",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js"
+    ]
+  },
+  "_chunk-JOT4BT4P-DUrtLGUw.js": {
+    "file": "assets/chunk-JOT4BT4P-DUrtLGUw.js",
+>>>>>>> Stashed changes
     "name": "chunk-JOT4BT4P",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-O5MCAK4F-DgHvhE4r.js": {
     "file": "assets/chunk-O5MCAK4F-DgHvhE4r.js",
     "name": "chunk-O5MCAK4F",
@@ -670,18 +1193,52 @@
   },
   "_chunk-SSA7SXE4-BJoh4X-s.js": {
     "file": "assets/chunk-SSA7SXE4-BJoh4X-s.js",
+=======
+  "_chunk-O5MCAK4F-RA0tlcCK.js": {
+    "file": "assets/chunk-O5MCAK4F-RA0tlcCK.js",
+    "name": "chunk-O5MCAK4F",
+    "imports": [
+      "_Dashboard-PMT9L6iU.js",
+      "resources/js/app.jsx"
+    ]
+  },
+  "_chunk-QESP63UR-C89HLauD.js": {
+    "file": "assets/chunk-QESP63UR-C89HLauD.js",
+    "name": "chunk-QESP63UR",
+    "imports": [
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "resources/js/app.jsx"
+    ]
+  },
+  "_chunk-S574QCAN-D9KKzz51.js": {
+    "file": "assets/chunk-S574QCAN-D9KKzz51.js",
+    "name": "chunk-S574QCAN",
+    "imports": [
+      "resources/js/app.jsx",
+      "_Dashboard-PMT9L6iU.js"
+    ]
+  },
+  "_chunk-SSA7SXE4-kGhgEhoz.js": {
+    "file": "assets/chunk-SSA7SXE4-kGhgEhoz.js",
+>>>>>>> Stashed changes
     "name": "chunk-SSA7SXE4",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-TLYTI3QM-CBaYsJS5.js": {
     "file": "assets/chunk-TLYTI3QM-CBaYsJS5.js",
+=======
+  "_chunk-TLYTI3QM-BYKAmrkG.js": {
+    "file": "assets/chunk-TLYTI3QM-BYKAmrkG.js",
+>>>>>>> Stashed changes
     "name": "chunk-TLYTI3QM",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-TQNYOUFX-BNwOEqtf.js": {
     "file": "assets/chunk-TQNYOUFX-BNwOEqtf.js",
     "name": "chunk-TQNYOUFX",
@@ -717,18 +1274,62 @@
       "resources/js/app.jsx",
       "_chunk-SSA7SXE4-BJoh4X-s.js",
       "_toastUtils-6YNuLodH.js"
+=======
+  "_chunk-TQNYOUFX-v8rKt3jl.js": {
+    "file": "assets/chunk-TQNYOUFX-v8rKt3jl.js",
+    "name": "chunk-TQNYOUFX",
+    "imports": [
+      "resources/js/app.jsx",
+      "_toastUtils-Iz8RhFxm.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "_chunk-XJ2YRSUP-BBCnKNhp.js": {
+    "file": "assets/chunk-XJ2YRSUP-BBCnKNhp.js",
+    "name": "chunk-XJ2YRSUP",
+    "imports": [
+      "resources/js/app.jsx",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_toastUtils-Iz8RhFxm.js"
+    ]
+  },
+  "_chunk-XVMALT6H-kpfTB7wQ.js": {
+    "file": "assets/chunk-XVMALT6H-kpfTB7wQ.js",
+    "name": "chunk-XVMALT6H",
+    "imports": [
+      "resources/js/app.jsx",
+      "_useProgressBar-Csp-WOVq.js",
+      "_Dashboard-PMT9L6iU.js"
+    ]
+  },
+  "_chunk-Y2AYO5NJ-Btdgu39A.js": {
+    "file": "assets/chunk-Y2AYO5NJ-Btdgu39A.js",
+    "name": "chunk-Y2AYO5NJ",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_toastUtils-Iz8RhFxm.js"
+>>>>>>> Stashed changes
     ],
     "dynamicImports": [
       "node_modules/@heroui/dom-animation/dist/index.mjs"
     ]
   },
+<<<<<<< Updated upstream
   "_chunk-YRZGWF2W-D8nJVjbc.js": {
     "file": "assets/chunk-YRZGWF2W-D8nJVjbc.js",
+=======
+  "_chunk-YRZGWF2W-BdQvQ8_J.js": {
+    "file": "assets/chunk-YRZGWF2W-BdQvQ8_J.js",
+>>>>>>> Stashed changes
     "name": "chunk-YRZGWF2W",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_clock-Cooo_ABa.js": {
     "file": "assets/clock-Cooo_ABa.js",
     "name": "clock",
@@ -738,20 +1339,41 @@
   },
   "_create-visual-element-OeeLNUjW.js": {
     "file": "assets/create-visual-element-OeeLNUjW.js",
+=======
+  "_clock-BC9j8Whw.js": {
+    "file": "assets/clock-BC9j8Whw.js",
+    "name": "clock",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_create-visual-element-CeiJpb04.js": {
+    "file": "assets/create-visual-element-CeiJpb04.js",
+>>>>>>> Stashed changes
     "name": "create-visual-element",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_createLucideIcon-glyUy6AA.js": {
     "file": "assets/createLucideIcon-glyUy6AA.js",
+=======
+  "_createLucideIcon-BFyqkjqD.js": {
+    "file": "assets/createLucideIcon-BFyqkjqD.js",
+>>>>>>> Stashed changes
     "name": "createLucideIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_dayjs.min-DAA8ALUK.js": {
     "file": "assets/dayjs.min-DAA8ALUK.js",
+=======
+  "_dayjs.min-C28EdO6Z.js": {
+    "file": "assets/dayjs.min-C28EdO6Z.js",
+>>>>>>> Stashed changes
     "name": "dayjs.min",
     "imports": [
       "resources/js/app.jsx"
@@ -761,6 +1383,7 @@
     "file": "assets/en-US-D8UQXs-H.js",
     "name": "en-US"
   },
+<<<<<<< Updated upstream
   "_features-animation-BiBNG8Xa.js": {
     "file": "assets/features-animation-BiBNG8Xa.js",
     "name": "features-animation",
@@ -790,13 +1413,49 @@
   },
   "_index-b0ZRZlw4.js": {
     "file": "assets/index-b0ZRZlw4.js",
+=======
+  "_features-animation-D0YkvCDz.js": {
+    "file": "assets/features-animation-D0YkvCDz.js",
+    "name": "features-animation",
+    "imports": [
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "_index-CVtaHEqw.js": {
+    "file": "assets/index-CVtaHEqw.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-SSA7SXE4-kGhgEhoz.js"
+    ]
+  },
+  "_index-CerE71PA.js": {
+    "file": "assets/index-CerE71PA.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js"
+    ]
+  },
+  "_index-CtBsO7PD.js": {
+    "file": "assets/index-CtBsO7PD.js",
+    "name": "index"
+  },
+  "_index-vyppYF7I.js": {
+    "file": "assets/index-vyppYF7I.js",
+>>>>>>> Stashed changes
     "name": "index",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_isBetween-CUDeWDcC.js": {
     "file": "assets/isBetween-CUDeWDcC.js",
+=======
+  "_isBetween-B-ywIGVZ.js": {
+    "file": "assets/isBetween-B-ywIGVZ.js",
+>>>>>>> Stashed changes
     "name": "isBetween",
     "imports": [
       "resources/js/app.jsx"
@@ -806,8 +1465,13 @@
     "file": "assets/leaflet-CLLlcC51.css",
     "src": "_leaflet-CLLlcC51.css"
   },
+<<<<<<< Updated upstream
   "_leaflet-CzVixunx.js": {
     "file": "assets/leaflet-CzVixunx.js",
+=======
+  "_leaflet-TfS_ydne.js": {
+    "file": "assets/leaflet-TfS_ydne.js",
+>>>>>>> Stashed changes
     "name": "leaflet",
     "imports": [
       "resources/js/app.jsx"
@@ -821,8 +1485,13 @@
       "assets/marker-icon-hN30_KVU.png"
     ]
   },
+<<<<<<< Updated upstream
   "_leaflet-routing-machine-xt_SzNLs.js": {
     "file": "assets/leaflet-routing-machine-xt_SzNLs.js",
+=======
+  "_leaflet-routing-machine-D1zLfiOQ.js": {
+    "file": "assets/leaflet-routing-machine-D1zLfiOQ.js",
+>>>>>>> Stashed changes
     "name": "leaflet-routing-machine",
     "imports": [
       "resources/js/app.jsx"
@@ -835,6 +1504,7 @@
       "assets/logo-DFQfDCzR.png"
     ]
   },
+<<<<<<< Updated upstream
   "_map-pin-CWal0TQu.js": {
     "file": "assets/map-pin-CWal0TQu.js",
     "name": "map-pin",
@@ -852,11 +1522,31 @@
   },
   "_toastUtils-6YNuLodH.js": {
     "file": "assets/toastUtils-6YNuLodH.js",
+=======
+  "_map-pin--VeH8B8Z.js": {
+    "file": "assets/map-pin--VeH8B8Z.js",
+    "name": "map-pin",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_proxy-ByMbOVRp.js": {
+    "file": "assets/proxy-ByMbOVRp.js",
+    "name": "proxy",
+    "imports": [
+      "resources/js/app.jsx",
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "_toastUtils-Iz8RhFxm.js": {
+    "file": "assets/toastUtils-Iz8RhFxm.js",
+>>>>>>> Stashed changes
     "name": "toastUtils",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_useDateFieldState-BxbVZ7qZ.js": {
     "file": "assets/useDateFieldState-BxbVZ7qZ.js",
     "name": "useDateFieldState",
@@ -871,11 +1561,28 @@
   },
   "_useFilter-cnWUcL67.js": {
     "file": "assets/useFilter-cnWUcL67.js",
+=======
+  "_useDateFieldState-ErDGQr8B.js": {
+    "file": "assets/useDateFieldState-ErDGQr8B.js",
+    "name": "useDateFieldState",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_useFilter-B9Id6Fug.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js"
+    ]
+  },
+  "_useFilter-B9Id6Fug.js": {
+    "file": "assets/useFilter-B9Id6Fug.js",
+>>>>>>> Stashed changes
     "name": "useFilter",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+<<<<<<< Updated upstream
   "_useProgressBar-Ba50_dqT.js": {
     "file": "assets/useProgressBar-Ba50_dqT.js",
     "name": "useProgressBar",
@@ -915,6 +1622,47 @@
       "resources/js/app.jsx",
       "_chunk-SSA7SXE4-BJoh4X-s.js",
       "_createLucideIcon-glyUy6AA.js"
+=======
+  "_useProgressBar-Csp-WOVq.js": {
+    "file": "assets/useProgressBar-Csp-WOVq.js",
+    "name": "useProgressBar",
+    "imports": [
+      "resources/js/app.jsx",
+      "_toastUtils-Iz8RhFxm.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_NumberFormatter-DNR9MAW-.js"
+    ]
+  },
+  "_useToggleState-Cbk3iJwk.js": {
+    "file": "assets/useToggleState-Cbk3iJwk.js",
+    "name": "useToggleState",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-SSA7SXE4-kGhgEhoz.js"
+    ]
+  },
+  "_user-DMOfaRHA.js": {
+    "file": "assets/user-DMOfaRHA.js",
+    "name": "user",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_users-BCnw-u6P.js": {
+    "file": "assets/users-BCnw-u6P.js",
+    "name": "users",
+    "imports": [
+      "_createLucideIcon-BFyqkjqD.js"
+    ]
+  },
+  "_xlsx-AzvlBsUj.js": {
+    "file": "assets/xlsx-AzvlBsUj.js",
+    "name": "xlsx",
+    "imports": [
+      "resources/js/app.jsx",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_createLucideIcon-BFyqkjqD.js"
+>>>>>>> Stashed changes
     ]
   },
   "node_modules/@fontsource/roboto/files/roboto-cyrillic-300-normal.woff": {
@@ -1206,23 +1954,37 @@
     "src": "node_modules/@fontsource/roboto/files/roboto-vietnamese-700-normal.woff2"
   },
   "node_modules/@heroui/dom-animation/dist/index.mjs": {
+<<<<<<< Updated upstream
     "file": "assets/index-tCJyzwh8.js",
+=======
+    "file": "assets/index-T4hZmn7C.js",
+>>>>>>> Stashed changes
     "name": "index",
     "src": "node_modules/@heroui/dom-animation/dist/index.mjs",
     "isDynamicEntry": true,
     "imports": [
+<<<<<<< Updated upstream
       "_features-animation-BiBNG8Xa.js",
       "_create-visual-element-OeeLNUjW.js",
+=======
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+>>>>>>> Stashed changes
       "resources/js/app.jsx"
     ]
   },
   "node_modules/canvg/lib/index.es.js": {
+<<<<<<< Updated upstream
     "file": "assets/index.es-DEhYklSo.js",
+=======
+    "file": "assets/index.es-CkLS824V.js",
+>>>>>>> Stashed changes
     "name": "index.es",
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_DailyWorks-BmZ9A6vo.js",
       "_toastUtils-6YNuLodH.js",
       "_Dashboard-D1938BEl.js",
@@ -1280,6 +2042,65 @@
       "_useProgressBar-Ba50_dqT.js",
       "_ChartBarIcon-D5tcyWKJ.js",
       "_PlusIcon-DgDq5LT8.js"
+=======
+      "_DailyWorks-DiKlWM3s.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_xlsx-AzvlBsUj.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_DocumentIcon-D8od2ICh.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_calendar-BTrj-jH5.js",
+      "_map-pin--VeH8B8Z.js",
+      "_clock-BC9j8Whw.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_useDateFieldState-ErDGQr8B.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_useFilter-B9Id6Fug.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_chunk-ITDNPVX3-ntzMB9Vi.js",
+      "_index-vyppYF7I.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_PlusIcon-BQw3U6ju.js"
+>>>>>>> Stashed changes
     ]
   },
   "node_modules/dompurify/dist/purify.es.mjs": {
@@ -1319,17 +2140,26 @@
     "src": "public/assets/images/logo.png"
   },
   "resources/css/app.css": {
+<<<<<<< Updated upstream
     "file": "assets/app-Baqw_DrA.css",
+=======
+    "file": "assets/app-BzGBvzSZ.css",
+>>>>>>> Stashed changes
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/Pages/Administration/ModuleManagement.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/ModuleManagement-ClAmBQcm.js",
+=======
+    "file": "assets/ModuleManagement-CgKKqRfq.js",
+>>>>>>> Stashed changes
     "name": "ModuleManagement",
     "src": "resources/js/Pages/Administration/ModuleManagement.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -1366,11 +2196,53 @@
   },
   "resources/js/Pages/Administration/RoleManagement.jsx": {
     "file": "assets/RoleManagement-B2T5OYF1.js",
+=======
+      "_GlassCard-BA-7Eich.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_DocumentIcon-D8od2ICh.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_PencilSquareIcon-C6YrQtNt.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_proxy-ByMbOVRp.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Administration/RoleManagement.jsx": {
+    "file": "assets/RoleManagement-DrtmgWLT.js",
+>>>>>>> Stashed changes
     "name": "RoleManagement",
     "src": "resources/js/Pages/Administration/RoleManagement.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_StatsCards-CpXnaZfD.js",
@@ -1415,11 +2287,56 @@
   },
   "resources/js/Pages/Administration/SystemMonitoringEnhanced.jsx": {
     "file": "assets/SystemMonitoringEnhanced-B5f6XZbz.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_FunnelIcon-CIKQXU0-.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_proxy-ByMbOVRp.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_PencilSquareIcon-C6YrQtNt.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Administration/SystemMonitoringEnhanced.jsx": {
+    "file": "assets/SystemMonitoringEnhanced-BzVIatrn.js",
+>>>>>>> Stashed changes
     "name": "SystemMonitoringEnhanced",
     "src": "resources/js/Pages/Administration/SystemMonitoringEnhanced.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
@@ -1460,11 +2377,55 @@
   },
   "resources/js/Pages/AttendanceAdmin.jsx": {
     "file": "assets/AttendanceAdmin-B7yuICed.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_proxy-ByMbOVRp.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_AreaChart-BLYWCxIh.js",
+      "_ChartPieIcon-7ldQK5gQ.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_index-vyppYF7I.js"
+    ]
+  },
+  "resources/js/Pages/AttendanceAdmin.jsx": {
+    "file": "assets/AttendanceAdmin-DHrkiN7-.js",
+>>>>>>> Stashed changes
     "name": "AttendanceAdmin",
     "src": "resources/js/Pages/AttendanceAdmin.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_StatsCards-CpXnaZfD.js",
       "_Dashboard-D1938BEl.js",
       "_dayjs.min-DAA8ALUK.js",
@@ -1507,11 +2468,57 @@
   },
   "resources/js/Pages/AttendanceEmployee.jsx": {
     "file": "assets/AttendanceEmployee-DGn_tbM7.js",
+=======
+      "_StatsCards-BAsbSv3i.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_ClipboardDocumentListIcon-Cb7A9EUL.js",
+      "_proxy-ByMbOVRp.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-Ch4BuJNt.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/AttendanceEmployee.jsx": {
+    "file": "assets/AttendanceEmployee-CVOAz98M.js",
+>>>>>>> Stashed changes
     "name": "AttendanceEmployee",
     "src": "resources/js/Pages/AttendanceEmployee.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_TimeSheetTable-D_s3kqq2.js",
@@ -1554,11 +2561,57 @@
   },
   "resources/js/Pages/Auth/ForgotPassword.jsx": {
     "file": "assets/ForgotPassword-1Dj-5YS2.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_TimeSheetTable-CO1m3QfX.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_proxy-ByMbOVRp.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_PageHeader-CQH90OfM.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-S574QCAN-D9KKzz51.js"
+    ]
+  },
+  "resources/js/Pages/Auth/ForgotPassword.jsx": {
+    "file": "assets/ForgotPassword-Pc2r4VS_.js",
+>>>>>>> Stashed changes
     "name": "ForgotPassword",
     "src": "resources/js/Pages/Auth/ForgotPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_AuthLayout-DXyQ4Elo.js",
       "_Button-DE8ogfmf.js",
       "_proxy-CGLX1-DN.js",
@@ -1574,11 +2627,29 @@
   },
   "resources/js/Pages/Auth/Login.jsx": {
     "file": "assets/Login-DqlaLxbY.js",
+=======
+      "_AuthLayout-CVAwh7E9.js",
+      "_Button-Weuw5w3x.js",
+      "_proxy-ByMbOVRp.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_GlassCard-BA-7Eich.js",
+      "_logo-Pwvcz7fP.js",
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "resources/js/Pages/Auth/Login.jsx": {
+    "file": "assets/Login-DNd3KfXi.js",
+>>>>>>> Stashed changes
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_toastUtils-6YNuLodH.js",
       "_proxy-CGLX1-DN.js",
       "_CheckCircleIcon-DC8cSzAY.js",
@@ -1601,11 +2672,36 @@
   },
   "resources/js/Pages/Auth/Register.jsx": {
     "file": "assets/Register-D_lI2Qjn.js",
+=======
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_DeviceTabletIcon-D5tDUgpR.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_EyeSlashIcon-CXkoOyiP.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Auth/Register.jsx": {
+    "file": "assets/Register-OcFJ-U0u.js",
+>>>>>>> Stashed changes
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_AuthLayout-DXyQ4Elo.js",
       "_Button-DE8ogfmf.js",
       "_proxy-CGLX1-DN.js",
@@ -1622,11 +2718,30 @@
   },
   "resources/js/Pages/Auth/ResetPassword.jsx": {
     "file": "assets/ResetPassword-CZLmrJk2.js",
+=======
+      "_AuthLayout-CVAwh7E9.js",
+      "_Button-Weuw5w3x.js",
+      "_proxy-ByMbOVRp.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_EyeSlashIcon-CXkoOyiP.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_GlassCard-BA-7Eich.js",
+      "_logo-Pwvcz7fP.js",
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "resources/js/Pages/Auth/ResetPassword.jsx": {
+    "file": "assets/ResetPassword-kARnqKCF.js",
+>>>>>>> Stashed changes
     "name": "ResetPassword",
     "src": "resources/js/Pages/Auth/ResetPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_AuthLayout-DXyQ4Elo.js",
       "_Button-DE8ogfmf.js",
       "_proxy-CGLX1-DN.js",
@@ -1643,11 +2758,30 @@
   },
   "resources/js/Pages/Auth/VerifyEmail.jsx": {
     "file": "assets/VerifyEmail-sT5qtu6F.js",
+=======
+      "_AuthLayout-CVAwh7E9.js",
+      "_Button-Weuw5w3x.js",
+      "_proxy-ByMbOVRp.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_EyeSlashIcon-CXkoOyiP.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_GlassCard-BA-7Eich.js",
+      "_logo-Pwvcz7fP.js",
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "resources/js/Pages/Auth/VerifyEmail.jsx": {
+    "file": "assets/VerifyEmail-B96TwzWM.js",
+>>>>>>> Stashed changes
     "name": "VerifyEmail",
     "src": "resources/js/Pages/Auth/VerifyEmail.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_AuthLayout-DXyQ4Elo.js",
       "_proxy-CGLX1-DN.js",
       "_EnvelopeIcon-D9i0PDbo.js",
@@ -1660,11 +2794,26 @@
   },
   "resources/js/Pages/Dashboard.jsx": {
     "file": "assets/Dashboard-DeB-eCMv.js",
+=======
+      "_AuthLayout-CVAwh7E9.js",
+      "_proxy-ByMbOVRp.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_GlassCard-BA-7Eich.js",
+      "_logo-Pwvcz7fP.js",
+      "_create-visual-element-CeiJpb04.js"
+    ]
+  },
+  "resources/js/Pages/Dashboard.jsx": {
+    "file": "assets/Dashboard-C3zNfd21.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_TimeSheetTable-D_s3kqq2.js",
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
@@ -1712,6 +2861,56 @@
       "_index-DWsedguo.js",
       "_logo-Pwvcz7fP.js",
       "_create-visual-element-OeeLNUjW.js"
+=======
+      "_TimeSheetTable-CO1m3QfX.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_leaflet-TfS_ydne.js",
+      "_leaflet-routing-machine-D1zLfiOQ.js",
+      "_proxy-ByMbOVRp.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_users-BCnw-u6P.js",
+      "_map-pin--VeH8B8Z.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_isBetween-B-ywIGVZ.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_SunIcon-MA65_TKy.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_ClipboardDocumentListIcon-Cb7A9EUL.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_WifiIcon-CkBFZVge.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_PageHeader-CQH90OfM.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js"
+>>>>>>> Stashed changes
     ],
     "css": [
       "assets/Dashboard-BFS5CXfo.css"
@@ -1722,12 +2921,17 @@
     ]
   },
   "resources/js/Pages/Departments.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Departments-zO6VNfvp.js",
+=======
+    "file": "assets/Departments-XxhtpxmD.js",
+>>>>>>> Stashed changes
     "name": "Departments",
     "src": "resources/js/Pages/Departments.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
       "_StatsCards-CpXnaZfD.js",
@@ -1779,11 +2983,66 @@
   },
   "resources/js/Pages/Designations.jsx": {
     "file": "assets/Designations-p-pKhTKV.js",
+=======
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_NoDataMessage-DcR7Qyh_.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_briefcase-Ct6aHhzs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Designations.jsx": {
+    "file": "assets/Designations-CUUu8ygU.js",
+>>>>>>> Stashed changes
     "name": "Designations",
     "src": "resources/js/Pages/Designations.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
       "_StatsCards-CpXnaZfD.js",
@@ -1829,11 +3088,60 @@
   },
   "resources/js/Pages/Employees/EmployeeList.jsx": {
     "file": "assets/EmployeeList-BG-_sxlS.js",
+=======
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_NoDataMessage-DcR7Qyh_.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_briefcase-Ct6aHhzs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Employees/EmployeeList.jsx": {
+    "file": "assets/EmployeeList-g_329gyh.js",
+>>>>>>> Stashed changes
     "name": "EmployeeList",
     "src": "resources/js/Pages/Employees/EmployeeList.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -1882,11 +3190,95 @@
   },
   "resources/js/Pages/Events/Analytics.jsx": {
     "file": "assets/Analytics-z1NneYIk.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_WifiIcon-CkBFZVge.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_HashtagIcon-D2YaOxd2.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_TrophyIcon-xC6RD9dI.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_FunnelIcon-CIKQXU0-.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Errors/Forbidden.jsx": {
+    "file": "assets/Forbidden-DLMQIlzy.js",
+    "name": "Forbidden",
+    "src": "resources/js/Pages/Errors/Forbidden.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Dashboard-PMT9L6iU.js",
+      "_proxy-ByMbOVRp.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+    ]
+  },
+  "resources/js/Pages/Events/Analytics.jsx": {
+    "file": "assets/Analytics-hHZ2M6Sm.js",
+>>>>>>> Stashed changes
     "name": "Analytics",
     "src": "resources/js/Pages/Events/Analytics.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_UserGroupIcon-DKhnss-s.js",
@@ -1919,11 +3311,47 @@
   },
   "resources/js/Pages/Events/Create.jsx": {
     "file": "assets/Create-BaJ9OiGY.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_proxy-ByMbOVRp.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_AreaChart-BLYWCxIh.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_index-vyppYF7I.js"
+    ]
+  },
+  "resources/js/Pages/Events/Create.jsx": {
+    "file": "assets/Create-uDNpOXQv.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/Events/Create.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_toastUtils-6YNuLodH.js",
       "_proxy-CGLX1-DN.js",
@@ -1955,11 +3383,46 @@
   },
   "resources/js/Pages/Events/Edit.jsx": {
     "file": "assets/Edit-C7oIzvF9.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Events/Edit.jsx": {
+    "file": "assets/Edit-CVGkeF4V.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/Events/Edit.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_toastUtils-6YNuLodH.js",
       "_proxy-CGLX1-DN.js",
@@ -1991,11 +3454,46 @@
   },
   "resources/js/Pages/Events/Index.jsx": {
     "file": "assets/Index-DdLbbGOi.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Events/Index.jsx": {
+    "file": "assets/Index-pXyux0eJ.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Events/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -2029,11 +3527,48 @@
   },
   "resources/js/Pages/Events/Registrations/Index.jsx": {
     "file": "assets/Index-DCD572HY.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_proxy-ByMbOVRp.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js"
+    ]
+  },
+  "resources/js/Pages/Events/Registrations/Index.jsx": {
+    "file": "assets/Index-C3ygAo50.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Events/Registrations/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -2076,21 +3611,75 @@
   },
   "resources/js/Pages/Events/Registrations/PrintToken.jsx": {
     "file": "assets/PrintToken-_NfGKpC-.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_index-CerE71PA.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ClipboardDocumentListIcon-Cb7A9EUL.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_proxy-ByMbOVRp.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_PrinterIcon-DYoSHEKn.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Events/Registrations/PrintToken.jsx": {
+    "file": "assets/PrintToken-GSbOCdPo.js",
+>>>>>>> Stashed changes
     "name": "PrintToken",
     "src": "resources/js/Pages/Events/Registrations/PrintToken.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_dayjs.min-DAA8ALUK.js"
     ]
   },
   "resources/js/Pages/Events/Registrations/Show.jsx": {
     "file": "assets/Show-OsvmkTsD.js",
+=======
+      "_dayjs.min-C28EdO6Z.js"
+    ]
+  },
+  "resources/js/Pages/Events/Registrations/Show.jsx": {
+    "file": "assets/Show-nbQVCeEL.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/Events/Registrations/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_dayjs.min-DAA8ALUK.js",
       "_toastUtils-6YNuLodH.js",
@@ -2123,11 +3712,47 @@
   },
   "resources/js/Pages/Events/Show.jsx": {
     "file": "assets/Show-vERM8lCy.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_PrinterIcon-DYoSHEKn.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_chunk-BHGNW4BO-Ju-mgSqf.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+    ]
+  },
+  "resources/js/Pages/Events/Show.jsx": {
+    "file": "assets/Show-CjKPX25H.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/Events/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_dayjs.min-DAA8ALUK.js",
@@ -2160,6 +3785,41 @@
   },
   "resources/js/Pages/HR/Offboarding/Create.jsx": {
     "file": "assets/Create-BIvFErsN.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClipboardDocumentListIcon-Cb7A9EUL.js",
+      "_proxy-ByMbOVRp.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js"
+    ]
+  },
+  "resources/js/Pages/HR/Offboarding/Create.jsx": {
+    "file": "assets/Create-DR_S6E1Q.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/HR/Offboarding/Create.jsx",
     "isDynamicEntry": true,
@@ -2168,7 +3828,11 @@
     ]
   },
   "resources/js/Pages/HR/Offboarding/Index.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Index-Co7Lxihv.js",
+=======
+    "file": "assets/Index-CI0ZFdXE.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/HR/Offboarding/Index.jsx",
     "isDynamicEntry": true,
@@ -2177,7 +3841,11 @@
     ]
   },
   "resources/js/Pages/HR/Offboarding/Show.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Show-DxixepjO.js",
+=======
+    "file": "assets/Show-BGIRmApU.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/HR/Offboarding/Show.jsx",
     "isDynamicEntry": true,
@@ -2186,7 +3854,11 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Create.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Create-pURGopqc.js",
+=======
+    "file": "assets/Create-XVcD0ym1.js",
+>>>>>>> Stashed changes
     "name": "Create",
     "src": "resources/js/Pages/HR/Onboarding/Create.jsx",
     "isDynamicEntry": true,
@@ -2195,7 +3867,11 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Edit.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Edit-D4INaYOG.js",
+=======
+    "file": "assets/Edit-BIxUXFNp.js",
+>>>>>>> Stashed changes
     "name": "Edit",
     "src": "resources/js/Pages/HR/Onboarding/Edit.jsx",
     "isDynamicEntry": true,
@@ -2204,7 +3880,11 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Index.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Index-CNC2F8lY.js",
+=======
+    "file": "assets/Index-BRhruhPj.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/HR/Onboarding/Index.jsx",
     "isDynamicEntry": true,
@@ -2213,7 +3893,11 @@
     ]
   },
   "resources/js/Pages/HR/Onboarding/Show.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Show-Xnlh2VRN.js",
+=======
+    "file": "assets/Show-DlH3TdAf.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/HR/Onboarding/Show.jsx",
     "isDynamicEntry": true,
@@ -2222,12 +3906,17 @@
     ]
   },
   "resources/js/Pages/HR/TimeOff/Dashboard.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Dashboard-_qoUprlH.js",
+=======
+    "file": "assets/Dashboard-cfgUGUiM.js",
+>>>>>>> Stashed changes
     "name": "Dashboard",
     "src": "resources/js/Pages/HR/TimeOff/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
@@ -2257,16 +3946,53 @@
       "_ExclamationTriangleIcon-nydRqaXF.js",
       "_chunk-TLYTI3QM-CBaYsJS5.js",
       "_useProgressBar-Ba50_dqT.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_useProgressBar-Csp-WOVq.js",
+>>>>>>> Stashed changes
       "_NumberFormatter-DNR9MAW-.js"
     ]
   },
   "resources/js/Pages/HR/TimeOff/Holidays.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Holidays-n78ldxAX.js",
+=======
+    "file": "assets/Holidays-rjnHOHaK.js",
+>>>>>>> Stashed changes
     "name": "Holidays",
     "src": "resources/js/Pages/HR/TimeOff/Holidays.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
@@ -2310,11 +4036,58 @@
   },
   "resources/js/Pages/HR/TimeOff/Index.jsx": {
     "file": "assets/Index-Dpnw1Yg2.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_FunnelIcon-CIKQXU0-.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_useDateFieldState-ErDGQr8B.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_index-CerE71PA.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_useFilter-B9Id6Fug.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/HR/TimeOff/Index.jsx": {
+    "file": "assets/Index-DQH1mKgB.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/HR/TimeOff/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_GlassCard-_yH4RJEj.js",
       "_PageHeader-BcvZZaFC.js",
       "_StatsCards-CpXnaZfD.js",
@@ -2341,6 +4114,35 @@
       "_chunk-IHOGUXIG-Bvz9okur.js",
       "_ExclamationTriangleIcon-nydRqaXF.js",
       "_create-visual-element-OeeLNUjW.js"
+=======
+      "_GlassCard-BA-7Eich.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_proxy-ByMbOVRp.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+>>>>>>> Stashed changes
     ]
   },
   "resources/js/Pages/HR/Training/Create.jsx": {
@@ -2356,12 +4158,17 @@
     "isDynamicEntry": true
   },
   "resources/js/Pages/HR/Training/Index.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Index-w_4vhx8d.js",
+=======
+    "file": "assets/Index-qtfu7pQW.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/HR/Training/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -2408,6 +4215,55 @@
       "_create-visual-element-OeeLNUjW.js",
       "_chunk-XJ2YRSUP-D09CMxFA.js",
       "_useToggleState-DJ-cC1ex.js"
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_user-DMOfaRHA.js",
+      "_calendar-BTrj-jH5.js",
+      "_map-pin--VeH8B8Z.js",
+      "_users-BCnw-u6P.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_proxy-ByMbOVRp.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-Ch4BuJNt.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+>>>>>>> Stashed changes
     ]
   },
   "resources/js/Pages/HR/Training/Show.jsx": {
@@ -2417,12 +4273,17 @@
     "isDynamicEntry": true
   },
   "resources/js/Pages/Holidays.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/Holidays-BtgZRDn0.js",
+=======
+    "file": "assets/Holidays-C9iJhOmt.js",
+>>>>>>> Stashed changes
     "name": "Holidays",
     "src": "resources/js/Pages/Holidays.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_StatsCards-CpXnaZfD.js",
       "_Dashboard-D1938BEl.js",
       "_en-US-D8UQXs-H.js",
@@ -2468,11 +4329,60 @@
   },
   "resources/js/Pages/LeaveSummary.jsx": {
     "file": "assets/LeaveSummary-D6l75eAo.js",
+=======
+      "_StatsCards-BAsbSv3i.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_en-US-D8UQXs-H.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_EyeIcon-DWfYEIX7.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_proxy-ByMbOVRp.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/LeaveSummary.jsx": {
+    "file": "assets/LeaveSummary-DzTPrd5g.js",
+>>>>>>> Stashed changes
     "name": "LeaveSummary",
     "src": "resources/js/Pages/LeaveSummary.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_index-B7mgmw7u.js",
       "_GlassCard-_yH4RJEj.js",
       "_StatsCards-CpXnaZfD.js",
@@ -2516,11 +4426,58 @@
   },
   "resources/js/Pages/LeavesAdmin.jsx": {
     "file": "assets/LeavesAdmin-B1gaZIiJ.js",
+=======
+      "_index-CtBsO7PD.js",
+      "_GlassCard-BA-7Eich.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_proxy-ByMbOVRp.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_FunnelIcon-CIKQXU0-.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/LeavesAdmin.jsx": {
+    "file": "assets/LeavesAdmin-Ceo1JHYB.js",
+>>>>>>> Stashed changes
     "name": "LeavesAdmin",
     "src": "resources/js/Pages/LeavesAdmin.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_BulkDeleteModal-CLiX0d_3.js",
@@ -2587,11 +4544,81 @@
   },
   "resources/js/Pages/LeavesAdmin_new.jsx": {
     "file": "assets/LeavesAdmin_new-DOIoB-wO.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_BulkDeleteModal-CnlcIBbV.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_proxy-ByMbOVRp.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-Ch4BuJNt.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_index-CtBsO7PD.js",
+      "_index-CerE71PA.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_ClockIcon-CRPRCI7H.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_HeartIcon-6D_JYTIB.js",
+      "_SunIcon-MA65_TKy.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_calendar-BTrj-jH5.js",
+      "_user-DMOfaRHA.js",
+      "_clock-BC9j8Whw.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js"
+    ]
+  },
+  "resources/js/Pages/LeavesAdmin_new.jsx": {
+    "file": "assets/LeavesAdmin_new-DGeisXnN.js",
+>>>>>>> Stashed changes
     "name": "LeavesAdmin_new",
     "src": "resources/js/Pages/LeavesAdmin_new.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_BulkDeleteModal-CLiX0d_3.js",
@@ -2657,11 +4684,80 @@
   },
   "resources/js/Pages/LeavesEmployee.jsx": {
     "file": "assets/LeavesEmployee-C9xXH7eg.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_BulkDeleteModal-CnlcIBbV.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_proxy-ByMbOVRp.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_MagnifyingGlassIcon-Ch4BuJNt.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_index-CtBsO7PD.js",
+      "_index-CerE71PA.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_ClockIcon-CRPRCI7H.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_HeartIcon-6D_JYTIB.js",
+      "_SunIcon-MA65_TKy.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_calendar-BTrj-jH5.js",
+      "_user-DMOfaRHA.js",
+      "_clock-BC9j8Whw.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js"
+    ]
+  },
+  "resources/js/Pages/LeavesEmployee.jsx": {
+    "file": "assets/LeavesEmployee-_i4iOWmF.js",
+>>>>>>> Stashed changes
     "name": "LeavesEmployee",
     "src": "resources/js/Pages/LeavesEmployee.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_dayjs.min-DAA8ALUK.js",
       "_Dashboard-D1938BEl.js",
       "_BulkDeleteModal-CLiX0d_3.js",
@@ -2721,6 +4817,68 @@
   },
   "resources/js/Pages/Profile/Partials/DeleteUserForm.jsx": {
     "file": "assets/DeleteUserForm-BPs0j346.js",
+=======
+      "_dayjs.min-C28EdO6Z.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_BulkDeleteModal-CnlcIBbV.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_PresentationChartLineIcon-B50QN2cx.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_index-CtBsO7PD.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_index-CerE71PA.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_ClockIcon-CRPRCI7H.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_HeartIcon-6D_JYTIB.js",
+      "_SunIcon-MA65_TKy.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_calendar-BTrj-jH5.js",
+      "_user-DMOfaRHA.js",
+      "_clock-BC9j8Whw.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js"
+    ]
+  },
+  "resources/js/Pages/Profile/Partials/DeleteUserForm.jsx": {
+    "file": "assets/DeleteUserForm-CWeWBYym.js",
+>>>>>>> Stashed changes
     "name": "DeleteUserForm",
     "src": "resources/js/Pages/Profile/Partials/DeleteUserForm.jsx",
     "isDynamicEntry": true,
@@ -2729,7 +4887,11 @@
     ]
   },
   "resources/js/Pages/Profile/Partials/UpdatePasswordForm.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/UpdatePasswordForm-BPs0j346.js",
+=======
+    "file": "assets/UpdatePasswordForm-CWeWBYym.js",
+>>>>>>> Stashed changes
     "name": "UpdatePasswordForm",
     "src": "resources/js/Pages/Profile/Partials/UpdatePasswordForm.jsx",
     "isDynamicEntry": true,
@@ -2738,7 +4900,11 @@
     ]
   },
   "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/UpdateProfileInformationForm-BPs0j346.js",
+=======
+    "file": "assets/UpdateProfileInformationForm-CWeWBYym.js",
+>>>>>>> Stashed changes
     "name": "UpdateProfileInformationForm",
     "src": "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx",
     "isDynamicEntry": true,
@@ -2747,12 +4913,17 @@
     ]
   },
   "resources/js/Pages/Profile/UserProfile.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/UserProfile-BJq2XQAg.js",
+=======
+    "file": "assets/UserProfile-Uqk-rdOQ.js",
+>>>>>>> Stashed changes
     "name": "UserProfile",
     "src": "resources/js/Pages/Profile/UserProfile.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_PageHeader-BcvZZaFC.js",
       "_StatsCards-CpXnaZfD.js",
@@ -2795,16 +4966,66 @@
       "_chunk-TLYTI3QM-CBaYsJS5.js",
       "_create-visual-element-OeeLNUjW.js",
       "_useProgressBar-Ba50_dqT.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_PageHeader-CQH90OfM.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_proxy-ByMbOVRp.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_HashtagIcon-D2YaOxd2.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_camera-C20H_TkJ.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_user-DMOfaRHA.js",
+      "_GlassCard-BA-7Eich.js",
+      "_users-BCnw-u6P.js",
+      "_briefcase-Ct6aHhzs.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_HeartIcon-6D_JYTIB.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_useProgressBar-Csp-WOVq.js",
+>>>>>>> Stashed changes
       "_NumberFormatter-DNR9MAW-.js"
     ]
   },
   "resources/js/Pages/Project/DailyWorkSummary.jsx": {
+<<<<<<< Updated upstream
     "file": "assets/DailyWorkSummary-C-XiOF3_.js",
+=======
+    "file": "assets/DailyWorkSummary-CAjkt66W.js",
+>>>>>>> Stashed changes
     "name": "DailyWorkSummary",
     "src": "resources/js/Pages/Project/DailyWorkSummary.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_index-B7mgmw7u.js",
       "_Dashboard-D1938BEl.js",
       "_DocumentIcon-BzZUTO07.js",
@@ -2855,11 +5076,65 @@
   },
   "resources/js/Pages/Public/Events/CheckRegistration.jsx": {
     "file": "assets/CheckRegistration-B1rmE581.js",
+=======
+      "_index-CtBsO7PD.js",
+      "_Dashboard-PMT9L6iU.js",
+      "_DocumentIcon-D8od2ICh.js",
+      "_ClockIcon-CRPRCI7H.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_xlsx-AzvlBsUj.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-XVMALT6H-kpfTB7wQ.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_chunk-ITDNPVX3-ntzMB9Vi.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_isBetween-B-ywIGVZ.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_proxy-ByMbOVRp.js",
+      "_FunnelIcon-CIKQXU0-.js",
+      "_AdjustmentsHorizontalIcon-CitW2k5z.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Public/Events/CheckRegistration.jsx": {
+    "file": "assets/CheckRegistration-gtSlNBxE.js",
+>>>>>>> Stashed changes
     "name": "CheckRegistration",
     "src": "resources/js/Pages/Public/Events/CheckRegistration.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_dayjs.min-DAA8ALUK.js",
       "_MagnifyingGlassIcon-xO36MbuW.js",
       "_ArrowLeftIcon-BMwNcZN0.js",
@@ -2875,11 +5150,29 @@
   },
   "resources/js/Pages/Public/Events/Index.jsx": {
     "file": "assets/Index-C0XwtNx4.js",
+=======
+      "_dayjs.min-C28EdO6Z.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_PrinterIcon-DYoSHEKn.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-BHGNW4BO-Ju-mgSqf.js",
+      "_index-CVtaHEqw.js"
+    ]
+  },
+  "resources/js/Pages/Public/Events/Index.jsx": {
+    "file": "assets/Index-CUTKJJBy.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/Pages/Public/Events/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_dayjs.min-DAA8ALUK.js",
       "_MagnifyingGlassIcon-xO36MbuW.js",
       "_MapPinIcon-OO5CRGHq.js",
@@ -2891,11 +5184,25 @@
   },
   "resources/js/Pages/Public/Events/RegistrationSuccess.jsx": {
     "file": "assets/RegistrationSuccess-Cl_tBtqu.js",
+=======
+      "_dayjs.min-C28EdO6Z.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js"
+    ]
+  },
+  "resources/js/Pages/Public/Events/RegistrationSuccess.jsx": {
+    "file": "assets/RegistrationSuccess-Db2ygBDV.js",
+>>>>>>> Stashed changes
     "name": "RegistrationSuccess",
     "src": "resources/js/Pages/Public/Events/RegistrationSuccess.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_CheckCircleIcon-DC8cSzAY.js",
       "_ArrowLeftIcon-BMwNcZN0.js",
       "_PrinterIcon-15B4-6Y5.js"
@@ -2903,11 +5210,21 @@
   },
   "resources/js/Pages/Public/Events/Show.jsx": {
     "file": "assets/Show-jwqQ5CZG.js",
+=======
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_PrinterIcon-DYoSHEKn.js"
+    ]
+  },
+  "resources/js/Pages/Public/Events/Show.jsx": {
+    "file": "assets/Show-DrUztiWp.js",
+>>>>>>> Stashed changes
     "name": "Show",
     "src": "resources/js/Pages/Public/Events/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_dayjs.min-DAA8ALUK.js",
       "_toastUtils-6YNuLodH.js",
       "_ArrowLeftIcon-BMwNcZN0.js",
@@ -2926,11 +5243,32 @@
   },
   "resources/js/Pages/Settings/AttendanceSettings.jsx": {
     "file": "assets/AttendanceSettings-BNPsw9F8.js",
+=======
+      "_dayjs.min-C28EdO6Z.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-ITDNPVX3-ntzMB9Vi.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Settings/AttendanceSettings.jsx": {
+    "file": "assets/AttendanceSettings-BMFgLA9p.js",
+>>>>>>> Stashed changes
     "name": "AttendanceSettings",
     "src": "resources/js/Pages/Settings/AttendanceSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_toastUtils-6YNuLodH.js",
       "_leaflet-CzVixunx.js",
@@ -2972,11 +5310,56 @@
   },
   "resources/js/Pages/Settings/CompanySettings.jsx": {
     "file": "assets/CompanySettings-KuRxTomb.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_leaflet-TfS_ydne.js",
+      "_leaflet-routing-machine-D1zLfiOQ.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_Marker-CHxk6PAm.js",
+      "_index-CerE71PA.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/Settings/CompanySettings.jsx": {
+    "file": "assets/CompanySettings-ChfP7qkF.js",
+>>>>>>> Stashed changes
     "name": "CompanySettings",
     "src": "resources/js/Pages/Settings/CompanySettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_toastUtils-6YNuLodH.js",
@@ -3003,11 +5386,41 @@
   },
   "resources/js/Pages/Settings/HRMSettings.jsx": {
     "file": "assets/HRMSettings-DnA8vNBa.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_proxy-ByMbOVRp.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+    ]
+  },
+  "resources/js/Pages/Settings/HRMSettings.jsx": {
+    "file": "assets/HRMSettings-DPy9HdTw.js",
+>>>>>>> Stashed changes
     "name": "HRMSettings",
     "src": "resources/js/Pages/Settings/HRMSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_GlassCard-_yH4RJEj.js",
       "_toastUtils-6YNuLodH.js",
@@ -3034,11 +5447,41 @@
   },
   "resources/js/Pages/Settings/LeaveSettings.jsx": {
     "file": "assets/LeaveSettings-DwzgcZiH.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_GlassCard-BA-7Eich.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_features-animation-D0YkvCDz.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js"
+    ]
+  },
+  "resources/js/Pages/Settings/LeaveSettings.jsx": {
+    "file": "assets/LeaveSettings-CjsxDi3n.js",
+>>>>>>> Stashed changes
     "name": "LeaveSettings",
     "src": "resources/js/Pages/Settings/LeaveSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_toastUtils-6YNuLodH.js",
       "_proxy-CGLX1-DN.js",
@@ -3078,11 +5521,54 @@
   },
   "resources/js/Pages/TimeSheet.jsx": {
     "file": "assets/TimeSheet-lxavmMcs.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_proxy-ByMbOVRp.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_XCircleIcon-Cjs2Oqui.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_index-CerE71PA.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/TimeSheet.jsx": {
+    "file": "assets/TimeSheet-iCzLm-hm.js",
+>>>>>>> Stashed changes
     "name": "TimeSheet",
     "src": "resources/js/Pages/TimeSheet.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_TimeSheetTable-D_s3kqq2.js",
       "_toastUtils-6YNuLodH.js",
@@ -3128,11 +5614,60 @@
   },
   "resources/js/Pages/UserDevices.jsx": {
     "file": "assets/UserDevices-CfhuHfCH.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_TimeSheetTable-CO1m3QfX.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_dayjs.min-C28EdO6Z.js",
+      "_leaflet-TfS_ydne.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_Marker-CHxk6PAm.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_InformationCircleIcon-CKXmugUi.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_chunk-QESP63UR-C89HLauD.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_PageHeader-CQH90OfM.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_chunk-JOT4BT4P-DUrtLGUw.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/UserDevices.jsx": {
+    "file": "assets/UserDevices-DymjNv9E.js",
+>>>>>>> Stashed changes
     "name": "UserDevices",
     "src": "resources/js/Pages/UserDevices.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_ArrowLeftIcon-BMwNcZN0.js",
       "_LockClosedIcon-j9EWiTgZ.js",
@@ -3168,11 +5703,50 @@
   },
   "resources/js/Pages/UsersList.jsx": {
     "file": "assets/UsersList-DSMr71DJ.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_ArrowLeftIcon-DnPNnX4L.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_LockOpenIcon-D_GZ8TCD.js",
+      "_DeviceTabletIcon-D5tDUgpR.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_en-US-D8UQXs-H.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_logo-Pwvcz7fP.js",
+      "_proxy-ByMbOVRp.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_features-animation-D0YkvCDz.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/UsersList.jsx": {
+    "file": "assets/UsersList-C9oubI-O.js",
+>>>>>>> Stashed changes
     "name": "UsersList",
     "src": "resources/js/Pages/UsersList.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_StatsCards-CpXnaZfD.js",
       "_toastUtils-6YNuLodH.js",
@@ -3226,11 +5800,68 @@
   },
   "resources/js/Pages/WorkLocations/WorkLocations.jsx": {
     "file": "assets/WorkLocations-CXfjBfkL.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_HashtagIcon-D2YaOxd2.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_DeviceTabletIcon-D5tDUgpR.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_LockOpenIcon-D_GZ8TCD.js",
+      "_LockClosedIcon-C-3g3zEf.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-EAPQ7RWQ-DARtrv5-.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_user-DMOfaRHA.js",
+      "_camera-C20H_TkJ.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_useFilter-B9Id6Fug.js",
+      "_createLucideIcon-BFyqkjqD.js",
+      "_chunk-TQNYOUFX-v8rKt3jl.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_XCircleIcon-gac1YlSt.js",
+      "_TrophyIcon-xC6RD9dI.js",
+      "_UserPlusIcon-DWbDU3r4.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_proxy-ByMbOVRp.js",
+      "_DocumentArrowDownIcon-BayKnCWw.js",
+      "_ChartPieIcon-7ldQK5gQ.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_TableCellsIcon-CMdh6MsC.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js",
+      "_chunk-57V4RE7B-BFxJaW5n.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js"
+    ]
+  },
+  "resources/js/Pages/WorkLocations/WorkLocations.jsx": {
+    "file": "assets/WorkLocations-D-ia-kLt.js",
+>>>>>>> Stashed changes
     "name": "WorkLocations",
     "src": "resources/js/Pages/WorkLocations/WorkLocations.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
       "_toastUtils-6YNuLodH.js",
       "_PencilIcon-I6aag8pZ.js",
@@ -3273,6 +5904,51 @@
   },
   "resources/js/app.jsx": {
     "file": "assets/app-DXVmVWfT.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+      "_toastUtils-Iz8RhFxm.js",
+      "_PencilIcon-BkSrTia3.js",
+      "_TrashIcon-DcwicuGA.js",
+      "_ClockIcon-4Z87G53P.js",
+      "_UserIcon-RT0TlI1U.js",
+      "_MapPinIcon-B-THB0O0.js",
+      "_CheckCircleIcon-mncIOFUm.js",
+      "_useProgressBar-Csp-WOVq.js",
+      "_CheckCircleIcon-D-Xg8-Mx.js",
+      "_ExclamationTriangleIcon-BHcQEwYT.js",
+      "_EllipsisVerticalIcon-DPAKH8XQ.js",
+      "_XMarkIcon-B57lrNTs.js",
+      "_chunk-IHOGUXIG-qQB_28Ca.js",
+      "_chunk-S574QCAN-D9KKzz51.js",
+      "_chunk-Y2AYO5NJ-Btdgu39A.js",
+      "_chunk-F3UDT23P-CpKDAAZn.js",
+      "_chunk-YRZGWF2W-BdQvQ8_J.js",
+      "_chunk-D5XJWRAV-CmJIffgK.js",
+      "_StatsCards-BAsbSv3i.js",
+      "_chunk-SSA7SXE4-kGhgEhoz.js",
+      "_chunk-O5MCAK4F-RA0tlcCK.js",
+      "_ExclamationTriangleIcon-BEZKRPCj.js",
+      "_ChartBarIcon-D4B8pfqE.js",
+      "_PlusIcon-BQw3U6ju.js",
+      "_proxy-ByMbOVRp.js",
+      "_MagnifyingGlassIcon-WrElD3YO.js",
+      "_EnvelopeIcon-CfR7cmdn.js",
+      "_UserGroupIcon-CqYoflHv.js",
+      "_ShieldCheckIcon-Ci88VqTr.js",
+      "_KeyIcon-C67GVAFO.js",
+      "_index-CVtaHEqw.js",
+      "_logo-Pwvcz7fP.js",
+      "_features-animation-D0YkvCDz.js",
+      "_create-visual-element-CeiJpb04.js",
+      "_NumberFormatter-DNR9MAW-.js",
+      "_chunk-XJ2YRSUP-BBCnKNhp.js",
+      "_useToggleState-Cbk3iJwk.js",
+      "_chunk-TLYTI3QM-BYKAmrkG.js"
+    ]
+  },
+  "resources/js/app.jsx": {
+    "file": "assets/app-Bzvwrd0H.js",
+>>>>>>> Stashed changes
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -3293,6 +5969,7 @@
       "resources/js/Pages/Departments.jsx",
       "resources/js/Pages/Designations.jsx",
       "resources/js/Pages/Employees/EmployeeList.jsx",
+      "resources/js/Pages/Errors/Forbidden.jsx",
       "resources/js/Pages/Events/Analytics.jsx",
       "resources/js/Pages/Events/Create.jsx",
       "resources/js/Pages/Events/Edit.jsx",
@@ -3301,7 +5978,11 @@
       "resources/js/Pages/Events/Registrations/PrintToken.jsx",
       "resources/js/Pages/Events/Registrations/Show.jsx",
       "resources/js/Pages/Events/Show.jsx",
+<<<<<<< Updated upstream
       "_Dashboard-D1938BEl.js",
+=======
+      "_Dashboard-PMT9L6iU.js",
+>>>>>>> Stashed changes
       "resources/js/Pages/HR/Offboarding/Create.jsx",
       "resources/js/Pages/HR/Offboarding/Index.jsx",
       "resources/js/Pages/HR/Offboarding/Show.jsx",
@@ -3326,7 +6007,11 @@
       "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.jsx",
       "resources/js/Pages/Profile/UserProfile.jsx",
       "resources/js/Pages/Project/DailyWorkSummary.jsx",
+<<<<<<< Updated upstream
       "_DailyWorks-BmZ9A6vo.js",
+=======
+      "_DailyWorks-DiKlWM3s.js",
+>>>>>>> Stashed changes
       "resources/js/Pages/Public/Events/CheckRegistration.jsx",
       "resources/js/Pages/Public/Events/Index.jsx",
       "resources/js/Pages/Public/Events/RegistrationSuccess.jsx",
@@ -3341,7 +6026,11 @@
       "resources/js/Pages/WorkLocations/WorkLocations.jsx"
     ],
     "css": [
+<<<<<<< Updated upstream
       "assets/app-Baqw_DrA.css"
+=======
+      "assets/app-BzGBvzSZ.css"
+>>>>>>> Stashed changes
     ],
     "assets": [
       "assets/roboto-cyrillic-ext-300-normal-CUPJdUZp.woff2",
@@ -3425,7 +6114,11 @@
     "isDynamicEntry": true
   },
   "resources/js/utils/firebaseInit.js": {
+<<<<<<< Updated upstream
     "file": "assets/firebaseInit-BhBgiq4z.js",
+=======
+    "file": "assets/firebaseInit-LXmXaaMN.js",
+>>>>>>> Stashed changes
     "name": "firebaseInit",
     "src": "resources/js/utils/firebaseInit.js",
     "isDynamicEntry": true,
