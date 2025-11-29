@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { showToast } from '@/utils/toastUtils';
 import { 
@@ -12,7 +12,11 @@ import {
     CheckCircleIcon,
     ClockIcon,
     ExclamationTriangleIcon,
-    CalendarIcon
+    CalendarIcon,
+    FunnelIcon,
+    AdjustmentsHorizontalIcon,
+    UserIcon,
+    MapPinIcon
 } from "@heroicons/react/24/outline";
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
@@ -25,7 +29,10 @@ import {
     Button,
     Spinner,
     ScrollShadow,
-    Skeleton
+    Skeleton,
+    Select,
+    SelectItem,
+    ButtonGroup
 } from "@heroui/react";
 import StatsCards from "@/Components/StatsCards.jsx";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
@@ -77,12 +84,49 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         end: overallEndDate
     });
     
+    const renderSelectedBadges = useCallback((selectedIds, options, placeholder, labelKey = 'name') => {
+        if (!selectedIds || selectedIds.length === 0) {
+            return <span className="text-default-400 text-xs">{placeholder}</span>;
+        }
+
+        const normalized = selectedIds.map(String);
+        const labels = options
+            ?.filter((option) => normalized.includes(String(option.id)))
+            .map((option) => option[labelKey]) ?? [];
+
+        if (labels.length === 0) {
+            return <span className="text-default-400 text-xs">{placeholder}</span>;
+        }
+
+        return (
+            <div className="flex flex-wrap gap-1">
+                {labels.map((label) => (
+                    <span key={label} className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                        {label}
+                    </span>
+                ))}
+            </div>
+        );
+    }, []);
+
+    const inchargeOptions = useMemo(() => allData?.allInCharges ?? [], [allData?.allInCharges]);
+    const jurisdictionOptions = useMemo(() => {
+        return jurisdictions?.map((j) => ({
+            ...j,
+            displayLabel: `${j.start_chainage} - ${j.end_chainage}`,
+        })) ?? [];
+    }, [jurisdictions]);
+
     const [filterData, setFilterData] = useState({
         status: 'all',
-        incharge: 'all',
+        incharge: [],
+        jurisdiction: [],
         startDate: overallStartDate,
         endDate: overallEndDate
     });
+
+    // Show/Hide advanced filters panel
+    const [showFilters, setShowFilters] = useState(false);
     
     // Mobile data fetching - fetch all data for selected date without pagination
     const fetchMobileData = async (showLoader = true) => {
@@ -94,9 +138,8 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         
         try {
             const params = {
-                search: search,
-                status: filterData.status !== 'all' ? filterData.status : '',
-                inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                search,
+                ...buildFilterParams(),
                 startDate: selectedDate,
                 endDate: selectedDate,
             };
@@ -131,13 +174,12 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         
         try {
             const params = {
-                search: search,
-                status: filterData.status !== 'all' ? filterData.status : '',
-                inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                search,
+                ...buildFilterParams(),
                 startDate: dateRange.start,
                 endDate: dateRange.end,
                 page: currentPage,
-                perPage: perPage,
+                perPage,
             };
 
             console.log('Desktop mode: Fetching paginated data with params:', params);
@@ -187,12 +229,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         // Will trigger via useEffect
     };
 
-    const handleFilterChange = (newFilterData) => {
-        setFilterData(newFilterData);
-        setCurrentPage(1);
-        // Will trigger via useEffect
-    };
-
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setCurrentPage(1);
@@ -205,6 +241,22 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         // Will trigger via useEffect
     };
 
+    const buildFilterParams = () => {
+        const filters = {
+            status: filterData.status !== 'all' ? filterData.status : '',
+        };
+
+        if (filterData.incharge.length > 0) {
+            filters.inCharge = filterData.incharge;
+        }
+
+        if (filterData.jurisdiction.length > 0) {
+            filters.jurisdiction = filterData.jurisdiction;
+        }
+
+        return filters;
+    };
+
     // Fetch additional items if needed after deletion
     const fetchAdditionalItemsIfNeeded = async () => {
         if (data && data.length < perPage && totalRows > data.length) {
@@ -214,9 +266,8 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             setLoading(true);
             try {
                 const params = {
-                    search: search,
-                    status: filterData.status !== 'all' ? filterData.status : '',
-                    inCharge: filterData.incharge !== 'all' ? filterData.incharge : '',
+                    search,
+                    ...buildFilterParams(),
                     startDate: isMobile ? selectedDate : dateRange.start,
                     endDate: isMobile ? selectedDate : dateRange.end,
                     page: currentPage + 1,
@@ -761,31 +812,207 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                 />
                             </div>
                             
-                            {/* Search Section */}
+                            {/* Search and Filters Section */}
                             <div className="mb-6">
-                                <div className="w-full sm:w-auto sm:min-w-[300px]">
-                                    <Input
-                                        type="text"
-                                        placeholder="Search by description, location, or notes..."
-                                        value={search}
-                                        onChange={(e) => handleSearch(e)}
-                                        variant="bordered"
-                                        size={isMobile ? "sm" : "md"}
-                                        radius={getThemeRadius()}
-                                        startContent={
-                                            <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                        }
-                                        classNames={{
-                                            input: "text-foreground",
-                                            inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                         focus-within:bg-content2/90 border-divider/50 
-                                                         hover:border-divider data-[focus]:border-primary`,
-                                        }}
-                                        style={{
-                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                            borderRadius: `var(--borderRadius, 12px)`,
-                                        }}
-                                    />
+                                <div className="flex flex-col gap-4">
+                                    {/* Search and Filter Toggle Row */}
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                        <div className="w-full sm:w-auto sm:min-w-[300px]">
+                                            <Input
+                                                type="text"
+                                                placeholder="Search by description, location, or notes..."
+                                                value={search}
+                                                onChange={(e) => handleSearch(e)}
+                                                variant="bordered"
+                                                size={isMobile ? "sm" : "md"}
+                                                radius={getThemeRadius()}
+                                                startContent={
+                                                    <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
+                                                }
+                                                classNames={{
+                                                    input: "text-foreground",
+                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
+                                                                 focus-within:bg-content2/90 border-divider/50 
+                                                                 hover:border-divider data-[focus]:border-primary`,
+                                                }}
+                                                style={{
+                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                    borderRadius: `var(--borderRadius, 12px)`,
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <ButtonGroup 
+                                                variant="bordered" 
+                                                radius={getThemeRadius()}
+                                                className="bg-white/5"
+                                            >
+                                                <Button
+                                                    isIconOnly={isMobile}
+                                                    color={showFilters ? 'primary' : 'default'}
+                                                    onPress={() => setShowFilters(!showFilters)}
+                                                    className={showFilters ? 'bg-primary/20' : 'bg-white/5'}
+                                                    aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
+                                                    style={{
+                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                                    }}
+                                                >
+                                                    <AdjustmentsHorizontalIcon className="w-4 h-4" />
+                                                    {!isMobile && <span className="ml-1">Filters</span>}
+                                                </Button>
+                                            </ButtonGroup>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Advanced Filters Panel */}
+                                    <AnimatePresence>
+                                        {showFilters && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -20 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <div className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                        {/* Status Filter */}
+                                                        <Select
+                                                            label="Status"
+                                                            placeholder="Filter by status..."
+                                                            selectedKeys={filterData.status ? [filterData.status] : ["all"]}
+                                                            onSelectionChange={(keys) => {
+                                                                const value = Array.from(keys)[0];
+                                                                setFilterData(prev => ({
+                                                                    ...prev,
+                                                                    status: value
+                                                                }));
+                                                                setCurrentPage(1);
+                                                            }}
+                                                            variant="bordered"
+                                                            size="sm"
+                                                            radius={getThemeRadius()}
+                                                            classNames={{
+                                                                trigger: "text-sm",
+                                                                value: "text-foreground",
+                                                            }}
+                                                            style={{
+                                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                            }}
+                                                            aria-label="Filter by status"
+                                                        >
+                                                            <SelectItem key="all" value="all">All Status</SelectItem>
+                                                            <SelectItem key="new" value="new">New</SelectItem>
+                                                            <SelectItem key="completed" value="completed">Completed</SelectItem>
+                                                            <SelectItem key="resubmission" value="resubmission">Resubmission</SelectItem>
+                                                            <SelectItem key="emergency" value="emergency">Emergency</SelectItem>
+                                                        </Select>
+
+                                                        {/* In Charge Filter - Only for Admin/Super Admin */}
+                                                        {(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator')) && (
+                                                            <Select
+                                                                label="In Charge"
+                                                                placeholder="Filter by in charge..."
+                                                                selectionMode="multiple"
+                                                                selectedKeys={new Set(filterData.incharge || [])}
+                                                                onSelectionChange={(keys) => {
+                                                                    const values = Array.from(keys).filter(key => key !== 'all');
+                                                                    setFilterData(prev => ({
+                                                                        ...prev,
+                                                                        incharge: values,
+                                                                        // Reset jurisdiction when incharge changes
+                                                                        jurisdiction: values.length ? [] : prev.jurisdiction
+                                                                    }));
+                                                                    setCurrentPage(1);
+                                                                }}
+                                                                variant="bordered"
+                                                                size="sm"
+                                                                radius={getThemeRadius()}
+                                                                startContent={<UserIcon className="w-4 h-4 text-default-400" />}
+                                                                classNames={{
+                                                                    trigger: "text-sm",
+                                                                    value: "text-foreground",
+                                                                }}
+                                                                renderValue={() => renderSelectedBadges(filterData.incharge, inchargeOptions, 'Filter by in charge...')}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                                aria-label="Filter by in charge"
+                                                            >
+                                                                {inchargeOptions?.map(inCharge => (
+                                                                    <SelectItem key={String(inCharge.id)} value={String(inCharge.id)}>
+                                                                        {inCharge.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </Select>
+                                                        )}
+
+                                                        {/* Jurisdiction Filter - Only for Admin/Super Admin */}
+                                                        {(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator')) && (
+                                                            <Select
+                                                                label="Jurisdiction"
+                                                                placeholder="Filter by jurisdiction..."
+                                                                selectionMode="multiple"
+                                                                selectedKeys={new Set(filterData.jurisdiction || [])}
+                                                                onSelectionChange={(keys) => {
+                                                                    const values = Array.from(keys).filter(key => key !== 'all');
+                                                                    setFilterData(prev => ({
+                                                                        ...prev,
+                                                                        jurisdiction: values,
+                                                                        // Reset incharge when jurisdiction is selected
+                                                                        incharge: values.length ? [] : prev.incharge
+                                                                    }));
+                                                                    setCurrentPage(1);
+                                                                }}
+                                                                variant="bordered"
+                                                                size="sm"
+                                                                radius={getThemeRadius()}
+                                                                startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
+                                                                classNames={{
+                                                                    trigger: "text-sm",
+                                                                    value: "text-foreground",
+                                                                }}
+                                                                renderValue={() => renderSelectedBadges(filterData.jurisdiction, jurisdictionOptions, 'Filter by jurisdiction...', 'displayLabel')}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                                aria-label="Filter by jurisdiction"
+                                                            >
+                                                                {jurisdictionOptions?.map(jurisdiction => (
+                                                                    <SelectItem key={String(jurisdiction.id)} value={String(jurisdiction.id)}>
+                                                                        {jurisdiction.displayLabel}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </Select>
+                                                        )}
+
+                                                        {/* Clear Filters Button */}
+                                                        <div className="flex items-end">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="flat"
+                                                                color="danger"
+                                                                onPress={() => {
+                                                                    setFilterData({
+                                                                        status: 'all',
+                                                                        incharge: [],
+                                                                        jurisdiction: [],
+                                                                        startDate: overallStartDate,
+                                                                        endDate: overallEndDate
+                                                                    });
+                                                                    setCurrentPage(1);
+                                                                }}
+                                                                style={{
+                                                                    fontFamily: `var(--fontFamily, "Inter")`,
+                                                                }}
+                                                            >
+                                                                Clear Filters
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
 

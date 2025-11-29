@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { 
-    UserIcon,
     PhotoIcon,
     TrashIcon,
     XMarkIcon,
@@ -11,13 +10,13 @@ import {
     Button,
     Progress,
     Chip,
-    Avatar,
     Card,
     CardBody
 } from '@heroui/react';
 import { showToast } from '@/utils/toastUtils';
 import axios from 'axios';
 import GlassDialog from './GlassDialog';
+import ProfileAvatar from './ProfileAvatar';
 
 const ProfilePictureModal = ({ 
     isOpen, 
@@ -251,14 +250,12 @@ const ProfilePictureModal = ({
 
                 {/* Current Profile Picture */}
                 <div className="flex justify-center mb-6">
-                    <Avatar
+                    <ProfileAvatar
                         src={previewUrl || currentProfileImage || undefined}
                         name={employee?.name || 'Employee'}
                         size="lg"
                         className="w-24 h-24"
-                        fallback={
-                            <UserIcon className="w-12 h-12 text-gray-400" />
-                        }
+                        showBorder
                     />
                 </div>
 

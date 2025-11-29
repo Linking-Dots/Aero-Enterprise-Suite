@@ -3,6 +3,7 @@
 namespace App\Services\DailyWork;
 
 use App\Models\DailyWork;
+use App\Models\Jurisdiction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -23,7 +24,8 @@ class DailyWorkPaginationService
         $page = $request->get('search') != '' ? 1 : $request->get('page', 1);
         $search = $request->get('search');
         $statusFilter = $request->get('status');
-        $inChargeFilter = $request->get('inCharge');
+        $inChargeFilter = $request->input('inCharge');
+        $jurisdictionFilter = $request->input('jurisdiction');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
 
@@ -38,10 +40,11 @@ class DailyWorkPaginationService
             'search' => $search,
             'statusFilter' => $statusFilter,
             'inChargeFilter' => $inChargeFilter,
+            'jurisdictionFilter' => $jurisdictionFilter,
         ]);
 
         $query = $this->buildBaseQuery($user);
-        $query = $this->applyFilters($query, $search, $statusFilter, $inChargeFilter, $startDate, $endDate);
+        $query = $this->applyFilters($query, $search, $statusFilter, $inChargeFilter, $jurisdictionFilter, $startDate, $endDate);
 
         // Mobile mode detection: if perPage is very large (1000+), return all data without pagination
         if ($perPage >= 1000) {
@@ -97,12 +100,13 @@ class DailyWorkPaginationService
         $user = Auth::user();
         $search = $request->get('search');
         $statusFilter = $request->get('status');
-        $inChargeFilter = $request->get('inCharge');
+        $inChargeFilter = $request->input('inCharge');
+        $jurisdictionFilter = $request->input('jurisdiction');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
 
         $query = $this->buildBaseQuery($user);
-        $query = $this->applyFilters($query, $search, $statusFilter, $inChargeFilter, $startDate, $endDate);
+        $query = $this->applyFilters($query, $search, $statusFilter, $inChargeFilter, $jurisdictionFilter, $startDate, $endDate);
 
         $dailyWorks = $query->orderBy('date', 'desc')->get();
 
@@ -147,8 +151,11 @@ class DailyWorkPaginationService
     /**
      * Apply filters to the query with optimized date filtering
      */
-    private function applyFilters($query, ?string $search, ?string $statusFilter, ?string $inChargeFilter, ?string $startDate, ?string $endDate)
+    private function applyFilters($query, ?string $search, ?string $statusFilter, $inChargeFilter, $jurisdictionFilter, ?string $startDate, ?string $endDate)
     {
+        $normalizedIncharge = $this->normalizeIdFilter($inChargeFilter);
+        $normalizedJurisdictions = $this->normalizeIdFilter($jurisdictionFilter);
+
         // Apply date range filter FIRST for better performance (most selective)
         if ($startDate && $endDate) {
             // For single date (mobile), use exact match instead of range
@@ -166,9 +173,21 @@ class DailyWorkPaginationService
             $query->where('status', $statusFilter);
         }
 
-        // Apply in-charge filter if provided
-        if ($inChargeFilter) {
-            $query->where('incharge', $inChargeFilter);
+        if (! empty($normalizedIncharge)) {
+            $query->whereIn('incharge', $normalizedIncharge);
+        } elseif (! empty($normalizedJurisdictions)) {
+            $jurisdictionIncharges = Jurisdiction::whereIn('id', $normalizedJurisdictions)
+                ->pluck('incharge')
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+
+            if (! empty($jurisdictionIncharges)) {
+                $query->whereIn('incharge', $jurisdictionIncharges);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         // Apply search LAST as it's least selective
@@ -182,6 +201,22 @@ class DailyWorkPaginationService
         }
 
         return $query;
+    }
+
+    private function normalizeIdFilter($value): array
+    {
+        if ($value === null || $value === '' || $value === 'all') {
+            return [];
+        }
+
+        $ids = is_array($value) ? $value : [$value];
+
+        return collect($ids)
+            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     /**

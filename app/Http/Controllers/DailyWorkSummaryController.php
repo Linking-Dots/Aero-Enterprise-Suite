@@ -60,10 +60,10 @@ class DailyWorkSummaryController extends Controller
                 $query->whereBetween('date', [$startDate, $endDate]);
             }
 
-            // Apply incharge filter
-            if ($request->has('incharge') && $request->incharge !== 'all') {
-                $query->where('incharge', $request->incharge);
-            }
+            $inchargeFilter = $this->normalizeIdFilter($request->input('incharge'));
+            $jurisdictionFilter = $this->normalizeIdFilter($request->input('jurisdiction'));
+
+            $this->applyInchargeJurisdictionFilters($query, $inchargeFilter, $jurisdictionFilter);
 
             $filteredWorks = $query->get();
             $summaries = $this->generateSummariesFromDailyWorks($filteredWorks);
@@ -97,9 +97,10 @@ class DailyWorkSummaryController extends Controller
                 $query->whereBetween('date', [$request->startDate, $request->endDate]);
             }
 
-            if ($request->has('incharge') && $request->incharge !== 'all') {
-                $query->where('incharge', $request->incharge);
-            }
+            $inchargeFilter = $this->normalizeIdFilter($request->input('incharge'));
+            $jurisdictionFilter = $this->normalizeIdFilter($request->input('jurisdiction'));
+
+            $this->applyInchargeJurisdictionFilters($query, $inchargeFilter, $jurisdictionFilter);
 
             $dailyWorks = $query->get();
             $summaries = $this->generateSummariesFromDailyWorks($dailyWorks);
@@ -276,5 +277,50 @@ class DailyWorkSummaryController extends Controller
     {
         // Legacy method - can be removed or updated
         return $this->index();
+    }
+
+    private function normalizeIdFilter($value): array
+    {
+        if ($value === null || $value === 'all' || $value === '') {
+            return [];
+        }
+
+        $ids = is_array($value) ? $value : [$value];
+
+        return collect($ids)
+            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function applyInchargeJurisdictionFilters($query, array $inchargeFilter, array $jurisdictionFilter): void
+    {
+        if (! empty($inchargeFilter)) {
+            $query->whereIn('incharge', $inchargeFilter);
+
+            return;
+        }
+
+        if (empty($jurisdictionFilter)) {
+            return;
+        }
+
+        $jurisdictionIncharges = Jurisdiction::whereIn('id', $jurisdictionFilter)
+            ->pluck('incharge')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (! empty($jurisdictionIncharges)) {
+            $query->whereIn('incharge', $jurisdictionIncharges);
+
+            return;
+        }
+
+        // If jurisdictions exist without associated incharge users, force empty result
+        $query->whereRaw('1 = 0');
     }
 }

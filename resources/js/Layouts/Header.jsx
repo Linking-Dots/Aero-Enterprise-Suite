@@ -11,7 +11,6 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Avatar,
   Input,
   Badge,
   Kbd,
@@ -23,6 +22,7 @@ import {
 
 import ProfileMenu from '@/Components/ProfileMenu';
 import LanguageSwitcher from '@/Components/LanguageSwitcher';
+import ProfileAvatar from '@/Components/ProfileAvatar';
 import { useScrollTrigger } from '@/Hooks/useScrollTrigger.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -150,17 +150,18 @@ const ProfileButton = React.memo(React.forwardRef(({ size = "sm", ...props }, re
     >
       {/* Avatar with enhanced styling */}
       <div className="relative">
-        <Avatar
+        <ProfileAvatar
           size={avatarSize}
           src={auth.user.profile_image_url || auth.user.profile_image}
           name={auth.user.name}
           className={`
-            ring-2 ring-white/20 transition-all duration-300 ease-out
-            ${isHovered ? 'ring-white/40 scale-105' : ''}
+            transition-all duration-300 ease-out
+            ${isHovered ? 'scale-105' : ''}
             ${isPressed ? 'scale-95' : ''}
             group-hover:shadow-lg group-hover:shadow-blue-500/20
           `}
-          radius='sm'
+          showBorder
+          isInteractive
         />
         
         {/* Online indicator */}
@@ -296,22 +297,18 @@ const MobileHeader = React.memo(({
       >
         {/* Enhanced Avatar with Status Indicators */}
         <div className="relative">
-          <Avatar
+          <ProfileAvatar
             size={avatarSize}
             src={auth.user.profile_image_url || auth.user.profile_image}
             name={auth.user.name}
             className={`
-              ring-2 ring-white/20 transition-all duration-300 ease-out
-              ${isHovered ? 'ring-white/40 scale-105' : ''}
+              transition-all duration-300 ease-out
+              ${isHovered ? 'scale-105' : ''}
               ${isPressed ? 'scale-95' : ''}
               group-hover:shadow-lg group-hover:shadow-blue-500/20
             `}
-            radius="md"
-            fallback={
-              <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-primary to-secondary text-white font-semibold">
-                {(auth.user.name || 'U').charAt(0).toUpperCase()}
-              </div>
-            }
+            showBorder
+            isInteractive
           />
           
           {/* Multi-state Status Indicator */}
@@ -837,22 +834,18 @@ const DesktopHeader = React.memo(({
       >
         {/* Enhanced Avatar with Status Indicators */}
         <div className="relative">
-          <Avatar
+          <ProfileAvatar
             size={avatarSize}
             src={auth.user.profile_image_url || auth.user.profile_image}
             name={auth.user.name}
             className={`
-              ring-2 ring-white/20 transition-all duration-300 ease-out
-              ${isHovered ? 'ring-white/40 scale-105' : ''}
+              transition-all duration-300 ease-out
+              ${isHovered ? 'scale-105' : ''}
               ${isPressed ? 'scale-95' : ''}
               group-hover:shadow-lg group-hover:shadow-blue-500/20
             `}
-            radius="md"
-            fallback={
-              <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-primary to-secondary text-white font-semibold">
-                {(auth.user.name || 'U').charAt(0).toUpperCase()}
-              </div>
-            }
+            showBorder
+            isInteractive
           />
           
           {/* Multi-state Status Indicator */}

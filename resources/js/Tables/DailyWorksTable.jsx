@@ -4,6 +4,7 @@ import { usePage, router } from "@inertiajs/react";
 import { showToast } from '@/utils/toastUtils';
 import { debounce } from "lodash";
 import StatsCards from '@/Components/StatsCards';
+import ProfileAvatar, { getProfileAvatarTokens } from '@/Components/ProfileAvatar';
 
 import {
     Table,
@@ -32,7 +33,6 @@ import {
     Spinner,
     CircularProgress,
     Input,
-    Avatar,
     Skeleton
 } from "@heroui/react";
 import {
@@ -1160,11 +1160,12 @@ const DailyWorksTable = ({
                                                 }
                                                 return items.map((item) => (
                                                     <div key={item.key} className="flex items-center gap-2">
-                                                        <Avatar
+                                                        <ProfileAvatar
                                                             src={inchargeUser.profile_image_url || inchargeUser.profile_image}
                                                             size="sm"
                                                             name={inchargeUser.name}
                                                             className="w-5 h-5"
+                                                            showBorder
                                                         />
                                                         <span className="text-sm font-medium">{inchargeUser.name}</span>
                                                     </div>
@@ -1174,11 +1175,12 @@ const DailyWorksTable = ({
                                             {finalInCharges.map((user) => (
                                                 <SelectItem key={String(user.id)} textValue={user.name}>
                                                     <div className="flex items-center gap-2">
-                                                        <Avatar
+                                                        <ProfileAvatar
                                                             src={user.profile_image_url || user.profile_image}
                                                             size="sm"
                                                             name={user.name}
                                                             className="w-6 h-6"
+                                                            showBorder
                                                         />
                                                         <div>
                                                             <div className="text-sm font-medium">{user.name}</div>
@@ -1232,11 +1234,12 @@ const DailyWorksTable = ({
                                                 }
                                                 return items.map((item) => (
                                                     <div key={item.key} className="flex items-center gap-2">
-                                                        <Avatar
+                                                        <ProfileAvatar
                                                             src={assignedUser.profile_image_url || assignedUser.profile_image}
                                                             size="sm"
                                                             name={assignedUser.name}
                                                             className="w-5 h-5"
+                                                            showBorder
                                                         />
                                                         <span className="text-sm font-medium">{assignedUser.name}</span>
                                                     </div>
@@ -1246,11 +1249,12 @@ const DailyWorksTable = ({
                                             {getAvailableAssignees(work.incharge).map((user) => (
                                                 <SelectItem key={String(user.id)} textValue={user.name}>
                                                     <div className="flex items-center gap-2">
-                                                        <Avatar
+                                                        <ProfileAvatar
                                                             src={user.profile_image_url || user.profile_image}
                                                             size="sm"
                                                             name={user.name}
                                                             className="w-6 h-6"
+                                                            showBorder
                                                         />
                                                         <div>
                                                             <div className="text-sm font-medium">{user.name}</div>
@@ -1269,6 +1273,11 @@ const DailyWorksTable = ({
                                                 avatarProps={{
                                                     size: "sm",
                                                     src: assignedUser.profile_image_url || assignedUser.profile_image,
+                                                    name: assignedUser.name,
+                                                    ...getProfileAvatarTokens({
+                                                        name: assignedUser.name,
+                                                        size: 'sm',
+                                                    }),
                                                 }}
                                                 classNames={{
                                                     name: "text-sm font-medium",
@@ -1800,12 +1809,11 @@ const DailyWorksTable = ({
                                     }
                                     return items.map((item) => (
                                         <div key={item.key} className="flex items-center justify-center gap-2">
-                                           
-                                            <Avatar
+                                            <ProfileAvatar
                                                 src={inchargeUser.profile_image_url || inchargeUser.profile_image}
                                                 size="sm"
                                                 name={inchargeUser.name}
-                                                showFallback
+                                                showBorder
                                             />
                                             <span 
                                                 className="text-xs font-medium leading-tight break-words"
@@ -1833,6 +1841,11 @@ const DailyWorksTable = ({
                                             avatarProps={{
                                                 size: "sm",
                                                 src: incharge.profile_image_url || incharge.profile_image,
+                                                name: incharge.name,
+                                                ...getProfileAvatarTokens({
+                                                    name: incharge.name,
+                                                    size: 'sm',
+                                                }),
                                             }}
                                         />
                                     </SelectItem>
@@ -1862,6 +1875,11 @@ const DailyWorksTable = ({
                                         avatarProps={{
                                             size: "sm",
                                             src: inchargeUser.profile_image_url || inchargeUser.profile_image,
+                                            name: inchargeUser.name,
+                                            ...getProfileAvatarTokens({
+                                                name: inchargeUser.name,
+                                                size: 'sm',
+                                            }),
                                         }}
                                         classNames={{
                                             name: "text-xs font-medium leading-tight",
@@ -1918,11 +1936,11 @@ const DailyWorksTable = ({
                                     }
                                     return items.map((item) => (
                                         <div key={item.key} className="flex items-center gap-2">
-                                            <Avatar
+                                            <ProfileAvatar
                                                 src={assignedUser.profile_image_url || assignedUser.profile_image}
                                                 size="sm"
                                                 name={assignedUser.name}
-                                                showFallback
+                                                showBorder
                                             />
                                             <span 
                                                 className="text-xs font-medium leading-tight break-words"
@@ -1950,6 +1968,11 @@ const DailyWorksTable = ({
                                             avatarProps={{
                                                 size: "sm",
                                                 src: assignee.profile_image_url || assignee.profile_image,
+                                                name: assignee.name,
+                                                ...getProfileAvatarTokens({
+                                                    name: assignee.name,
+                                                    size: 'sm',
+                                                }),
                                             }}
                                         />
                                     </SelectItem>
@@ -1979,6 +2002,11 @@ const DailyWorksTable = ({
                                         avatarProps={{
                                             size: "sm",
                                             src: assignedUser.profile_image_url || assignedUser.profile_image,
+                                            name: assignedUser.name,
+                                            ...getProfileAvatarTokens({
+                                                name: assignedUser.name,
+                                                size: 'sm',
+                                            }),
                                         }}
                                         classNames={{
                                             name: "text-xs font-medium leading-tight",

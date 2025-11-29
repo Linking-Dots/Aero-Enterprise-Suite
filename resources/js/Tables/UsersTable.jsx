@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from '@inertiajs/react';
 import { showToast } from '@/utils/toastUtils';
+import { getProfileAvatarTokens } from '@/Components/ProfileAvatar';
 import { 
   Table, 
   TableBody, 
@@ -291,16 +292,13 @@ const UsersTable = ({
           <User
             className="w-fit max-w-full"
             avatarProps={{
-              radius: getThemeRadius(),
-              size: "sm",
               src: user?.profile_image_url || user?.profile_image,
-              showFallback: true,
               name: user?.name || "Unnamed User",
-              isBordered: true,
-              style: {
-                borderColor: `var(--theme-primary, #3B82F6)`,
-                borderWidth: '2px',
-              }
+              size: "sm",
+              ...getProfileAvatarTokens({
+                name: user?.name || "Unnamed User",
+                size: 'sm',
+              }),
             }}
             name={
               <span 

@@ -167,9 +167,10 @@ class DailyWorkController extends Controller
                 $query->whereBetween('date', [$request->startDate, $request->endDate]);
             }
 
-            if ($request->has('incharge') && $request->incharge !== 'all') {
-                $query->where('incharge', $request->incharge);
-            }
+            $inchargeFilter = $this->normalizeIdFilter($request->input('incharge'));
+            $jurisdictionFilter = $this->normalizeIdFilter($request->input('jurisdiction'));
+
+            $this->applyInchargeJurisdictionFilters($query, $inchargeFilter, $jurisdictionFilter);
 
             if ($request->has('status') && $request->status !== 'all') {
                 $query->where('status', $request->status);
@@ -535,5 +536,49 @@ class DailyWorkController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    private function normalizeIdFilter($value): array
+    {
+        if ($value === null || $value === '' || $value === 'all') {
+            return [];
+        }
+
+        $ids = is_array($value) ? $value : [$value];
+
+        return collect($ids)
+            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function applyInchargeJurisdictionFilters($query, array $inchargeFilter, array $jurisdictionFilter): void
+    {
+        if (! empty($inchargeFilter)) {
+            $query->whereIn('incharge', $inchargeFilter);
+
+            return;
+        }
+
+        if (empty($jurisdictionFilter)) {
+            return;
+        }
+
+        $jurisdictionIncharges = Jurisdiction::whereIn('id', $jurisdictionFilter)
+            ->pluck('incharge')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (! empty($jurisdictionIncharges)) {
+            $query->whereIn('incharge', $jurisdictionIncharges);
+
+            return;
+        }
+
+        $query->whereRaw('1 = 0');
     }
 }

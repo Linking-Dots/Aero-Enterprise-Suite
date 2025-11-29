@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { getProfileAvatarTokens } from '@/Components/ProfileAvatar';
 import { RefreshCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -398,12 +399,13 @@ const TimeSheetTable = ({ handleDateChange, selectedDate, updateTimeSheet, exter
                         
                         <User
                         avatarProps={{
-                        radius: "lg",
-                        size: "sm",
                         src: attendance.user?.profile_image_url || attendance.user?.profile_image,
-                        showFallback: true, // Ensure fallback is always available
+                        size: avatarSize,
                         name: attendance.user?.name || "Unnamed User",
-                        isBordered: true,
+                        ...getProfileAvatarTokens({
+                            name: attendance.user?.name || "Unnamed User",
+                            size: avatarSize,
+                        }),
                         }}
                         description={
                         attendance.user?.phone ? (
