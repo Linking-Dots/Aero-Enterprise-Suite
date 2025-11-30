@@ -105,12 +105,7 @@ createInertiaApp({
         includeCSS: true,
         showSpinner: false,
     },
-    defaults: {
-        prefetch: {
-            cacheFor: '1m', // Cache prefetched pages for 1 minute
-            hoverDelay: 50, // Faster prefetch trigger (default 75ms)
-        },
-    },
+    
     title: (title) => {
         const page = window.Laravel?.inertiaProps || {};
         const appName = page.app?.name || 'aeos365';

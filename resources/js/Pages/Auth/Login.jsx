@@ -1056,7 +1056,7 @@ export default function Login({
                                     {canResetPassword && (
                                         <Link
                                             href={route('password.request')}
-                                            prefetch
+                                        
                                             className="text-sm font-medium transition-colors duration-200 hover:underline"
                                             style={{ color: 'var(--theme-primary, #006FEE)' }}
                                         >
@@ -1115,7 +1115,7 @@ export default function Login({
                                         Don't have an account?{' '}
                                         <Link
                                             href={route('register')}
-                                            prefetch
+                                     
                                             className="font-semibold transition-colors duration-200 hover:underline"
                                             style={{ color: 'var(--theme-primary, #006FEE)' }}
                                         >

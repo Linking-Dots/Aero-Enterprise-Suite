@@ -58,7 +58,7 @@ const UserDevices = ({ user, devices }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href={route('users')} prefetch>
+            <Link href={route('users')}>
               <Button
                 variant="light"
                 startContent={<ArrowLeftIcon className="w-4 h-4" />}

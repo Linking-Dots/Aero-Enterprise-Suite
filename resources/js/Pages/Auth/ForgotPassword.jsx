@@ -130,7 +130,7 @@ export default function ForgotPassword({ status }) {
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Link
                             href={route('login')}
-                            prefetch
+                       
                             className="inline-flex items-center text-sm font-medium transition-colors duration-200"
                             style={{ color: theme.palette.text.secondary }}
                         >

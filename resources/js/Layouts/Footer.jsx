@@ -108,7 +108,7 @@ const Footer = () => {
                                                 <Link
                                                     key={index}
                                                     href={link.href}
-                                                    prefetch
+                                            
                                                     className="text-sm transition-all duration-200 p-2 rounded-lg"
                                                     style={isActive ? {
                                                         backgroundColor: `color-mix(in srgb, var(--theme-primary, #006FEE) 50%, transparent)`,
@@ -213,21 +213,21 @@ const Footer = () => {
                                 <div className="flex justify-center md:justify-end gap-4">
                                     <Link
                                         href="/privacy"
-                                        prefetch
+                                    
                                         className="text-sm hover:text-primary transition-colors duration-200"
                                     >
                                         Privacy Policy
                                     </Link>
                                     <Link
                                         href="/terms"
-                                        prefetch
+                                      
                                         className="text-sm hover:text-primary transition-colors duration-200"
                                     >
                                         Terms of Service
                                     </Link>
                                     <Link
                                         href="/support"
-                                        prefetch
+                                    
                                         className="text-sm hover:text-primary transition-colors duration-200"
                                     >
                                         Support
