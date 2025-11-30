@@ -6,6 +6,7 @@ import {createInertiaApp} from '@inertiajs/react';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import axios from 'axios';
 import ErrorBoundary from './Components/ErrorBoundary/ErrorBoundary';
+import LoadingIndicator from './Components/LoadingIndicator';
 import { ThemeProvider } from './Contexts/ThemeContext';
 import { HeroUIProvider } from '@heroui/react';
 import './theme/index.js';
@@ -99,12 +100,8 @@ if (false) {
 }
 
 createInertiaApp({
-    progress: {
-        color: '#29d',
-        delay: 50, // Faster progress indicator
-        includeCSS: true,
-        showSpinner: false,
-    },
+    // Disable default progress bar - using custom LoadingIndicator instead
+    progress: false,
     
     title: (title) => {
         const page = window.Laravel?.inertiaProps || {};
@@ -126,6 +123,7 @@ createInertiaApp({
             <ErrorBoundary>
                 <ThemeProvider>
                     <HeroUIProvider>
+                        <LoadingIndicator />
                         <App {...props} />
                     </HeroUIProvider>
                 </ThemeProvider>
