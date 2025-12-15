@@ -2,7 +2,8 @@
 
 namespace App\Services\Leave;
 
-use App\Models\Leave;
+use App\Models\HRM\Leave;
+use App\Models\HRM\LeaveSetting;
 use App\Models\User;
 use App\Notifications\LeaveApprovalNotification;
 use App\Notifications\LeaveApprovedNotification;
@@ -346,7 +347,7 @@ class LeaveApprovalService
     protected function getSpecialLeaveTypes(): array
     {
         // Get IDs for maternity, paternity, unpaid leave, etc.
-        return \App\Models\LeaveSetting::whereIn('leave_type', [
+        return LeaveSetting::whereIn('leave_type', [
             'Maternity Leave',
             'Paternity Leave',
             'Unpaid Leave',

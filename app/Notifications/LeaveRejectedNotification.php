@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\Leave;
+use App\Models\HRM\Leave;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
