@@ -135,7 +135,7 @@ class DailyWorkPolicy
      */
     public function updateInspectionDetails(User $user, DailyWork $dailyWork): bool
     {
-        if (! $user->hasPermissionTo('daily-works.update')) {
+        if (! $user->hasPermissionTo('daily-works.view')) {
             return false;
         }
 

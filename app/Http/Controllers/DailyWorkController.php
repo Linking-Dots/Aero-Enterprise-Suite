@@ -333,17 +333,55 @@ class DailyWorkController extends Controller
             $request->validate([
                 'id' => 'required|exists:daily_works,id',
                 'rfi_submission_date' => 'required|date',
+                // Override confirmation fields (required when objections exist)
+                'override_confirmed' => 'sometimes|boolean',
+                'override_reason' => 'sometimes|required_if:override_confirmed,true|string|max:1000',
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
             $this->authorize('updateSubmissionTime', $dailyWork);
 
+            // Check for active objections
+            $activeObjectionsCount = $dailyWork->active_objections_count;
+
+            if ($activeObjectionsCount > 0) {
+                // If user hasn't confirmed the override, require confirmation
+                if (! $request->boolean('override_confirmed')) {
+                    return response()->json([
+                        'requires_confirmation' => true,
+                        'active_objections_count' => $activeObjectionsCount,
+                        'message' => "This RFI has {$activeObjectionsCount} active objection(s). Changing the submission date may affect approvals, records, or claims. Please confirm to proceed.",
+                        'objections' => $dailyWork->activeObjections()
+                            ->with('createdBy:id,name')
+                            ->get(['id', 'title', 'category', 'status', 'created_by', 'created_at']),
+                    ], 422);
+                }
+
+                // Validate override reason
+                if (empty($request->override_reason)) {
+                    return response()->json([
+                        'error' => 'A reason is required when overriding an RFI with active objections.',
+                    ], 422);
+                }
+
+                // Log the override for audit purposes
+                \App\Models\RfiSubmissionOverrideLog::logOverride(
+                    dailyWorkId: $dailyWork->id,
+                    oldDate: $dailyWork->rfi_submission_date?->format('Y-m-d'),
+                    newDate: $request->rfi_submission_date,
+                    activeObjectionsCount: $activeObjectionsCount,
+                    reason: $request->override_reason,
+                    userId: auth()->id()
+                );
+            }
+
             $dailyWork->update(['rfi_submission_date' => $request->rfi_submission_date]);
 
             return response()->json([
                 'message' => 'RFI submission date updated successfully',
                 'dailyWork' => $dailyWork->fresh(['inchargeUser', 'assignedUser']),
+                'override_logged' => $activeObjectionsCount > 0,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

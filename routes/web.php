@@ -24,6 +24,7 @@ use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileImageController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RfiObjectionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Settings\AttendanceSettingController;
 use App\Http\Controllers\Settings\CompanySettingController;
@@ -133,12 +134,33 @@ Route::middleware($middlewareStack)->group(function () {
         Route::post('/daily-works/submission-time', [DailyWorkController::class, 'updateSubmissionTime'])->name('dailyWorks.updateSubmissionTime');
         Route::post('/daily-works/assigned', [DailyWorkController::class, 'updateAssigned'])->name('dailyWorks.updateAssigned');
         Route::post('/update-rfi-file', [DailyWorkController::class, 'uploadRFIFile'])->name('dailyWorks.uploadRFI');
+        Route::post('/daily-works/inspection-details', [DailyWorkController::class, 'updateInspectionDetails'])->name('dailyWorks.updateInspectionDetails');
 
         // RFI File Management routes
         Route::post('/daily-works/{dailyWork}/rfi-files', [DailyWorkController::class, 'uploadRfiFiles'])->name('dailyWorks.rfiFiles.upload');
         Route::get('/daily-works/{dailyWork}/rfi-files', [DailyWorkController::class, 'getRfiFiles'])->name('dailyWorks.rfiFiles.index');
         Route::delete('/daily-works/{dailyWork}/rfi-files/{mediaId}', [DailyWorkController::class, 'deleteRfiFile'])->name('dailyWorks.rfiFiles.delete');
         Route::get('/daily-works/{dailyWork}/rfi-files/{mediaId}/download', [DailyWorkController::class, 'downloadRfiFile'])->name('dailyWorks.rfiFiles.download');
+
+        // RFI Objection Routes - View and metadata
+        Route::get('/daily-works/{dailyWork}/objections', [RfiObjectionController::class, 'index'])->name('dailyWorks.objections.index');
+        Route::get('/daily-works/{dailyWork}/objections/{objection}', [RfiObjectionController::class, 'show'])->name('dailyWorks.objections.show');
+        Route::get('/daily-works/objections/metadata', [RfiObjectionController::class, 'getMetadata'])->name('dailyWorks.objections.metadata');
+        Route::get('/daily-works/{dailyWork}/objections/{objection}/files', [RfiObjectionController::class, 'getFiles'])->name('dailyWorks.objections.files');
+        Route::get('/daily-works/{dailyWork}/objections/{objection}/files/{mediaId}/download', [RfiObjectionController::class, 'downloadFile'])->name('dailyWorks.objections.files.download');
+        
+        // RFI Objection Routes - Create and manage (authorization handled by policy)
+        Route::post('/daily-works/{dailyWork}/objections', [RfiObjectionController::class, 'store'])->name('dailyWorks.objections.store');
+        Route::put('/daily-works/{dailyWork}/objections/{objection}', [RfiObjectionController::class, 'update'])->name('dailyWorks.objections.update');
+        Route::delete('/daily-works/{dailyWork}/objections/{objection}', [RfiObjectionController::class, 'destroy'])->name('dailyWorks.objections.destroy');
+        Route::post('/daily-works/{dailyWork}/objections/{objection}/submit', [RfiObjectionController::class, 'submit'])->name('dailyWorks.objections.submit');
+        Route::post('/daily-works/{dailyWork}/objections/{objection}/files', [RfiObjectionController::class, 'uploadFiles'])->name('dailyWorks.objections.files.upload');
+        Route::delete('/daily-works/{dailyWork}/objections/{objection}/files/{mediaId}', [RfiObjectionController::class, 'deleteFile'])->name('dailyWorks.objections.files.delete');
+        
+        // RFI Objection Routes - Review actions (authorization handled by policy)
+        Route::post('/daily-works/{dailyWork}/objections/{objection}/review', [RfiObjectionController::class, 'startReview'])->name('dailyWorks.objections.review');
+        Route::post('/daily-works/{dailyWork}/objections/{objection}/resolve', [RfiObjectionController::class, 'resolve'])->name('dailyWorks.objections.resolve');
+        Route::post('/daily-works/{dailyWork}/objections/{objection}/reject', [RfiObjectionController::class, 'reject'])->name('dailyWorks.objections.reject');
     });
 
     Route::middleware(['permission:daily-works.create'])->group(function () {
@@ -148,7 +170,6 @@ Route::middleware($middlewareStack)->group(function () {
     Route::middleware(['permission:daily-works.update'])->group(function () {
         Route::post('/update-daily-work', [DailyWorkController::class, 'update'])->name('dailyWorks.update');
         Route::post('/daily-works-summary/refresh', [DailyWorkSummaryController::class, 'refresh'])->name('daily-works-summary.refresh');
-        Route::post('/daily-works/inspection-details', [DailyWorkController::class, 'updateInspectionDetails'])->name('dailyWorks.updateInspectionDetails');
         Route::post('/daily-works/incharge', [DailyWorkController::class, 'updateIncharge'])->name('dailyWorks.updateIncharge');
         Route::post('/daily-works/assign', [DailyWorkController::class, 'assignWork'])->name('dailyWorks.assign');
     });

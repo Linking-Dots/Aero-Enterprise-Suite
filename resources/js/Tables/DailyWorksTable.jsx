@@ -9,6 +9,8 @@ import ProfileAvatar, { getProfileAvatarTokens } from '@/Components/ProfileAvata
 import SwipeableCard from '@/Components/Common/SwipeableCard';
 import RfiFilesModal from '@/Components/DailyWork/RfiFilesModal';
 import StatusUpdateModal from '@/Components/StatusUpdateModal';
+import ObjectionsModal from '@/Components/DailyWork/ObjectionsModal';
+import ObjectionWarningModal from '@/Components/DailyWork/ObjectionWarningModal';
 
 import {
     Table,
@@ -62,6 +64,7 @@ import {
     PlusIcon,
     EyeIcon,
     FolderOpenIcon,
+    ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 import {
     CheckCircleIcon as CheckCircleSolid,
@@ -156,12 +159,24 @@ const DailyWorksTable = ({
     const [statusModalOpen, setStatusModalOpen] = useState(false);
     const [statusModalWork, setStatusModalWork] = useState(null);
     
+    // Objections Modal state
+    const [objectionsModalOpen, setObjectionsModalOpen] = useState(false);
+    const [objectionsModalWork, setObjectionsModalWork] = useState(null);
+    
+    // Objection Warning Modal state (for submission date changes)
+    const [objectionWarningModal, setObjectionWarningModal] = useState({
+        isOpen: false,
+        dailyWork: null,
+        newSubmissionDate: null,
+        activeObjectionsCount: 0,
+        activeObjections: [],
+        isLoading: false,
+    });
+    
     // Function to open Status Update modal
     const openStatusModal = useCallback((work) => {
-        console.log('openStatusModal called with work:', work?.id, work?.number);
         setStatusModalWork(work);
         setStatusModalOpen(true);
-        console.log('statusModalOpen set to true');
     }, []);
     
     // Function to handle status update from modal
@@ -177,10 +192,20 @@ const DailyWorksTable = ({
     
     // Function to open RFI files modal
     const openRfiFilesModal = useCallback((work) => {
-        console.log('openRfiFilesModal called with work:', work?.id, work?.number);
         setRfiModalWork(work);
         setRfiModalOpen(true);
-        console.log('rfiModalOpen set to true');
+    }, []);
+    
+    // Function to open Objections modal
+    const openObjectionsModal = useCallback((work) => {
+        setObjectionsModalWork(work);
+        setObjectionsModalOpen(true);
+    }, []);
+    
+    // Function to handle objections update
+    const handleObjectionsUpdated = useCallback(() => {
+        // Refresh data to get updated objection counts
+        router.reload({ only: ['allData'], preserveScroll: true });
     }, []);
     
     // Function to handle files update from modal
@@ -247,6 +272,17 @@ const DailyWorksTable = ({
     // Check if user can update status and completion time (admin, SE, or assignee of the work)
     const canUserUpdateStatus = (work) => {
         return userIsAdmin || userIsSE || isUserAssigneeOfWork(work);
+    };
+    
+    // Check if user can create/manage objections for a specific work
+    // Only incharge, assigned, or admin can raise objections
+    const canUserCreateObjections = (work) => {
+        return userIsAdmin || isUserInchargeOfWork(work) || isUserAssigneeOfWork(work);
+    };
+    
+    // Check if user can review objections (admin/manager level)
+    const canUserReviewObjections = () => {
+        return userIsAdmin;
     };
     
     // Check if user is only an incharge (not admin)
@@ -344,8 +380,9 @@ const DailyWorksTable = ({
         return 'new';
     };
 
-    // Status configuration - consistent with backend DailyWork::$statuses
+    // Status configuration - consistent with backend DailyWork::$statuses and $inspectionResults
     const statusConfig = {
+        // Base statuses (without inspection result)
         'new': {
             color: 'primary',
             icon: PlusIconSolid,
@@ -361,6 +398,22 @@ const DailyWorksTable = ({
             icon: ClockSolid,
             label: 'Pending',
         },
+        'rejected': {
+            color: 'danger',
+            icon: XCircleSolid,
+            label: 'Rejected',
+        },
+        'resubmission': {
+            color: 'warning',
+            icon: ArrowPathSolid,
+            label: 'Resubmission',
+        },
+        'emergency': {
+            color: 'danger',
+            icon: ExclamationTriangleSolid,
+            label: 'Emergency',
+        },
+        // Completed statuses with inspection results (matching database enum: pass, fail, conditional, pending)
         'completed:pass': {
             color: 'success',
             icon: CheckCircleSolid,
@@ -381,21 +434,6 @@ const DailyWorksTable = ({
             icon: CheckCircleSolid,
             label: 'Completed: Pending Review',
         },
-        'rejected': {
-            color: 'danger',
-            icon: XCircleSolid,
-            label: 'Rejected',
-        },
-        'resubmission': {
-            color: 'warning',
-            icon: ArrowPathSolid,
-            label: 'Resubmission',
-        },
-        'emergency': {
-            color: 'danger',
-            icon: ExclamationTriangleSolid,
-            label: 'Emergency',
-        }
     };
 
     const getWorkTypeIcon = (type, className = "w-4 h-4") => {
@@ -955,7 +993,39 @@ const DailyWorksTable = ({
         () => debounce(async (workId, submissionTime) => {
             const work = allDataRef.current?.find(w => w.id === workId);
             if (!work) {
-                showToast.error('Work not found');
+                console.error('Work not found for ID:', workId, 'Available works:', allDataRef.current?.length);
+                showToast.error('Unable to find work record. Please refresh and try again.');
+                return;
+            }
+
+            // Check if work has active objections - if so, show warning modal
+            if (work.active_objections_count > 0) {
+                // Fetch active objections for the warning modal
+                try {
+                    const objResponse = await axios.get(route('dailyWorks.objections.index', work.id));
+                    
+                    setObjectionWarningModal({
+                        isOpen: true,
+                        dailyWork: work,
+                        newSubmissionDate: submissionTime,
+                        activeObjectionsCount: work.active_objections_count,
+                        activeObjections: objResponse.data?.objections?.filter(obj => 
+                            ['draft', 'submitted', 'under_review'].includes(obj.status)
+                        ) || [],
+                        isLoading: false,
+                    });
+                } catch (error) {
+                    console.error('Error fetching objections:', error);
+                    // If fetch fails, still show the modal with count only
+                    setObjectionWarningModal({
+                        isOpen: true,
+                        dailyWork: work,
+                        newSubmissionDate: submissionTime,
+                        activeObjectionsCount: work.active_objections_count,
+                        activeObjections: [],
+                        isLoading: false,
+                    });
+                }
                 return;
             }
 
@@ -988,6 +1058,67 @@ const DailyWorksTable = ({
         }, 800), // 0.8 second delay for time inputs
         []
     );
+
+    // Function to handle submission time update with override (after warning modal confirmation)
+    const handleSubmissionTimeOverride = useCallback(async (workId, newSubmissionDate, overrideReason) => {
+        const work = allDataRef.current?.find(w => w.id === workId);
+        if (!work) {
+            showToast.error('Work not found');
+            return;
+        }
+
+        setObjectionWarningModal(prev => ({ ...prev, isLoading: true }));
+
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const response = await axios.post(route('dailyWorks.updateSubmissionTime'), {
+                    id: work.id,
+                    rfi_submission_date: newSubmissionDate,
+                    confirm_override: true,
+                    override_reason: overrideReason,
+                });
+
+                if (response.status === 200) {
+                    setDataRef.current(prevWorks =>
+                        prevWorks.map(w =>
+                            w.id === work.id ? response.data.dailyWork : w
+                        )
+                    );
+                    setObjectionWarningModal({
+                        isOpen: false,
+                        dailyWork: null,
+                        newSubmissionDate: null,
+                        activeObjectionsCount: 0,
+                        activeObjections: [],
+                        isLoading: false,
+                    });
+                    resolve('RFI submission time updated successfully');
+                }
+            } catch (error) {
+                console.error('Error updating RFI submission time:', error.response?.data || error.message || error);
+                setObjectionWarningModal(prev => ({ ...prev, isLoading: false }));
+                reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update RFI submission time');
+            }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Updating RFI submission time...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
+    }, []);
+
+    // Function to close warning modal
+    const closeObjectionWarningModal = useCallback(() => {
+        setObjectionWarningModal({
+            isOpen: false,
+            dailyWork: null,
+            newSubmissionDate: null,
+            activeObjectionsCount: 0,
+            activeObjections: [],
+            isLoading: false,
+        });
+    }, []);
 
     // Cleanup debounced functions on unmount
     useEffect(() => {
@@ -1111,7 +1242,7 @@ const DailyWorksTable = ({
     };
 
     // Mobile tabs and accordion component - organized by work types
-    const MobileDailyWorkCard = ({ works, selectedTab, setSelectedTab, expandedItems, toggleExpanded, openStatusModal, openRfiFilesModal }) => {
+    const MobileDailyWorkCard = ({ works, selectedTab, setSelectedTab, expandedItems, toggleExpanded, openStatusModal, openRfiFilesModal, openObjectionsModal }) => {
 
         // Group works by type
         const groupedWorks = useMemo(() => {
@@ -1134,7 +1265,7 @@ const DailyWorksTable = ({
         }, [works]);
 
         // Individual work accordion item component - Redesigned for better mobile UX
-        const WorkAccordionItem = ({ work, index, isExpanded, onToggle, openStatusModal, openRfiFilesModal }) => {
+        const WorkAccordionItem = ({ work, index, isExpanded, onToggle, openStatusModal, openRfiFilesModal, openObjectionsModal }) => {
             const inchargeUser = getUserInfo(work.incharge);
             const assignedUser = getUserInfo(work.assigned);
             const statusKey = getStatusKey(work.status, work.inspection_result);
@@ -1168,7 +1299,11 @@ const DailyWorksTable = ({
             return (
                 <Card
                     radius={getThemeRadius()}
-                    className="bg-content1 border border-divider/40 shadow-sm"
+                    className={`bg-content1 border shadow-sm ${
+                        work.active_objections_count > 0 
+                            ? 'border-warning/60 bg-warning-50/30' 
+                            : 'border-divider/40'
+                    }`}
                     style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                     role="article"
                     aria-label={`Daily work ${work.number}`}
@@ -1189,12 +1324,28 @@ const DailyWorksTable = ({
                                 {work.rfi_files_count > 0 && (
                                     <DocumentCheckIcon className="w-3 h-3 text-success shrink-0" />
                                 )}
+                                {/* Objection warning indicator */}
+                                {work.active_objections_count > 0 && (
+                                    <ShieldExclamationIcon 
+                                        className="w-3 h-3 text-warning shrink-0 animate-pulse cursor-pointer" 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openObjectionsModal(work);
+                                        }}
+                                        title={`${work.active_objections_count} active objection(s)`}
+                                    />
+                                )}
                                 <span className="font-semibold text-[11px] text-default-800 break-all">
                                     <HighlightedText text={work.number} searchTerm={searchTerm} />
                                 </span>
                                 {work.rfi_files_count > 0 && (
                                     <span className="text-[9px] text-success shrink-0">
                                         ({work.rfi_files_count})
+                                    </span>
+                                )}
+                                {work.active_objections_count > 0 && (
+                                    <span className="text-[9px] text-warning shrink-0">
+                                        ⚠{work.active_objections_count}
                                     </span>
                                 )}
                             </div>
@@ -1365,21 +1516,40 @@ const DailyWorksTable = ({
                                 {canUserUpdateStatus(work) && (
                                     <div className="flex items-center gap-1">
                                         <span className="text-[10px] text-default-400 w-14 shrink-0">Status:</span>
-                                        <Button
+                                        <Select
                                             size="sm"
-                                            variant="flat"
-                                            color={statusConf.color}
-                                            startContent={<StatusIcon className="w-3 h-3" />}
-                                            radius="full"
-                                            className="h-6 px-2 min-w-0 flex-1"
-                                            onPress={() => {
-                                                console.log('Status button pressed for work:', work.id, work.number);
-                                                console.log('openStatusModal function:', typeof openStatusModal);
-                                                openStatusModal(work);
+                                            variant="bordered"
+                                            radius={getThemeRadius()}
+                                            aria-label="Select status"
+                                            selectedKeys={[statusKey]}
+                                            onSelectionChange={(keys) => {
+                                                const selectedKey = Array.from(keys)[0];
+                                                if (selectedKey && selectedKey !== statusKey) {
+                                                    updateWorkStatus(work, selectedKey);
+                                                }
+                                            }}
+                                            classNames={{
+                                                trigger: "min-h-7 h-7 bg-content2/50",
+                                                value: "text-[10px]",
+                                            }}
+                                            renderValue={(items) => {
+                                                return items.map((item) => (
+                                                    <div key={item.key} className="flex items-center gap-1">
+                                                        <StatusIcon className="w-3 h-3" />
+                                                        <span className="text-[10px]">{statusConf.label}</span>
+                                                    </div>
+                                                ));
                                             }}
                                         >
-                                            <span className="text-[10px] font-medium">{statusConf.label}</span>
-                                        </Button>
+                                            {Object.entries(statusConfig).map(([key, config]) => (
+                                                <SelectItem key={key} textValue={config.label}>
+                                                    <div className="flex items-center gap-2">
+                                                        <config.icon className={`w-4 h-4 text-${config.color}`} />
+                                                        <span>{config.label}</span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
                                     </div>
                                 )}
 
@@ -1451,13 +1621,25 @@ const DailyWorksTable = ({
                                     radius={getThemeRadius()}
                                     className="flex-1 h-7 text-[10px]"
                                     onPress={() => {
-                                        console.log('Files button pressed for work:', work.id, work.number);
-                                        console.log('openRfiFilesModal function:', typeof openRfiFilesModal);
                                         openRfiFilesModal(work);
                                     }}
                                 >
                                     Files {work.rfi_files_count > 0 && `(${work.rfi_files_count})`}
                                 </Button>
+                                
+                                {/* Objections button - visible to incharge, assigned, and admins */}
+                                {canUserCreateObjections(work) && (
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        color={work.active_objections_count > 0 ? "warning" : "default"}
+                                        radius={getThemeRadius()}
+                                        className="flex-1 h-7 text-[10px]"
+                                        onPress={() => openObjectionsModal(work)}
+                                    >
+                                        Objections {work.active_objections_count > 0 && `(${work.active_objections_count})`}
+                                    </Button>
+                                )}
                                 
                                 {shouldShowActions && (
                                     <>
@@ -1549,6 +1731,7 @@ const DailyWorksTable = ({
                                                 onToggle={() => toggleExpanded(work.id)}
                                                 openStatusModal={openStatusModal}
                                                 openRfiFilesModal={openRfiFilesModal}
+                                                openObjectionsModal={openObjectionsModal}
                                             />
                                         </SwipeableCard>
                                     ))}
@@ -1648,6 +1831,15 @@ const DailyWorksTable = ({
                                         </span>
                                     </Tooltip>
                                 )}
+                                
+                                {/* Objection indicator - click to open objections modal */}
+                                {work.active_objections_count > 0 && (
+                                    <Tooltip content={`${work.active_objections_count} active objection(s) - Click to view`}>
+                                        <span className="flex items-center cursor-pointer" onClick={() => openObjectionsModal(work)}>
+                                            <ShieldExclamationIcon className="w-3.5 h-3.5 text-warning animate-pulse" />
+                                        </span>
+                                    </Tooltip>
+                                )}
                             </div>
                             
                             {work.reports?.map(report => (
@@ -1669,28 +1861,46 @@ const DailyWorksTable = ({
                 const StatusIconComponent = currentStatusConfig.icon;
                 
                 return (
-                    <TableCell className="min-w-40">
+                    <TableCell className="min-w-48">
                         <div className="flex items-center justify-center w-full">
                             {canUserUpdateStatus(work) ? (
-                                <Tooltip content="Click to update status">
-                                    <Chip
-                                        size="md"
-                                        variant="flat"
-                                        color={currentStatusConfig.color}
-                                        startContent={<StatusIconComponent className="w-4 h-4" />}
-                                        className="cursor-pointer hover:scale-105 transition-transform"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openStatusModal(work);
-                                        }}
-                                        classNames={{
-                                            base: "h-8 px-3",
-                                            content: "text-sm font-medium"
-                                        }}
-                                    >
-                                        {currentStatusConfig.label}
-                                    </Chip>
-                                </Tooltip>
+                                <Select
+                                    size="sm"
+                                    variant="bordered"
+                                    radius={getThemeRadius()}
+                                    aria-label="Select status"
+                                    selectedKeys={[statusKey]}
+                                    onSelectionChange={(keys) => {
+                                        const selectedKey = Array.from(keys)[0];
+                                        if (selectedKey && selectedKey !== statusKey) {
+                                            updateWorkStatus(work, selectedKey);
+                                        }
+                                    }}
+                                    classNames={{
+                                        trigger: "min-h-10 bg-content2/50 hover:bg-content2/80",
+                                        value: "text-xs",
+                                    }}
+                                    style={{
+                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                    }}
+                                    renderValue={(items) => {
+                                        return items.map((item) => (
+                                            <div key={item.key} className="flex items-center gap-2">
+                                                <StatusIconComponent className={`w-4 h-4 text-${currentStatusConfig.color}`} />
+                                                <span className="text-xs font-medium">{currentStatusConfig.label}</span>
+                                            </div>
+                                        ));
+                                    }}
+                                >
+                                    {Object.entries(statusConfig).map(([key, config]) => (
+                                        <SelectItem key={key} textValue={config.label}>
+                                            <div className="flex items-center gap-2">
+                                                <config.icon className={`w-4 h-4 text-${config.color}`} />
+                                                <span>{config.label}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </Select>
                             ) : (
                                 getStatusChip(work.status, work.inspection_result)
                             )}
@@ -2019,6 +2229,33 @@ const DailyWorksTable = ({
                     </TableCell>
                 );
 
+            case "inspection_details":
+                return (
+                    <TableCell className="min-w-48">
+                        <div className="flex items-center justify-center">
+                            <Input
+                                size="sm"
+                                type="text"
+                                variant="bordered"
+                                radius={getThemeRadius()}
+                                placeholder="Enter details..."
+                                defaultValue={work.inspection_details || ''}
+                                onChange={(e) => debouncedUpdateInspectionDetails(work.id, e.target.value)}
+                                startContent={
+                                    <DocumentTextIcon className="w-4 h-4 text-default-400" />
+                                }
+                                classNames={{
+                                    input: "text-xs",
+                                    inputWrapper: "min-h-10 bg-content2/50 hover:bg-content2/80 focus-within:bg-content2/90 border-divider/50 hover:border-divider data-[focus]:border-primary"
+                                }}
+                                style={{
+                                    fontFamily: 'var(--font-family)',
+                                }}
+                            />
+                        </div>
+                    </TableCell>
+                );
+
             case "completion_time":
                 return (
                     <TableCell>
@@ -2104,6 +2341,21 @@ const DailyWorksTable = ({
                                     )}
                                 </Button>
                             </Tooltip>
+                            {(canUserCreateObjections(work) || canUserReviewObjections()) && (
+                                <Tooltip content={work.active_objections_count > 0 ? `Objections (${work.active_objections_count})` : "Manage Objections"}>
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="ghost"
+                                        color={work.active_objections_count > 0 ? "warning" : "default"}
+                                        radius={getThemeRadius()}
+                                        onPress={() => openObjectionsModal(work)}
+                                        className="min-w-8 h-8"
+                                    >
+                                        <ShieldExclamationIcon className={`w-4 h-4 ${work.active_objections_count > 0 ? 'animate-pulse' : ''}`} />
+                                    </Button>
+                                </Tooltip>
+                            )}
                             <Tooltip content="Edit Work">
                                 <Button
                                     isIconOnly
@@ -2339,6 +2591,7 @@ const DailyWorksTable = ({
                         toggleExpanded={toggleExpanded}
                         openStatusModal={openStatusModal}
                         openRfiFilesModal={openRfiFilesModal}
+                        openObjectionsModal={openObjectionsModal}
                     />
                 </ScrollShadow>
                 {/* Mobile pagination - show when there are multiple pages */}
@@ -2367,6 +2620,53 @@ const DailyWorksTable = ({
                         />
                     </div>
                 )}
+                
+                {/* RFI Files Modal */}
+                <RfiFilesModal
+                    isOpen={rfiModalOpen}
+                    onClose={() => {
+                        setRfiModalOpen(false);
+                        setRfiModalWork(null);
+                    }}
+                    dailyWork={rfiModalWork}
+                    onFilesUpdated={handleRfiFilesUpdated}
+                />
+                
+                {/* Status Update Modal */}
+                <StatusUpdateModal
+                    open={statusModalOpen}
+                    closeModal={() => {
+                        setStatusModalOpen(false);
+                        setStatusModalWork(null);
+                    }}
+                    dailyWork={statusModalWork}
+                    onStatusUpdated={handleStatusUpdated}
+                />
+                
+                {/* Objections Modal */}
+                <ObjectionsModal
+                    isOpen={objectionsModalOpen}
+                    onClose={() => {
+                        setObjectionsModalOpen(false);
+                        setObjectionsModalWork(null);
+                    }}
+                    dailyWork={objectionsModalWork}
+                    onObjectionsUpdated={handleObjectionsUpdated}
+                    canCreate={objectionsModalWork ? canUserCreateObjections(objectionsModalWork) : false}
+                    canReview={canUserReviewObjections()}
+                />
+                
+                {/* Objection Warning Modal - for submission date changes */}
+                <ObjectionWarningModal
+                    isOpen={objectionWarningModal.isOpen}
+                    onClose={closeObjectionWarningModal}
+                    dailyWork={objectionWarningModal.dailyWork}
+                    newSubmissionDate={objectionWarningModal.newSubmissionDate}
+                    activeObjectionsCount={objectionWarningModal.activeObjectionsCount}
+                    activeObjections={objectionWarningModal.activeObjections}
+                    isLoading={objectionWarningModal.isLoading}
+                    onConfirm={handleSubmissionTimeOverride}
+                />
             </div>
         );
     }
@@ -2452,7 +2752,8 @@ const DailyWorksTable = ({
                     >
                         {(work) => (
                             <TableRow 
-                                key={work.id} 
+                                key={work.id}
+                                className={work.active_objections_count > 0 ? 'bg-warning-50/40 hover:bg-warning-50/60 border-2 border-warning' : ''}
                             >
                                 {(columnKey) => renderCell(work, columnKey)}
                             </TableRow>
@@ -2485,7 +2786,6 @@ const DailyWorksTable = ({
             )}
             
             {/* RFI Files Modal */}
-            {console.log('Rendering RfiFilesModal - isOpen:', rfiModalOpen, 'work:', rfiModalWork?.id)}
             <RfiFilesModal
                 isOpen={rfiModalOpen}
                 onClose={() => {
@@ -2497,7 +2797,6 @@ const DailyWorksTable = ({
             />
             
             {/* Status Update Modal */}
-            {console.log('Rendering StatusUpdateModal - open:', statusModalOpen, 'work:', statusModalWork?.id)}
             <StatusUpdateModal
                 open={statusModalOpen}
                 closeModal={() => {
@@ -2506,6 +2805,29 @@ const DailyWorksTable = ({
                 }}
                 dailyWork={statusModalWork}
                 onStatusUpdated={handleStatusUpdated}
+            />
+            
+            {/* Objections Modal */}
+            <ObjectionsModal
+                isOpen={objectionsModalOpen}
+                onClose={() => {
+                    setObjectionsModalOpen(false);
+                    setObjectionsModalWork(null);
+                }}
+                dailyWork={objectionsModalWork}
+                onObjectionsUpdated={handleObjectionsUpdated}
+            />
+            
+            {/* Objection Warning Modal - for submission date changes */}
+            <ObjectionWarningModal
+                isOpen={objectionWarningModal.isOpen}
+                onClose={closeObjectionWarningModal}
+                dailyWork={objectionWarningModal.dailyWork}
+                newSubmissionDate={objectionWarningModal.newSubmissionDate}
+                activeObjectionsCount={objectionWarningModal.activeObjectionsCount}
+                activeObjections={objectionWarningModal.activeObjections}
+                isLoading={objectionWarningModal.isLoading}
+                onConfirm={handleSubmissionTimeOverride}
             />
         </div>
     );

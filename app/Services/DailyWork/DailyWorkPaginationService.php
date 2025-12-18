@@ -128,11 +128,12 @@ class DailyWorkPaginationService
         $userDesignationTitle = $userWithDesignation->designation?->title;
 
         // Use optimized eager loading to prevent N+1 queries
+        // Include active objections count for RFI warning indicators
         $baseQuery = DailyWork::with([
 
             'inchargeUser:id,name', // Load user names for display
             'assignedUser:id,name',  // Load assigned user names
-        ]);
+        ])->withCount(['activeObjections']);
 
         if ($userDesignationTitle === 'Supervision Engineer') {
             return $baseQuery->where('incharge', $user->id);

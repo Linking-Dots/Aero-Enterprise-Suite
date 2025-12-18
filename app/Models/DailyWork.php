@@ -129,11 +129,11 @@ class DailyWork extends Model implements HasMedia
     ];
 
     /**
-     * Append RFI files count to JSON serialization.
+     * Append RFI files count and objection info to JSON serialization.
      * Note: rfi_files is not appended by default to avoid N+1 queries.
      * Use getRfiFilesAttribute() explicitly when needed.
      */
-    protected $appends = ['rfi_files_count'];
+    protected $appends = ['rfi_files_count', 'active_objections_count', 'has_active_objections'];
 
     /**
      * Register media collections for RFI files.
@@ -224,6 +224,50 @@ class DailyWork extends Model implements HasMedia
         return $this->belongsTo(User::class, 'assigned');
     }
 
+    /**
+     * Get all objections for this RFI.
+     */
+    public function objections()
+    {
+        return $this->hasMany(RfiObjection::class, 'daily_work_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get only active (blocking) objections for this RFI.
+     */
+    public function activeObjections()
+    {
+        return $this->hasMany(RfiObjection::class, 'daily_work_id')
+            ->whereIn('status', RfiObjection::$activeStatuses)
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get submission override logs for this RFI.
+     */
+    public function submissionOverrideLogs()
+    {
+        return $this->hasMany(RfiSubmissionOverrideLog::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get count of active objections.
+     */
+    public function getActiveObjectionsCountAttribute(): int
+    {
+        return $this->objections()
+            ->whereIn('status', RfiObjection::$activeStatuses)
+            ->count();
+    }
+
+    /**
+     * Check if RFI has any active objections.
+     */
+    public function getHasActiveObjectionsAttribute(): bool
+    {
+        return $this->active_objections_count > 0;
+    }
+
     // Scopes
     public function scopeCompleted($query)
     {
@@ -258,6 +302,26 @@ class DailyWork extends Model implements HasMedia
     public function scopeByDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('date', [$startDate, $endDate]);
+    }
+
+    /**
+     * Scope to RFIs with active objections.
+     */
+    public function scopeWithActiveObjections($query)
+    {
+        return $query->whereHas('objections', function ($q) {
+            $q->whereIn('status', RfiObjection::$activeStatuses);
+        });
+    }
+
+    /**
+     * Scope to RFIs without active objections.
+     */
+    public function scopeWithoutActiveObjections($query)
+    {
+        return $query->whereDoesntHave('objections', function ($q) {
+            $q->whereIn('status', RfiObjection::$activeStatuses);
+        });
     }
 
     // Accessors
