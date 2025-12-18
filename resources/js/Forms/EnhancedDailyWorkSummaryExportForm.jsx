@@ -86,31 +86,36 @@ const EnhancedDailyWorkSummaryExportForm = ({
     const handleExport = async () => {
         setIsLoading(true);
         
-        try {
-            // Prepare export data based on settings
-            let exportData = prepareExportData();
-            
-            const filename = `daily_work_summary_${new Date().toISOString().split('T')[0]}`;
-            
-            switch (exportSettings.format) {
-                case 'excel':
-                    exportToExcel(exportData, filename);
-                    break;
-                case 'csv':
-                    exportToCSV(exportData, filename);
-                    break;
-            }
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // Prepare export data based on settings
+                let exportData = prepareExportData();
+                
+                const filename = `daily_work_summary_${new Date().toISOString().split('T')[0]}`;
+                
+                switch (exportSettings.format) {
+                    case 'excel':
+                        exportToExcel(exportData, filename);
+                        break;
+                    case 'csv':
+                        exportToCSV(exportData, filename);
+                        break;
+                }
 
-            showToast.success(`Successfully exported ${exportData.length} summary records`, {
-                icon: <CheckCircleIcon className="w-5 h-5" />,
-            });
-            
-            closeModal();
-        } catch (error) {
-            showToast.error('Export failed: ' + error.message);
-        } finally {
-            setIsLoading(false);
-        }
+                closeModal();
+                resolve(`Successfully exported ${exportData.length} summary records`);
+            } catch (error) {
+                reject('Export failed: ' + error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Exporting summary...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     };
 
     const prepareExportData = () => {

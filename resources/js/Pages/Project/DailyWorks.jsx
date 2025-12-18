@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { showToast } from '@/utils/toastUtils';
@@ -16,7 +16,9 @@ import {
     FunnelIcon,
     AdjustmentsHorizontalIcon,
     UserIcon,
-    MapPinIcon
+    MapPinIcon,
+    ArrowPathIcon,
+    DocumentPlusIcon
 } from "@heroicons/react/24/outline";
 import { Head } from "@inertiajs/react";
 import App from "@/Layouts/App.jsx";
@@ -36,10 +38,13 @@ import {
 } from "@heroui/react";
 import StatsCards from "@/Components/StatsCards.jsx";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { getThemeRadius } from '@/Hooks/useThemeRadius.js';
 import DailyWorkForm from "@/Forms/DailyWorkForm.jsx";
 import DeleteDailyWorkForm from "@/Forms/DeleteDailyWorkForm.jsx";
 import EnhancedDailyWorksExportForm from "@/Forms/EnhancedDailyWorksExportForm.jsx";
 import DailyWorksUploadForm from "@/Forms/DailyWorksUploadForm.jsx";
+import ErrorBoundary from "@/Components/Common/ErrorBoundary.jsx";
+import PullToRefresh from "@/Components/Common/PullToRefresh.jsx";
 
 
 
@@ -47,24 +52,21 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
+    
+    // Role-based access control - includes Daily Work Manager role
+    const userIsAdmin = auth.roles?.includes('Administrator') || auth.roles?.includes('Super Administrator') || auth.roles?.includes('Daily Work Manager') || false;
 
-    // Helper function to convert theme borderRadius to HeroUI radius values
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
-        const radiusValue = parseInt(borderRadius);
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
+    // AbortController ref for cancelling in-flight requests
+    const abortControllerRef = useRef(null);
+    
+    // Pull-to-refresh state for mobile
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const pullStartY = useRef(0);
+    const pullCurrentY = useRef(0);
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [tableLoading, setTableLoading] = useState(true); // Start as true to show skeleton on initial load
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [modeSwitch, setModeSwitch] = useState(false); // Track mode switching
     const [totalRows, setTotalRows] = useState(0);
@@ -128,12 +130,21 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
     // Show/Hide advanced filters panel
     const [showFilters, setShowFilters] = useState(false);
     
+    // Cancel any in-flight request before starting a new one
+    const cancelPendingRequest = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
+        return abortControllerRef.current.signal;
+    }, []);
+    
     // Mobile data fetching - fetch all data for selected date without pagination
     const fetchMobileData = async (showLoader = true) => {
-        if (loading) return;
+        const signal = cancelPendingRequest();
         
         if (showLoader && !modeSwitch) {
-            setLoading(true);
+            setTableLoading(true);
         }
         
         try {
@@ -143,33 +154,39 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                 startDate: selectedDate,
                 endDate: selectedDate,
             };
-
-      
             
             // Use the /daily-works-all endpoint to get all data without pagination
-            const response = await axios.get('/daily-works-all', { params });
+            const response = await axios.get('/daily-works-all', { params, signal });
+            
+            // Check if request was aborted
+            if (signal.aborted) return;
             
             const dailyWorks = response.data.dailyWorks || [];
             setData(Array.isArray(dailyWorks) ? dailyWorks : []);
             setTotalRows(dailyWorks.length);
             setLastPage(1);
-            
-         
         } catch (error) {
+            // Ignore aborted requests
+            if (axios.isCancel(error) || error.name === 'AbortError') return;
+            
             console.error('Error fetching mobile data:', error);
             setData([]);
             showToast.error('Failed to fetch data.');
         } finally {
-            setLoading(false);
+            if (!signal.aborted) {
+                setTableLoading(false);
+                setLoading(false);
+                setIsRefreshing(false);
+            }
         }
     };
 
     // Desktop data fetching - use pagination for date range
     const fetchDesktopData = async (showLoader = true) => {
-        if (loading) return;
+        const signal = cancelPendingRequest();
         
         if (showLoader && !modeSwitch) {
-            setLoading(true);
+            setTableLoading(true);
         }
         
         try {
@@ -181,40 +198,65 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                 page: currentPage,
                 perPage,
             };
-
-        
             
-            const response = await axios.get('/daily-works-paginate', { params });
+            const response = await axios.get('/daily-works-paginate', { params, signal });
+            
+            // Check if request was aborted
+            if (signal.aborted) return;
             
             setData(Array.isArray(response.data.data) ? response.data.data : []);
             setTotalRows(response.data.total || 0);
             setLastPage(response.data.last_page || 1);
-            
         } catch (error) {
+            // Ignore aborted requests
+            if (axios.isCancel(error) || error.name === 'AbortError') return;
+            
             console.error('Error fetching desktop data:', error);
             setData([]);
             showToast.error('Failed to fetch data.');
         } finally {
-            setLoading(false);
+            if (!signal.aborted) {
+                setTableLoading(false);
+                setLoading(false);
+            }
         }
     };
 
     // Main fetch function that delegates to mobile or desktop
-    const fetchData = async (showLoader = true) => {
+    const fetchData = useCallback(async (showLoader = true) => {
         if (isMobile) {
             await fetchMobileData(showLoader);
         } else {
             await fetchDesktopData(showLoader);
         }
-    };
+    }, [isMobile, search, filterData, selectedDate, dateRange, currentPage, perPage]);
+
+    // Pull-to-refresh handler for mobile
+    const handlePullToRefresh = useCallback(async () => {
+        if (isRefreshing || !isMobile) return;
+        
+        setIsRefreshing(true);
+        setCurrentPage(1);
+        await fetchData(false);
+        await fetchStatistics();
+        showToast.success('Data refreshed');
+    }, [isRefreshing, isMobile, fetchData]);
 
     // Enhanced refresh function that handles mobile/desktop modes
-    const refreshData = () => {
-    
-        setCurrentPage(1); // Reset to first page
+    const refreshData = useCallback(() => {
+        setCurrentPage(1);
         fetchData();
-        fetchStatistics(); // Also refresh statistics
-    };
+        fetchStatistics();
+    }, [fetchData]);
+
+    // Cleanup abort controller on unmount
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     // Enhanced event handlers for mobile/desktop differences
     const handleSearch = (event) => {
@@ -262,7 +304,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             const itemsNeeded = Math.min(perPage - data.length, totalRows - data.length);
             if (itemsNeeded <= 0) return;
             
-            setLoading(true);
+            setTableLoading(true);
             try {
                 const params = {
                     search,
@@ -284,7 +326,7 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
             } catch (error) {
                 console.error('Error fetching additional items:', error);
             } finally {
-                setLoading(false);
+                setTableLoading(false);
             }
         }
     };
@@ -513,66 +555,117 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         }
     };
 
-    // Simple statistics calculation
-    const stats = apiStats ? [
-        {
-            title: 'Total Works',
-            value: apiStats.overview?.totalWorks || 0,
-            icon: <ChartBarIcon className="w-5 h-5" />,
-            color: 'text-blue-600',
-            description: `All daily works`
-        },
-        {
-            title: 'Completed',
-            value: apiStats.overview?.completedWorks || 0,
-            icon: <CheckCircleIcon className="w-5 h-5" />,
-            color: 'text-green-600',
-            description: `${apiStats.performanceIndicators?.completionRate || 0}% completion rate`
-        },
-        {
-            title: 'In Progress',
-            value: apiStats.overview?.inProgressWorks || 0,
-            icon: <ClockIcon className="w-5 h-5" />,
-            color: 'text-orange-600',
-            description: 'Currently active'
-        },
-        {
-            title: 'Quality Rate',
-            value: `${apiStats.performanceIndicators?.qualityRate || 0}%`,
-            icon: <DocumentArrowUpIcon className="w-5 h-5" />,
-            color: 'text-purple-600',
-            description: `${apiStats.qualityMetrics?.passedInspections || 0} passed inspections`
+    // Enhanced statistics calculation with more actionable insights
+    const stats = useMemo(() => {
+        if (apiStats) {
+            const totalWorks = apiStats.overview?.totalWorks || 0;
+            const completedWorks = apiStats.overview?.completedWorks || 0;
+            const pendingWorks = apiStats.overview?.pendingWorks || 0;
+            const rfiSubmissions = apiStats.qualityMetrics?.rfiSubmissions || 0;
+            const passedInspections = apiStats.qualityMetrics?.passedInspections || 0;
+            const failedInspections = apiStats.qualityMetrics?.failedInspections || 0;
+            const totalResubmissions = apiStats.qualityMetrics?.totalResubmissions || 0;
+            const completionRate = apiStats.performanceIndicators?.completionRate || 0;
+            const todayWorks = apiStats.recentActivity?.todayWorks || 0;
+            
+            // Calculate inspection pass rate
+            const totalInspected = passedInspections + failedInspections;
+            const inspectionPassRate = totalInspected > 0 
+                ? Math.round((passedInspections / totalInspected) * 100) 
+                : 0;
+            
+            // RFI submission rate
+            const rfiRate = totalWorks > 0 
+                ? Math.round((rfiSubmissions / totalWorks) * 100) 
+                : 0;
+
+            return [
+                {
+                    title: 'Total Works',
+                    value: totalWorks.toLocaleString(),
+                    icon: <ChartBarIcon className="w-5 h-5" />,
+                    color: 'text-blue-600',
+                    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+                    description: `${todayWorks} added today`,
+                    trend: todayWorks > 0 ? 'up' : 'neutral'
+                },
+                {
+                    title: 'Completion Rate',
+                    value: `${completionRate}%`,
+                    icon: <CheckCircleIcon className="w-5 h-5" />,
+                    color: completionRate >= 80 ? 'text-green-600' : completionRate >= 50 ? 'text-yellow-600' : 'text-red-600',
+                    bgColor: completionRate >= 80 ? 'bg-green-50 dark:bg-green-900/20' : completionRate >= 50 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-red-50 dark:bg-red-900/20',
+                    description: `${completedWorks.toLocaleString()} of ${totalWorks.toLocaleString()} completed`,
+                    trend: completionRate >= 80 ? 'up' : completionRate >= 50 ? 'neutral' : 'down'
+                },
+                {
+                    title: 'Pending Review',
+                    value: pendingWorks.toLocaleString(),
+                    icon: <ClockIcon className="w-5 h-5" />,
+                    color: pendingWorks > 100 ? 'text-orange-600' : 'text-amber-600',
+                    bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+                    description: pendingWorks > 0 ? 'Awaiting action' : 'All caught up!',
+                    trend: pendingWorks > 100 ? 'down' : 'neutral'
+                },
+                {
+                    title: 'Inspection Pass',
+                    value: `${inspectionPassRate}%`,
+                    icon: <DocumentArrowUpIcon className="w-5 h-5" />,
+                    color: inspectionPassRate >= 90 ? 'text-green-600' : inspectionPassRate >= 70 ? 'text-purple-600' : 'text-red-600',
+                    bgColor: inspectionPassRate >= 90 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-purple-50 dark:bg-purple-900/20',
+                    description: totalResubmissions > 0 ? `${totalResubmissions} resubmissions` : `${passedInspections} passed`,
+                    trend: inspectionPassRate >= 90 ? 'up' : inspectionPassRate >= 70 ? 'neutral' : 'down'
+                }
+            ];
         }
-    ] : [
-        {
-            title: 'Total',
-            value: data.length || totalRows,
-            icon: <ChartBarIcon className="w-5 h-5" />,
-            color: 'text-blue-600',
-            description: 'All work logs'
-        },
-        {
-            title: 'Completed',
-            value: data.filter(work => work.status === 'completed').length,
-            icon: <CheckCircleIcon className="w-5 h-5" />,
-            color: 'text-green-600',
-            description: 'Finished tasks'
-        },
-        {
-            title: 'Pending',
-            value: data.filter(work => work.status === 'new' || work.status === 'resubmission').length,
-            icon: <ClockIcon className="w-5 h-5" />,
-            color: 'text-orange-600',
-            description: 'In progress'
-        },
-        {
-            title: 'Emergency',
-            value: data.filter(work => work.status === 'emergency').length,
-            icon: <ExclamationTriangleIcon className="w-5 h-5" />,
-            color: 'text-red-600',
-            description: 'Urgent tasks'
-        }
-    ];
+        
+        // Fallback: Calculate from current page data when API stats not available
+        const totalWorks = totalRows || data.length;
+        const completedWorks = data.filter(work => work.status === 'completed').length;
+        const pendingWorks = data.filter(work => ['new', 'resubmission', 'pending', 'in-progress'].includes(work.status)).length;
+        const passedWorks = data.filter(work => work.inspection_result === 'pass' || work.inspection_result === 'approved').length;
+        const failedWorks = data.filter(work => work.inspection_result === 'fail' || work.inspection_result === 'rejected').length;
+        const resubmissionWorks = data.filter(work => work.resubmission_count > 0).length;
+        
+        const completionRate = data.length > 0 ? Math.round((completedWorks / data.length) * 100) : 0;
+        const totalInspected = passedWorks + failedWorks;
+        const inspectionPassRate = totalInspected > 0 ? Math.round((passedWorks / totalInspected) * 100) : 0;
+
+        return [
+            {
+                title: 'Total Works',
+                value: totalWorks.toLocaleString(),
+                icon: <ChartBarIcon className="w-5 h-5" />,
+                color: 'text-blue-600',
+                bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+                description: `Showing ${data.length} on page`
+            },
+            {
+                title: 'Completion Rate',
+                value: `${completionRate}%`,
+                icon: <CheckCircleIcon className="w-5 h-5" />,
+                color: completionRate >= 80 ? 'text-green-600' : completionRate >= 50 ? 'text-yellow-600' : 'text-red-600',
+                bgColor: completionRate >= 80 ? 'bg-green-50 dark:bg-green-900/20' : completionRate >= 50 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-red-50 dark:bg-red-900/20',
+                description: `${completedWorks} completed`
+            },
+            {
+                title: 'Pending',
+                value: pendingWorks,
+                icon: <ClockIcon className="w-5 h-5" />,
+                color: 'text-orange-600',
+                bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+                description: 'Awaiting action'
+            },
+            {
+                title: 'Inspection Pass',
+                value: totalInspected > 0 ? `${inspectionPassRate}%` : '-',
+                icon: <DocumentArrowUpIcon className="w-5 h-5" />,
+                color: inspectionPassRate >= 90 ? 'text-green-600' : 'text-purple-600',
+                bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+                description: resubmissionWorks > 0 ? `${resubmissionWorks} resubmitted` : `${passedWorks} passed`
+            }
+        ];
+    }, [apiStats, data, totalRows]);
 
     // Action buttons configuration
     const actionButtons = [
@@ -599,33 +692,40 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
         }
     ];
 
-    // Enhanced useEffect for mobile/desktop mode switching
+    // Enhanced useEffect for mobile/desktop mode switching and initial load
+    const isInitialMount = useRef(true);
+    
     useEffect(() => {
-   
-        
         // When switching to mobile, ensure selectedDate is set (default to end date if not already set)
         if (isMobile && !selectedDate) {
-       
             setSelectedDate(overallEndDate);
         }
         
         setModeSwitch(true);
+        setTableLoading(true);
         setCurrentPage(1);
-        fetchData(true).finally(() => setModeSwitch(false));
+        fetchData(true).finally(() => {
+            setModeSwitch(false);
+            setTableLoading(false);
+            isInitialMount.current = false;
+        });
     }, [isMobile]);
 
     // Debounced data fetching effect for search, filter, pagination
     useEffect(() => {
+        // Skip on initial mount - handled by the isMobile effect
+        if (isInitialMount.current) return;
+        
         // Skip if mode is switching
         if (modeSwitch) return;
         
-        // Debounce search, instant for others
+        // Debounce search (150ms for faster response), instant for others
         const timeoutId = search ? setTimeout(() => {
-            fetchData(false); // No loader for filter/search/pagination
-        }, 300) : null;
+            fetchData(true); // Show table loading for search
+        }, 150) : null;
         
         if (!search) {
-            fetchData(false); // Instant for pagination/filter changes
+            fetchData(true); // Show table loading for pagination/filter changes
         }
         
         return () => {
@@ -774,23 +874,25 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                             </div>
                                         </div>
                                         {/* Action Buttons */}
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 sm:gap-4 w-full lg:w-auto">
+                                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end w-full lg:w-auto">
                                                 {actionButtons.map((button, index) => (
                                                     <Button
                                                         key={index}
                                                         size={isLargeScreen ? "md" : "sm"}
                                                         variant={button.variant || "flat"}
                                                         color={button.color || "primary"}
-                                                        startContent={button.icon}
+                                                        startContent={!isMobile && button.icon}
+                                                        isIconOnly={isMobile}
                                                         onPress={button.onPress}
-                                                        className={`${button.className || ''} font-medium`}
+                                                        className={`${button.className || ''} font-medium ${isMobile ? 'min-w-9 h-9' : ''}`}
+                                                        aria-label={button.label}
                                                         style={{
                                                             fontFamily: `var(--fontFamily, "Inter")`,
                                                             borderRadius: `var(--borderRadius, 12px)`,
                                                         }}
                                                     >
-                                                        {button.label}
+                                                        {isMobile ? button.icon : button.label}
                                                     </Button>
                                                 ))}
                                             </div>
@@ -810,93 +912,146 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                 />
                             </div>
                             
-                            {/* Search and Filters Section */}
-                            <div className="mb-6">
-                                <div className="flex flex-col gap-4">
-                                    {/* Search and Filter Toggle Row */}
-                                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                                        <div className="w-full sm:w-auto sm:min-w-[300px]">
+                            {/* Search and Filters Section - Improved Layout */}
+                            <div className="mb-4 space-y-4">
+                                {/* Row 1: Filter Toggle + Date Selector + Search */}
+                                <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+                                    {/* Filter Toggle Button - First */}
+                                    <Button
+                                        size="sm"
+                                        variant={showFilters ? 'solid' : 'bordered'}
+                                        color={showFilters ? 'primary' : 'default'}
+                                        onPress={() => setShowFilters(!showFilters)}
+                                        radius={getThemeRadius()}
+                                        className={`shrink-0 min-h-10 ${showFilters ? '' : 'border-divider/50'}`}
+                                        startContent={<AdjustmentsHorizontalIcon className="w-4 h-4" />}
+                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                    >
+                                        {isMobile ? '' : 'Filters'}
+                                    </Button>
+
+                                    {/* Date Selector - Second */}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {!isMobile && <CalendarIcon className="w-4 h-4 text-default-500 shrink-0" />}
+                                        {isMobile ? (
                                             <Input
-                                                type="text"
-                                                placeholder="Search by description, location, or notes..."
-                                                value={search}
-                                                onChange={(e) => handleSearch(e)}
+                                                type="date"
+                                                value={selectedDate}
+                                                onChange={(e) => handleDateChange(e.target.value)}
                                                 variant="bordered"
-                                                size={isMobile ? "sm" : "md"}
+                                                size="sm"
                                                 radius={getThemeRadius()}
-                                                startContent={
-                                                    <MagnifyingGlassIcon className="w-4 h-4 text-default-400" />
-                                                }
+                                                min={overallStartDate}
+                                                max={overallEndDate}
                                                 classNames={{
-                                                    input: "text-foreground",
-                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                                 focus-within:bg-content2/90 border-divider/50 
-                                                                 hover:border-divider data-[focus]:border-primary`,
+                                                    base: "w-full",
+                                                    input: "text-foreground text-sm",
+                                                    inputWrapper: "min-h-10 bg-content2/50 border-divider/50 hover:border-divider",
                                                 }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                    borderRadius: `var(--borderRadius, 12px)`,
-                                                }}
+                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                             />
-                                        </div>
-                                        <div className="flex gap-2 items-center">
-                                            <ButtonGroup 
-                                                variant="bordered" 
-                                                radius={getThemeRadius()}
-                                                className="bg-white/5"
-                                            >
-                                                <Button
-                                                    isIconOnly={isMobile}
-                                                    color={showFilters ? 'primary' : 'default'}
-                                                    onPress={() => setShowFilters(!showFilters)}
-                                                    className={showFilters ? 'bg-primary/20' : 'bg-white/5'}
-                                                    aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    type="date"
+                                                    labelPlacement="outside-left"
+                                                    label="From"
+                                                    value={dateRange.start}
+                                                    onChange={(e) => handleDateRangeChange({ ...dateRange, start: e.target.value })}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    min={overallStartDate}
+                                                    max={overallEndDate}
+                                                    classNames={{
+                                                        base: "w-auto",
+                                                        label: "text-xs text-default-500 whitespace-nowrap",
+                                                        input: "text-foreground text-sm",
+                                                        inputWrapper: "min-h-10 bg-content2/50 border-divider/50 hover:border-divider",
                                                     }}
-                                                >
-                                                    <AdjustmentsHorizontalIcon className="w-4 h-4" />
-                                                    {!isMobile && <span className="ml-1">Filters</span>}
-                                                </Button>
-                                            </ButtonGroup>
-                                        </div>
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                />
+                                                <span className="text-default-400 text-sm">—</span>
+                                                <Input
+                                                    type="date"
+                                                    labelPlacement="outside-left"
+                                                    label="To"
+                                                    value={dateRange.end}
+                                                    onChange={(e) => handleDateRangeChange({ ...dateRange, end: e.target.value })}
+                                                    variant="bordered"
+                                                    size="sm"
+                                                    radius={getThemeRadius()}
+                                                    min={overallStartDate}
+                                                    max={overallEndDate}
+                                                    classNames={{
+                                                        base: "w-auto",
+                                                        label: "text-xs text-default-500 whitespace-nowrap",
+                                                        input: "text-foreground text-sm",
+                                                        inputWrapper: "min-h-10 bg-content2/50 border-divider/50 hover:border-divider",
+                                                    }}
+                                                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    
-                                    {/* Advanced Filters Panel */}
-                                    <AnimatePresence>
-                                        {showFilters && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: -20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
-                                                transition={{ duration: 0.3 }}
+
+                                    {/* Search Field - Last */}
+                                    <div className="flex-1 min-w-0">
+                                        <Input
+                                            type="text"
+                                            placeholder="Search by description, location, or notes..."
+                                            value={search}
+                                            onChange={(e) => handleSearch(e)}
+                                            variant="bordered"
+                                            size="sm"
+                                            radius={getThemeRadius()}
+                                            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-default-400 shrink-0" />}
+                                            classNames={{
+                                                input: "text-foreground text-sm",
+                                                inputWrapper: "min-h-10 bg-content2/50 border-divider/50 hover:border-divider",
+                                            }}
+                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                {/* Row 2: Advanced Filters Panel */}
+                                <AnimatePresence>
+                                    {showFilters && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div 
+                                                className="p-3 rounded-lg border"
+                                                style={{
+                                                    background: 'var(--theme-content2, rgba(244, 244, 245, 0.8))',
+                                                    borderColor: 'var(--theme-divider, rgba(228, 228, 231, 0.5))',
+                                                }}
                                             >
-                                                <div className="p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                        {/* Status Filter */}
+                                                <div className="flex flex-wrap gap-3 items-end">
+                                                    {/* Status Filter */}
+                                                    <div className="w-full sm:w-auto sm:min-w-[160px]">
                                                         <Select
                                                             label="Status"
-                                                            placeholder="Filter by status..."
+                                                            placeholder="All"
                                                             selectedKeys={filterData.status ? [filterData.status] : ["all"]}
                                                             onSelectionChange={(keys) => {
                                                                 const value = Array.from(keys)[0];
-                                                                setFilterData(prev => ({
-                                                                    ...prev,
-                                                                    status: value
-                                                                }));
+                                                                setFilterData(prev => ({ ...prev, status: value }));
                                                                 setCurrentPage(1);
                                                             }}
                                                             variant="bordered"
                                                             size="sm"
                                                             radius={getThemeRadius()}
                                                             classNames={{
-                                                                trigger: "text-sm",
-                                                                value: "text-foreground",
+                                                                trigger: "min-h-10",
+                                                                value: "text-foreground text-sm",
                                                             }}
-                                                            style={{
-                                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                                            }}
-                                                            aria-label="Filter by status"
+                                                            style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                         >
                                                             <SelectItem key="all" value="all">All Status</SelectItem>
                                                             <SelectItem key="new" value="new">New</SelectItem>
@@ -904,9 +1059,11 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                             <SelectItem key="resubmission" value="resubmission">Resubmission</SelectItem>
                                                             <SelectItem key="emergency" value="emergency">Emergency</SelectItem>
                                                         </Select>
+                                                    </div>
 
-                                                        {/* In Charge Filter - Only for Admin/Super Admin */}
-                                                        {(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator')) && (
+                                                    {/* In Charge Filter - Admin only */}
+                                                    {userIsAdmin && (
+                                                        <div className="w-full sm:w-auto sm:min-w-[200px]">
                                                             <Select
                                                                 label="In Charge"
                                                                 placeholder="Filter by in charge..."
@@ -917,7 +1074,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                     setFilterData(prev => ({
                                                                         ...prev,
                                                                         incharge: values,
-                                                                        // Reset jurisdiction when incharge changes
                                                                         jurisdiction: values.length ? [] : prev.jurisdiction
                                                                     }));
                                                                     setCurrentPage(1);
@@ -927,14 +1083,11 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                 radius={getThemeRadius()}
                                                                 startContent={<UserIcon className="w-4 h-4 text-default-400" />}
                                                                 classNames={{
-                                                                    trigger: "text-sm",
-                                                                    value: "text-foreground",
+                                                                    trigger: "min-h-10",
+                                                                    value: "text-foreground text-sm",
                                                                 }}
-                                                                renderValue={() => renderSelectedBadges(filterData.incharge, inchargeOptions, 'Filter by in charge...')}
-                                                                style={{
-                                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                                }}
-                                                                aria-label="Filter by in charge"
+                                                                renderValue={() => renderSelectedBadges(filterData.incharge, inchargeOptions, 'All')}
+                                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                             >
                                                                 {inchargeOptions?.map(inCharge => (
                                                                     <SelectItem key={String(inCharge.id)} value={String(inCharge.id)}>
@@ -942,10 +1095,12 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                     </SelectItem>
                                                                 ))}
                                                             </Select>
-                                                        )}
+                                                        </div>
+                                                    )}
 
-                                                        {/* Jurisdiction Filter - Only for Admin/Super Admin */}
-                                                        {(auth.roles.includes('Administrator') || auth.roles.includes('Super Administrator')) && (
+                                                    {/* Jurisdiction Filter - Admin only */}
+                                                    {userIsAdmin && (
+                                                        <div className="w-full sm:w-auto sm:min-w-[200px]">
                                                             <Select
                                                                 label="Jurisdiction"
                                                                 placeholder="Filter by jurisdiction..."
@@ -956,7 +1111,6 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                     setFilterData(prev => ({
                                                                         ...prev,
                                                                         jurisdiction: values,
-                                                                        // Reset incharge when jurisdiction is selected
                                                                         incharge: values.length ? [] : prev.incharge
                                                                     }));
                                                                     setCurrentPage(1);
@@ -966,14 +1120,11 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                 radius={getThemeRadius()}
                                                                 startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
                                                                 classNames={{
-                                                                    trigger: "text-sm",
-                                                                    value: "text-foreground",
+                                                                    trigger: "min-h-10",
+                                                                    value: "text-foreground text-sm",
                                                                 }}
-                                                                renderValue={() => renderSelectedBadges(filterData.jurisdiction, jurisdictionOptions, 'Filter by jurisdiction...', 'displayLabel')}
-                                                                style={{
-                                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                                }}
-                                                                aria-label="Filter by jurisdiction"
+                                                                renderValue={() => renderSelectedBadges(filterData.jurisdiction, jurisdictionOptions, 'All', 'displayLabel')}
+                                                                style={{ fontFamily: `var(--fontFamily, "Inter")` }}
                                                             >
                                                                 {jurisdictionOptions?.map(jurisdiction => (
                                                                     <SelectItem key={String(jurisdiction.id)} value={String(jurisdiction.id)}>
@@ -981,128 +1132,35 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                                                     </SelectItem>
                                                                 ))}
                                                             </Select>
-                                                        )}
-
-                                                        {/* Clear Filters Button */}
-                                                        <div className="flex items-end">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="flat"
-                                                                color="danger"
-                                                                onPress={() => {
-                                                                    setFilterData({
-                                                                        status: 'all',
-                                                                        incharge: [],
-                                                                        jurisdiction: [],
-                                                                        startDate: overallStartDate,
-                                                                        endDate: overallEndDate
-                                                                    });
-                                                                    setCurrentPage(1);
-                                                                }}
-                                                                style={{
-                                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                                }}
-                                                            >
-                                                                Clear Filters
-                                                            </Button>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            </div>
+                                                    )}
 
-                            {/* Date Selector Section */}
-                            <div className="mb-6">
-                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                    <div className="flex items-center gap-2">
-                                        <CalendarIcon className="w-5 h-5 text-default-500" />
-                                            <span className="text-sm font-medium text-foreground">
-                                                {isMobile ? 'Select Date:' : 'Date Range:'}
-                                            </span>
-                                        </div>
-                                        
-                                        {isMobile ? (
-                                            // Mobile: Single date picker for current date
-                                            <div className="w-full sm:w-auto">
-                                                <Input
-                                                    type="date"
-                                                    value={selectedDate}
-                                                    onChange={(e) => handleDateChange(e.target.value)}
-                                                    variant="bordered"
-                                                    size="sm"
-                                                    radius={getThemeRadius()}
-                                                    min={overallStartDate}
-                                                    max={overallEndDate}
-                                                    classNames={{
-                                                        input: "text-foreground",
-                                                        inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                                     focus-within:bg-content2/90 border-divider/50 
-                                                                     hover:border-divider data-[focus]:border-primary`,
-                                                    }}
-                                                    style={{
-                                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                                        borderRadius: `var(--borderRadius, 12px)`,
-                                                    }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        // Desktop: Date range picker
-                                        <div className="flex gap-2 items-center">
-                                            <Input
-                                                type="date"
-                                                label="Start Date"
-                                                value={dateRange.start}
-                                                onChange={(e) => handleDateRangeChange({
-                                                    ...dateRange,
-                                                    start: e.target.value
-                                                })}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                min={overallStartDate}
-                                                max={overallEndDate}
-                                                classNames={{
-                                                    input: "text-foreground",
-                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                                 focus-within:bg-content2/90 border-divider/50 
-                                                                 hover:border-divider data-[focus]:border-primary`,
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                    borderRadius: `var(--borderRadius, 12px)`,
-                                                }}
-                                            />
-                                            <span className="text-default-500">to</span>
-                                            <Input
-                                                type="date"
-                                                label="End Date"
-                                                value={dateRange.end}
-                                                onChange={(e) => handleDateRangeChange({
-                                                    ...dateRange,
-                                                    end: e.target.value
-                                                })}
-                                                variant="bordered"
-                                                size="sm"
-                                                radius={getThemeRadius()}
-                                                min={overallStartDate}
-                                                max={overallEndDate}
-                                                classNames={{
-                                                    input: "text-foreground",
-                                                    inputWrapper: `bg-content2/50 hover:bg-content2/70 
-                                                                 focus-within:bg-content2/90 border-divider/50 
-                                                                 hover:border-divider data-[focus]:border-primary`,
-                                                }}
-                                                style={{
-                                                    fontFamily: `var(--fontFamily, "Inter")`,
-                                                    borderRadius: `var(--borderRadius, 12px)`,
-                                                }}
-                                            />
-                                        </div>
+                                                    {/* Clear Filters */}
+                                                    <Button
+                                                        size="sm"
+                                                        variant="flat"
+                                                        color="danger"
+                                                        radius={getThemeRadius()}
+                                                        className="min-h-10"
+                                                        onPress={() => {
+                                                            setFilterData({
+                                                                status: 'all',
+                                                                incharge: [],
+                                                                jurisdiction: [],
+                                                                startDate: overallStartDate,
+                                                                endDate: overallEndDate
+                                                            });
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                                                    >
+                                                        Clear
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
                                     )}
-                                </div>
+                                </AnimatePresence>
                             </div>
                             
                             {/* Daily Works Table */}
@@ -1117,30 +1175,71 @@ const DailyWorks = ({ auth, title, allData, jurisdictions, users, reports, repor
                                 }}
                             >
                                 <CardBody className="p-4">
-                                    <DailyWorksTable
-                                        setData={setData}
-                                        filteredData={filteredData}
-                                        setFilteredData={setFilteredData}
-                                        reports={reports}
-                                        setCurrentRow={setCurrentRow}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        onPageChange={handlePageChange}
-                                        setLoading={setLoading}
-                                        refreshStatistics={fetchStatistics}
-                                        handleClickOpen={handleClickOpen}
-                                        openModal={openModal}
-                                        juniors={allData.juniors}
-                                        totalRows={totalRows}
-                                        lastPage={lastPage}
-                                        loading={loading || modeSwitch}
-                                        allData={data}
-                                        allInCharges={allData.allInCharges}
-                                        jurisdictions={jurisdictions}
-                                        users={users}
-                                        reports_with_daily_works={reports_with_daily_works}
-                                        isMobile={isMobile}
-                                    />
+                                    <ErrorBoundary
+                                        fallbackTitle="Unable to load daily works"
+                                        fallbackDescription="There was an error loading the daily works table. Please try refreshing."
+                                        onRetry={refreshData}
+                                    >
+                                        {isMobile ? (
+                                            <PullToRefresh 
+                                                onRefresh={handlePullToRefresh}
+                                                disabled={tableLoading || modeSwitch}
+                                            >
+                                                <DailyWorksTable
+                                                    setData={setData}
+                                                    filteredData={filteredData}
+                                                    setFilteredData={setFilteredData}
+                                                    reports={reports}
+                                                    setCurrentRow={setCurrentRow}
+                                                    currentPage={currentPage}
+                                                    setCurrentPage={setCurrentPage}
+                                                    onPageChange={handlePageChange}
+                                                    setLoading={setTableLoading}
+                                                    refreshStatistics={fetchStatistics}
+                                                    handleClickOpen={handleClickOpen}
+                                                    openModal={openModal}
+                                                    juniors={allData.juniors}
+                                                    totalRows={totalRows}
+                                                    lastPage={lastPage}
+                                                    loading={tableLoading}
+                                                    allData={data}
+                                                    allInCharges={allData.allInCharges}
+                                                    jurisdictions={jurisdictions}
+                                                    users={users}
+                                                    reports_with_daily_works={reports_with_daily_works}
+                                                    isMobile={isMobile}
+                                                    isRefreshing={isRefreshing}
+                                                    searchTerm={search}
+                                                />
+                                            </PullToRefresh>
+                                        ) : (
+                                            <DailyWorksTable
+                                                setData={setData}
+                                                filteredData={filteredData}
+                                                setFilteredData={setFilteredData}
+                                                reports={reports}
+                                                setCurrentRow={setCurrentRow}
+                                                currentPage={currentPage}
+                                                setCurrentPage={setCurrentPage}
+                                                onPageChange={handlePageChange}
+                                                setLoading={setTableLoading}
+                                                refreshStatistics={fetchStatistics}
+                                                handleClickOpen={handleClickOpen}
+                                                openModal={openModal}
+                                                juniors={allData.juniors}
+                                                totalRows={totalRows}
+                                                lastPage={lastPage}
+                                                loading={tableLoading}
+                                                allData={data}
+                                                allInCharges={allData.allInCharges}
+                                                jurisdictions={jurisdictions}
+                                                users={users}
+                                                reports_with_daily_works={reports_with_daily_works}
+                                                isMobile={isMobile}
+                                                searchTerm={search}
+                                            />
+                                        )}
+                                    </ErrorBoundary>
                                 </CardBody>
                             </Card>
                         </CardBody>

@@ -1,10 +1,14 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { getThemeRadius } from '@/Hooks/useThemeRadius.js';
 import { usePage, router } from "@inertiajs/react";
 import { showToast } from '@/utils/toastUtils';
 import { debounce } from "lodash";
 import StatsCards from '@/Components/StatsCards';
 import ProfileAvatar, { getProfileAvatarTokens } from '@/Components/ProfileAvatar';
+import SwipeableCard from '@/Components/Common/SwipeableCard';
+import RfiFilesModal from '@/Components/DailyWork/RfiFilesModal';
+import StatusUpdateModal from '@/Components/StatusUpdateModal';
 
 import {
     Table,
@@ -55,7 +59,9 @@ import {
     DocumentArrowUpIcon,
     DocumentCheckIcon,
     XCircleIcon,
-    PlusIcon
+    PlusIcon,
+    EyeIcon,
+    FolderOpenIcon,
 } from '@heroicons/react/24/outline';
 import {
     CheckCircleIcon as CheckCircleSolid,
@@ -68,6 +74,32 @@ import {
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { jsPDF } from "jspdf";
+
+// Utility function to highlight matching text in search results
+const HighlightedText = ({ text, searchTerm }) => {
+    if (!searchTerm || !text) return <>{text}</>;
+    
+    const textStr = String(text);
+    const searchLower = searchTerm.toLowerCase();
+    const textLower = textStr.toLowerCase();
+    const index = textLower.indexOf(searchLower);
+    
+    if (index === -1) return <>{textStr}</>;
+    
+    const before = textStr.slice(0, index);
+    const match = textStr.slice(index, index + searchTerm.length);
+    const after = textStr.slice(index + searchTerm.length);
+    
+    return (
+        <>
+            {before}
+            <mark className="bg-warning-200 text-warning-800 dark:bg-warning-800/40 dark:text-warning-200 px-0.5 rounded">
+                {match}
+            </mark>
+            {after}
+        </>
+    );
+};
 
 const DailyWorksTable = ({ 
     allData, 
@@ -85,27 +117,13 @@ const DailyWorksTable = ({
     currentPage,
     totalRows,
     lastPage,
-    onPageChange
+    onPageChange,
+    searchTerm = ''
 }) => {
     const { auth, users, jurisdictions } = usePage().props;
     const isLargeScreen = useMediaQuery('(min-width: 1025px)');
     const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
     const isMobile = useMediaQuery('(max-width: 640px)');
-
-    // Helper function to convert theme borderRadius to HeroUI radius values
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
-        const radiusValue = parseInt(borderRadius);
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
 
     // Handle refresh functionality
     const handleRefresh = useCallback(() => {
@@ -120,8 +138,61 @@ const DailyWorksTable = ({
     // Mobile tab state - persist across pagination
     const [selectedTab, setSelectedTab] = useState("structure");
     
+    // Define work types for mobile tabs - shared between loading skeleton and actual component
+    const workTypes = [
+        { key: "structure", label: "Structure", icon: "🏗️" },
+        { key: "embankment", label: "Embankment", icon: "🏔️" },
+        { key: "pavement", label: "Pavement", icon: "🛣️" }
+    ];
+    
     // Mobile accordion state - persist across all updates and re-renders
     const [expandedItems, setExpandedItems] = useState(new Set());
+    
+    // RFI Files Modal state
+    const [rfiModalOpen, setRfiModalOpen] = useState(false);
+    const [rfiModalWork, setRfiModalWork] = useState(null);
+    
+    // Status Update Modal state
+    const [statusModalOpen, setStatusModalOpen] = useState(false);
+    const [statusModalWork, setStatusModalWork] = useState(null);
+    
+    // Function to open Status Update modal
+    const openStatusModal = useCallback((work) => {
+        console.log('openStatusModal called with work:', work?.id, work?.number);
+        setStatusModalWork(work);
+        setStatusModalOpen(true);
+        console.log('statusModalOpen set to true');
+    }, []);
+    
+    // Function to handle status update from modal
+    const handleStatusUpdated = useCallback((updatedWork) => {
+        if (updatedWork && setData) {
+            setData(prevWorks =>
+                prevWorks.map(w =>
+                    w.id === updatedWork.id ? updatedWork : w
+                )
+            );
+        }
+    }, [setData]);
+    
+    // Function to open RFI files modal
+    const openRfiFilesModal = useCallback((work) => {
+        console.log('openRfiFilesModal called with work:', work?.id, work?.number);
+        setRfiModalWork(work);
+        setRfiModalOpen(true);
+        console.log('rfiModalOpen set to true');
+    }, []);
+    
+    // Function to handle files update from modal
+    const handleRfiFilesUpdated = useCallback((newCount) => {
+        // Update the local data to reflect new file count
+        if (rfiModalWork && setData) {
+            const updatedData = allData.map(w => 
+                w.id === rfiModalWork.id ? { ...w, rfi_files_count: newCount } : w
+            );
+            setData(updatedData);
+        }
+    }, [rfiModalWork, allData, setData]);
     
     // Function to toggle expanded state for a specific work item
     const toggleExpanded = useCallback((workId) => {
@@ -154,7 +225,7 @@ const DailyWorksTable = ({
     }, [allData]);
 
     // Permission-based access control using designations
-    const userIsAdmin = auth.roles?.includes('Administrator') || auth.roles?.includes('Super Administrator') || false;
+    const userIsAdmin = auth.roles?.includes('Administrator') || auth.roles?.includes('Super Administrator') || auth.roles?.includes('Daily Work Manager') || false;
     const userIsSE = auth.designation === 'Supervision Engineer' || false;
     const userIsQCI = auth.designation === 'Quality Control Inspector' || auth.designation === 'Asst. Quality Control Inspector' || false;
     
@@ -178,18 +249,43 @@ const DailyWorksTable = ({
         return userIsAdmin || userIsSE || isUserAssigneeOfWork(work);
     };
     
-    // Check if user should see the assigned column (not if they're just an assignee viewing their own work)
-    const shouldShowAssignedColumn = useMemo(() => {
-        // Admins and incharges should see the column
-        if (userIsAdmin) return true;
-        
-        // Check if user is incharge of any work
-        const isInchargeOfAnyWork = allData?.some(work => isUserInchargeOfWork(work));
-        if (isInchargeOfAnyWork) return true;
-        
-        // If user is only an assignee (not admin/incharge), hide the column
-        return false;
+    // Check if user is only an incharge (not admin)
+    const isUserOnlyIncharge = useMemo(() => {
+        if (userIsAdmin) return false;
+        return allData?.some(work => isUserInchargeOfWork(work)) || false;
     }, [userIsAdmin, allData, auth.user?.id]);
+    
+    // Check if user is only an assignee (not admin and not incharge)
+    const isUserOnlyAssignee = useMemo(() => {
+        if (userIsAdmin) return false;
+        if (isUserOnlyIncharge) return false;
+        return allData?.some(work => isUserAssigneeOfWork(work)) || false;
+    }, [userIsAdmin, isUserOnlyIncharge, allData, auth.user?.id]);
+    
+    // Check if user should see the incharge column (only admins)
+    const shouldShowInchargeColumn = useMemo(() => {
+        return userIsAdmin;
+    }, [userIsAdmin]);
+    
+    // Check if user should see the assigned column
+    // - Admins and incharges should see the column
+    // - Assignees should NOT see the column
+    const shouldShowAssignedColumn = useMemo(() => {
+        if (userIsAdmin) return true;
+        if (isUserOnlyIncharge) return true;
+        // Assignees don't see assignee column
+        return false;
+    }, [userIsAdmin, isUserOnlyIncharge]);
+    
+    // Check if user should see the RFI submission date column (only admins)
+    const shouldShowRfiColumn = useMemo(() => {
+        return userIsAdmin;
+    }, [userIsAdmin]);
+    
+    // Check if user should see edit/delete actions (only admins)
+    const shouldShowActions = useMemo(() => {
+        return userIsAdmin;
+    }, [userIsAdmin]);
 
     // Use available data with fallbacks
     const availableInCharges = allInCharges || users || [];
@@ -234,47 +330,71 @@ const DailyWorksTable = ({
             return statusLower;
         }
         
-        // Map legacy statuses to new format
-        const statusMap = {
-            'new': 'new',
-            'resubmission': 'resubmission', 
-            'emergency': 'emergency',
-            'completed': 'completed:pass' // Default to pass if no inspection result
-        };
+        // Map statuses - return as-is if valid, default to 'new'
+        const validStatuses = ['new', 'in-progress', 'completed', 'rejected', 'resubmission', 'pending', 'emergency'];
+        if (validStatuses.includes(statusLower)) {
+            return statusLower;
+        }
         
-        return statusMap[statusLower] || 'new';
+        // Default completed to pass if no inspection result
+        if (statusLower === 'completed') {
+            return 'completed:pass';
+        }
+        
+        return 'new';
     };
 
-    // Status configuration - standardized across the application
+    // Status configuration - consistent with backend DailyWork::$statuses
     const statusConfig = {
         'new': {
             color: 'primary',
             icon: PlusIconSolid,
             label: 'New',
         },
+        'in-progress': {
+            color: 'secondary',
+            icon: ArrowPathSolid,
+            label: 'In Progress',
+        },
+        'pending': {
+            color: 'default',
+            icon: ClockSolid,
+            label: 'Pending',
+        },
         'completed:pass': {
             color: 'success',
             icon: CheckCircleSolid,
             label: 'Completed: Passed',
-           
         },
         'completed:fail': {
             color: 'danger',
             icon: XCircleSolid,
             label: 'Completed: Failed',
-           
+        },
+        'completed:conditional': {
+            color: 'warning',
+            icon: CheckCircleSolid,
+            label: 'Completed: Conditional',
+        },
+        'completed:pending': {
+            color: 'default',
+            icon: CheckCircleSolid,
+            label: 'Completed: Pending Review',
+        },
+        'rejected': {
+            color: 'danger',
+            icon: XCircleSolid,
+            label: 'Rejected',
         },
         'resubmission': {
             color: 'warning',
             icon: ArrowPathSolid,
             label: 'Resubmission',
-            
         },
         'emergency': {
             color: 'danger',
             icon: ExclamationTriangleSolid,
             label: 'Emergency',
-           
         }
     };
 
@@ -575,6 +695,7 @@ const DailyWorksTable = ({
                     resolve(response.data.message || `Work status updated to ${statusLabel}`);
                 }
             } catch (error) {
+                console.error('Error updating work status:', error.response?.data || error.message || error);
                 let errorMsg = "Failed to update work status";
                 
                 if (error.response?.status === 422 && error.response.data?.errors) {
@@ -582,6 +703,8 @@ const DailyWorksTable = ({
                     const errors = error.response.data.errors;
                     const errorMessages = Object.values(errors).flat();
                     errorMsg = errorMessages.join(', ');
+                } else if (error.response?.data?.error) {
+                    errorMsg = error.response.data.error;
                 } else if (error.response?.data?.message) {
                     errorMsg = error.response.data.message;
                 } else if (error.response?.statusText) {
@@ -603,44 +726,62 @@ const DailyWorksTable = ({
 
     // Handle completion time updates
     const updateCompletionTime = useCallback(async (work, completionTime) => {
-        try {
-            const response = await axios.post(route('dailyWorks.updateCompletionTime'), {
-                id: work.id,
-                completion_time: completionTime,
-            });
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const response = await axios.post(route('dailyWorks.updateCompletionTime'), {
+                    id: work.id,
+                    completion_time: completionTime,
+                });
 
-            if (response.status === 200) {
-                setData(prevWorks =>
-                    prevWorks.map(w =>
-                        w.id === work.id ? response.data.dailyWork : w
-                    )
-                );
-                showToast.success('Completion time updated successfully');
+                if (response.status === 200) {
+                    setData(prevWorks =>
+                        prevWorks.map(w =>
+                            w.id === work.id ? response.data.dailyWork : w
+                        )
+                    );
+                    resolve('Completion time updated successfully');
+                }
+            } catch (error) {
+                console.error('Error updating completion time:', error.response?.data || error.message || error);
+                reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update completion time');
             }
-        } catch (error) {
-            showToast.error('Failed to update completion time');
-        }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Updating completion time...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     }, [setData]);
 
     // Handle submission time updates
     const updateSubmissionTime = useCallback(async (work, submissionTime) => {
-        try {
-            const response = await axios.post(route('dailyWorks.updateSubmissionTime'), {
-                id: work.id,
-                submission_time: submissionTime,
-            });
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const response = await axios.post(route('dailyWorks.updateSubmissionTime'), {
+                    id: work.id,
+                    submission_time: submissionTime,
+                });
 
-            if (response.status === 200) {
-                setData(prevWorks =>
-                    prevWorks.map(w =>
-                        w.id === work.id ? response.data.dailyWork : w
-                    )
-                );
-                showToast.success('Submission time updated successfully');
+                if (response.status === 200) {
+                    setData(prevWorks =>
+                        prevWorks.map(w =>
+                            w.id === work.id ? response.data.dailyWork : w
+                        )
+                    );
+                    resolve('Submission time updated successfully');
+                }
+            } catch (error) {
+                console.error('Error updating submission time:', error.response?.data || error.message || error);
+                reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update submission time');
             }
-        } catch (error) {
-            showToast.error('Failed to update submission time');
-        }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Updating submission time...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     }, [setData]);
 
   
@@ -656,30 +797,38 @@ const DailyWorksTable = ({
     // Debounced function for updating incharge
     const debouncedUpdateIncharge = useMemo(
         () => debounce(async (workId, inchargeId) => {
-            try {
-                const work = allDataRef.current?.find(w => w.id === workId);
-                if (!work) {
-                    showToast.error('Work not found');
-                    return;
-                }
-
-                const response = await axios.post(route('dailyWorks.updateIncharge'), {
-                    id: work.id,
-                    incharge: inchargeId,
-                });
-
-                if (response.status === 200) {
-                    setDataRef.current(prevWorks =>
-                        prevWorks.map(w =>
-                            w.id === work.id ? response.data.dailyWork : w
-                        )
-                    );
-                    showToast.success('Incharge updated successfully');
-                }
-            } catch (error) {
-                console.error('Error updating incharge:', error);
-                showToast.error('Failed to update incharge');
+            const work = allDataRef.current?.find(w => w.id === workId);
+            if (!work) {
+                showToast.error('Work not found');
+                return;
             }
+
+            const promise = new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.post(route('dailyWorks.updateIncharge'), {
+                        id: work.id,
+                        incharge: inchargeId,
+                    });
+
+                    if (response.status === 200) {
+                        setDataRef.current(prevWorks =>
+                            prevWorks.map(w =>
+                                w.id === work.id ? response.data.dailyWork : w
+                            )
+                        );
+                        resolve('Incharge updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating incharge:', error.response?.data || error.message || error);
+                    reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update incharge');
+                }
+            });
+
+            showToast.promise(promise, {
+                loading: 'Updating incharge...',
+                success: (msg) => msg,
+                error: (msg) => msg,
+            });
         }, 500), // 0.5 second delay for dropdowns
         []
     );
@@ -687,30 +836,38 @@ const DailyWorksTable = ({
     // Debounced function for updating assigned user
     const debouncedUpdateAssigned = useMemo(
         () => debounce(async (workId, assignedId) => {
-            try {
-                const work = allDataRef.current?.find(w => w.id === workId);
-                if (!work) {
-                    showToast.error('Work not found');
-                    return;
-                }
-
-                const response = await axios.post(route('dailyWorks.updateAssigned'), {
-                    id: work.id,
-                    assigned: assignedId,
-                });
-
-                if (response.status === 200) {
-                    setDataRef.current(prevWorks =>
-                        prevWorks.map(w =>
-                            w.id === work.id ? response.data.dailyWork : w
-                        )
-                    );
-                    showToast.success('Assigned user updated successfully');
-                }
-            } catch (error) {
-                console.error('Error updating assigned user:', error);
-                showToast.error('Failed to update assigned user');
+            const work = allDataRef.current?.find(w => w.id === workId);
+            if (!work) {
+                showToast.error('Work not found');
+                return;
             }
+
+            const promise = new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.post(route('dailyWorks.updateAssigned'), {
+                        id: work.id,
+                        assigned: assignedId,
+                    });
+
+                    if (response.status === 200) {
+                        setDataRef.current(prevWorks =>
+                            prevWorks.map(w =>
+                                w.id === work.id ? response.data.dailyWork : w
+                            )
+                        );
+                        resolve('Assigned user updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating assigned user:', error.response?.data || error.message || error);
+                    reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update assigned user');
+                }
+            });
+
+            showToast.promise(promise, {
+                loading: 'Updating assigned user...',
+                success: (msg) => msg,
+                error: (msg) => msg,
+            });
         }, 500), // 0.5 second delay for dropdowns
         []
     );
@@ -718,61 +875,116 @@ const DailyWorksTable = ({
     // Debounced function for updating completion time
     const debouncedUpdateCompletionTime = useMemo(
         () => debounce(async (workId, completionTime) => {
-            try {
-                const work = allDataRef.current?.find(w => w.id === workId);
-                if (!work) {
-                    showToast.error('Work not found');
-                    return;
-                }
-
-                const response = await axios.post(route('dailyWorks.updateCompletionTime'), {
-                    id: work.id,
-                    completion_time: completionTime,
-                });
-
-                if (response.status === 200) {
-                    setDataRef.current(prevWorks =>
-                        prevWorks.map(w =>
-                            w.id === work.id ? response.data.dailyWork : w
-                        )
-                    );
-                    showToast.success('Completion time updated successfully');
-                }
-            } catch (error) {
-                console.error('Error updating completion time:', error);
-                showToast.error('Failed to update completion time');
+            const work = allDataRef.current?.find(w => w.id === workId);
+            if (!work) {
+                showToast.error('Work not found');
+                return;
             }
+
+            const promise = new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.post(route('dailyWorks.updateCompletionTime'), {
+                        id: work.id,
+                        completion_time: completionTime,
+                    });
+
+                    if (response.status === 200) {
+                        setDataRef.current(prevWorks =>
+                            prevWorks.map(w =>
+                                w.id === work.id ? response.data.dailyWork : w
+                            )
+                        );
+                        resolve('Completion time updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating completion time:', error.response?.data || error.message || error);
+                    reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update completion time');
+                }
+            });
+
+            showToast.promise(promise, {
+                loading: 'Updating completion time...',
+                success: (msg) => msg,
+                error: (msg) => msg,
+            });
         }, 800), // 0.8 second delay for time inputs
+        []
+    );
+
+    // Debounced function for updating inspection details
+    const debouncedUpdateInspectionDetails = useMemo(
+        () => debounce(async (workId, inspectionDetails) => {
+            const work = allDataRef.current?.find(w => w.id === workId);
+            if (!work) {
+                showToast.error('Work not found');
+                return;
+            }
+
+            const promise = new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.post(route('dailyWorks.updateInspectionDetails'), {
+                        id: work.id,
+                        inspection_details: inspectionDetails,
+                    });
+
+                    if (response.status === 200) {
+                        setDataRef.current(prevWorks =>
+                            prevWorks.map(w =>
+                                w.id === work.id ? { ...w, inspection_details: inspectionDetails } : w
+                            )
+                        );
+                        resolve('Inspection details updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating inspection details:', error.response?.data || error.message || error);
+                    reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update inspection details');
+                }
+            });
+
+            showToast.promise(promise, {
+                loading: 'Updating inspection details...',
+                success: (msg) => msg,
+                error: (msg) => msg,
+            });
+        }, 800), // 0.8 second delay for text inputs
         []
     );
 
     // Debounced function for updating RFI submission time
     const debouncedUpdateSubmissionTime = useMemo(
         () => debounce(async (workId, submissionTime) => {
-            try {
-                const work = allDataRef.current?.find(w => w.id === workId);
-                if (!work) {
-                    showToast.error('Work not found');
-                    return;
-                }
-
-                const response = await axios.post(route('dailyWorks.updateSubmissionTime'), {
-                    id: work.id,
-                    rfi_submission_date: submissionTime,
-                });
-
-                if (response.status === 200) {
-                    setDataRef.current(prevWorks =>
-                        prevWorks.map(w =>
-                            w.id === work.id ? response.data.dailyWork : w
-                        )
-                    );
-                    showToast.success('RFI submission time updated successfully');
-                }
-            } catch (error) {
-                console.error('Error updating RFI submission time:', error);
-                showToast.error('Failed to update RFI submission time');
+            const work = allDataRef.current?.find(w => w.id === workId);
+            if (!work) {
+                showToast.error('Work not found');
+                return;
             }
+
+            const promise = new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.post(route('dailyWorks.updateSubmissionTime'), {
+                        id: work.id,
+                        rfi_submission_date: submissionTime,
+                    });
+
+                    if (response.status === 200) {
+                        setDataRef.current(prevWorks =>
+                            prevWorks.map(w =>
+                                w.id === work.id ? response.data.dailyWork : w
+                            )
+                        );
+                        resolve('RFI submission time updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating RFI submission time:', error.response?.data || error.message || error);
+                    reject(error.response?.data?.error || error.response?.data?.message || 'Failed to update RFI submission time');
+                }
+            });
+
+            showToast.promise(promise, {
+                loading: 'Updating RFI submission time...',
+                success: (msg) => msg,
+                error: (msg) => msg,
+            });
         }, 800), // 0.8 second delay for time inputs
         []
     );
@@ -784,6 +996,7 @@ const DailyWorksTable = ({
             debouncedUpdateIncharge.cancel();
             debouncedUpdateAssigned.cancel();
             debouncedUpdateCompletionTime.cancel();
+            debouncedUpdateInspectionDetails.cancel();
             debouncedUpdateSubmissionTime.cancel();
         };
     }, [
@@ -791,128 +1004,114 @@ const DailyWorksTable = ({
         debouncedUpdateIncharge,
         debouncedUpdateAssigned,
         debouncedUpdateCompletionTime,
+        debouncedUpdateInspectionDetails,
         debouncedUpdateSubmissionTime
     ]);
 
     // Handle general field updates
     const handleChange = async (taskId, taskNumber, key, value, type) => {
-        try {
-            // Find the current work to get all its data
-            const currentWork = allData?.find(work => work.id === taskId);
-            if (!currentWork) {
-                showToast.error('Work not found');
-                return;
-            }
-
-            // Prepare update data with logical field assignments
-            const updateData = {
-                id: taskId,
-                [key]: value,
-                // Include required fields with standardized fallbacks
-                date: currentWork.date || new Date().toISOString().split('T')[0],
-                number: currentWork.number || `RFI-${Date.now()}`,
-                planned_time: currentWork.planned_time || '09:00',
-                status: key === 'status' ? value : (currentWork.status || 'new'),
-                type: currentWork.type || 'Standard',
-                description: currentWork.description || 'Work description pending',
-                location: currentWork.location || 'Location to be determined',
-                side: currentWork.side || 'Both'
-            };
-
-            // Logical field assignments
-            if (key === 'status') {
-                if (value === 'completed') {
-                    // Auto-set completion time and submission time if not already set
-                    updateData.completion_time = currentWork.completion_time || new Date().toISOString();
-                    updateData.submission_time = currentWork.submission_time || new Date().toISOString();
-                    
-                    // Capture document if not structure type
-                    if (!(type === 'Structure')) {
-                        const pdfFile = await captureDocument(taskNumber);
-                        if (pdfFile) {
-                            await uploadImage(taskId, pdfFile);
-                        }
-                    }
-                } else if (value === 'resubmission') {
-                    // Increment resubmission count
-                    updateData.resubmission_count = (currentWork.resubmission_count || 0) + 1;
-                } else if (value === 'new') {
-                    // Reset completion and submission times for new status
-                    updateData.completion_time = null;
-                    updateData.submission_time = null;
-                }
-            }
-
-            const response = await axios.post(route('dailyWorks.update'), updateData);
-
-            if (response.status === 200) {
-                setData(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === taskId ? { 
-                            ...task, 
-                            [key]: value,
-                            // Update logical fields based on status change
-                            ...(key === 'status' && value === 'completed' && {
-                                completion_time: updateData.completion_time,
-                                submission_time: updateData.submission_time
-                            }),
-                            ...(key === 'status' && value === 'resubmission' && {
-                                resubmission_count: updateData.resubmission_count
-                            }),
-                            ...(key === 'status' && value === 'new' && {
-                                completion_time: null,
-                                submission_time: null
-                            })
-                        } : task
-                    )
-                );
-
-                showToast.success(response.data.message || `Task updated successfully`, {
-                    icon: '🟢',
-                    style: {
-                        backdropFilter: 'blur(16px) saturate(200%)',
-                        background: 'var(--theme-content1)',
-                        border: '1px solid var(--theme-divider)',
-                        color: 'var(--theme-primary)',
-                    }
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            let errorMessage = 'An unexpected error occurred.';
-            
-            if (error.response?.status === 422 && error.response.data?.errors) {
-                // Handle validation errors
-                const errors = error.response.data.errors;
-                const errorMessages = Object.values(errors).flat();
-                errorMessage = errorMessages.join(', ');
-            } else if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error.response?.statusText) {
-                errorMessage = error.response.statusText;
-            }
-
-            showToast.error(errorMessage, {
-                icon: '🔴',
-                style: {
-                    backdropFilter: 'blur(16px) saturate(200%)',
-                    background: 'var(--theme-content1)',
-                    border: '1px solid var(--theme-divider)',
-                    color: 'var(--theme-primary)',
-                }
-            });
+        // Find the current work to get all its data
+        const currentWork = allData?.find(work => work.id === taskId);
+        if (!currentWork) {
+            showToast.error('Work not found');
+            return;
         }
+
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // Prepare update data with logical field assignments
+                const updateData = {
+                    id: taskId,
+                    [key]: value,
+                    // Include required fields with standardized fallbacks
+                    date: currentWork.date || new Date().toISOString().split('T')[0],
+                    number: currentWork.number || `RFI-${Date.now()}`,
+                    planned_time: currentWork.planned_time || '09:00',
+                    status: key === 'status' ? value : (currentWork.status || 'new'),
+                    type: currentWork.type || 'Standard',
+                    description: currentWork.description || 'Work description pending',
+                    location: currentWork.location || 'Location to be determined',
+                    side: currentWork.side || 'Both'
+                };
+
+                // Logical field assignments
+                if (key === 'status') {
+                    if (value === 'completed') {
+                        // Auto-set completion time and submission time if not already set
+                        updateData.completion_time = currentWork.completion_time || new Date().toISOString();
+                        updateData.submission_time = currentWork.submission_time || new Date().toISOString();
+                        
+                        // Capture document if not structure type
+                        if (!(type === 'Structure')) {
+                            const pdfFile = await captureDocument(taskNumber);
+                            if (pdfFile) {
+                                await uploadImage(taskId, pdfFile);
+                            }
+                        }
+                    } else if (value === 'resubmission') {
+                        // Increment resubmission count
+                        updateData.resubmission_count = (currentWork.resubmission_count || 0) + 1;
+                    } else if (value === 'new') {
+                        // Reset completion and submission times for new status
+                        updateData.completion_time = null;
+                        updateData.submission_time = null;
+                    }
+                }
+
+                const response = await axios.post(route('dailyWorks.update'), updateData);
+
+                if (response.status === 200) {
+                    setData(prevTasks =>
+                        prevTasks.map(task =>
+                            task.id === taskId ? { 
+                                ...task, 
+                                [key]: value,
+                                // Update logical fields based on status change
+                                ...(key === 'status' && value === 'completed' && {
+                                    completion_time: updateData.completion_time,
+                                    submission_time: updateData.submission_time
+                                }),
+                                ...(key === 'status' && value === 'resubmission' && {
+                                    resubmission_count: updateData.resubmission_count
+                                }),
+                                ...(key === 'status' && value === 'new' && {
+                                    completion_time: null,
+                                    submission_time: null
+                                })
+                            } : task
+                        )
+                    );
+
+                    resolve(response.data.message || 'Task updated successfully');
+                }
+            } catch (error) {
+                console.error(error);
+                let errorMessage = 'An unexpected error occurred.';
+                
+                if (error.response?.status === 422 && error.response.data?.errors) {
+                    // Handle validation errors
+                    const errors = error.response.data.errors;
+                    const errorMessages = Object.values(errors).flat();
+                    errorMessage = errorMessages.join(', ');
+                } else if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response?.statusText) {
+                    errorMessage = error.response.statusText;
+                }
+
+                reject(errorMessage);
+            }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Updating task...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     };
 
     // Mobile tabs and accordion component - organized by work types
-    const MobileDailyWorkCard = ({ works, selectedTab, setSelectedTab, expandedItems, toggleExpanded }) => {
-        
-        // Define work types and their corresponding data
-        const workTypes = [
-            { key: "structure", label: "Structure", icon: "🏗️" },
-            { key: "embankment", label: "Embankment", icon: "🏔️" },
-            { key: "pavement", label: "Pavement", icon: "🛣️" }
-        ];
+    const MobileDailyWorkCard = ({ works, selectedTab, setSelectedTab, expandedItems, toggleExpanded, openStatusModal, openRfiFilesModal }) => {
 
         // Group works by type
         const groupedWorks = useMemo(() => {
@@ -934,526 +1133,360 @@ const DailyWorksTable = ({
             return groups;
         }, [works]);
 
-        // Mobile Loading Skeleton
-        const MobileLoadingSkeleton = () => {
-            return (
-                <div className="space-y-2">
-                    {/* Tab skeleton */}
-                    <div className="flex overflow-x-auto border-b border-divider mb-3 scrollbar-hide">
-                        {workTypes.map((type) => (
-                            <div key={type.key} className="flex items-center gap-2 px-3 py-2.5 min-w-fit">
-                                <Skeleton className="w-6 h-6 rounded" />
-                                <Skeleton className="w-16 h-4 rounded" />
-                                <Skeleton className="w-6 h-5 rounded-full" />
-                            </div>
-                        ))}
-                    </div>
-                    
-                    {/* Card skeletons */}
-                    {Array.from({ length: 5 }).map((_, index) => (
-                        <Card
-                            key={index}
-                            radius={getThemeRadius()}
-                            className="mb-2 bg-content1/98 backdrop-blur-sm border border-divider/30"
-                        >
-                            <CardHeader className="pb-2 px-3 py-3 flex flex-col relative">
-                                {/* Status chip skeleton */}
-                                <div className="flex flex-row justify-end mb-2 w-full">
-                                    <Skeleton className="w-24 h-6 rounded-full" />
-                                </div>
-                                
-                                {/* Main content skeleton */}
-                                <div className="flex flex-row items-start gap-3 w-full pr-10">
-                                    <Skeleton className="w-8 h-8 rounded-lg" />
-                                    <div className="min-w-0 flex-1 flex flex-col space-y-2">
-                                        <Skeleton className="w-32 h-4 rounded" />
-                                        <div className="flex flex-row items-center gap-2">
-                                            <Skeleton className="w-3 h-3 rounded" />
-                                            <Skeleton className="w-20 h-3 rounded" />
-                                        </div>
-                                        <div className="flex flex-row items-center gap-2">
-                                            <Skeleton className="w-3 h-3 rounded" />
-                                            <Skeleton className="w-40 h-3 rounded" />
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {/* Dropdown button skeleton */}
-                                <Skeleton className="absolute bottom-2 right-3 w-8 h-8 rounded-full" />
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
-            );
-        };
-
-        // Show loading skeleton when loading
-        if (loading) {
-            return <MobileLoadingSkeleton />;
-        }
-
-        // Individual work accordion item component
-        const WorkAccordionItem = ({ work, index, isExpanded, onToggle }) => {
+        // Individual work accordion item component - Redesigned for better mobile UX
+        const WorkAccordionItem = ({ work, index, isExpanded, onToggle, openStatusModal, openRfiFilesModal }) => {
             const inchargeUser = getUserInfo(work.incharge);
             const assignedUser = getUserInfo(work.assigned);
-            const statusConf = statusConfig[work.status] || statusConfig['new'];
+            const statusKey = getStatusKey(work.status, work.inspection_result);
+            const statusConf = statusConfig[statusKey] || statusConfig['new'];
+            const StatusIcon = statusConf.icon;
+
+            // Handle keyboard navigation
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onToggle();
+                }
+            };
+
+            // Compact info row component - without icons for cleaner mobile UI
+            const InfoRow = ({ label, value, chip, chipColor = 'default', highlight = false }) => (
+                <div className="flex items-center justify-between py-0.5 border-b border-divider/20 last:border-b-0 gap-2">
+                    <span className="text-[10px] text-default-400 shrink-0">{label}</span>
+                    {chip ? (
+                        <Chip size="sm" variant="flat" color={chipColor} className="text-[9px] h-3.5 px-1">
+                            {highlight ? <HighlightedText text={value} searchTerm={searchTerm} /> : value}
+                        </Chip>
+                    ) : (
+                        <span className="text-[10px] font-medium text-default-600 text-right truncate max-w-[65%]">
+                            {highlight ? <HighlightedText text={value} searchTerm={searchTerm} /> : value}
+                        </span>
+                    )}
+                </div>
+            );
 
             return (
                 <Card
-                    key={work.id}
                     radius={getThemeRadius()}
-                    className="mb-2 bg-content1/98 backdrop-blur-sm border border-divider/30 shadow-sm hover:shadow-md transition-all duration-200"
-                    style={{
-                        fontFamily: `var(--fontFamily, "Inter")`,
-                    }}
+                    className="bg-content1 border border-divider/40 shadow-sm"
+                    style={{ fontFamily: `var(--fontFamily, "Inter")` }}
+                    role="article"
+                    aria-label={`Daily work ${work.number}`}
                 >
-                    {/* Collapsible Header */}
-                    <CardHeader className="pb-2 px-3 py-3 flex flex-col relative">
-                        {/* Row 1: Status chip */}
-                        <div className="flex flex-row justify-end mb-2 w-full">
-                            {getStatusChip(work.status, work.inspection_result)}
-                        </div>
-                        
-                        {/* Row 2: Main content only */}
-                        <div className="flex flex-row items-start gap-3 w-full pr-10">
-                            <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
-                                <DocumentIcon className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="min-w-0 flex-1 flex flex-col">
-                                <div className="font-semibold text-sm text-default-800 leading-normal mb-1">
-                                    {work.number}
-                                </div>
-                                <div className="flex flex-row items-center gap-2 text-xs text-default-500 mb-0.5">
-                                    <CalendarDaysIcon className="w-3 h-3" />
-                                    <span>{formatDate(work.date)}</span>
-                                </div>
-                                {work.location && (
-                                    <div className="flex flex-row items-center gap-2 text-xs text-default-400">
-                                        <MapPinIcon className="w-3 h-3" />
-                                        <span className="truncate">{work.location}</span>
-                                    </div>
+                    {/* Card Header - Compact & Clickable - Only this should toggle accordion */}
+                    <CardHeader 
+                        className="p-2 cursor-pointer select-none active:scale-[0.99] transition-transform duration-100"
+                        onClick={onToggle}
+                        onKeyDown={handleKeyDown}
+                        tabIndex={0}
+                        role="button"
+                        aria-expanded={isExpanded}
+                    >
+                        <div className="flex flex-wrap items-center gap-1.5 w-full">
+                            {/* Main Info - RFI Number with file indicators */}
+                            <div className="flex items-center gap-1 flex-1 min-w-0">
+                                {/* File indicator icon */}
+                                {work.rfi_files_count > 0 && (
+                                    <DocumentCheckIcon className="w-3 h-3 text-success shrink-0" />
+                                )}
+                                <span className="font-semibold text-[11px] text-default-800 break-all">
+                                    <HighlightedText text={work.number} searchTerm={searchTerm} />
+                                </span>
+                                {work.rfi_files_count > 0 && (
+                                    <span className="text-[9px] text-success shrink-0">
+                                        ({work.rfi_files_count})
+                                    </span>
                                 )}
                             </div>
-                        </div>
-                        
-                        {/* Dropdown button - positioned absolutely at bottom right */}
-                        <button
-                            onClick={() => onToggle()}
-                            className="absolute bottom-2 right-3 w-8 h-8 rounded-full bg-default-100/80 hover:bg-default-200/80 border border-default-200/50 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shrink-0"
-                            aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                        >
-                            <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-                                <svg className="w-4 h-4 text-default-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
+                            
+                            {/* Status Badge & Expand Icon - Wrap to new line if needed */}
+                            <div className="flex items-center gap-1 shrink-0">
+                                <Chip 
+                                    size="sm" 
+                                    variant="flat" 
+                                    color={statusConf.color}
+                                    className="h-4 text-[9px] px-1"
+                                >
+                                    {statusConf.label.split(':')[0]}
+                                </Chip>
+                                <div className={`w-4 h-4 rounded-full bg-default-100 flex items-center justify-center transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                                    <svg className="w-2.5 h-2.5 text-default-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
                             </div>
-                        </button>
+                        </div>
                     </CardHeader>
 
-                    {/* Collapsible Content */}
+                    {/* Expandable Content */}
                     {isExpanded && (
-                        <CardBody className="pt-0 px-3 pb-3">
-                            <div className="space-y-3">
-                        {/* Basic Information - Compact Grid */}
-                        <div className="grid grid-cols-1 gap-2 text-xs">
-                            {/* Description */}
-                            {work.description && (
-                                <div className="flex items-start gap-2">
-                                    <DocumentTextIcon className="w-3.5 h-3.5 text-default-400 mt-0.5 shrink-0" />
-                                    <span className="text-default-600 flex-1 leading-relaxed">
-                                        {work.description}
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Jurisdiction */}
-                            <div className="flex items-center gap-2">
-                                <BuildingOfficeIcon className="w-3.5 h-3.5 text-default-400" />
-                                <span className="text-default-600">
-                                    {getJurisdictionInfo(work.jurisdiction_id)?.name || 'Not assigned'}
-                                </span>
-                            </div>
-
-                            {/* Side and Layers in one row */}
-                            <div className="flex items-center gap-4">
-                                {work.side && (
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-default-400">Side:</span>
-                                        <Chip size="sm" variant="flat" color="default" className="capitalize text-xs">
-                                            {work.side}
-                                        </Chip>
-                                    </div>
+                        <CardBody className="px-2 pb-2 pt-0" onClick={(e) => e.stopPropagation()}>
+                            <Divider className="mb-2" />
+                            
+                            {/* Section 1: Info Section (Read-only) */}
+                            <div className="bg-default-50 rounded-lg p-1.5 mb-2">
+                                <InfoRow 
+                                    label="Date" 
+                                    value={formatDate(work.date)} 
+                                    highlight
+                                />
+                                {work.description && (
+                                    <InfoRow 
+                                        label="Description" 
+                                        value={work.description} 
+                                        highlight
+                                    />
                                 )}
+                                <InfoRow 
+                                    label="Location" 
+                                    value={work.location || 'Not set'} 
+                                    highlight
+                                />
+                                <InfoRow 
+                                    label="Side" 
+                                    value={work.side || 'Both'} 
+                                    chip 
+                                    highlight
+                                />
                                 {work.qty_layer && (
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-default-400">Layers:</span>
-                                        <span className="text-default-600 font-medium">{work.qty_layer}</span>
-                                    </div>
+                                    <InfoRow 
+                                        label="Qty/Layer" 
+                                        value={work.qty_layer} 
+                                        highlight
+                                    />
+                                )}
+                                <InfoRow 
+                                    label="Planned" 
+                                    value={work.planned_time || 'Not set'} 
+                                    highlight
+                                />
+                                {work.resubmission_count > 0 && (
+                                    <InfoRow 
+                                        label="Resubmissions" 
+                                        value={work.resubmission_count} 
+                                        chip 
+                                        chipColor="warning" 
+                                    />
                                 )}
                             </div>
 
-                            {/* Resubmission Count */}
-                            {work.resubmission_count > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <Chip size="sm" variant="flat" color="warning" className="text-xs">
-                                        {work.resubmission_count} resubmissions
-                                    </Chip>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Timing Information - Compact */}
-                        <div className="bg-content2/20 p-2.5 rounded-md">
-                            <h4 className="text-xs font-semibold text-default-700 mb-2">Timing</h4>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <ClockIcon className="w-3.5 h-3.5 text-default-400" />
-                                    <span className="text-xs text-default-600">
-                                        Planned: {work.planned_time || 'Not set'}
-                                    </span>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircleIcon className="w-3.5 h-3.5 text-default-400" />
-                                        <span className="text-xs font-medium text-default-600">Completion Time:</span>
+                            {/* Section 2: Input Fields */}
+                            <div className="space-y-1.5">
+                                {/* In-charge - Admin only */}
+                                {shouldShowInchargeColumn && (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] text-default-400 w-14 shrink-0">In-charge:</span>
+                                        <Select
+                                            size="sm"
+                                            variant="bordered"
+                                            radius={getThemeRadius()}
+                                            placeholder="Select"
+                                            aria-label="Select in-charge"
+                                            selectedKeys={work.incharge ? [String(work.incharge)] : []}
+                                            onSelectionChange={(keys) => {
+                                                const key = Array.from(keys)[0];
+                                                if (key) debouncedUpdateIncharge(work.id, key);
+                                            }}
+                                            classNames={{
+                                                base: "flex-1",
+                                                trigger: "min-h-6 h-6",
+                                                value: "text-[10px]",
+                                                popoverContent: "max-w-[280px]"
+                                            }}
+                                            renderValue={() => (
+                                                <div className="flex items-center gap-1">
+                                                    <ProfileAvatar src={inchargeUser.profile_image_url} size="xs" name={inchargeUser.name} className="w-3 h-3" />
+                                                    <span className="text-[10px] truncate">{inchargeUser.name}</span>
+                                                </div>
+                                            )}
+                                        >
+                                            {finalInCharges.map((user) => (
+                                                <SelectItem key={String(user.id)} textValue={user.name}>
+                                                    <div className="flex items-center gap-2">
+                                                        <ProfileAvatar src={user.profile_image_url} size="sm" name={user.name} className="w-5 h-5" />
+                                                        <span className="text-xs">{user.name}</span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
                                     </div>
+                                )}
+
+                                {/* Assigned To - Visible to admins and incharges, not to assignees */}
+                                {shouldShowAssignedColumn && (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] text-default-400 w-14 shrink-0">Assigned:</span>
+                                        {canUserAssign(work) ? (
+                                            <Select
+                                                size="sm"
+                                                variant="bordered"
+                                                radius={getThemeRadius()}
+                                                placeholder="Select"
+                                                aria-label="Select assignee"
+                                                selectedKeys={work.assigned ? [String(work.assigned)] : []}
+                                                onSelectionChange={(keys) => {
+                                                    const key = Array.from(keys)[0];
+                                                    if (key) debouncedUpdateAssigned(work.id, key);
+                                                }}
+                                                classNames={{
+                                                    base: "flex-1",
+                                                    trigger: "min-h-6 h-6",
+                                                    value: "text-[10px]",
+                                                    popoverContent: "max-w-[280px]"
+                                                }}
+                                                renderValue={() => (
+                                                    assignedUser.name !== 'Unassigned' ? (
+                                                        <div className="flex items-center gap-1">
+                                                            <ProfileAvatar src={assignedUser.profile_image_url} size="xs" name={assignedUser.name} className="w-3 h-3" />
+                                                            <span className="text-[10px] truncate">{assignedUser.name}</span>
+                                                        </div>
+                                                    ) : <span className="text-[10px] text-default-400">Select</span>
+                                                )}
+                                            >
+                                                {getAvailableAssignees(work.incharge).map((user) => (
+                                                    <SelectItem key={String(user.id)} textValue={user.name}>
+                                                        <div className="flex items-center gap-2">
+                                                            <ProfileAvatar src={user.profile_image_url} size="sm" name={user.name} className="w-4 h-4" />
+                                                            <span className="text-[10px]">{user.name}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            <div className="flex-1 flex items-center gap-1">
+                                                <ProfileAvatar src={assignedUser.profile_image_url} size="xs" name={assignedUser.name} className="w-3 h-3" />
+                                                <span className="text-[10px] text-default-600">{assignedUser.name || 'Unassigned'}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Status Dropdown */}
+                                {canUserUpdateStatus(work) && (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] text-default-400 w-14 shrink-0">Status:</span>
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color={statusConf.color}
+                                            startContent={<StatusIcon className="w-3 h-3" />}
+                                            radius="full"
+                                            className="h-6 px-2 min-w-0 flex-1"
+                                            onPress={() => {
+                                                console.log('Status button pressed for work:', work.id, work.number);
+                                                console.log('openStatusModal function:', typeof openStatusModal);
+                                                openStatusModal(work);
+                                            }}
+                                        >
+                                            <span className="text-[10px] font-medium">{statusConf.label}</span>
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Inspection Details */}
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] text-default-400">Inspection Details:</span>
+                                    <Input
+                                        size="sm"
+                                        type="text"
+                                        variant="bordered"
+                                        radius={getThemeRadius()}
+                                        placeholder="Enter details..."
+                                        defaultValue={work.inspection_details || ''}
+                                        onChange={(e) => debouncedUpdateInspectionDetails(work.id, e.target.value)}
+                                        classNames={{
+                                            base: "w-full",
+                                            input: "text-[10px]",
+                                            inputWrapper: "min-h-7 h-7"
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Completion Time */}
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] text-default-400">Completion:</span>
                                     <Input
                                         size="sm"
                                         type="datetime-local"
                                         variant="bordered"
                                         radius={getThemeRadius()}
-                                        value={work.completion_time
-                                            ? new Date(work.completion_time).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)
-                                            : ''
-                                        }
+                                        value={work.completion_time ? new Date(work.completion_time).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16) : ''}
                                         onChange={(e) => debouncedUpdateCompletionTime(work.id, e.target.value)}
                                         classNames={{
-                                            input: "text-sm",
-                                        }}
-                                        style={{
-                                            fontFamily: `var(--fontFamily, "Inter")`,
+                                            base: "w-full",
+                                            input: "text-[10px]",
+                                            inputWrapper: "min-h-7 h-7"
                                         }}
                                     />
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* Personnel Assignment - Compact */}
-                        <div className="bg-content2/20 p-2.5 rounded-md">
-                            <h4 className="text-xs font-semibold text-default-700 mb-2">Personnel</h4>
-                            <div className="space-y-3">
-                                {/* In-charge */}
-                                {userIsAdmin && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <UserIcon className="w-4 h-4 text-default-500" />
-                                            <span className="text-xs font-medium text-default-600">In-charge:</span>
-                                        </div>
-                                        <Select
-                                            size="sm"
-                                            variant="bordered"
-                                            radius={getThemeRadius()}
-                                            placeholder="Select in-charge"
-                                            aria-label="Select in-charge person"
-                                            selectedKeys={work.incharge && finalInCharges.find(user => user.id === parseInt(work.incharge)) 
-                                                ? [String(work.incharge)] 
-                                                : []}
-                                            onSelectionChange={(keys) => {
-                                                const selectedKey = Array.from(keys)[0];
-                                                if (selectedKey) {
-                                                    debouncedUpdateIncharge(work.id, selectedKey);
-                                                }
-                                            }}
-                                            classNames={{
-                                                trigger: "min-h-8 w-full",
-                                                value: "text-sm leading-tight",
-                                                popoverContent: "w-64"
-                                            }}
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
-                                            renderValue={(items) => {
-                                                if (items.length === 0) {
-                                                    return (
-                                                        <div className="flex items-center gap-2">
-                                                            <UserIcon className="w-4 h-4 text-default-400" />
-                                                            <span className="text-sm">Select in-charge</span>
-                                                        </div>
-                                                    );
-                                                }
-                                                return items.map((item) => (
-                                                    <div key={item.key} className="flex items-center gap-2">
-                                                        <ProfileAvatar
-                                                            src={inchargeUser.profile_image_url || inchargeUser.profile_image}
-                                                            size="sm"
-                                                            name={inchargeUser.name}
-                                                            className="w-5 h-5"
-                                                            showBorder
-                                                        />
-                                                        <span className="text-sm font-medium">{inchargeUser.name}</span>
-                                                    </div>
-                                                ));
-                                            }}
-                                        >
-                                            {finalInCharges.map((user) => (
-                                                <SelectItem key={String(user.id)} textValue={user.name}>
-                                                    <div className="flex items-center gap-2">
-                                                        <ProfileAvatar
-                                                            src={user.profile_image_url || user.profile_image}
-                                                            size="sm"
-                                                            name={user.name}
-                                                            className="w-6 h-6"
-                                                            showBorder
-                                                        />
-                                                        <div>
-                                                            <div className="text-sm font-medium">{user.name}</div>
-                                                            <div className="text-xs text-default-400">{user.role_name || 'Team Member'}</div>
-                                                        </div>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </Select>
-                                    </div>
-                                )}
-
-                                {/* Assigned To - Hidden for assignees viewing their own work */}
-                                {(canUserAssign(work) || !isUserAssigneeOfWork(work)) && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <UserIcon className="w-4 h-4 text-default-500" />
-                                        <span className="text-xs font-medium text-default-600">Assigned to:</span>
-                                    </div>
-                                    {canUserAssign(work) ? (
-                                        <Select
-                                            size="sm"
-                                            variant="bordered"
-                                            radius={getThemeRadius()}
-                                            placeholder="Select assignee"
-                                            aria-label="Select assigned person"
-                                            selectedKeys={work.assigned && getAvailableAssignees(work.incharge).find(user => user.id === parseInt(work.assigned))
-                                                ? [String(work.assigned)]
-                                                : []}
-                                            onSelectionChange={(keys) => {
-                                                const selectedKey = Array.from(keys)[0];
-                                                if (selectedKey) {
-                                                    debouncedUpdateAssigned(work.id, selectedKey);
-                                                }
-                                            }}
-                                            classNames={{
-                                                trigger: "min-h-8 w-full",
-                                                value: "text-sm leading-tight",
-                                                popoverContent: "w-64"
-                                            }}
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
-                                            }}
-                                            renderValue={(items) => {
-                                                if (items.length === 0) {
-                                                    return (
-                                                        <div className="flex items-center gap-2">
-                                                            <UserIcon className="w-4 h-4 text-default-400" />
-                                                            <span className="text-sm">Select assignee</span>
-                                                        </div>
-                                                    );
-                                                }
-                                                return items.map((item) => (
-                                                    <div key={item.key} className="flex items-center gap-2">
-                                                        <ProfileAvatar
-                                                            src={assignedUser.profile_image_url || assignedUser.profile_image}
-                                                            size="sm"
-                                                            name={assignedUser.name}
-                                                            className="w-5 h-5"
-                                                            showBorder
-                                                        />
-                                                        <span className="text-sm font-medium">{assignedUser.name}</span>
-                                                    </div>
-                                                ));
-                                            }}
-                                        >
-                                            {getAvailableAssignees(work.incharge).map((user) => (
-                                                <SelectItem key={String(user.id)} textValue={user.name}>
-                                                    <div className="flex items-center gap-2">
-                                                        <ProfileAvatar
-                                                            src={user.profile_image_url || user.profile_image}
-                                                            size="sm"
-                                                            name={user.name}
-                                                            className="w-6 h-6"
-                                                            showBorder
-                                                        />
-                                                        <div>
-                                                            <div className="text-sm font-medium">{user.name}</div>
-                                                            <div className="text-xs text-default-400">{user.designation_title || user.designation?.title || 'Staff'}</div>
-                                                        </div>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </Select>
-                                    ) : (
-                                        assignedUser.name !== 'Unassigned' ? (
-                                            <User
-                                                size="sm"
-                                                name={assignedUser.name}
-                                                description="Assigned"
-                                                avatarProps={{
-                                                    size: "sm",
-                                                    src: assignedUser.profile_image_url || assignedUser.profile_image,
-                                                    name: assignedUser.name,
-                                                    ...getProfileAvatarTokens({
-                                                        name: assignedUser.name,
-                                                        size: 'sm',
-                                                    }),
-                                                }}
-                                                classNames={{
-                                                    name: "text-sm font-medium",
-                                                    description: "text-xs text-default-400"
-                                                }}
-                                            />
-                                        ) : (
-                                            <Chip size="sm" variant="flat" color="default">
-                                                Unassigned
-                                            </Chip>
-                                        )
-                                    )}
-                                </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Status Management - Compact (visible to admin, SE, or assignee) */}
-                        {canUserUpdateStatus(work) && (
-                            <div className="bg-content2/20 p-2.5 rounded-md">
-                                <h4 className="text-xs font-semibold text-default-700 mb-2">Status</h4>
-                                
-                                {/* Status Dropdown */}
-                                <div className="space-y-2">
-                                    <span className="text-xs font-medium text-default-600">Current Status:</span>
-                                    <Select
-                                        size="sm"
-                                        color={(() => {
-                                            const statusKey = getStatusKey(work.status, work.inspection_result);
-                                            return statusConfig[statusKey]?.color || 'default';
-                                        })()}
-                                        variant="bordered"
-                                        placeholder="Select status"
-                                        aria-label="Select work status"
-                                        selectedKeys={work.status ? [getStatusKey(work.status, work.inspection_result)] : []}
-                                        onSelectionChange={(keys) => {
-                                            const selectedKey = Array.from(keys)[0];
-                                            if (selectedKey) {
-                                                updateWorkStatus(work, selectedKey);
-                                            }
-                                        }}
-                                        isDisabled={updatingWorkId === work.id}
-                                        radius={getThemeRadius()}
-                                        classNames={{
-                                            trigger: `min-h-8 w-full transition-colors`,
-                                            value: "text-sm font-medium",
-                                            popoverContent: "min-w-[210px]"
-                                        }}
-                                        style={{
-                                            fontFamily: `var(--fontFamily, "Inter")`,
-                                        }}
-                                        renderValue={(items) => {
-                                            if (items.length === 0) {
-                                                return (
-                                                    <div className="flex items-center gap-2">
-                                                        <ExclamationTriangleSolid className="w-4 h-4 text-default-400" />
-                                                        <span className="text-sm">Select status</span>
-                                                    </div>
-                                                );
-                                            }
-                                            const statusKey = getStatusKey(work.status, work.inspection_result);
-                                            const currentStatus = statusConfig[statusKey] || statusConfig['new'];
-                                            const StatusIcon = currentStatus.icon;
-                                            return (
-                                                <div className="flex items-center gap-2">
-                                                    <StatusIcon className="w-4 h-4" />
-                                                    <span className="text-sm font-medium">{currentStatus.label}</span>
-                                                </div>
-                                            );
-                                        }}
-                                    >
-                                        {Object.keys(statusConfig).map((status) => {
-                                            const config = statusConfig[status];
-                                            const StatusIcon = config.icon;
-                                            return (
-                                                <SelectItem 
-                                                    key={status} 
-                                                    textValue={config.label}
-                                                    color={config.color}
-                                                    startContent={<StatusIcon className="w-4 h-4" />}
-                                                    classNames={{
-                                                        title: "text-sm font-medium",
-                                                        description: "text-sm"
-                                                    }}
-                                                >
-                                                    {config.label}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </Select>
-                                </div>
-
-                                {/* RFI Submission Date (Admin only) */}
-                                {userIsAdmin && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <CalendarDaysIcon className="w-4 h-4 text-default-500" />
-                                            <span className="text-xs font-medium text-default-600">RFI Submission Date:</span>
-                                        </div>
+                                {/* RFI Date - Admin only */}
+                                {shouldShowRfiColumn && (
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[10px] text-default-400">RFI Date:</span>
                                         <Input
                                             size="sm"
                                             type="date"
                                             variant="bordered"
                                             radius={getThemeRadius()}
-                                            value={work.rfi_submission_date ? 
-                                                new Date(work.rfi_submission_date).toISOString().slice(0, 10) : ''
-                                            }
+                                            value={work.rfi_submission_date ? new Date(work.rfi_submission_date).toISOString().slice(0, 10) : ''}
                                             onChange={(e) => debouncedUpdateSubmissionTime(work.id, e.target.value)}
                                             classNames={{
-                                                input: "text-sm",
-                                            }}
-                                            style={{
-                                                fontFamily: `var(--fontFamily, "Inter")`,
+                                                base: "w-full",
+                                                input: "text-[10px]",
+                                                inputWrapper: "min-h-7 h-7"
                                             }}
                                         />
                                     </div>
                                 )}
                             </div>
-                        )}
 
-                        {/* Actions */}
-                        {userIsAdmin && (
-                            <div className="flex items-center justify-between pt-2 border-t border-divider">
-                                <span className="text-xs text-default-500">Actions:</span>
-                                <div className="flex gap-2">
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        color="primary"
-                                        radius={getThemeRadius()}
-                                        onPress={() => {
-                                            setCurrentRow(work);
-                                            openModal("editDailyWork");
-                                        }}
-                                        startContent={<PencilIcon className="w-4 h-4" />}
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        color="danger"
-                                        radius={getThemeRadius()}
-                                        onPress={() => handleClickOpen(work.id, "deleteDailyWork")}
-                                        startContent={<TrashIcon className="w-4 h-4" />}
-                                    >
-                                        Delete
-                                    </Button>
-                                </div>
+                            {/* Action Buttons - Admin only for Edit/Delete, all users can access files */}
+                            <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-divider">
+                                {/* RFI Files button - available to all users */}
+                                <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color={work.rfi_files_count > 0 ? "success" : "default"}
+                                    radius={getThemeRadius()}
+                                    className="flex-1 h-7 text-[10px]"
+                                    onPress={() => {
+                                        console.log('Files button pressed for work:', work.id, work.number);
+                                        console.log('openRfiFilesModal function:', typeof openRfiFilesModal);
+                                        openRfiFilesModal(work);
+                                    }}
+                                >
+                                    Files {work.rfi_files_count > 0 && `(${work.rfi_files_count})`}
+                                </Button>
+                                
+                                {shouldShowActions && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="primary"
+                                            radius={getThemeRadius()}
+                                            className="flex-1 h-7 text-[10px]"
+                                            onPress={() => {
+                                                setCurrentRow(work);
+                                                openModal("editDailyWork");
+                                            }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="danger"
+                                            radius={getThemeRadius()}
+                                            className="flex-1 h-7 text-[10px]"
+                                            onPress={() => handleClickOpen(work.id, "deleteDailyWork")}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
                             </div>
-                        )}
-                    </div>
                         </CardBody>
                     )}
                 </Card>
@@ -1462,46 +1495,62 @@ const DailyWorksTable = ({
 
         return (
             <div className="w-full">
-                {/* Custom Tab Headers - Compact */}
-                <div className="flex overflow-x-auto border-b border-divider mb-3 scrollbar-hide">
+                {/* Tab Headers - Compact for mobile */}
+                <div className="flex overflow-x-auto border-b border-divider scrollbar-hide -mx-1 px-1">
                     {workTypes.map((type) => (
                         <button
                             key={type.key}
                             onClick={() => setSelectedTab(type.key)}
-                            className={`flex items-center gap-2 px-3 py-2.5 min-w-fit whitespace-nowrap border-b-2 transition-all duration-200 ${
+                            className={`flex items-center gap-1 px-2 py-1.5 min-w-fit whitespace-nowrap border-b-2 transition-all duration-150 ${
                                 selectedTab === type.key
-                                    ? 'border-primary text-primary font-semibold bg-primary/5'
-                                    : 'border-transparent text-default-500 hover:text-default-700 hover:bg-default-50/50'
+                                    ? 'border-primary text-primary font-semibold'
+                                    : 'border-transparent text-default-500'
                             }`}
                         >
-                            <span className="text-base">{type.icon}</span>
-                            <span className="font-medium text-sm">{type.label}</span>
-                            <Chip 
-                                size="sm" 
-                                variant="flat" 
-                                color={selectedTab === type.key ? "primary" : "default"}
-                                className="text-xs min-w-[20px] h-5"
-                            >
+                            <span className="text-[10px]">{type.icon}</span>
+                            <span className="text-[10px]">{type.label}</span>
+                            <span className={`min-w-[16px] h-3.5 px-1 rounded-full text-[9px] font-medium flex items-center justify-center ${
+                                selectedTab === type.key 
+                                    ? 'bg-primary text-white' 
+                                    : 'bg-default-100 text-default-600'
+                            }`}>
                                 {groupedWorks[type.key]?.length || 0}
-                            </Chip>
+                            </span>
                         </button>
                     ))}
                 </div>
 
-                {/* Tab Content - Compact */}
-                <div className="pt-1">
+                {/* Tab Content */}
+                <div className="pt-2">
                     {workTypes.map((type) => (
                         <div key={type.key} className={selectedTab === type.key ? 'block' : 'hidden'}>
                             {groupedWorks[type.key]?.length > 0 ? (
-                                <div className="space-y-2">
+                                <div className="flex flex-col gap-2">
                                     {groupedWorks[type.key].map((work, index) => (
-                                        <WorkAccordionItem 
-                                            key={work.id} 
-                                            work={work} 
-                                            index={index}
-                                            isExpanded={expandedItems.has(work.id)}
-                                            onToggle={() => toggleExpanded(work.id)}
-                                        />
+                                        <SwipeableCard
+                                            key={work.id}
+                                            onEdit={() => {
+                                                setCurrentRow(work);
+                                                openModal("editDailyWork");
+                                            }}
+                                            onDelete={() => handleClickOpen(work.id, "deleteDailyWork")}
+                                            onStatusChange={() => {
+                                                // Quick complete - set to completed:pass
+                                                if (work.status !== 'completed') {
+                                                    updateWorkStatus(work, 'completed:pass');
+                                                }
+                                            }}
+                                            disabled={!shouldShowActions}
+                                        >
+                                            <WorkAccordionItem 
+                                                work={work} 
+                                                index={index}
+                                                isExpanded={expandedItems.has(work.id)}
+                                                onToggle={() => toggleExpanded(work.id)}
+                                                openStatusModal={openStatusModal}
+                                                openRfiFilesModal={openRfiFilesModal}
+                                            />
+                                        </SwipeableCard>
                                     ))}
                                 </div>
                             ) : (
@@ -1538,7 +1587,7 @@ const DailyWorksTable = ({
                         <div className="flex items-center justify-center gap-1 whitespace-nowrap">
                             <CalendarDaysIcon className="w-3 h-3 text-default-500" />
                             <span className="text-sm font-medium">
-                                {formatDate(work.date)}
+                                <HighlightedText text={formatDate(work.date)} searchTerm={searchTerm} />
                             </span>
                         </div>
                     </TableCell>
@@ -1546,56 +1595,68 @@ const DailyWorksTable = ({
 
             case "number":
                 return (
-                    <TableCell className="max-w-32">
+                    <TableCell className="max-w-40">
                         <div className="flex flex-col items-center justify-center gap-1 w-full whitespace-nowrap">
-                            {(work.status === 'completed' || work.status?.startsWith('completed:')) && work.file ? (
-                                <Link
-                                    isExternal
-                                    href={work.file}
-                                    color={(() => {
-                                        const statusKey = getStatusKey(work.status, work.inspection_result);
-                                        return statusConfig[statusKey]?.color || 'default';
-                                    })()}
-                                    size="sm"
-                                    className="font-medium text-center"
-                                    title={work.number}
-                                >
-                                    {work.number}
-                                </Link>
-                            ) : (work.status === 'completed' || work.status?.startsWith('completed:')) && !work.file ? (
-                                <Link
-                                    href="#"
-                                    color={(() => {
-                                        const statusKey = getStatusKey(work.status, work.inspection_result);
-                                        return statusConfig[statusKey]?.color || 'default';
-                                    })()}
-                                    size="sm"
-                                    className="font-medium text-center"
-                                    title={work.number}
-                                    onPress={async () => {
-                                        const pdfFile = await captureDocument(work.number);
-                                        if (pdfFile) {
-                                            await uploadImage(work.id, pdfFile);
-                                        }
-                                    }}
-                                >
-                                    {work.number}
-                                </Link>
-                            ) : (
-                                <span 
-                                    className="text-sm font-medium text-primary text-center"
-                                    title={work.number}
-                                >
-                                    {work.number}
-                                </span>
-                            )}
+                            {/* RFI Number with file icons */}
+                            <div className="flex items-center gap-1">
+                                {/* Eye icon - click to view/manage RFI files */}
+                                <Tooltip content={work.rfi_files_count > 0 ? `View ${work.rfi_files_count} RFI file(s)` : "Manage RFI files"}>
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        className="w-5 h-5 min-w-5"
+                                        onPress={() => openRfiFilesModal(work)}
+                                    >
+                                        {work.rfi_files_count > 0 ? (
+                                            <FolderOpenIcon className="w-3.5 h-3.5 text-primary" />
+                                        ) : (
+                                            <EyeIcon className="w-3.5 h-3.5 text-default-400" />
+                                        )}
+                                    </Button>
+                                </Tooltip>
+                                
+                                {/* RFI Number */}
+                                {(work.status === 'completed' || work.status?.startsWith('completed:')) && work.file ? (
+                                    <Link
+                                        isExternal
+                                        href={work.file}
+                                        color={(() => {
+                                            const statusKey = getStatusKey(work.status, work.inspection_result);
+                                            return statusConfig[statusKey]?.color || 'default';
+                                        })()}
+                                        size="sm"
+                                        className="font-medium text-center"
+                                        title={work.number}
+                                    >
+                                        <HighlightedText text={work.number} searchTerm={searchTerm} />
+                                    </Link>
+                                ) : (
+                                    <span 
+                                        className="text-sm font-medium text-primary text-center"
+                                        title={work.number}
+                                    >
+                                        <HighlightedText text={work.number} searchTerm={searchTerm} />
+                                    </span>
+                                )}
+                                
+                                {/* Document check icon - shows if files exist */}
+                                {work.rfi_files_count > 0 && (
+                                    <Tooltip content={`${work.rfi_files_count} file(s) attached`}>
+                                        <span className="flex items-center">
+                                            <DocumentCheckIcon className="w-3.5 h-3.5 text-success" />
+                                        </span>
+                                    </Tooltip>
+                                )}
+                            </div>
+                            
                             {work.reports?.map(report => (
                                 <span 
                                     key={report.ref_no} 
                                     className="text-xs text-default-500 text-center"
                                     title={`• ${report.ref_no}`}
                                 >
-                                    • {report.ref_no}
+                                    • <HighlightedText text={report.ref_no} searchTerm={searchTerm} />
                                 </span>
                             ))}
                         </div>
@@ -1603,76 +1664,33 @@ const DailyWorksTable = ({
                 );
 
             case "status":
+                const statusKey = getStatusKey(work.status, work.inspection_result);
+                const currentStatusConfig = statusConfig[statusKey] || statusConfig['new'];
+                const StatusIconComponent = currentStatusConfig.icon;
+                
                 return (
-                    <TableCell className="min-w-56">
-                        <div className="flex items-center justify-center gap-2 w-full">
+                    <TableCell className="min-w-40">
+                        <div className="flex items-center justify-center w-full">
                             {canUserUpdateStatus(work) ? (
-                                <Select
-                                    size="sm"
-                                    color={(() => {
-                                        const statusKey = getStatusKey(work.status, work.inspection_result);
-                                        return statusConfig[statusKey]?.color || 'default';
-                                    })()}
-                                    variant="bordered"
-                                    placeholder="Select status"
-                                    aria-label="Select work status"
-                                    selectedKeys={work.status ? [getStatusKey(work.status, work.inspection_result)] : []}
-                                    onSelectionChange={(keys) => {
-                                        const selectedKey = Array.from(keys)[0];
-                                        if (selectedKey) {
-                                            updateWorkStatus(work, selectedKey);
-                                        }
-                                    }}
-                                    isDisabled={updatingWorkId === work.id}
-                                    radius={getThemeRadius()}
-                                    classNames={{
-                                        trigger: `min-h-10 w-full transition-colors`,
-                                        value: "text-sm font-medium",
-                                        popoverContent: "min-w-[210px]"
-                                    }}
-                                    style={{
-                                        fontFamily: `var(--fontFamily, "Inter")`,
-                                    }}
-                                    renderValue={(items) => {
-                                        if (items.length === 0) {
-                                            return (
-                                                <div className="flex items-center gap-2">
-                                                    <ExclamationTriangleSolid className="w-4 h-4 text-default-400" />
-                                                    <span className="text-xs">Select status</span>
-                                                </div>
-                                            );
-                                        }
-                                        const statusKey = getStatusKey(work.status, work.inspection_result);
-                                        const currentStatus = statusConfig[statusKey] || statusConfig['new'];
-                                        const StatusIcon = currentStatus.icon;
-                                        return (
-                                            <div className="flex items-center gap-2">
-                                                <StatusIcon className="w-4 h-4" />
-                                                <span className="text-xs font-medium">{currentStatus.label}</span>
-                                            </div>
-                                        );
-                                    }}
-                                >
-                                    {Object.keys(statusConfig).map((status) => {
-                                        const config = statusConfig[status];
-                                        const StatusIcon = config.icon;
-                                        return (
-                                            <SelectItem 
-                                                key={status} 
-                                                textValue={config.label}
-                                                color={config.color}
-                                                startContent={<StatusIcon className="w-4 h-4" />}
-                                           
-                                                classNames={{
-                                                    title: "text-sm font-medium",
-                                                    description: "text-sm"
-                                                }}
-                                            >
-                                                {config.label}
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </Select>
+                                <Tooltip content="Click to update status">
+                                    <Chip
+                                        size="md"
+                                        variant="flat"
+                                        color={currentStatusConfig.color}
+                                        startContent={<StatusIconComponent className="w-4 h-4" />}
+                                        className="cursor-pointer hover:scale-105 transition-transform"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openStatusModal(work);
+                                        }}
+                                        classNames={{
+                                            base: "h-8 px-3",
+                                            content: "text-sm font-medium"
+                                        }}
+                                    >
+                                        {currentStatusConfig.label}
+                                    </Chip>
+                                </Tooltip>
                             ) : (
                                 getStatusChip(work.status, work.inspection_result)
                             )}
@@ -1686,7 +1704,7 @@ const DailyWorksTable = ({
                         <div className="flex items-center justify-center gap-2">
                             {getWorkTypeIcon(work.type, "w-4 h-4")}
                             <span className="text-sm font-medium capitalize">
-                                {work.type || 'Standard Work'}
+                                <HighlightedText text={work.type || 'Standard Work'} searchTerm={searchTerm} />
                             </span>
                         </div>
                     </TableCell>
@@ -1695,21 +1713,12 @@ const DailyWorksTable = ({
             case "description":
                 return (
                     <TableCell className={`max-w-60 ${cellBaseClasses}`}>
-                        <div className="w-full">
+                        <div className="w-full overflow-hidden">
                             <span 
-                                className="text-sm text-default-600 leading-tight line-clamp-2 break-words"
-                                style={{
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    wordBreak: 'break-word',
-                                    lineHeight: '1.3',
-                                    maxHeight: '2.6em'
-                                }}
+                                className="text-sm text-default-600 line-clamp-2"
                                 title={work.description || "No description provided"}
                             >
-                                {work.description || "No description provided"}
+                                <HighlightedText text={work.description || "No description provided"} searchTerm={searchTerm} />
                             </span>
                         </div>
                     </TableCell>
@@ -1718,25 +1727,14 @@ const DailyWorksTable = ({
             case "location":
                 return (
                     <TableCell className="max-w-48">
-                        <div className="flex flex-col items-center justify-center gap-1">
-                            <div className="flex items-center justify-center gap-2">
-                                <MapPinIcon className="w-3 h-3 text-default-500 shrink-0" />
-                                <span 
-                                    className="text-sm font-medium leading-tight line-clamp-2 break-words text-center"
-                                    style={{
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical',
-                                        overflow: 'hidden',
-                                        wordBreak: 'break-word',
-                                        lineHeight: '1.3',
-                                        maxHeight: '2.6em'
-                                    }}
-                                    title={work.location || 'Location not specified'}
-                                >
-                                    {work.location || 'Location not specified'}
-                                </span>
-                            </div>
+                        <div className="flex items-center justify-center gap-2 overflow-hidden">
+                            <MapPinIcon className="w-3 h-3 text-default-500 shrink-0" />
+                            <span 
+                                className="text-sm font-medium line-clamp-2 text-center"
+                                title={work.location || 'Location not specified'}
+                            >
+                                <HighlightedText text={work.location || 'Location not specified'} searchTerm={searchTerm} />
+                            </span>
                         </div>
                     </TableCell>
                 );
@@ -1751,7 +1749,7 @@ const DailyWorksTable = ({
                                 color="default"
                                 className="capitalize"
                             >
-                                {work.side || 'Both Sides'}
+                                <HighlightedText text={work.side || 'Both Sides'} searchTerm={searchTerm} />
                             </Chip>
                         </div>
                     </TableCell>
@@ -1762,7 +1760,7 @@ const DailyWorksTable = ({
                     <TableCell>
                         <div className="flex items-center justify-center">
                             <span className="text-sm">
-                                {work.qty_layer ? work.qty_layer : 'N/A'}
+                                <HighlightedText text={work.qty_layer ? work.qty_layer : 'N/A'} searchTerm={searchTerm} />
                             </span>
                         </div>
                     </TableCell>
@@ -1774,7 +1772,7 @@ const DailyWorksTable = ({
                         <div className="flex items-center justify-center gap-1">
                             <ClockIcon className="w-3 h-3 text-default-500" />
                             <span className="text-sm">
-                                {work.planned_time || 'Not set'}
+                                <HighlightedText text={work.planned_time || 'Not set'} searchTerm={searchTerm} />
                             </span>
                         </div>
                     </TableCell>
@@ -1816,9 +1814,9 @@ const DailyWorksTable = ({
                                         }
                                     }}
                                     classNames={{
-                                        trigger: "min-h-10 w-full bg-white/50 hover:bg-white/80 focus:bg-white/90 transition-colors",
+                                        trigger: "min-h-10 w-full bg-content2/50 hover:bg-content2/80 focus:bg-content2/90 transition-colors",
                                         value: "text-sm leading-tight",
-                                        popoverContent: "w-64"
+                                        popoverContent: "w-64 max-w-[300px]"
                                     }}
                                     style={{
                                         fontFamily: `var(--fontFamily, "Inter")`,
@@ -1841,14 +1839,7 @@ const DailyWorksTable = ({
                                                 showBorder
                                             />
                                             <span 
-                                                className="text-xs font-medium leading-tight break-words"
-                                                style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 1,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    wordBreak: 'break-word'
-                                                }}
+                                                className="text-xs font-medium truncate max-w-[120px]"
                                                 title={inchargeUser.name}
                                             >
                                                 {inchargeUser.name}
@@ -1883,14 +1874,7 @@ const DailyWorksTable = ({
                                         size="sm"
                                         name={
                                             <span 
-                                                style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 1,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    wordBreak: 'break-word',
-                                                    lineHeight: '1.3'
-                                                }}
+                                                className="truncate max-w-[100px]"
                                                 title={inchargeUser.name}
                                             >
                                                 {inchargeUser.name}
@@ -1943,9 +1927,9 @@ const DailyWorksTable = ({
                                         }
                                     }}
                                     classNames={{
-                                        trigger: "min-h-10 w-full bg-white/50 hover:bg-white/80 focus:bg-white/90 transition-colors",
+                                        trigger: "min-h-10 w-full bg-content2/50 hover:bg-content2/80 focus:bg-content2/90 transition-colors",
                                         value: "text-sm leading-tight text-center",
-                                        popoverContent: "w-64"
+                                        popoverContent: "w-64 max-w-[300px]"
                                     }}
                                     style={{
                                         fontFamily: `var(--fontFamily, "Inter")`,
@@ -1968,14 +1952,7 @@ const DailyWorksTable = ({
                                                 showBorder
                                             />
                                             <span 
-                                                className="text-xs font-medium leading-tight break-words"
-                                                style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 1,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    wordBreak: 'break-word'
-                                                }}
+                                                className="text-xs font-medium truncate max-w-[120px]"
                                                 title={assignedUser.name}
                                             >
                                                 {assignedUser.name}
@@ -2010,14 +1987,7 @@ const DailyWorksTable = ({
                                         size="sm"
                                         name={
                                             <span 
-                                                style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 1,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    wordBreak: 'break-word',
-                                                    lineHeight: '1.3'
-                                                }}
+                                                className="truncate max-w-[100px]"
                                                 title={assignedUser.name}
                                             >
                                                 {assignedUser.name}
@@ -2034,7 +2004,7 @@ const DailyWorksTable = ({
                                             }),
                                         }}
                                         classNames={{
-                                            name: "text-xs font-medium leading-tight",
+                                            name: "text-xs font-medium",
                                             description: "text-xs text-default-400"
                                         }}
                                     />
@@ -2117,6 +2087,23 @@ const DailyWorksTable = ({
                 return (
                     <TableCell>
                         <div className="flex items-center justify-center gap-1">
+                            <Tooltip content={work.rfi_files_count > 0 ? `Files (${work.rfi_files_count})` : "Manage Files"}>
+                                <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="ghost"
+                                    color={work.rfi_files_count > 0 ? "success" : "default"}
+                                    radius={getThemeRadius()}
+                                    onPress={() => openRfiFilesModal(work)}
+                                    className="min-w-8 h-8"
+                                >
+                                    {work.rfi_files_count > 0 ? (
+                                        <DocumentCheckIcon className="w-4 h-4" />
+                                    ) : (
+                                        <FolderOpenIcon className="w-4 h-4" />
+                                    )}
+                                </Button>
+                            </Tooltip>
                             <Tooltip content="Edit Work">
                                 <Button
                                     isIconOnly
@@ -2160,38 +2147,203 @@ const DailyWorksTable = ({
         }
     }, [userIsAdmin, userIsSE, updatingWorkId, setCurrentRow, openModal, handleClickOpen, handleChange]);
 
+    // Columns ordered to match mobile card layout:
+    // Section 1: Info fields (read-only) - Date, Description, Location, Side, Qty/Layer, Planned Time, Resubmissions
+    // Section 2: Input fields - In-charge, Assigned, Status, Inspection Details, Completion Time, RFI Date, Actions
     const columns = [
+        // Info fields first
         { name: "Date", uid: "date", icon: CalendarDaysIcon, sortable: true, width: "w-24" },
         { name: "RFI Number", uid: "number", icon: DocumentIcon, sortable: true, width: "w-32" },
-        { name: "Status", uid: "status", icon: ClockIconOutline, sortable: true, width: "w-56" },
         { name: "Work Type", uid: "type", icon: DocumentTextIcon, sortable: true, width: "w-28" },
         { name: "Description", uid: "description", icon: DocumentTextIcon, sortable: false, width: "w-60" },
         { name: "Location", uid: "location", icon: MapPinIcon, sortable: true, width: "w-48" },
         { name: "Road Side", uid: "side", sortable: true, width: "w-20" },
         { name: "Layer Quantity", uid: "qty_layer", sortable: true, width: "w-24" },
-        ...(userIsAdmin ? [{ name: "In-Charge", uid: "incharge", icon: UserIcon, sortable: true, width: "w-64" }] : []),
-        ...(shouldShowAssignedColumn ? [{ name: "Assigned To", uid: "assigned", icon: UserIcon, sortable: true, width: "w-64" }] : []),
         { name: "Planned Time", uid: "planned_time", icon: ClockIcon, sortable: true, width: "w-28" },
-        { name: "Completion Time", uid: "completion_time", icon: CheckCircleIcon, sortable: true, width: "w-56" },
         { name: "Resubmissions", uid: "resubmission_count", icon: ArrowPathIcon, sortable: true, width: "w-28" },
-        ...(userIsAdmin ? [{ name: "RFI Submission Date", uid: "rfi_submission_date", icon: CalendarDaysIcon, sortable: true, width: "w-36" }] : []),
-        ...(userIsAdmin ? [{ name: "Actions", uid: "actions", sortable: false, width: "w-20" }] : [])
+        // Input fields last (matching mobile card order)
+        ...(shouldShowInchargeColumn ? [{ name: "In-Charge", uid: "incharge", icon: UserIcon, sortable: true, width: "w-64" }] : []),
+        ...(shouldShowAssignedColumn ? [{ name: "Assigned To", uid: "assigned", icon: UserIcon, sortable: true, width: "w-64" }] : []),
+        { name: "Status", uid: "status", icon: ClockIconOutline, sortable: true, width: "w-56" },
+        { name: "Inspection Details", uid: "inspection_details", icon: DocumentTextIcon, sortable: false, width: "w-48" },
+        { name: "Completion Time", uid: "completion_time", icon: CheckCircleIcon, sortable: true, width: "w-56" },
+        ...(shouldShowRfiColumn ? [{ name: "RFI Submission Date", uid: "rfi_submission_date", icon: CalendarDaysIcon, sortable: true, width: "w-36" }] : []),
+        ...(shouldShowActions ? [{ name: "Actions", uid: "actions", sortable: false, width: "w-28" }] : [])
     ];
+
+    // Mobile Loading Skeleton - Only card rows, tabs are kept visible
+    const MobileLoadingSkeleton = () => (
+        <div className="w-full">
+            {/* Tab Headers - Always visible */}
+            <div className="flex overflow-x-auto border-b border-divider scrollbar-hide -mx-1 px-1">
+                {workTypes.map((type) => (
+                    <button
+                        key={type.key}
+                        onClick={() => setSelectedTab(type.key)}
+                        className={`flex items-center gap-1 px-2 py-1.5 min-w-fit whitespace-nowrap border-b-2 transition-all duration-150 ${
+                            selectedTab === type.key
+                                ? 'border-primary text-primary font-semibold'
+                                : 'border-transparent text-default-500'
+                        }`}
+                    >
+                        <span className="text-[10px]">{type.icon}</span>
+                        <span className="text-[10px]">{type.label}</span>
+                        <span className={`min-w-[16px] h-3.5 px-1 rounded-full text-[9px] font-medium flex items-center justify-center ${
+                            selectedTab === type.key 
+                                ? 'bg-primary text-white' 
+                                : 'bg-default-100 text-default-600'
+                        }`}>
+                            -
+                        </span>
+                    </button>
+                ))}
+            </div>
+            {/* Skeleton rows in tab content */}
+            <div className="py-2 space-y-1.5">
+                {Array.from({ length: 5 }).map((_, index) => (
+                    <Card key={index} className="w-full border border-divider/50 shadow-none">
+                        <CardHeader className="p-2 gap-1.5">
+                            <div className="flex items-center gap-1.5 w-full">
+                                <Skeleton className="flex-1 h-3 rounded" />
+                                <Skeleton className="w-12 h-4 rounded-full shrink-0" />
+                                <Skeleton className="w-4 h-4 rounded-full shrink-0" />
+                            </div>
+                        </CardHeader>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    );
+
+    // Desktop Table Row Loading Skeleton - Only rows, not header/pagination
+    const DesktopRowSkeleton = () => (
+        <div className="divide-y divide-divider">
+            {Array.from({ length: 8 }).map((_, rowIndex) => (
+                <div key={rowIndex} className="flex bg-content1 hover:bg-content2/50">
+                    {columns.map((column, colIndex) => (
+                        <div key={colIndex} className="flex-1 p-3 flex items-center justify-center">
+                            {column.uid === 'status' ? (
+                                <Skeleton className="w-28 h-7 rounded" />
+                            ) : column.uid === 'description' ? (
+                                <div className="w-full space-y-1">
+                                    <Skeleton className="w-full h-3 rounded" />
+                                    <Skeleton className="w-3/4 h-3 rounded" />
+                                </div>
+                            ) : column.uid === 'incharge' || column.uid === 'assigned' ? (
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="w-7 h-7 rounded-full" />
+                                    <Skeleton className="w-16 h-3 rounded" />
+                                </div>
+                            ) : column.uid === 'completion_time' || column.uid === 'rfi_submission_date' ? (
+                                <Skeleton className="w-28 h-7 rounded" />
+                            ) : column.uid === 'actions' ? (
+                                <div className="flex gap-1">
+                                    <Skeleton className="w-7 h-7 rounded" />
+                                    <Skeleton className="w-7 h-7 rounded" />
+                                </div>
+                            ) : column.uid === 'side' || column.uid === 'resubmission_count' ? (
+                                <Skeleton className="w-14 h-5 rounded-full" />
+                            ) : (
+                                <Skeleton className="w-16 h-3 rounded" />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+
+    // Desktop Loading State
+    const DesktopLoadingSkeleton = () => (
+        <div className="max-h-[84vh] overflow-y-auto">
+            {/* Table Header with Refresh Button - Always visible */}
+            <div className="flex items-center justify-between mb-4 px-2">
+                <h3 className="text-lg font-semibold text-default-700">Daily Works</h3>
+                <Button
+                    variant="flat"
+                    color="primary"
+                    size="sm"
+                    radius={getThemeRadius()}
+                    isDisabled
+                    startContent={<Spinner size="sm" />}
+                >
+                    Loading...
+                </Button>
+            </div>
+            
+            <ScrollShadow className="max-h-[70vh]">
+                <div className="border border-divider rounded-lg overflow-hidden">
+                    {/* Table header - real header */}
+                    <div className="bg-default-100/80 backdrop-blur-md border-b border-divider">
+                        <div className="flex">
+                            {columns.map((column) => {
+                                const IconComponent = column.icon;
+                                return (
+                                    <div key={column.uid} className="flex-1 p-3 flex items-center justify-center gap-1 text-xs font-medium text-default-600">
+                                        {IconComponent && <IconComponent className="w-3 h-3" />}
+                                        <span>{column.name}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    {/* Skeleton rows */}
+                    <DesktopRowSkeleton />
+                </div>
+            </ScrollShadow>
+            
+            {/* Pagination - Always visible */}
+            <div className="py-4 flex justify-center">
+                <Pagination
+                    isDisabled
+                    total={lastPage || 1}
+                    page={currentPage}
+                    showControls
+                    size="sm"
+                    radius={getThemeRadius()}
+                />
+            </div>
+        </div>
+    );
+
+    // Show loading skeleton BEFORE checking isMobile
+    if (loading) {
+        if (isMobile) {
+            return (
+                <div className="space-y-3">
+                    <ScrollShadow 
+                        className="max-h-[calc(100vh-280px)] min-h-[300px]"
+                        hideScrollBar
+                    >
+                        <MobileLoadingSkeleton />
+                    </ScrollShadow>
+                </div>
+            );
+        }
+        return <DesktopLoadingSkeleton />;
+    }
 
     if (isMobile) {
         return (
-            <div className="space-y-4">
-                <ScrollShadow className="max-h-[70vh]">
+            <div className="space-y-3">
+                <ScrollShadow 
+                    className="max-h-[calc(100vh-280px)] min-h-[300px]"
+                    hideScrollBar
+                >
                     <MobileDailyWorkCard 
                         works={allData || []} 
                         selectedTab={selectedTab}
                         setSelectedTab={setSelectedTab}
                         expandedItems={expandedItems}
                         toggleExpanded={toggleExpanded}
+                        openStatusModal={openStatusModal}
+                        openRfiFilesModal={openRfiFilesModal}
                     />
                 </ScrollShadow>
-                {!isMobile && totalRows > 30 && (
-                    <div className="flex justify-center pt-4">
+                {/* Mobile pagination - show when there are multiple pages */}
+                {lastPage > 1 && (
+                    <div className="flex justify-center pt-2 pb-safe">
                         <Pagination
                             showControls
                             showShadow
@@ -2201,10 +2353,12 @@ const DailyWorksTable = ({
                             total={lastPage}
                             onChange={handlePageChange}
                             size="sm"
+                            siblings={0}
+                            boundaries={1}
                             radius={getThemeRadius()}
                             classNames={{
-                                wrapper: "bg-content1/80 backdrop-blur-md border-divider/50",
-                                item: "bg-content1/50 border-divider/30",
+                                wrapper: "bg-content1/80 backdrop-blur-md border-divider/50 gap-1",
+                                item: "bg-content1/50 border-divider/30 min-w-8 h-8",
                                 cursor: "bg-primary/20 backdrop-blur-md"
                             }}
                             style={{
@@ -2215,87 +2369,6 @@ const DailyWorksTable = ({
                 )}
             </div>
         );
-    }
-
-    // Desktop Table Loading Skeleton
-    const DesktopLoadingSkeleton = () => {
-        return (
-            <div className="max-h-[84vh] overflow-y-auto">
-                {/* Header skeleton */}
-                <div className="flex items-center justify-between mb-4 px-2">
-                    <Skeleton className="w-32 h-6 rounded" />
-                    <Skeleton className="w-20 h-8 rounded" />
-                </div>
-                
-                <ScrollShadow className="max-h-[70vh]">
-                    <div className="border border-divider rounded-lg overflow-hidden">
-                        {/* Table header skeleton */}
-                        <div className="bg-default-100/80 backdrop-blur-md border-b border-divider">
-                            <div className="flex">
-                                {columns.map((column, index) => (
-                                    <div key={index} className="flex-1 p-3 flex items-center justify-center gap-1">
-                                        <Skeleton className="w-3 h-3 rounded" />
-                                        <Skeleton className="w-16 h-4 rounded" />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        {/* Table body skeleton */}
-                        <div className="divide-y divide-divider">
-                            {Array.from({ length: 8 }).map((_, rowIndex) => (
-                                <div key={rowIndex} className="flex bg-content1 hover:bg-content2/50">
-                                    {columns.map((column, colIndex) => (
-                                        <div key={colIndex} className="flex-1 p-3 flex items-center justify-center">
-                                            {column.uid === 'status' ? (
-                                                <Skeleton className="w-32 h-8 rounded" />
-                                            ) : column.uid === 'description' ? (
-                                                <div className="w-full space-y-1">
-                                                    <Skeleton className="w-full h-3 rounded" />
-                                                    <Skeleton className="w-3/4 h-3 rounded" />
-                                                </div>
-                                            ) : column.uid === 'incharge' || column.uid === 'assigned' ? (
-                                                <div className="flex items-center gap-2">
-                                                    <Skeleton className="w-8 h-8 rounded-full" />
-                                                    <Skeleton className="w-20 h-4 rounded" />
-                                                </div>
-                                            ) : column.uid === 'completion_time' || column.uid === 'rfi_submission_date' ? (
-                                                <Skeleton className="w-32 h-8 rounded" />
-                                            ) : column.uid === 'actions' ? (
-                                                <div className="flex gap-1">
-                                                    <Skeleton className="w-8 h-8 rounded" />
-                                                    <Skeleton className="w-8 h-8 rounded" />
-                                                </div>
-                                            ) : column.uid === 'side' || column.uid === 'resubmission_count' ? (
-                                                <Skeleton className="w-16 h-6 rounded-full" />
-                                            ) : (
-                                                <Skeleton className="w-20 h-4 rounded" />
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </ScrollShadow>
-                
-                {/* Pagination skeleton */}
-                <div className="py-4 flex justify-center">
-                    <div className="flex items-center gap-2">
-                        <Skeleton className="w-8 h-8 rounded" />
-                        <Skeleton className="w-8 h-8 rounded" />
-                        <Skeleton className="w-8 h-8 rounded" />
-                        <Skeleton className="w-8 h-8 rounded" />
-                        <Skeleton className="w-8 h-8 rounded" />
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    // Show loading skeleton when loading
-    if (loading) {
-        return <DesktopLoadingSkeleton />;
     }
 
     return (
@@ -2410,6 +2483,30 @@ const DailyWorksTable = ({
                     />
                 </div>
             )}
+            
+            {/* RFI Files Modal */}
+            {console.log('Rendering RfiFilesModal - isOpen:', rfiModalOpen, 'work:', rfiModalWork?.id)}
+            <RfiFilesModal
+                isOpen={rfiModalOpen}
+                onClose={() => {
+                    setRfiModalOpen(false);
+                    setRfiModalWork(null);
+                }}
+                dailyWork={rfiModalWork}
+                onFilesUpdated={handleRfiFilesUpdated}
+            />
+            
+            {/* Status Update Modal */}
+            {console.log('Rendering StatusUpdateModal - open:', statusModalOpen, 'work:', statusModalWork?.id)}
+            <StatusUpdateModal
+                open={statusModalOpen}
+                closeModal={() => {
+                    setStatusModalOpen(false);
+                    setStatusModalWork(null);
+                }}
+                dailyWork={statusModalWork}
+                onStatusUpdated={handleStatusUpdated}
+            />
         </div>
     );
 };

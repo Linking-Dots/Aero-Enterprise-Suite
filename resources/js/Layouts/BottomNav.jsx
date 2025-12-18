@@ -217,7 +217,6 @@ const BottomNav = ({ auth, contentRef, toggleSideBar, sideBarOpen, toggleThemeDr
         );
 
         const buttonProps = {
-            key: item.id,
             variant: isActive ? "flat" : "light",
             size: "sm",
             className: `

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Benefit;
 use App\Models\Competency;
+use App\Models\DailyWork;
 use App\Models\DocumentCategory;
 use App\Models\HRM\HrDocument;
 use App\Models\HRM\Offboarding;
@@ -15,6 +16,7 @@ use App\Models\Skill;
 use App\Models\User;
 use App\Policies\BenefitPolicy;
 use App\Policies\CompetencyPolicy;
+use App\Policies\DailyWorkPolicy;
 use App\Policies\DocumentCategoryPolicy;
 use App\Policies\HrDocumentPolicy;
 use App\Policies\OffboardingPolicy;
@@ -36,6 +38,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         User::class => UserPolicy::class,
+        DailyWork::class => DailyWorkPolicy::class,
         Onboarding::class => OnboardingPolicy::class,
         Offboarding::class => OffboardingPolicy::class,
         HrDocument::class => HrDocumentPolicy::class,

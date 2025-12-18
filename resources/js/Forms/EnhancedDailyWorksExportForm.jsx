@@ -133,46 +133,51 @@ const EnhancedDailyWorksExportForm = ({
     const handleExport = async () => {
         setIsLoading(true);
         
-        try {
-            const exportParams = {
-                columns: exportSettings.columns,
-                ...exportSettings.filters,
-                ...(exportSettings.dateRange.start && { 
-                    startDate: exportSettings.dateRange.start.toString() 
-                }),
-                ...(exportSettings.dateRange.end && { 
-                    endDate: exportSettings.dateRange.end.toString() 
-                })
-            };
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const exportParams = {
+                    columns: exportSettings.columns,
+                    ...exportSettings.filters,
+                    ...(exportSettings.dateRange.start && { 
+                        startDate: exportSettings.dateRange.start.toString() 
+                    }),
+                    ...(exportSettings.dateRange.end && { 
+                        endDate: exportSettings.dateRange.end.toString() 
+                    })
+                };
 
-            const response = await axios.post(route('dailyWorks.export'), exportParams);
-            
-            if (response.data.data) {
-                const { data: exportData, filename } = response.data;
+                const response = await axios.post(route('dailyWorks.export'), exportParams);
                 
-                switch (exportSettings.format) {
-                    case 'excel':
-                        exportToExcel(exportData, filename);
-                        break;
-                    case 'csv':
-                        exportToCSV(exportData, filename);
-                        break;
-                    case 'json':
-                        exportToJSON(exportData, filename);
-                        break;
+                if (response.data.data) {
+                    const { data: exportData, filename } = response.data;
+                    
+                    switch (exportSettings.format) {
+                        case 'excel':
+                            exportToExcel(exportData, filename);
+                            break;
+                        case 'csv':
+                            exportToCSV(exportData, filename);
+                            break;
+                        case 'json':
+                            exportToJSON(exportData, filename);
+                            break;
+                    }
+
+                    closeModal();
+                    resolve(`Successfully exported ${exportData.length} records`);
                 }
-
-                showToast.success(`Successfully exported ${exportData.length} records`, {
-                    icon: <CheckCircleIcon className="w-5 h-5" />,
-                });
-                
-                closeModal();
+            } catch (error) {
+                reject('Export failed: ' + (error.response?.data?.error || error.message));
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            showToast.error('Export failed: ' + (error.response?.data?.error || error.message));
-        } finally {
-            setIsLoading(false);
-        }
+        });
+
+        showToast.promise(promise, {
+            loading: 'Exporting daily works...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     };
 
     const exportToExcel = (data, filename) => {

@@ -1,1 +1,0 @@
-import{j as s}from"./vendor-heroui-BNTwcCTa.js";import{r,x as t}from"./vendor-inertia-sUfCHI_5.js";import"./vendor-framer-Bf5AFsoJ.js";import"./vendor-react-FouZbkAE.js";import"./vendor-utils-CrJAVL9K.js";const w=()=>{const[a,e]=r.useState(!1);return t({email:"",password:"",remember:!1}),s.jsx("div",{className:"auth-page-wrapper pt-5"})};export{w as default};

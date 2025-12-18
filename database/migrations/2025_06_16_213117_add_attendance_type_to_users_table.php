@@ -16,6 +16,10 @@ return new class extends Migration
                 $table->unsignedBigInteger('attendance_type_id')->nullable()->after('email_verified_at');
                 $table->foreign('attendance_type_id')->references('id')->on('attendance_types')->nullOnDelete();
             }
+
+            if (! Schema::hasColumn('users', 'attendance_config')) {
+                $table->json('attendance_config')->nullable()->after('attendance_type_id');
+            }
         });
     }
 

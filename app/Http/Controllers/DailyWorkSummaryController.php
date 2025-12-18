@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\DailyWork;
 use App\Models\Jurisdiction;
 use App\Models\User;
+use App\Traits\DailyWorkFilterable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DailyWorkSummaryController extends Controller
 {
+    use DailyWorkFilterable;
+
     public function index()
     {
         $user = User::with('designation')->find(Auth::id());
@@ -197,54 +200,108 @@ class DailyWorkSummaryController extends Controller
         $dailyWorks = $query->get();
 
         // Calculate comprehensive statistics
+        $totalWorks = $dailyWorks->count();
+
+        // Status counts - handle both formats (e.g., 'completed' or 'completed:pass')
+        $completedWorks = $dailyWorks->filter(function ($work) {
+            return $work->status === 'completed' || str_starts_with($work->status ?? '', 'completed:');
+        })->count();
+
+        $pendingWorks = $dailyWorks->whereIn('status', ['new', 'pending', 'resubmission', 'in-progress'])->count();
+        $inProgressWorks = $dailyWorks->where('status', 'in-progress')->count();
+        $newWorks = $dailyWorks->where('status', 'new')->count();
+        $emergencyWorks = $dailyWorks->where('status', 'emergency')->count();
+        $resubmissionWorks = $dailyWorks->where('status', 'resubmission')->count();
+
+        // Inspection results - match the actual values used in the model
+        $passedInspections = $dailyWorks->filter(function ($work) {
+            return in_array($work->inspection_result, ['pass', 'approved']);
+        })->count();
+
+        $failedInspections = $dailyWorks->filter(function ($work) {
+            return in_array($work->inspection_result, ['fail', 'rejected']);
+        })->count();
+
+        $conditionalInspections = $dailyWorks->where('inspection_result', 'conditional')->count();
+        $pendingInspections = $dailyWorks->where('inspection_result', 'pending')->count();
+
+        // RFI and resubmission metrics
+        $rfiSubmissions = $dailyWorks->whereNotNull('rfi_submission_date')->count();
+        $worksWithResubmissions = $dailyWorks->where('resubmission_count', '>', 0)->count();
+        $totalResubmissions = (int) $dailyWorks->sum('resubmission_count');
+
+        // Time metrics
+        $worksWithCompletionTime = $dailyWorks->whereNotNull('completion_time')->count();
+
+        // Type breakdown
+        $embankmentCount = $dailyWorks->filter(fn ($w) => stripos($w->type ?? '', 'embankment') !== false)->count();
+        $structureCount = $dailyWorks->filter(fn ($w) => stripos($w->type ?? '', 'structure') !== false)->count();
+        $pavementCount = $dailyWorks->filter(fn ($w) => stripos($w->type ?? '', 'pavement') !== false)->count();
+
+        // Recent activity
+        $todayWorks = $dailyWorks->filter(fn ($w) => $w->date?->isToday())->count();
+        $thisWeekWorks = $dailyWorks->filter(fn ($w) => $w->date?->isCurrentWeek())->count();
+        $thisMonthWorks = $dailyWorks->filter(fn ($w) => $w->date?->isCurrentMonth())->count();
+
+        // Performance indicators
+        $completionRate = $totalWorks > 0 ? round(($completedWorks / $totalWorks) * 100, 1) : 0;
+
+        $totalInspected = $passedInspections + $failedInspections + $conditionalInspections;
+        $inspectionPassRate = $totalInspected > 0
+            ? round(($passedInspections / $totalInspected) * 100, 1)
+            : 0;
+
+        $rfiRate = $totalWorks > 0 ? round(($rfiSubmissions / $totalWorks) * 100, 1) : 0;
+
+        // First-time pass rate (works that passed without resubmissions)
+        $firstTimePassCount = $dailyWorks->filter(function ($work) {
+            return in_array($work->inspection_result, ['pass', 'approved'])
+                && ($work->resubmission_count ?? 0) === 0;
+        })->count();
+        $firstTimePassRate = $completedWorks > 0
+            ? round(($firstTimePassCount / $completedWorks) * 100, 1)
+            : 0;
+
         $stats = [
             'overview' => [
-                'totalWorks' => $dailyWorks->count(),
-                'completedWorks' => $dailyWorks->where('status', 'completed')->count(),
-                'pendingWorks' => $dailyWorks->whereNotIn('status', ['completed'])->count(),
-                'inProgressWorks' => $dailyWorks->where('status', 'in_progress')->count(),
-                'newWorks' => $dailyWorks->where('status', 'new')->count(),
+                'totalWorks' => $totalWorks,
+                'completedWorks' => $completedWorks,
+                'pendingWorks' => $pendingWorks,
+                'inProgressWorks' => $inProgressWorks,
+                'newWorks' => $newWorks,
+                'emergencyWorks' => $emergencyWorks,
             ],
             'statusBreakdown' => [
-                'new' => $dailyWorks->where('status', 'new')->count(),
-                'in_progress' => $dailyWorks->where('status', 'in_progress')->count(),
-                'completed' => $dailyWorks->where('status', 'completed')->count(),
-                'under_review' => $dailyWorks->where('status', 'under_review')->count(),
-                'approved' => $dailyWorks->where('status', 'approved')->count(),
+                'new' => $newWorks,
+                'in_progress' => $inProgressWorks,
+                'completed' => $completedWorks,
+                'resubmission' => $resubmissionWorks,
+                'emergency' => $emergencyWorks,
             ],
             'typeBreakdown' => [
-                'embankment' => $dailyWorks->filter(function ($work) {
-                    return stripos($work->type, 'embankment') !== false;
-                })->count(),
-                'structure' => $dailyWorks->filter(function ($work) {
-                    return stripos($work->type, 'structure') !== false;
-                })->count(),
-                'pavement' => $dailyWorks->filter(function ($work) {
-                    return stripos($work->type, 'pavement') !== false;
-                })->count(),
+                'embankment' => $embankmentCount,
+                'structure' => $structureCount,
+                'pavement' => $pavementCount,
             ],
             'qualityMetrics' => [
-                'rfiSubmissions' => $dailyWorks->whereNotNull('rfi_submission_date')->count(),
-                'resubmissions' => $dailyWorks->where('resubmission_count', '>', 0)->count(),
-                'totalResubmissions' => $dailyWorks->sum('resubmission_count'),
-                'passedInspections' => $dailyWorks->where('inspection_result', 'passed')->count(),
-                'failedInspections' => $dailyWorks->where('inspection_result', 'failed')->count(),
+                'rfiSubmissions' => $rfiSubmissions,
+                'worksWithResubmissions' => $worksWithResubmissions,
+                'totalResubmissions' => $totalResubmissions,
+                'passedInspections' => $passedInspections,
+                'failedInspections' => $failedInspections,
+                'conditionalInspections' => $conditionalInspections,
+                'pendingInspections' => $pendingInspections,
             ],
             'timeMetrics' => [
-                'worksWithCompletionTime' => $dailyWorks->whereNotNull('completion_time')->count(),
-                'worksWithSubmissionTime' => $dailyWorks->whereNotNull('submission_time')->count(),
-                'averageResubmissions' => $dailyWorks->where('resubmission_count', '>', 0)->avg('resubmission_count') ?? 0,
+                'worksWithCompletionTime' => $worksWithCompletionTime,
+                'averageResubmissions' => $worksWithResubmissions > 0
+                    ? round($totalResubmissions / $worksWithResubmissions, 1)
+                    : 0,
             ],
             'recentActivity' => [
-                'todayWorks' => $dailyWorks->where('date', now()->toDateString())->count(),
-                'thisWeekWorks' => $dailyWorks->whereBetween('date', [
-                    now()->startOfWeek()->toDateString(),
-                    now()->endOfWeek()->toDateString(),
-                ])->count(),
-                'thisMonthWorks' => $dailyWorks->whereBetween('date', [
-                    now()->startOfMonth()->toDateString(),
-                    now()->endOfMonth()->toDateString(),
-                ])->count(),
+                'todayWorks' => $todayWorks,
+                'thisWeekWorks' => $thisWeekWorks,
+                'thisMonthWorks' => $thisMonthWorks,
             ],
             'userRole' => [
                 'designation' => $userDesignationTitle,
@@ -253,10 +310,11 @@ class DailyWorkSummaryController extends Controller
                 'totalAsAssigned' => $dailyWorks->where('assigned', $user->id)->count(),
             ],
             'performanceIndicators' => [
-                'completionRate' => $dailyWorks->count() > 0 ? round(($dailyWorks->where('status', 'completed')->count() / $dailyWorks->count()) * 100, 2) : 0,
-                'qualityRate' => $dailyWorks->whereNotNull('inspection_result')->count() > 0 ?
-                    round(($dailyWorks->where('inspection_result', 'passed')->count() / $dailyWorks->whereNotNull('inspection_result')->count()) * 100, 2) : 0,
-                'rfiRate' => $dailyWorks->count() > 0 ? round(($dailyWorks->whereNotNull('rfi_submission_date')->count() / $dailyWorks->count()) * 100, 2) : 0,
+                'completionRate' => $completionRate,
+                'inspectionPassRate' => $inspectionPassRate,
+                'firstTimePassRate' => $firstTimePassRate,
+                'rfiRate' => $rfiRate,
+                'qualityRate' => $inspectionPassRate, // Alias for backward compatibility
             ],
         ];
 
@@ -277,50 +335,5 @@ class DailyWorkSummaryController extends Controller
     {
         // Legacy method - can be removed or updated
         return $this->index();
-    }
-
-    private function normalizeIdFilter($value): array
-    {
-        if ($value === null || $value === 'all' || $value === '') {
-            return [];
-        }
-
-        $ids = is_array($value) ? $value : [$value];
-
-        return collect($ids)
-            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->toArray();
-    }
-
-    private function applyInchargeJurisdictionFilters($query, array $inchargeFilter, array $jurisdictionFilter): void
-    {
-        if (! empty($inchargeFilter)) {
-            $query->whereIn('incharge', $inchargeFilter);
-
-            return;
-        }
-
-        if (empty($jurisdictionFilter)) {
-            return;
-        }
-
-        $jurisdictionIncharges = Jurisdiction::whereIn('id', $jurisdictionFilter)
-            ->pluck('incharge')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-
-        if (! empty($jurisdictionIncharges)) {
-            $query->whereIn('incharge', $jurisdictionIncharges);
-
-            return;
-        }
-
-        // If jurisdictions exist without associated incharge users, force empty result
-        $query->whereRaw('1 = 0');
     }
 }

@@ -3,11 +3,6 @@ import laravel from 'laravel-vite-plugin';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
-import fs from 'fs';
-
-const host = 'aero-enterprise-suite.com'; 
-const certPath = 'D:/laragon/etc/ssl/laragon.crt'; 
-const keyPath = 'D:/laragon/etc/ssl/laragon.key';
 
 export default defineConfig({
     plugins: [
@@ -49,15 +44,7 @@ export default defineConfig({
         chunkSizeWarningLimit: 600,
     },
     server: { 
-        host, 
-        hmr: { host },
-        https: {
-            key: fs.readFileSync(keyPath),
-            cert: fs.readFileSync(certPath),
-        },
-        cors: {
-            origin: 'https://aero-enterprise-suite.com',
-            credentials: true,
-        },
+        host: 'localhost',
+        hmr: { host: 'localhost' },
     },
 });

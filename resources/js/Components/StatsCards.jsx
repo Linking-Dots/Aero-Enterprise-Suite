@@ -1,22 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardBody, Skeleton } from "@heroui/react";
-
-// Custom hook to replicate MUI's useMediaQuery functionality
-const useMediaQuery = (query) => {
-    const [matches, setMatches] = React.useState(false);
-    
-    React.useEffect(() => {
-        const mediaQuery = window.matchMedia(query);
-        setMatches(mediaQuery.matches);
-        
-        const handler = (event) => setMatches(event.matches);
-        mediaQuery.addEventListener('change', handler);
-        
-        return () => mediaQuery.removeEventListener('change', handler);
-    }, [query]);
-    
-    return matches;
-};
+import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
 
 /**
  * Shared statistics cards component with enhanced responsive design for any number of cards

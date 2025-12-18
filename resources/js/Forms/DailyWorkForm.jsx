@@ -30,25 +30,11 @@ import {
 } from 'lucide-react';
 import { BuildingOfficeIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { showToast } from '@/utils/toastUtils';
+import { getThemeRadius } from '@/Hooks/useThemeRadius.js';
 import axios from 'axios';
 
 
 const DailyWorkForm = ({ open, closeModal, currentRow, setData, modalType}) => {
-
-    // Helper function to convert theme borderRadius to HeroUI radius values
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
-        const radiusValue = parseInt(borderRadius);
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
 
     // Auto-generate RFI number
     const generateRFINumber = () => {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DailyWork\UpdateDailyWorkStatusRequest;
+use App\Http\Requests\DailyWork\UpdateInspectionDetailsRequest;
 use App\Models\DailyWork;
 use App\Models\Jurisdiction;
 use App\Models\Report;
@@ -10,6 +12,7 @@ use App\Services\DailyWork\DailyWorkCrudService;
 use App\Services\DailyWork\DailyWorkFileService;
 use App\Services\DailyWork\DailyWorkImportService;
 use App\Services\DailyWork\DailyWorkPaginationService;
+use App\Traits\DailyWorkFilterable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +20,8 @@ use Inertia\Inertia;
 
 class DailyWorkController extends Controller
 {
+    use DailyWorkFilterable;
+
     private DailyWorkPaginationService $paginationService;
 
     private DailyWorkImportService $importService;
@@ -261,26 +266,10 @@ class DailyWorkController extends Controller
         }
     }
 
-    public function updateStatus(Request $request): \Illuminate\Http\JsonResponse
+    public function updateStatus(UpdateDailyWorkStatusRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $request->validate([
-                'id' => 'required|exists:daily_works,id',
-                'status' => 'required|in:new,completed,resubmission,emergency',
-                'inspection_result' => 'nullable|in:pass,fail',
-            ]);
-
             $dailyWork = DailyWork::findOrFail($request->id);
-
-            // Check authorization: admin, incharge, or assigned user can update status
-            $user = User::with('roles')->find(Auth::id());
-            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
-            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
-            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
-
-            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
-                return response()->json(['error' => 'Unauthorized to update status for this work'], 403);
-            }
 
             $updateData = [
                 'status' => $request->status,
@@ -292,13 +281,13 @@ class DailyWorkController extends Controller
             }
 
             // Auto-set completion and submission times for completed status
-            if ($request->status === 'completed') {
+            if ($request->status === DailyWork::STATUS_COMPLETED) {
                 $updateData['completion_time'] = $dailyWork->completion_time ?? now();
                 $updateData['submission_time'] = $dailyWork->submission_time ?? now();
             }
 
             // Reset times for new status
-            if ($request->status === 'new') {
+            if ($request->status === DailyWork::STATUS_NEW) {
                 $updateData['completion_time'] = null;
                 $updateData['submission_time'] = null;
                 $updateData['inspection_result'] = null;
@@ -325,15 +314,7 @@ class DailyWorkController extends Controller
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
-            // Check authorization: admin, incharge, or assigned user can update completion time
-            $user = User::with('roles')->find(Auth::id());
-            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
-            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
-            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
-
-            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
-                return response()->json(['error' => 'Unauthorized to update completion time for this work'], 403);
-            }
+            $this->authorize('updateCompletionTime', $dailyWork);
 
             $dailyWork->update(['completion_time' => $request->completion_time]);
 
@@ -356,15 +337,7 @@ class DailyWorkController extends Controller
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
-            // Check authorization: admin, incharge, or assigned user can update submission time
-            $user = User::with('roles')->find(Auth::id());
-            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
-            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
-            $isAssigned = (int) $dailyWork->assigned === (int) $user->id;
-
-            if (! $isAdmin && ! $isIncharge && ! $isAssigned) {
-                return response()->json(['error' => 'Unauthorized to update submission date for this work'], 403);
-            }
+            $this->authorize('updateSubmissionTime', $dailyWork);
 
             $dailyWork->update(['rfi_submission_date' => $request->rfi_submission_date]);
 
@@ -377,16 +350,17 @@ class DailyWorkController extends Controller
         }
     }
 
-    public function updateInspectionDetails(Request $request): \Illuminate\Http\JsonResponse
+    public function updateInspectionDetails(UpdateInspectionDetailsRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $request->validate([
-                'id' => 'required|exists:daily_works,id',
-                'inspection_details' => 'nullable|string|max:1000',
-            ]);
-
             $dailyWork = DailyWork::findOrFail($request->id);
-            $dailyWork->update(['inspection_details' => $request->inspection_details]);
+
+            $inspectionDetails = $request->inspection_details;
+            if ($inspectionDetails === '') {
+                $inspectionDetails = null;
+            }
+
+            $dailyWork->update(['inspection_details' => $inspectionDetails]);
 
             return response()->json([
                 'message' => 'Inspection details updated successfully',
@@ -406,6 +380,9 @@ class DailyWorkController extends Controller
             ]);
 
             $dailyWork = DailyWork::findOrFail($request->id);
+
+            $this->authorize('updateIncharge', $dailyWork);
+
             $dailyWork->update(['incharge' => $request->incharge]);
 
             return response()->json([
@@ -427,14 +404,7 @@ class DailyWorkController extends Controller
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
-            // Check authorization: only admin or incharge can update assigned
-            $user = User::with('roles')->find(Auth::id());
-            $isAdmin = $user->roles->contains('name', 'Super Administrator') || $user->roles->contains('name', 'Administrator');
-            $isIncharge = (int) $dailyWork->incharge === (int) $user->id;
-
-            if (! $isAdmin && ! $isIncharge) {
-                return response()->json(['error' => 'Unauthorized to update assigned user for this work'], 403);
-            }
+            $this->authorize('updateAssigned', $dailyWork);
 
             $dailyWork->update(['assigned' => $request->assigned]);
 
@@ -457,13 +427,7 @@ class DailyWorkController extends Controller
 
             $dailyWork = DailyWork::findOrFail($request->id);
 
-            // Only incharge can assign work
-            $user = Auth::user();
-            $isAdmin = $user->roles->contains('name', 'Administrator');
-
-            if ($dailyWork->incharge !== Auth::id() && ! $isAdmin) {
-                return response()->json(['error' => 'Unauthorized to assign this work'], 403);
-            }
+            $this->authorize('updateAssigned', $dailyWork);
 
             $dailyWork->update(['assigned' => $request->assigned]);
 
@@ -479,6 +443,8 @@ class DailyWorkController extends Controller
     public function add(Request $request)
     {
         try {
+            $this->authorize('create', DailyWork::class);
+
             $result = $this->crudService->create($request);
 
             return response()->json($result);
@@ -499,6 +465,119 @@ class DailyWorkController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred while uploading the RFI file.'], 500);
+        }
+    }
+
+    /**
+     * Upload multiple RFI files for a daily work.
+     */
+    public function uploadRfiFiles(Request $request, DailyWork $dailyWork)
+    {
+        try {
+            // Debug logging - check what's coming in
+            \Log::info('RFI Upload Request', [
+                'daily_work_id' => $dailyWork->id,
+                'has_files' => $request->hasFile('files'),
+                'all_files' => $request->allFiles(),
+                'content_type' => $request->header('Content-Type'),
+            ]);
+
+            $request->validate([
+                'files' => 'required|array|min:1',
+                'files.*' => 'required|file|mimes:jpeg,jpg,png,webp,gif,pdf|max:10240', // 10MB max per file
+            ], [
+                'files.required' => 'Please select at least one file to upload.',
+                'files.*.mimes' => 'Only images (JPEG, PNG, WebP, GIF) and PDF files are allowed.',
+                'files.*.max' => 'Each file must be less than 10MB.',
+            ]);
+
+            $files = $request->file('files');
+
+            \Log::info('Files after validation', [
+                'file_count' => is_array($files) ? count($files) : 0,
+                'files_type' => gettype($files),
+            ]);
+
+            if (empty($files)) {
+                return response()->json(['error' => 'No files received by server.'], 400);
+            }
+
+            $result = $this->fileService->uploadRfiFiles($dailyWork, $files);
+
+            return response()->json([
+                'message' => count($result['uploaded']).' file(s) uploaded successfully.',
+                'files' => $result['uploaded'],
+                'errors' => $result['errors'],
+                'total_files' => $result['total_files'],
+            ]);
+        } catch (ValidationException $e) {
+            \Log::error('RFI Upload Validation Error', ['errors' => $e->errors()]);
+
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            \Log::error('RFI Upload Error', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+            return response()->json(['error' => 'An error occurred while uploading files: '.$e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get all RFI files for a daily work.
+     */
+    public function getRfiFiles(DailyWork $dailyWork)
+    {
+        try {
+            $files = $this->fileService->getRfiFiles($dailyWork);
+
+            return response()->json([
+                'files' => $files,
+                'total' => count($files),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while fetching files.'], 500);
+        }
+    }
+
+    /**
+     * Delete a specific RFI file.
+     */
+    public function deleteRfiFile(DailyWork $dailyWork, int $mediaId)
+    {
+        try {
+            $deleted = $this->fileService->deleteRfiFile($dailyWork, $mediaId);
+
+            if (! $deleted) {
+                return response()->json(['error' => 'File not found.'], 404);
+            }
+
+            return response()->json([
+                'message' => 'File deleted successfully.',
+                'total_files' => $dailyWork->getMedia('rfi_files')->count(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while deleting the file.'], 500);
+        }
+    }
+
+    /**
+     * Download/view a specific RFI file.
+     */
+    public function downloadRfiFile(DailyWork $dailyWork, int $mediaId)
+    {
+        try {
+            $media = $this->fileService->getRfiFile($dailyWork, $mediaId);
+
+            if (! $media) {
+                return response()->json(['error' => 'File not found.'], 404);
+            }
+
+            // For inline viewing (images and PDFs)
+            return response()->file($media->getPath(), [
+                'Content-Type' => $media->mime_type,
+                'Content-Disposition' => 'inline; filename="'.$media->file_name.'"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while downloading the file.'], 500);
         }
     }
 
@@ -536,49 +615,5 @@ class DailyWorkController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }
-
-    private function normalizeIdFilter($value): array
-    {
-        if ($value === null || $value === '' || $value === 'all') {
-            return [];
-        }
-
-        $ids = is_array($value) ? $value : [$value];
-
-        return collect($ids)
-            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->toArray();
-    }
-
-    private function applyInchargeJurisdictionFilters($query, array $inchargeFilter, array $jurisdictionFilter): void
-    {
-        if (! empty($inchargeFilter)) {
-            $query->whereIn('incharge', $inchargeFilter);
-
-            return;
-        }
-
-        if (empty($jurisdictionFilter)) {
-            return;
-        }
-
-        $jurisdictionIncharges = Jurisdiction::whereIn('id', $jurisdictionFilter)
-            ->pluck('incharge')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-
-        if (! empty($jurisdictionIncharges)) {
-            $query->whereIn('incharge', $jurisdictionIncharges);
-
-            return;
-        }
-
-        $query->whereRaw('1 = 0');
     }
 }

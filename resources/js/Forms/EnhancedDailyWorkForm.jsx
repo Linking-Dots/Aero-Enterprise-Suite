@@ -144,47 +144,57 @@ const EnhancedDailyWorkForm = ({ open, closeModal, currentRow, setData, modalTyp
         setProcessing(true);
         setErrors({});
 
-        try {
-            const response = await axios.post(route(`dailyWorks.${modalType}`), {
-                ruleSet: 'details',
-                ...dailyWorkData
-            });
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                const response = await axios.post(route(`dailyWorks.${modalType}`), {
+                    ruleSet: 'details',
+                    ...dailyWorkData
+                });
 
-            if (response.status === 200) {
-                if (modalType === 'update') {
-                    setData(prevWorks => prevWorks.map(work =>
-                        work.id === dailyWorkData.id ? { ...work, ...response.data.dailyWork } : work
-                    ));
-                } else {
-                    setData(prevWorks => [...prevWorks, response.data.dailyWork]);
+                if (response.status === 200) {
+                    if (modalType === 'update') {
+                        setData(prevWorks => prevWorks.map(work =>
+                            work.id === dailyWorkData.id ? { ...work, ...response.data.dailyWork } : work
+                        ));
+                    } else {
+                        setData(prevWorks => [...prevWorks, response.data.dailyWork]);
+                    }
+                    
+                    closeModal();
+                    resolve(response.data.message || `Daily work ${modalType === 'add' ? 'created' : 'updated'} successfully!`);
+                }
+            } catch (error) {
+                console.error('Daily work submission error:', error);
+                
+                let errorMessage = 'An unexpected error occurred. Please try again.';
+                
+                if (error.response?.status === 422) {
+                    // Validation errors from backend
+                    const backendErrors = error.response.data.errors || {};
+                    setErrors(backendErrors);
+                    
+                    // Show specific error messages
+                    const errorMessages = Object.values(backendErrors).flat();
+                    errorMessage = errorMessages.join(', ') || 'Please correct the errors and try again.';
+                } else if (error.response?.status === 403) {
+                    errorMessage = 'You do not have permission to perform this action.';
+                } else if (error.response?.status === 409) {
+                    errorMessage = 'A daily work with this RFI number already exists.';
+                } else if (error.response?.status === 500) {
+                    errorMessage = 'Server error occurred. Please try again later.';
                 }
                 
-                showToast.success(response.data.message || `Daily work ${modalType === 'add' ? 'created' : 'updated'} successfully!`);
-                closeModal();
+                reject(errorMessage);
+            } finally {
+                setProcessing(false);
             }
-        } catch (error) {
-            console.error('Daily work submission error:', error);
-            
-            if (error.response?.status === 422) {
-                // Validation errors from backend
-                const backendErrors = error.response.data.errors || {};
-                setErrors(backendErrors);
-                
-                // Show specific error messages
-                const errorMessages = Object.values(backendErrors).flat();
-                showToast.error(errorMessages.join(', ') || 'Please correct the errors and try again.');
-            } else if (error.response?.status === 403) {
-                showToast.error('You do not have permission to perform this action.');
-            } else if (error.response?.status === 409) {
-                showToast.error('A daily work with this RFI number already exists.');
-            } else if (error.response?.status === 500) {
-                showToast.error('Server error occurred. Please try again later.');
-            } else {
-                showToast.error('An unexpected error occurred. Please try again.');
-            }
-        } finally {
-            setProcessing(false);
-        }
+        });
+
+        showToast.promise(promise, {
+            loading: modalType === 'add' ? 'Creating daily work...' : 'Updating daily work...',
+            success: (msg) => msg,
+            error: (msg) => msg,
+        });
     };
 
     const getFieldError = (fieldName) => {

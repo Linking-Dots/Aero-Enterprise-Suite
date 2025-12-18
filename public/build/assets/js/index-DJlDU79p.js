@@ -1,1 +1,0 @@
-import{d as o}from"./vendor-framer-Bf5AFsoJ.js";import"./vendor-heroui-BNTwcCTa.js";import"./vendor-inertia-sUfCHI_5.js";import"./vendor-react-FouZbkAE.js";import"./vendor-utils-CrJAVL9K.js";var p=o;export{p as default};

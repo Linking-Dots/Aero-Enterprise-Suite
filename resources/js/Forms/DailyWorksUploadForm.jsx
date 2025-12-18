@@ -34,6 +34,7 @@ import {
     ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
 import { showToast } from "@/utils/toastUtils";
+import { getThemeRadius } from '@/Hooks/useThemeRadius.js';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 
@@ -57,21 +58,6 @@ const DailyWorksUploadForm = ({ open, closeModal, setTotalRows, setData, refresh
     const [validationErrors, setValidationErrors] = useState([]);
     const [serverErrors, setServerErrors] = useState({});
     const [previewData, setPreviewData] = useState(null);
-
-    // Helper function to convert theme borderRadius to HeroUI radius values
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const rootStyles = getComputedStyle(document.documentElement);
-        const borderRadius = rootStyles.getPropertyValue('--borderRadius')?.trim() || '12px';
-        
-        const radiusValue = parseInt(borderRadius);
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
 
     // Validate file before processing
     const validateFile = (file) => {

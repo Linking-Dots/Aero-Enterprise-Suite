@@ -133,6 +133,12 @@ Route::middleware($middlewareStack)->group(function () {
         Route::post('/daily-works/submission-time', [DailyWorkController::class, 'updateSubmissionTime'])->name('dailyWorks.updateSubmissionTime');
         Route::post('/daily-works/assigned', [DailyWorkController::class, 'updateAssigned'])->name('dailyWorks.updateAssigned');
         Route::post('/update-rfi-file', [DailyWorkController::class, 'uploadRFIFile'])->name('dailyWorks.uploadRFI');
+
+        // RFI File Management routes
+        Route::post('/daily-works/{dailyWork}/rfi-files', [DailyWorkController::class, 'uploadRfiFiles'])->name('dailyWorks.rfiFiles.upload');
+        Route::get('/daily-works/{dailyWork}/rfi-files', [DailyWorkController::class, 'getRfiFiles'])->name('dailyWorks.rfiFiles.index');
+        Route::delete('/daily-works/{dailyWork}/rfi-files/{mediaId}', [DailyWorkController::class, 'deleteRfiFile'])->name('dailyWorks.rfiFiles.delete');
+        Route::get('/daily-works/{dailyWork}/rfi-files/{mediaId}/download', [DailyWorkController::class, 'downloadRfiFile'])->name('dailyWorks.rfiFiles.download');
     });
 
     Route::middleware(['permission:daily-works.create'])->group(function () {
@@ -275,7 +281,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:jurisdiction.view'])->get('/jurisdiction', [JurisdictionController::class, 'index'])->name('jurisdiction');
 
     // Daily works management routes
-    Route::middleware(['permission:daily-works.import'])->post('/import-daily-works/', [DailyWorkController::class, 'import'])->name('dailyWorks.import');
+    Route::middleware(['permission:daily-works.import', 'throttle:10,1'])->post('/import-daily-works/', [DailyWorkController::class, 'import'])->name('dailyWorks.import');
     Route::middleware(['permission:daily-works.import'])->get('/download-daily-works-template', [DailyWorkController::class, 'downloadTemplate'])->name('dailyWorks.downloadTemplate');
     Route::middleware(['permission:daily-works.delete'])->delete('/delete-daily-work', [DailyWorkController::class, 'delete'])->name('dailyWorks.delete');
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\DailyWork;
 
+use App\Models\DailyWork;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -53,36 +54,45 @@ class DailyWorkValidationService
      */
     public function validateAddRequest(Request $request): array
     {
+        $statusValidation = 'required|in:'.implode(',', DailyWork::$statuses);
+        $inspectionValidation = $request->input('status') === DailyWork::STATUS_COMPLETED
+            ? 'required|in:'.implode(',', DailyWork::$inspectionResults)
+            : 'nullable|in:'.implode(',', DailyWork::$inspectionResults);
+        $typeValidation = 'required|in:'.implode(',', DailyWork::$types);
+        $sideValidation = 'required|in:'.implode(',', DailyWork::$sides);
+
         return $request->validate([
             'date' => 'required|date',
             'number' => 'required|string',
-            'time' => 'required|string',
-            'status' => 'required|in:new,completed,resubmission,emergency',
-            'inspection_result' => $request->input('status') === 'completed' ? 'required|in:pass,fail' : 'nullable|in:pass,fail',
-            'type' => 'required|string',
+            'planned_time' => 'required|string',
+            'status' => $statusValidation,
+            'inspection_result' => $inspectionValidation,
+            'type' => $typeValidation,
             'description' => 'required|string',
             'location' => 'required|string|custom_location',
-            'side' => 'required|string',
-            'qty_layer' => $request->input('type') === 'Embankment' ? 'required|string' : '',
-            'completion_time' => $request->input('status') === 'completed' ? 'required|string' : '',
-            'inspection_details' => 'nullable|string',
+            'side' => $sideValidation,
+            'qty_layer' => $request->input('type') === DailyWork::TYPE_EMBANKMENT ? 'required|string' : 'nullable|string',
+            'completion_time' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|string' : 'nullable|string',
+            'inspection_details' => 'nullable|string|max:1000',
         ], [
             'date.required' => 'RFI Date is required.',
             'number.required' => 'RFI Number is required.',
-            'time.required' => 'RFI Time is required.',
-            'time.string' => 'RFI Time is not string.',
+            'planned_time.required' => 'RFI Time is required.',
+            'planned_time.string' => 'RFI Time must be a string.',
             'status.required' => 'Status is required.',
-            'status.in' => 'Status must be one of: new, completed, resubmission, emergency.',
-            'inspection_result.required' => 'Inspection result (Pass/Fail) is required for completed work.',
-            'inspection_result.in' => 'Inspection result must be either pass or fail.',
+            'status.in' => 'Status must be one of: '.implode(', ', DailyWork::$statuses).'.',
+            'inspection_result.required' => 'Inspection result is required for completed work.',
+            'inspection_result.in' => 'Inspection result must be one of: '.implode(', ', DailyWork::$inspectionResults).'.',
             'type.required' => 'Type is required.',
+            'type.in' => 'Type must be one of: '.implode(', ', DailyWork::$types).'.',
             'description.required' => 'Description is required.',
             'location.required' => 'Location is required.',
             'location.custom_location' => 'The :attribute must start with \'K\' and be in the range K0 to K48.',
             'side.required' => 'Road Type is required.',
-            'qty_layer.required' => $request->input('type') === 'Embankment' ? 'Layer No. is required when the type is Embankment.' : '',
-            'completion_time.required' => 'Completion time is required.',
-            'qty_layer.string' => 'Quantity/Layer No. is not string',
+            'side.in' => 'Road Type must be one of: '.implode(', ', DailyWork::$sides).'.',
+            'qty_layer.required' => 'Layer No. is required when the type is Embankment.',
+            'completion_time.required' => 'Completion time is required when status is completed.',
+            'inspection_details.max' => 'Inspection details cannot exceed 1000 characters.',
         ]);
     }
 
@@ -91,20 +101,27 @@ class DailyWorkValidationService
      */
     public function validateUpdateRequest(Request $request): array
     {
+        $statusValidation = 'required|in:'.implode(',', DailyWork::$statuses);
+        $inspectionValidation = $request->input('status') === DailyWork::STATUS_COMPLETED
+            ? 'required|in:'.implode(',', DailyWork::$inspectionResults)
+            : 'nullable|in:'.implode(',', DailyWork::$inspectionResults);
+        $typeValidation = 'required|in:'.implode(',', DailyWork::$types);
+        $sideValidation = 'required|in:'.implode(',', DailyWork::$sides);
+
         return $request->validate([
             'id' => 'required|integer|exists:daily_works,id',
             'date' => 'required|date',
             'number' => 'required|string',
             'planned_time' => 'required|string',
-            'status' => 'required|in:new,completed,resubmission,emergency',
-            'inspection_result' => $request->input('status') === 'completed' ? 'required|in:pass,fail' : 'nullable|in:pass,fail',
-            'type' => 'required|string',
+            'status' => $statusValidation,
+            'inspection_result' => $inspectionValidation,
+            'type' => $typeValidation,
             'description' => 'required|string',
             'location' => 'required|string|custom_location',
-            'side' => 'required|string',
-            'qty_layer' => $request->input('type') === 'Embankment' ? 'required|string' : '',
-            'completion_time' => $request->input('status') === 'completed' ? 'required|string' : '',
-            'inspection_details' => 'nullable|string',
+            'side' => $sideValidation,
+            'qty_layer' => $request->input('type') === DailyWork::TYPE_EMBANKMENT ? 'required|string' : 'nullable|string',
+            'completion_time' => $request->input('status') === DailyWork::STATUS_COMPLETED ? 'required|string' : 'nullable|string',
+            'inspection_details' => 'nullable|string|max:1000',
         ], [
             'id.required' => 'Daily Work ID is required.',
             'id.integer' => 'Daily Work ID must be an integer.',
@@ -113,16 +130,19 @@ class DailyWorkValidationService
             'number.required' => 'RFI Number is required.',
             'planned_time.required' => 'RFI Time is required.',
             'status.required' => 'Status is required.',
-            'status.in' => 'Status must be one of: new, completed, resubmission, emergency.',
-            'inspection_result.required' => 'Inspection result (Pass/Fail) is required for completed work.',
-            'inspection_result.in' => 'Inspection result must be either pass or fail.',
+            'status.in' => 'Status must be one of: '.implode(', ', DailyWork::$statuses).'.',
+            'inspection_result.required' => 'Inspection result is required for completed work.',
+            'inspection_result.in' => 'Inspection result must be one of: '.implode(', ', DailyWork::$inspectionResults).'.',
             'type.required' => 'Type is required.',
+            'type.in' => 'Type must be one of: '.implode(', ', DailyWork::$types).'.',
             'description.required' => 'Description is required.',
             'location.required' => 'Location is required.',
             'location.custom_location' => 'The :attribute must start with \'K\' and be in the range K0 to K48.',
             'side.required' => 'Road Type is required.',
-            'qty_layer.required' => $request->input('type') === 'Embankment' ? 'Layer No. is required when the type is Embankment.' : '',
+            'side.in' => 'Road Type must be one of: '.implode(', ', DailyWork::$sides).'.',
+            'qty_layer.required' => 'Layer No. is required when the type is Embankment.',
             'completion_time.required' => 'Completion time is required when status is completed.',
+            'inspection_details.max' => 'Inspection details cannot exceed 1000 characters.',
         ]);
     }
 
@@ -163,7 +183,7 @@ class DailyWorkValidationService
                 },
             ],
             '*.1' => 'required|string',
-            '*.2' => 'required|string|in:Embankment,Structure,Pavement',
+            '*.2' => 'required|string|in:'.implode(',', DailyWork::$types),
             '*.3' => 'required|string',
             '*.4' => 'required|string|custom_location',
         ];
@@ -179,7 +199,7 @@ class DailyWorkValidationService
             '*.0.date_format' => ':attribute must be in the format Y-m-d.',
             '*.1.required' => ':attribute must have a value.',
             '*.2.required' => ':attribute must have a value.',
-            '*.2.in' => ':attribute must be either Embankment, Structure, or Pavement.',
+            '*.2.in' => ':attribute must be one of: '.implode(', ', DailyWork::$types).'.',
             '*.3.required' => ':attribute must have a value.',
             '*.4.required' => ':attribute must have a value.',
         ];

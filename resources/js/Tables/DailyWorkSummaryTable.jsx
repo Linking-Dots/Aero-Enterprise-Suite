@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '@/Contexts/ThemeContext.jsx';
 import { useMediaQuery } from '@/Hooks/useMediaQuery.js';
+import { getThemeRadius } from '@/Hooks/useThemeRadius.js';
 import { usePage } from "@inertiajs/react";
 
 import {
@@ -41,20 +42,6 @@ import {
 const DailyWorkSummaryTable = ({ filteredData, onRefresh, loading = false }) => {
     const { theme } = useTheme();
     const isMobile = useMediaQuery('(max-width: 1024px)');
-    
-    // Theme radius helper function (same as DailyWorksTable)
-    const getThemeRadius = () => {
-        if (typeof window === 'undefined') return 'lg';
-        
-        const radiusValue = parseInt(getComputedStyle(document.documentElement)
-            .getPropertyValue('--borderRadius')?.trim() || '12');
-        
-        if (radiusValue === 0) return 'none';
-        if (radiusValue <= 4) return 'sm';
-        if (radiusValue <= 8) return 'md';
-        if (radiusValue <= 16) return 'lg';
-        return 'full';
-    };
 
     // Desktop Table Loading Skeleton (matching DailyWorksTable)
     const DesktopLoadingSkeleton = () => {

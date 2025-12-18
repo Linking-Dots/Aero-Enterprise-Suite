@@ -3,8 +3,8 @@
 namespace App\Services\DailyWork;
 
 use App\Models\DailyWork;
-use App\Models\Jurisdiction;
 use App\Models\User;
+use App\Traits\DailyWorkFilterable;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class DailyWorkPaginationService
 {
+    use DailyWorkFilterable;
+
     /**
      * Get paginated daily works based on user role and filters
      */
@@ -201,22 +203,6 @@ class DailyWorkPaginationService
         }
 
         return $query;
-    }
-
-    private function normalizeIdFilter($value): array
-    {
-        if ($value === null || $value === '' || $value === 'all') {
-            return [];
-        }
-
-        $ids = is_array($value) ? $value : [$value];
-
-        return collect($ids)
-            ->reject(fn ($id) => $id === null || $id === '' || $id === 'all')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->toArray();
     }
 
     /**

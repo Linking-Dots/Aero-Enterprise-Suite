@@ -4,12 +4,102 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class DailyWork extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, SoftDeletes;
+
+    // Status constants
+    public const STATUS_NEW = 'new';
+
+    public const STATUS_IN_PROGRESS = 'in-progress';
+
+    public const STATUS_COMPLETED = 'completed';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_RESUBMISSION = 'resubmission';
+
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_EMERGENCY = 'emergency';
+
+    // Inspection result constants
+    public const INSPECTION_PASS = 'pass';
+
+    public const INSPECTION_FAIL = 'fail';
+
+    public const INSPECTION_CONDITIONAL = 'conditional';
+
+    public const INSPECTION_PENDING = 'pending';
+
+    public const INSPECTION_APPROVED = 'approved';
+
+    public const INSPECTION_REJECTED = 'rejected';
+
+    // Type constants
+    public const TYPE_EMBANKMENT = 'Embankment';
+
+    public const TYPE_STRUCTURE = 'Structure';
+
+    public const TYPE_PAVEMENT = 'Pavement';
+
+    /**
+     * Valid statuses for validation
+     *
+     * @var array<string>
+     */
+    public static array $statuses = [
+        self::STATUS_NEW,
+        self::STATUS_IN_PROGRESS,
+        self::STATUS_COMPLETED,
+        self::STATUS_REJECTED,
+        self::STATUS_RESUBMISSION,
+        self::STATUS_PENDING,
+        self::STATUS_EMERGENCY,
+    ];
+
+    /**
+     * Valid inspection results for validation
+     *
+     * @var array<string>
+     */
+    public static array $inspectionResults = [
+        self::INSPECTION_PASS,
+        self::INSPECTION_FAIL,
+        self::INSPECTION_CONDITIONAL,
+        self::INSPECTION_PENDING,
+        self::INSPECTION_APPROVED,
+        self::INSPECTION_REJECTED,
+    ];
+
+    /**
+     * Valid work types for validation
+     *
+     * @var array<string>
+     */
+    public static array $types = [
+        self::TYPE_EMBANKMENT,
+        self::TYPE_STRUCTURE,
+        self::TYPE_PAVEMENT,
+    ];
+
+    /**
+     * Valid side/road types for validation
+     *
+     * @var array<string>
+     */
+    public static array $sides = [
+        'TR-R',
+        'TR-L',
+        'SR-R',
+        'SR-L',
+        'Both',
+    ];
 
     protected $fillable = [
         'date',
@@ -37,6 +127,86 @@ class DailyWork extends Model implements HasMedia
         'rfi_submission_date' => 'date',
         'resubmission_count' => 'integer',
     ];
+
+    /**
+     * Append RFI files count to JSON serialization.
+     * Note: rfi_files is not appended by default to avoid N+1 queries.
+     * Use getRfiFilesAttribute() explicitly when needed.
+     */
+    protected $appends = ['rfi_files_count'];
+
+    /**
+     * Register media collections for RFI files.
+     * Supports multiple files (images and PDFs) per daily work.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('rfi_files')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'image/gif',
+                'application/pdf',
+            ])
+            ->useDisk('public');
+    }
+
+    /**
+     * Register media conversions for thumbnails.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(150)
+            ->height(150)
+            ->sharpen(10)
+            ->nonQueued()
+            ->performOnCollections('rfi_files');
+    }
+
+    /**
+     * Get RFI files count.
+     */
+    public function getRfiFilesCountAttribute(): int
+    {
+        return $this->getMedia('rfi_files')->count();
+    }
+
+    /**
+     * Get RFI files with formatted data.
+     */
+    public function getRfiFilesAttribute(): array
+    {
+        return $this->getMedia('rfi_files')->map(function ($media) {
+            return [
+                'id' => $media->id,
+                'name' => $media->file_name,
+                'url' => $media->getUrl(),
+                'thumb_url' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : null,
+                'mime_type' => $media->mime_type,
+                'size' => $media->size,
+                'human_size' => $this->formatBytes($media->size),
+                'is_image' => str_starts_with($media->mime_type, 'image/'),
+                'is_pdf' => $media->mime_type === 'application/pdf',
+                'created_at' => $media->created_at->toISOString(),
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Format bytes to human readable size.
+     */
+    protected function formatBytes(int $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision).' '.$units[$pow];
+    }
 
     // Relationships
     public function reports()
@@ -104,5 +274,53 @@ class DailyWork extends Model implements HasMedia
     public function getIsResubmissionAttribute()
     {
         return $this->resubmission_count > 0;
+    }
+
+    /**
+     * Check if a status is valid.
+     */
+    public static function isValidStatus(?string $status): bool
+    {
+        if ($status === null) {
+            return true;
+        }
+
+        return in_array($status, self::$statuses, true);
+    }
+
+    /**
+     * Check if an inspection result is valid.
+     */
+    public static function isValidInspectionResult(?string $result): bool
+    {
+        if ($result === null) {
+            return true;
+        }
+
+        return in_array($result, self::$inspectionResults, true);
+    }
+
+    /**
+     * Boot method with validation.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($dailyWork) {
+            // Validate status
+            if ($dailyWork->status && ! self::isValidStatus($dailyWork->status)) {
+                throw new \InvalidArgumentException(
+                    "Invalid status '{$dailyWork->status}'. Valid statuses are: ".implode(', ', self::$statuses)
+                );
+            }
+
+            // Validate inspection_result
+            if ($dailyWork->inspection_result && ! self::isValidInspectionResult($dailyWork->inspection_result)) {
+                throw new \InvalidArgumentException(
+                    "Invalid inspection result '{$dailyWork->inspection_result}'. Valid results are: ".implode(', ', self::$inspectionResults)
+                );
+            }
+        });
     }
 }
