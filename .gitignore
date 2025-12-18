@@ -7,7 +7,7 @@
 /node_modules/
 /vendor/
 public/hot
-
+storage/app/public
 
 # Dependencies
 package-lock.json
