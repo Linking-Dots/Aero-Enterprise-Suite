@@ -66,7 +66,16 @@ check_required_file() {
 echo "1. EMPLOYEE MODEL EXISTENCE"
 echo "----------------------------"
 check_required_file "Employee model exists" "app/Models/HRM/Employee.php"
-check_required_file "Employee migration exists" "database/migrations/*_create_employees_table.php"
+# Check for migration with wildcard
+if ls database/migrations/*create_employees_table.php 1> /dev/null 2>&1; then
+    echo -n "Checking: Employee migration exists... "
+    echo -e "${GREEN}[PASS]${NC}"
+    ((PASSED++))
+else
+    echo -n "Checking: Employee migration exists... "
+    echo -e "${RED}[FAIL] File not found${NC}"
+    ((FAILED++))
+fi
 echo ""
 
 echo "2. DIRECT USER REFERENCES IN HRM"
