@@ -517,3 +517,459 @@ Activity logs can be retrieved via the activity log API (separate documentation)
 7. **Date Format**: All dates should be in `Y-m-d` format (2025-11-26).
 
 8. **DateTime Format**: All datetime fields should be in ISO 8601 format (2025-11-26T16:00:00Z).
+
+---
+
+## RFI Objections API
+
+### Overview
+The objection system allows stakeholders to raise, track, and resolve objections on RFI submissions. Objections follow a workflow: draft → submitted → under review → resolved/rejected.
+
+### Permissions Required
+- `rfi-objections.view` - View objections
+- `rfi-objections.create` - Create new objections
+- `rfi-objections.update` - Update objections
+- `rfi-objections.delete` - Delete objections
+- `rfi-objections.review` - Review and resolve objections
+
+---
+
+### 1. Get Objections for an RFI
+**GET** `/daily-works/{dailyWorkId}/objections`
+
+Returns all objections for a specific RFI.
+
+**Permissions:** `rfi-objections.view`
+
+**Response:**
+```json
+{
+  "objections": [
+    {
+      "id": 1,
+      "daily_work_id": 123,
+      "title": "Foundation depth discrepancy",
+      "category": "design_conflict",
+      "category_label": "Design Conflict",
+      "description": "The foundation depth shown on site does not match drawings",
+      "reason": "Survey data shows rock layer at different elevation",
+      "status": "submitted",
+      "status_label": "Submitted",
+      "resolution_notes": null,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_by": {
+        "id": 5,
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "files_count": 3,
+      "is_active": true,
+      "created_at": "2025-12-18T10:00:00.000000Z",
+      "updated_at": "2025-12-18T10:00:00.000000Z"
+    }
+  ],
+  "total": 5,
+  "active_count": 2
+}
+```
+
+---
+
+### 2. Get Specific Objection
+**GET** `/daily-works/{dailyWorkId}/objections/{objectionId}`
+
+Get detailed information about a specific objection including status logs.
+
+**Permissions:** `rfi-objections.view`
+
+**Response:**
+```json
+{
+  "objection": {
+    "id": 1,
+    "title": "Foundation depth discrepancy",
+    "category": "design_conflict",
+    "description": "...",
+    "reason": "...",
+    "status": "under_review",
+    "files": [
+      {
+        "id": 1,
+        "name": "site_photo.jpg",
+        "url": "https://example.com/storage/...",
+        "thumb_url": "https://example.com/storage/.../thumb.jpg",
+        "mime_type": "image/jpeg",
+        "size": 245678,
+        "human_size": "240 KB",
+        "is_image": true,
+        "is_pdf": false,
+        "created_at": "2025-12-18T10:00:00.000000Z"
+      }
+    ],
+    "status_logs": [
+      {
+        "id": 1,
+        "from_status": "submitted",
+        "to_status": "under_review",
+        "notes": "Review started",
+        "changed_by": {
+          "id": 3,
+          "name": "Admin User"
+        },
+        "changed_at": "2025-12-18T11:00:00.000000Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 3. Create Objection
+**POST** `/daily-works/{dailyWorkId}/objections`
+
+Create a new objection for an RFI.
+
+**Permissions:** `rfi-objections.create`
+
+**Request Body:**
+```json
+{
+  "title": "Foundation depth discrepancy",
+  "category": "design_conflict",
+  "description": "The foundation depth shown on site does not match the approved drawings",
+  "reason": "Survey data shows rock layer at different elevation than design assumptions",
+  "status": "draft"
+}
+```
+
+**Validation Rules:**
+- `title` - required, string, max 255
+- `category` - nullable, one of: design_conflict, site_mismatch, material_change, safety_concern, specification_error, other
+- `description` - required, string, max 5000
+- `reason` - required, string, max 5000
+- `status` - nullable, one of: draft, submitted (default: draft)
+
+**Response:**
+```json
+{
+  "message": "Objection created successfully.",
+  "objection": { ... }
+}
+```
+
+---
+
+### 4. Update Objection
+**PUT** `/daily-works/{dailyWorkId}/objections/{objectionId}`
+
+Update an existing objection (only draft objections can be updated).
+
+**Permissions:** `rfi-objections.update`
+
+**Request Body:**
+```json
+{
+  "title": "Updated title",
+  "category": "safety_concern",
+  "description": "Updated description",
+  "reason": "Updated reason"
+}
+```
+
+---
+
+### 5. Submit Objection for Review
+**POST** `/daily-works/{dailyWorkId}/objections/{objectionId}/submit`
+
+Submit a draft objection for review. This transitions the status from "draft" to "submitted" and sends notifications.
+
+**Permissions:** `rfi-objections.create`
+
+**Response:**
+```json
+{
+  "message": "Objection submitted for review.",
+  "objection": { ... }
+}
+```
+
+---
+
+### 6. Start Reviewing Objection
+**POST** `/daily-works/{dailyWorkId}/objections/{objectionId}/review`
+
+Start reviewing a submitted objection. Transitions status from "submitted" to "under_review".
+
+**Permissions:** `rfi-objections.review`
+
+**Response:**
+```json
+{
+  "message": "Objection is now under review.",
+  "objection": { ... }
+}
+```
+
+---
+
+### 7. Resolve Objection
+**POST** `/daily-works/{dailyWorkId}/objections/{objectionId}/resolve`
+
+Resolve an objection with resolution notes.
+
+**Permissions:** `rfi-objections.review`
+
+**Request Body:**
+```json
+{
+  "resolution_notes": "Issue has been addressed per revised drawings dated 2025-12-18. Foundation depth adjusted to actual site conditions."
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Objection resolved successfully.",
+  "objection": { ... }
+}
+```
+
+---
+
+### 8. Reject Objection
+**POST** `/daily-works/{dailyWorkId}/objections/{objectionId}/reject`
+
+Reject an objection with rejection reason.
+
+**Permissions:** `rfi-objections.review`
+
+**Request Body:**
+```json
+{
+  "rejection_reason": "Objection is not valid. The foundation depth matches the specification requirements for this soil type."
+}
+```
+
+---
+
+### 9. Upload Files to Objection
+**POST** `/daily-works/{dailyWorkId}/objections/{objectionId}/files`
+
+Upload supporting documents (photos, PDFs, drawings) to an objection.
+
+**Permissions:** `rfi-objections.create` or `rfi-objections.update`
+
+**Request Body (multipart/form-data):**
+- `files[]` - Array of files (max 10 files)
+- Supported formats: jpeg, jpg, png, webp, gif, pdf, doc, docx, xls, xlsx
+- Max size per file: 10MB
+
+**Response:**
+```json
+{
+  "message": "3 file(s) uploaded successfully.",
+  "files": [
+    {
+      "id": 1,
+      "name": "site_photo_1.jpg",
+      "url": "https://...",
+      "thumb_url": "https://...",
+      "mime_type": "image/jpeg",
+      "size": 245678,
+      "is_image": true,
+      "is_pdf": false
+    }
+  ],
+  "errors": [],
+  "total_files": 5
+}
+```
+
+---
+
+### 10. Get Files for Objection
+**GET** `/daily-works/{dailyWorkId}/objections/{objectionId}/files`
+
+Get all files attached to an objection.
+
+**Permissions:** `rfi-objections.view`
+
+**Response:**
+```json
+{
+  "files": [ ... ],
+  "total": 5
+}
+```
+
+---
+
+### 11. Delete File from Objection
+**DELETE** `/daily-works/{dailyWorkId}/objections/{objectionId}/files/{mediaId}`
+
+Delete a specific file from an objection.
+
+**Permissions:** `rfi-objections.delete`
+
+**Response:**
+```json
+{
+  "message": "File deleted successfully.",
+  "total_files": 4
+}
+```
+
+---
+
+### 12. Download File from Objection
+**GET** `/daily-works/{dailyWorkId}/objections/{objectionId}/files/{mediaId}/download`
+
+Download a specific file.
+
+**Permissions:** `rfi-objections.view`
+
+**Response:** File download
+
+---
+
+### 13. Delete Objection
+**DELETE** `/daily-works/{dailyWorkId}/objections/{objectionId}`
+
+Soft delete an objection (only draft objections can be deleted by creator).
+
+**Permissions:** `rfi-objections.delete`
+
+**Response:**
+```json
+{
+  "message": "Objection deleted successfully."
+}
+```
+
+---
+
+### 14. Get Objection Metadata
+**GET** `/daily-works/objections/metadata`
+
+Get available categories and statuses for dropdowns.
+
+**Response:**
+```json
+{
+  "categories": [
+    {
+      "value": "design_conflict",
+      "label": "Design Conflict"
+    },
+    {
+      "value": "site_mismatch",
+      "label": "Site Condition Mismatch"
+    }
+  ],
+  "statuses": [
+    {
+      "value": "draft",
+      "label": "Draft"
+    },
+    {
+      "value": "submitted",
+      "label": "Submitted"
+    }
+  ],
+  "active_statuses": ["draft", "submitted", "under_review"]
+}
+```
+
+---
+
+## Objection Status Workflow
+
+```
+Draft → Submitted → Under Review → Resolved/Rejected
+  ↓         ↓              ↓
+Edit      Cannot         Cannot
+          Edit           Edit
+```
+
+**Status Descriptions:**
+- **draft** - Objection is being prepared, can be edited or deleted
+- **submitted** - Objection submitted for review, notifications sent
+- **under_review** - Objection is being reviewed by authorized personnel
+- **resolved** - Objection has been addressed and resolved
+- **rejected** - Objection determined to be invalid
+
+**Active Statuses:** draft, submitted, under_review (blocks RFI submission date changes)
+
+---
+
+## Objection Categories
+
+1. **design_conflict** - Design discrepancies or conflicts
+2. **site_mismatch** - Site conditions don't match assumptions
+3. **material_change** - Material substitution or unavailability
+4. **safety_concern** - Safety issues or hazards
+5. **specification_error** - Errors or ambiguities in specifications
+6. **other** - Other objections requiring clarification
+
+---
+
+## RFI Submission Date Override
+
+When changing an RFI submission date while active objections exist:
+
+1. Backend checks for active objections
+2. Returns warning response with objection list
+3. Frontend shows ObjectionWarningModal
+4. User must provide override reason
+5. Backend logs override in `rfi_submission_override_logs` table
+6. Change is allowed with full audit trail
+
+**Override Log Fields:**
+- `daily_work_id` - RFI being modified
+- `old_submission_date` - Previous date
+- `new_submission_date` - New date
+- `active_objections_count` - Number of active objections at time of override
+- `override_reason` - Reason provided by user
+- `user_acknowledged` - User confirmed they understand the impact
+- `overridden_by` - User who made the override
+- `created_at` - Timestamp of override
+
+---
+
+## Notifications
+
+Objection notifications are sent automatically:
+
+**On Submission:**
+- Sent to: RFI incharge, assigned user, managers, admins
+- Event: objection_submitted
+
+**On Resolution:**
+- Sent to: Objection creator
+- Event: objection_resolved
+
+**On Rejection:**
+- Sent to: Objection creator
+- Event: objection_rejected
+
+Notifications include:
+- Objection details
+- RFI information
+- Link to view objection
+- Timestamp and actor
+
+---
+
+## Authorization
+
+Objection access is controlled by policies:
+
+- **View:** Anyone involved in the RFI or with review permissions
+- **Create:** RFI incharge, assigned user, or authorized roles
+- **Update:** Objection creator (draft only)
+- **Delete:** Objection creator (draft only) or admins
+- **Review/Resolve:** Admins, managers, consultants
+
+---
